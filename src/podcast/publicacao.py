@@ -23,6 +23,7 @@ from xml.etree import ElementTree as ET
 from podcast.audio import Audio, Vinheta, duracao_mp3, exportar_mp3
 from podcast.dominio import Fala, Persona
 from podcast.personas import carregar_personas
+from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
 from podcast.roteiro import Projeto, regras_para
 from podcast.tts.provedor import TtsProvider
 from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, validar_episodio
@@ -138,8 +139,9 @@ def publicar_pendentes(
             continue
 
         roteiro = _ler_json(pasta / ROTEIRO)
+        falas = aplicar_pronuncias(carregar_falas(roteiro, personas), carregar_pronuncias(config["tts"]))
         audio, provedor, erro_principal = sintetizar_com_fallback(
-            carregar_falas(roteiro, personas),
+            falas,
             lambda: criar_provedor(config["tts"]["principal"]),
             lambda: criar_provedor(config["tts"]["fallback"]),
         )

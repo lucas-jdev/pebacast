@@ -34,6 +34,14 @@ tts:
   fallback: kokoro
   idioma: pt-BR
   max_caracteres_por_bloco: 4000
+  # Só para o TTS: o roteiro e o feed mantêm a grafia original (src/podcast/pronuncia.py).
+  pronuncia:
+    - termo: Pebacast
+      # "Peba" vem do tatu-peba: E aberto, PÉ-ba-cast. A grafia alternativa fica
+      # desligada até o teste com o Gemini confirmar se a instrução basta.
+      # escrever_como: Pébacast
+      instrucao: >-
+        Pronuncie "Pebacast" com o E aberto, como em "tatu-peba": PÉ-ba-cast.
 
 audio:
   formato: mp3
