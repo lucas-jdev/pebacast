@@ -2,15 +2,27 @@
 
 Roda uma vez por dia, na noite anterior ao episódio. Cada etapa grava sua saída em `episodios/<id>/`, o que deixa a geração auditável: dá para ver de onde veio cada fala e o que o revisor corrigiu.
 
+A pipeline tem duas partes, ligadas por um commit ([ADR 0006](adr/0006-roteiro-por-rotina-claude.md)):
+
 ```
-seleção → contexto de notícias → roteiro → revisão ⇄ correção → voz → montagem → publicação
+Rotina do Claude (rotina/roteirista.md)                     GitHub Actions
+seleção → notícias → roteiro → revisão ⇄ correção  ──push──▶  validar → voz → montagem → publicação
 ```
+
+Arquivos de cada episódio:
+
+| Arquivo | Quem grava | Conteúdo |
+|---|---|---|
+| `noticia.json` | rotina | notícia usada ou cenário hipotético |
+| `roteiro.json` | rotina | diálogo final |
+| `revisoes/1.json`, `2.json`, ... | subagente revisor | relatório de cada revisão |
+| `publicacao.json` | Actions | GUID, URL do MP3 e data. Marca o episódio como publicado |
 
 ## 1. Seleção do episódio
 
-Escolhe o próximo episódio com `status: pendente` da saga do dia (definida em `config/pipeline.yaml`), cujos pré-requisitos já foram publicados e cujas referências estão verificadas.
+`python -m podcast.roteiro contexto` escolhe, na ordem do currículo, o próximo episódio não publicado da saga do dia (definida em `config/pipeline.yaml`), cujos pré-requisitos já foram publicados e cujas referências estão verificadas. Se algum episódio já tem roteiro aprovado e ainda não foi publicado, nada novo é escrito.
 
-Saída: o spec do episódio, as personas envolvidas e os feedbacks recentes da saga.
+Saída: o spec do episódio, as referências, as personas envolvidas, as regras e os feedbacks recentes da saga.
 
 ## 2. Contexto de notícias
 
@@ -25,7 +37,7 @@ Busca uma notícia que ilustre o problema do episódio, ampliando a janela em ca
 
 **Critério de relevância.** Um juiz avalia cada notícia candidata com nota de 0 a 10 e uma justificativa ligando a notícia a pelo menos um objetivo do episódio. Só passa com nota mínima definida em `config/pipeline.yaml`. Sem esse limiar, o modelo tende a forçar uma conexão com qualquer notícia.
 
-**Notícias já usadas.** O registro `episodios/noticias-usadas.yaml` impede que a mesma notícia apareça em dois episódios.
+**Notícias já usadas.** As notícias dos episódios publicados (`episodios/*/noticia.json`) não podem ser repetidas.
 
 **Cenário hipotético.** É apresentado explicitamente como hipotético no áudio ("imagine uma empresa que...").
 
@@ -33,7 +45,7 @@ Saída: `noticia.json`, com a notícia e sua fonte, ou o cenário marcado como h
 
 ## 3. Roteiro
 
-O roteirista recebe o spec, as personas, o contexto de notícias e os feedbacks recentes e devolve o diálogo em JSON:
+O roteirista recebe o spec, as personas, o contexto de notícias e os feedbacks recentes e devolve o diálogo em JSON. O campo `estilo` de cada fala é opcional e vai para o TTS:
 
 ```json
 {
@@ -51,7 +63,7 @@ Estrutura fixa do episódio: abertura com aviso de conteúdo gerado por IA, prob
 
 ## 4. Revisão
 
-O revisor é um agente separado, com papel diferente do roteirista. Ele não reescreve o roteiro:
+O revisor é um subagente novo a cada revisão, sem o contexto do roteirista, e segue `rotina/revisor.md`. Ele não reescreve o roteiro:
 
 1. Extrai do roteiro cada afirmação verificável.
 2. Checa cada afirmação contra as referências do spec e, quando necessário, por busca.
@@ -72,13 +84,13 @@ O revisor é um agente separado, com papel diferente do roteirista. Ele não ree
 }
 ```
 
-Vereditos possíveis: `correta`, `incorreta`, `imprecisa` e `nao_verificavel`. O roteiro é aprovado quando não há `incorreta` nem `imprecisa`. Os motivos dessa separação estão em [ADR 0004](adr/0004-roteiro-com-revisor-independente.md).
+Vereditos possíveis: `correta`, `incorreta`, `imprecisa` e `nao_verificavel`. O roteiro é aprovado quando não há `incorreta` nem `imprecisa`. O relatório também traz `roteiro_sha256`, o hash do roteiro revisado (`python -m podcast.roteiro hash <id>`). Os motivos dessa separação estão em [ADR 0004](adr/0004-roteiro-com-revisor-independente.md).
 
 ## 5. Correção
 
-O roteirista recebe o relatório e corrige só as falas apontadas. Revisão e correção se repetem por no máximo dois ciclos.
+O roteirista recebe o relatório e corrige só as falas apontadas. Revisão e correção se repetem por no máximo dois ciclos, mais uma revisão final, o que dá até 3 revisões.
 
-Se o roteiro continuar reprovado, a pipeline falha fechada: não publica e abre uma issue com o relatório. É melhor perder um dia do que publicar um conceito errado.
+A rotina commita a pasta do episódio, aprovada ou não. O Actions roda `python -m podcast.roteiro validar <id>`. Se reprovar, a pipeline falha fechada: não publica e abre uma issue com os problemas. É melhor perder um dia do que publicar um conceito errado.
 
 ## 6. Voz
 

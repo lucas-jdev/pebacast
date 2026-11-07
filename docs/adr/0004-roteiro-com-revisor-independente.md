@@ -2,6 +2,7 @@
 
 - Status: Aceito
 - Data: 2026-11-05
+- Revisado: 2026-11-07. Roteirista e revisor rodam numa rotina do Claude Opus 5.5, e o revisor é um subagente sem o contexto do roteirista. Ver [ADR 0006](0006-roteiro-por-rotina-claude.md).
 
 ## Contexto
 
@@ -32,7 +33,7 @@ Positivas:
 Negativas:
 
 - Roteirista e revisor no mesmo modelo compartilham pontos cegos. A mitigação é dar ao revisor um contexto diferente (referências do spec e busca) e um formato de saída diferente (vereditos, não texto).
-- Cada episódio consome mais requisições: até 3 buscas de notícia, 2 revisões e 2 correções. Isso cabe no free tier para um episódio por dia.
+- Cada episódio consome mais trabalho do modelo: até 3 buscas de notícia, 3 revisões e 2 correções.
 - Alguns dias podem ficar sem episódio.
 
 ## Critério de revisão

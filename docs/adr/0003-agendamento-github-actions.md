@@ -1,7 +1,8 @@
 # 0003. Agendamento com GitHub Actions e gatilho manual por saga
 
-- Status: Aceito
+- Status: Substituído em parte pelo [ADR 0006](0006-roteiro-por-rotina-claude.md)
 - Data: 2026-11-05
+- Revisado: 2026-11-07. O agendamento noturno passou para a rotina do Claude. O workflow do Actions agora é disparado pelo push do roteiro em `episodios/`. O `workflow_dispatch` e a issue em caso de falha continuam valendo.
 
 ## Contexto
 

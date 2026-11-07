@@ -12,10 +12,10 @@ MVP privado: uma saga (Software), quatro episódios, um expert. O feed é consum
 
 1. Seleciona o próximo episódio pendente da saga do dia, respeitando pré-requisitos.
 2. Busca notícias relacionadas em cascata (7 dias, 30 dias, 60 dias) ou cria um cenário hipotético.
-3. O roteirista gera o diálogo em JSON a partir da especificação do episódio e das personas.
-4. O revisor verifica cada afirmação contra as referências curadas e aponta correções.
+3. O roteirista (Claude Opus 5.5, numa rotina agendada) gera o diálogo em JSON a partir da especificação do episódio e das personas.
+4. Um subagente revisor, sem o contexto do roteirista, verifica cada afirmação contra as referências curadas e aponta correções.
 5. O roteirista aplica as correções. Se o roteiro não for aprovado em dois ciclos, o episódio não é publicado.
-6. O áudio é sintetizado, montado e publicado no feed.
+6. A rotina commita o episódio. O GitHub Actions valida o roteiro de novo, sintetiza o áudio, monta e publica no feed.
 
 Detalhes em [docs/pipeline.md](docs/pipeline.md).
 
@@ -24,6 +24,9 @@ Detalhes em [docs/pipeline.md](docs/pipeline.md).
 ```
 src/podcast/                  código da pipeline (Python 3.12)
 src/podcast/tts/              interface TtsProvider e adaptadores Gemini, Kokoro e Piper
+src/podcast/roteiro.py        seleção, contexto e validação usados pela rotina do roteirista
+rotina/                       instruções da rotina do roteirista e do revisor
+episodios/<id>/               notícia, roteiro, revisões e publicação de cada episódio
 experimentos/teste-vozes/     teste cego de vozes do ADR 0001
 tests/                        testes automatizados
 config/pipeline.yaml          parâmetros da pipeline

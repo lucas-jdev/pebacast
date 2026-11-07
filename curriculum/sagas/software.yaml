@@ -31,7 +31,6 @@ episodios:
       Escolha uma decisão técnica recente do seu time e liste pelo menos dois
       ganhos e duas perdas que ela trouxe. Se não encontrar nenhuma perda,
       procure de novo.
-    status: pendente
 
   - id: sw-002
     titulo: "Modularidade: coesão, acoplamento e conascência"
@@ -48,7 +47,6 @@ episodios:
       Pegue dois módulos de um sistema que você mantém, classifique a
       conascência mais forte entre eles e proponha uma mudança que a
       enfraqueça.
-    status: pendente
 
   - id: sw-003
     titulo: "Características arquiteturais: os requisitos que ninguém escreve"
@@ -65,7 +63,6 @@ episodios:
       Liste as três características mais críticas de um sistema que você
       mantém, justificando cada uma com um requisito de negócio, e aponte
       qual delas não é medida hoje.
-    status: pendente
 
   - id: sw-004
     titulo: "ADR: decisões que sobrevivem a quem as tomou"
@@ -82,4 +79,3 @@ episodios:
     desafio: >-
       Escreva um ADR de uma decisão que o seu time já tomou e nunca
       registrou, incluindo as alternativas que foram descartadas.
-    status: pendente
