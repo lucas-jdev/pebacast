@@ -1,4 +1,4 @@
-# pebacast
+# Pebacast
 
 O Pebacast é um podcast gerado automaticamente para estudo de arquitetura em sete sagas: Software, Soluções, Sistemas, Dados e Informação, Infraestrutura, Segurança e Corporativa.
 
