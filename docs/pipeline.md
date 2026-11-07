@@ -59,7 +59,7 @@ O roteirista recebe o spec, as personas, o contexto de notícias e os feedbacks 
 }
 ```
 
-Estrutura fixa do episódio: abertura com aviso de conteúdo gerado por IA, problema ou notícia, solução ingênua do apresentador, desconstrução pelo expert, trade-offs, resumo e desafio.
+Estrutura fixa do episódio: abertura com boas-vindas ao Pebacast e aviso de conteúdo gerado por IA, apresentação do expert convidado, problema ou notícia, solução ingênua do apresentador, desconstrução pelo expert, trade-offs, resumo, desafio e despedida. O `validar` confere a abertura: a primeira fala cita o Pebacast e traz o aviso de IA, e nas três primeiras falas o apresentador diz o nome do expert e o expert fala.
 
 ## 4. Revisão
 

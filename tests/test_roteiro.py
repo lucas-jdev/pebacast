@@ -91,7 +91,7 @@ def projeto(tmp_path: Path) -> Projeto:
 def _roteiro(episodio: str, falas: int = 4) -> dict:
     texto = " ".join(["palavra"] * PALAVRAS_POR_FALA)
     corpo = [{"persona": "helena" if i % 2 else "davi", "texto": texto} for i in range(1, falas)]
-    abertura = {"persona": "davi", "texto": "Este episódio foi gerado por IA e revisado contra as fontes."}
+    abertura = {"persona": "davi", "texto": "Bem-vindos ao Pebacast! Episódio gerado por IA. Hoje a convidada é a Helena."}
     return {"episodio": episodio, "falas": [abertura, *corpo], "desafio": "Liste dois trade-offs.", "fontes": ["fosa cap. 1"]}
 
 
@@ -251,7 +251,11 @@ def test_aceita_aprovacao_na_terceira_revisao(projeto):
     ("alterar", "trecho"),
     [
         (lambda r: r["falas"].insert(0, {"persona": "helena", "texto": "Oi, IA."}), "primeira fala precisa ser do apresentador"),
-        (lambda r: r["falas"][0].update(texto="Bem-vindos ao episódio."), "aviso de conteúdo gerado por IA"),
+        (lambda r: r["falas"][0].update(texto="Bem-vindos ao Pebacast. Hoje com a Helena."), "aviso de conteúdo gerado por IA"),
+        (lambda r: r["falas"][0].update(texto="Episódio gerado por IA, com a Helena."), "apresentar o pebacast"),
+        (lambda r: r["falas"][0].update(texto="Bem-vindos ao Pebacast, episódio gerado por IA."), "apresentar Helena pelo nome"),
+        (lambda r: r["falas"].insert(1, {"persona": "davi", "texto": "Antes de tudo, um recado rápido."}) or
+                   r["falas"].insert(1, {"persona": "davi", "texto": "E mais um recado."}), "Helena precisa falar"),
         (lambda r: r["falas"].append({"persona": "bruno", "texto": "oi"}), "persona 'bruno' fora do episódio"),
         (lambda r: r.update(desafio=" "), "desafio vazio"),
         (lambda r: r.update(fontes=[]), "fontes precisa ser"),

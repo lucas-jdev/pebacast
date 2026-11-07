@@ -21,12 +21,17 @@ VEREDITOS = frozenset({"correta", "incorreta", "imprecisa", "nao_verificavel"})
 TIPOS_DE_CONTEXTO = frozenset({"noticia", "hipotetico"})
 AVISO_IA = re.compile(r"\bIA\b|intelig[êe]ncia artificial", re.IGNORECASE)
 PALAVRA = re.compile(r"\w+")
+# O apresentador apresenta o podcast e a pessoa convidada logo no começo, antes de entrar no tema.
+FALAS_DA_APRESENTACAO = 3
 
 
 @dataclass(frozen=True)
 class Regras:
     episodio_id: str
+    nome_podcast: str
     apresentador: str
+    expert: str
+    nome_expert: str
     personas_permitidas: frozenset[str]
     palavras_min: int
     palavras_max: int
@@ -100,6 +105,9 @@ def _validar_roteiro(roteiro: Any, regras: Regras) -> list[str]:
         problemas.append(f"{ROTEIRO}: a primeira fala precisa ser do apresentador ({regras.apresentador})")
     if not AVISO_IA.search(str(primeira.get("texto", ""))):
         problemas.append(f"{ROTEIRO}: a primeira fala precisa trazer o aviso de conteúdo gerado por IA")
+    if not _menciona(primeira.get("texto"), regras.nome_podcast):
+        problemas.append(f"{ROTEIRO}: a primeira fala precisa apresentar o {regras.nome_podcast}")
+    problemas += _validar_apresentacao_do_expert(falas[:FALAS_DA_APRESENTACAO], regras)
 
     if not _texto_preenchido(roteiro.get("desafio")):
         problemas.append(f"{ROTEIRO}: desafio vazio")
@@ -115,6 +123,27 @@ def _validar_roteiro(roteiro: Any, regras: Regras) -> list[str]:
                 f"{ROTEIRO}: {palavras} palavras, fora da faixa {regras.palavras_min}-{regras.palavras_max}"
             )
     return problemas
+
+
+def _validar_apresentacao_do_expert(inicio: list[Any], regras: Regras) -> list[str]:
+    falas = [fala for fala in inicio if isinstance(fala, dict)]
+    problemas = []
+    apresentou = any(
+        fala.get("persona") == regras.apresentador and _menciona(fala.get("texto"), regras.nome_expert)
+        for fala in falas
+    )
+    if not apresentou:
+        problemas.append(
+            f"{ROTEIRO}: o apresentador precisa apresentar {regras.nome_expert} pelo nome "
+            f"nas {FALAS_DA_APRESENTACAO} primeiras falas"
+        )
+    if not any(fala.get("persona") == regras.expert for fala in falas):
+        problemas.append(f"{ROTEIRO}: {regras.nome_expert} precisa falar nas {FALAS_DA_APRESENTACAO} primeiras falas")
+    return problemas
+
+
+def _menciona(texto: Any, nome: str) -> bool:
+    return isinstance(texto, str) and re.search(rf"\b{re.escape(nome)}\b", texto, re.IGNORECASE) is not None
 
 
 def _validar_fala(indice: int, fala: Any, regras: Regras) -> list[str]:

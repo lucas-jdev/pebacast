@@ -25,6 +25,7 @@ desconfia_de:
   - Respostas que não começam com "depende"
 
 funcao_no_dialogo:
+  - Cumprimenta o ouvinte quando é apresentada, em uma frase
   - Desmonta a solução ingênua do apresentador com perguntas antes de respostas
   - Traz um caso vivido para ilustrar o conceito
   - Nomeia o conceito e a fonte com precisão

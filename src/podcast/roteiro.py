@@ -108,10 +108,14 @@ def urls_ja_usadas(pasta_episodios: Path, exceto: str) -> frozenset[str]:
 
 def regras_para(projeto: Projeto, saga: Saga, episodio_id: str) -> Regras:
     config = projeto.config()
-    voz_principal = apresentador(projeto.personas(), saga.id)
+    personas = projeto.personas()
+    voz_principal = apresentador(personas, saga.id)
     return Regras(
         episodio_id=episodio_id,
+        nome_podcast=config["feed"]["titulo"],
         apresentador=voz_principal,
+        expert=saga.expert,
+        nome_expert=personas[saga.expert]["nome"],
         personas_permitidas=frozenset({voz_principal, saga.expert}),
         palavras_min=config["episodio"]["palavras_alvo"]["min"],
         palavras_max=config["episodio"]["palavras_alvo"]["max"],

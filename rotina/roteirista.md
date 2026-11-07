@@ -43,13 +43,14 @@ Escreva um diálogo entre `personas.apresentador` e `personas.expert`. Leia as d
 
 Estrutura fixa, nesta ordem:
 
-1. **Abertura.** A primeira fala é do apresentador e traz o aviso de que o episódio foi gerado por inteligência artificial e revisado contra as fontes.
-2. **Problema.** A notícia, com o nome do veículo, ou o cenário hipotético.
-3. **Solução ingênua.** O apresentador propõe, de boa-fé, a solução da moda ou a mais óbvia.
-4. **Desconstrução.** A expert desmonta a proposta com perguntas antes de dar respostas.
-5. **Trade-offs.** O que se ganha e o que se perde em cada caminho.
-6. **Resumo.** O apresentador resume com as próprias palavras.
-7. **Desafio.** O apresentador apresenta o `episodio.desafio`.
+1. **Abertura.** A primeira fala é do apresentador. Ele dá as boas-vindas ao Pebacast, avisa que o episódio foi gerado por inteligência artificial e revisado contra as fontes, e diz o tema do dia em uma frase.
+2. **Apresentação do expert.** Ainda nas três primeiras falas, o apresentador apresenta o expert pelo nome, com uma ou duas frases tiradas do `historico` da persona, e o expert cumprimenta o ouvinte. É uma apresentação curta, e não um currículo.
+3. **Problema.** A notícia, com o nome do veículo, ou o cenário hipotético.
+4. **Solução ingênua.** O apresentador propõe, de boa-fé, a solução da moda ou a mais óbvia.
+5. **Desconstrução.** A expert desmonta a proposta com perguntas antes de dar respostas.
+6. **Trade-offs.** O que se ganha e o que se perde em cada caminho.
+7. **Resumo.** O apresentador resume com as próprias palavras.
+8. **Desafio e despedida.** O apresentador apresenta o `episodio.desafio`, agradece o expert e se despede em nome do Pebacast.
 
 Regras:
 
@@ -93,7 +94,7 @@ O limite é `regras.revisao.max_revisoes` revisões. Se a última reprovar, pare
 python -m podcast.roteiro validar $ID
 ```
 
-Se houver problema de formato (tamanho, campos, aviso de IA), corrija e peça uma nova revisão, já que o roteiro mudou, desde que ainda haja revisões no limite.
+Se houver problema de formato (tamanho, campos, aviso de IA, apresentação do Pebacast ou do expert), corrija e peça uma nova revisão, já que o roteiro mudou, desde que ainda haja revisões no limite.
 
 Commite a pasta inteira, aprovada ou não. A tentativa reprovada também é registro, e é o Actions que abre a issue em caso de falha.
 

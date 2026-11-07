@@ -1,6 +1,6 @@
-# Podcast de Arquitetura
+# pebacast
 
-Podcast gerado automaticamente para estudo de arquitetura em sete sagas: Software, Soluções, Sistemas, Dados e Informação, Infraestrutura, Segurança e Corporativa.
+O Pebacast é um podcast gerado automaticamente para estudo de arquitetura em sete sagas: Software, Soluções, Sistemas, Dados e Informação, Infraestrutura, Segurança e Corporativa.
 
 Cada episódio tem entre 15 e 20 minutos, é um diálogo entre o apresentador e o expert da saga e termina com um desafio prático.
 
