@@ -25,6 +25,7 @@ from podcast.dominio import Fala, Persona
 from podcast.personas import carregar_personas
 from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
 from podcast.roteiro import Projeto, regras_para
+from podcast.site import escrever_pagina
 from podcast.tts.provedor import TtsProvider
 from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, validar_episodio
 
@@ -202,15 +203,7 @@ def gerar_feed(projeto: Projeto) -> str:
 def escrever_site(projeto: Projeto, site: Path) -> None:
     site.mkdir(parents=True, exist_ok=True)
     (site / ARQUIVO_FEED).write_text(gerar_feed(projeto), encoding="utf-8")
-    meta = projeto.config()["feed"]
-    (site / "index.html").write_text(
-        "<!doctype html>\n<html lang=\"pt-BR\"><meta charset=\"utf-8\">"
-        f"<title>{meta['titulo']}</title>\n"
-        f"<h1>{meta['titulo']}</h1>\n<p>{meta['descricao'].strip()}</p>\n"
-        f"<p><a href=\"{ARQUIVO_FEED}\">Feed RSS</a> · <a href=\"{meta['url_repositorio']}\">Repositório</a></p>\n"
-        "</html>\n",
-        encoding="utf-8",
-    )
+    escrever_pagina(projeto, site, ARQUIVO_FEED)
 
 
 def show_notes(episodio: Mapping[str, Any], roteiro: Mapping[str, Any], noticia: Mapping[str, Any],

@@ -28,6 +28,7 @@ src/podcast/roteiro.py        seleção, contexto e validação usados pela roti
 rotina/                       instruções da rotina do roteirista e do revisor
 episodios/<id>/               notícia, roteiro, revisões e publicação de cada episódio
 experimentos/teste-vozes/     teste cego de vozes do ADR 0001
+site/                         CSS, JS e ícone da página do Pages (o HTML sai de src/podcast/site.py)
 tests/                        testes automatizados
 config/pipeline.yaml          parâmetros da pipeline
 curriculum/sagas/             especificação das sagas e episódios (curadoria manual)

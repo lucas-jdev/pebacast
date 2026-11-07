@@ -7,3 +7,4 @@ experimentos/teste-vozes/saida/
 assets/*
 !assets/*.gpg
 experimentos/teste-vozes/vozes-piper/
+_site/
