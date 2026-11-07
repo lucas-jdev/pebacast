@@ -1,0 +1,85 @@
+id: software
+nome: Arquitetura de Software
+pergunta_central: Como um sistema é organizado por dentro e por quê?
+expert: helena
+
+referencias_base:
+  - id: fosa
+    titulo: Fundamentals of Software Architecture
+    autores: [Mark Richards, Neal Ford]
+    edicao: 1ª edição (2020)
+    tipo: livro
+  - id: nygard-adr
+    titulo: Documenting Architecture Decisions
+    autores: [Michael Nygard]
+    ano: 2011
+    tipo: artigo
+
+episodios:
+  - id: sw-001
+    titulo: "Tudo é trade-off: o que faz um arquiteto de software"
+    objetivos:
+      - Diferenciar arquitetura de design
+      - Entender as expectativas sobre o papel de arquiteto
+      - Aplicar a ideia de que toda decisão arquitetural é um trade-off
+    pre_requisitos: []
+    referencias:
+      - fonte: fosa
+        capitulos: [1, 2]
+    referencias_verificadas: true
+    desafio: >-
+      Escolha uma decisão técnica recente do seu time e liste pelo menos dois
+      ganhos e duas perdas que ela trouxe. Se não encontrar nenhuma perda,
+      procure de novo.
+    status: pendente
+
+  - id: sw-002
+    titulo: "Modularidade: coesão, acoplamento e conascência"
+    objetivos:
+      - Medir coesão e acoplamento de um módulo
+      - Classificar formas de conascência e suas intensidades
+      - Identificar qual acoplamento vale a pena reduzir primeiro
+    pre_requisitos: [sw-001]
+    referencias:
+      - fonte: fosa
+        capitulos: [3]
+    referencias_verificadas: false
+    desafio: >-
+      Pegue dois módulos de um sistema que você mantém, classifique a
+      conascência mais forte entre eles e proponha uma mudança que a
+      enfraqueça.
+    status: pendente
+
+  - id: sw-003
+    titulo: "Características arquiteturais: os requisitos que ninguém escreve"
+    objetivos:
+      - Definir características arquiteturais e diferenciá-las de requisitos funcionais
+      - Extrair características a partir de requisitos de negócio
+      - Reconhecer que maximizar todas as características é inviável
+    pre_requisitos: [sw-001]
+    referencias:
+      - fonte: fosa
+        capitulos: [4, 5]
+    referencias_verificadas: false
+    desafio: >-
+      Liste as três características mais críticas de um sistema que você
+      mantém, justificando cada uma com um requisito de negócio, e aponte
+      qual delas não é medida hoje.
+    status: pendente
+
+  - id: sw-004
+    titulo: "ADR: decisões que sobrevivem a quem as tomou"
+    objetivos:
+      - Estruturar um ADR com contexto, decisão e consequências
+      - Diferenciar decisão arquitetural de decisão de design
+      - Reconhecer os antipadrões de decisão sem registro
+    pre_requisitos: [sw-001]
+    referencias:
+      - fonte: fosa
+        capitulos: [19]
+      - fonte: nygard-adr
+    referencias_verificadas: false
+    desafio: >-
+      Escreva um ADR de uma decisão que o seu time já tomou e nunca
+      registrou, incluindo as alternativas que foram descartadas.
+    status: pendente

@@ -1,0 +1,70 @@
+episodio: sw-001
+duracao_estimada_minutos: 2
+
+falas:
+  - persona: davi
+    texto: >-
+      Fala, pessoal! Começando a saga de Arquitetura de Software, e eu tô
+      empolgadíssimo. Helena, eu vou chegar chegando: semana passada eu
+      sugeri pro meu time quebrar o nosso monólito em microservices.
+      Kubernetes, um serviço por domínio, deploy independente. É o futuro, né?
+
+  - persona: helena
+    estilo: calma, com uma ironia leve e um meio sorriso na voz
+    texto: >-
+      Que bom que você chegou animado, Davi. Agora me conta: qual problema o
+      monólito está causando hoje?
+
+  - persona: davi
+    texto: >-
+      Ah... problema, problema mesmo... o deploy demora uns quinze minutos. E
+      todo mundo tá migrando, né? Eu vi três palestras sobre isso só esse mês.
+
+  - persona: helena
+    texto: >-
+      Três palestras não são um requisito de negócio. Olha, o Mark Richards e
+      o Neal Ford têm uma frase que eu repito quase todo dia: tudo em
+      arquitetura de software é um trade-off. Se você não encontrou o
+      trade-off, é porque ainda não procurou direito.
+
+  - persona: davi
+    texto: >-
+      Peraí, deixa eu ver se eu entendi. Então microservices não é melhor que
+      monólito?
+
+  - persona: helena
+    texto: >-
+      Depende. Com microservices você ganha deploy independente e escala cada
+      parte separadamente. Em troca, ganha rede no meio de tudo, consistência
+      eventual, observabilidade distribuída e um time que agora precisa
+      operar Kubernetes. O seu time de cinco pessoas está pronto para pagar
+      essa conta?
+
+  - persona: davi
+    estilo: pensativo, perdendo um pouco da empolgação
+    texto: >-
+      Hum... honestamente? Não. A gente mal tem tempo pra manter o Spring Boot
+      atualizado.
+
+  - persona: helena
+    texto: >-
+      Então talvez o problema real seja o pipeline de deploy, e não o
+      monólito. Os mesmos autores têm uma segunda lei: o porquê é mais
+      importante do que o como. Antes de escolher a tecnologia, escreva por
+      que você quer mudar. Se o porquê for o hype, você já tem a resposta.
+
+  - persona: davi
+    texto: >-
+      Faz sentido. E onde eu escrevo esse porquê?
+
+  - persona: helena
+    texto: >-
+      Num ADR, um registro de decisão de arquitetura. Mas isso é assunto pra
+      outro episódio.
+
+  - persona: davi
+    estilo: animado de novo, encerrando o programa
+    texto: >-
+      Anotado! Então fica o desafio de hoje: pega uma decisão técnica recente
+      do seu time e lista dois ganhos e duas perdas. Se não achar nenhuma
+      perda, procura de novo.

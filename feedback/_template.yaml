@@ -1,0 +1,19 @@
+episodio: sw-000
+ouvido_em: 2026-01-01
+nota: null
+
+gostei: []
+
+nao_gostei: []
+
+erros_encontrados:
+  - afirmacao: ""
+    correcao: ""
+    fonte: ""
+    gravidade: leve
+
+desafio:
+  feito: false
+  link_artefato: ""
+
+sugestoes_para_proximos: []

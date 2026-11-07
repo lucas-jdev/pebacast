@@ -1,0 +1,47 @@
+agenda:
+  modo: saga_unica
+  saga_unica: software
+  rotacao_semanal:
+    segunda: software
+    terca: solucoes
+    quarta: sistemas
+    quinta: dados
+    sexta: infraestrutura
+    sabado: seguranca
+    domingo: corporativa
+
+episodio:
+  duracao_minutos: { min: 15, max: 20 }
+  palavras_alvo: { min: 2300, max: 3000 }
+  idioma: pt-BR
+  exigir_referencias_verificadas: true
+
+noticias:
+  janelas_dias: [7, 30, 60]
+  nota_minima_relevancia: 7
+  fallback: cenario_hipotetico
+
+revisao:
+  max_ciclos: 2
+  vereditos_reprovam: [incorreta, imprecisa]
+  falhar_fechado: true
+
+feedback:
+  ultimos_por_saga: 5
+
+tts:
+  principal: gemini-3.8-flash-tts
+  fallback: kokoro
+  idioma: pt-BR
+  max_caracteres_por_bloco: 4000
+
+audio:
+  formato: mp3
+  canais: 1
+  bitrate_kbps: 64
+  normalizacao: loudnorm
+
+publicacao:
+  audio: github_releases
+  feed: github_pages
+  aviso_ia: true
