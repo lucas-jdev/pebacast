@@ -40,6 +40,17 @@ audio:
   canais: 1
   bitrate_kbps: 64
   normalizacao: loudnorm
+  # Faixa de terceiros: fica cifrada no repositório (assets/vinheta.mp3.gpg) e é
+  # decifrada no Actions com o secret VINHETA_SENHA. Ver docs/vinheta.md.
+  vinheta:
+    arquivo: assets/vinheta.mp3
+    inicio_s: 0          # segundo da faixa onde o recorte começa
+    duracao_s: 8         # tamanho do recorte
+    fade_entrada_s: 0.5
+    fade_saida_s: 3      # a música abaixa nos últimos 3 s do recorte
+    sobreposicao_s: 1.5  # a primeira fala entra 1,5 s antes do fim do recorte
+    volume: 0.7
+    encerramento: true   # repete o recorte depois da última fala
 
 publicacao:
   audio: github_releases

@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, Protocol
 from xml.etree import ElementTree as ET
 
-from podcast.audio import Audio, exportar_mp3
+from podcast.audio import Audio, Vinheta, duracao_mp3, exportar_mp3
 from podcast.dominio import Fala, Persona
 from podcast.personas import carregar_personas
 from podcast.roteiro import Projeto, regras_para
@@ -103,6 +103,18 @@ def sintetizar_com_fallback(
         return fallback.sintetizar(falas), fallback.nome, f"{type(erro).__name__}: {erro}"
 
 
+def carregar_vinheta(projeto: Projeto, config_audio: Mapping[str, Any]) -> tuple[Vinheta | None, str | None]:
+    """Devolve a vinheta configurada ou, se o arquivo decifrado não estiver lá, um aviso."""
+    dados = config_audio.get("vinheta")
+    if not dados:
+        return None, None
+    arquivo = projeto.raiz / dados["arquivo"]
+    if not arquivo.exists():
+        return None, f"vinheta configurada, mas {dados['arquivo']} não existe (o secret VINHETA_SENHA está definido?)"
+    parametros = {chave: valor for chave, valor in dados.items() if chave != "arquivo"}
+    return Vinheta(arquivo=arquivo, **parametros), None
+
+
 def publicar_pendentes(
     projeto: Projeto,
     storage: AudioStorage,
@@ -135,8 +147,12 @@ def publicar_pendentes(
         if erro_principal:
             avisos.append(f"{episodio_id}: sintetizado com o fallback {provedor}. Erro do principal: {erro_principal}")
 
+        vinheta, aviso_vinheta = carregar_vinheta(projeto, config["audio"])
+        if aviso_vinheta:
+            avisos.append(f"{episodio_id}: publicado sem vinheta. {aviso_vinheta}")
+
         mp3 = trabalho / f"pebacast-{episodio_id}.mp3"
-        exportar_mp3(audio, mp3, config["audio"]["bitrate_kbps"])
+        exportar_mp3(audio, mp3, config["audio"]["bitrate_kbps"], vinheta=vinheta)
         episodio = saga.episodio(episodio_id)
         url = storage.publicar(episodio_id, episodio.titulo, mp3)
 
@@ -144,9 +160,10 @@ def publicar_pendentes(
             "guid": f"pebacast-{episodio_id}",
             "url_audio": url,
             "tamanho_bytes": mp3.stat().st_size,
-            "duracao_segundos": round(audio.duracao_segundos),
+            "duracao_segundos": round(duracao_mp3(mp3)),
             "publicado_em": agora().isoformat(timespec="seconds"),
             "tts": {"provedor": provedor, "fallback": erro_principal is not None},
+            "vinheta": vinheta is not None,
         }
         (pasta / PUBLICACAO).write_text(json.dumps(publicacao, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         publicados.append(episodio_id)

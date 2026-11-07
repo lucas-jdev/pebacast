@@ -3,4 +3,7 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 experimentos/teste-vozes/saida/
+# Faixas de terceiros só entram cifradas (.gpg). Ver docs/vinheta.md.
+assets/*
+!assets/*.gpg
 experimentos/teste-vozes/vozes-piper/

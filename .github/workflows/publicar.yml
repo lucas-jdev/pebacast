@@ -53,6 +53,17 @@ jobs:
       - name: Instalar a pipeline
         run: pip install -e ".[gemini,kokoro]" --extra-index-url https://download.pytorch.org/whl/cpu
 
+      # Faixa de terceiros: só a versão cifrada fica no repositório (docs/vinheta.md).
+      - name: Decifrar a vinheta
+        # Se falhar (secret ausente ou errado), o episódio sai sem vinheta e a publicação abre um aviso.
+        if: ${{ !inputs.apenas_feed && hashFiles('assets/vinheta.mp3.gpg') != '' }}
+        continue-on-error: true
+        env:
+          VINHETA_SENHA: ${{ secrets.VINHETA_SENHA }}
+        run: |
+          printf '%s' "$VINHETA_SENHA" | gpg --batch --yes --quiet --pinentry-mode loopback --passphrase-fd 0 \
+            -o assets/vinheta.mp3 -d assets/vinheta.mp3.gpg
+
       - name: Publicar episódios pendentes
         id: publicar
         if: ${{ !inputs.apenas_feed }}

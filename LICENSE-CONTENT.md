@@ -24,6 +24,8 @@ Cite o nome do podcast, o autor e o link para o repositório, e indique se você
 
 A licença não se estende às obras citadas nos episódios. Livros, artigos e notícias continuam com os direitos de seus autores. Os episódios só fazem referência a essas obras e as comentam.
 
+A vinheta musical também fica fora da CC BY 4.0. Ela é uma faixa de terceiros, usada sob a licença da Pixabay, e não pode ser extraída nem redistribuída separadamente. Origem e licença estão em [docs/vinheta.md](docs/vinheta.md).
+
 ## Texto da licença
 
 O texto abaixo é a versão oficial em inglês, obtida em https://creativecommons.org/licenses/by/4.0/legalcode.txt.

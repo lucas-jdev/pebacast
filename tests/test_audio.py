@@ -1,10 +1,11 @@
 import json
 import subprocess
+from pathlib import Path
 
 import numpy as np
 import pytest
 
-from podcast.audio import Audio, concatenar, exportar_mp3
+from podcast.audio import Audio, Vinheta, concatenar, duracao_mp3, exportar_mp3
 
 
 def test_concatenar_insere_pausa_entre_as_partes():
@@ -46,3 +47,35 @@ def test_exportar_mp3_gera_arquivo_mono_na_taxa_de_saida(tmp_path):
     assert stream["channels"] == 1
     assert stream["sample_rate"] == "24000"
     assert float(stream["duration"]) == pytest.approx(1.0, abs=0.1)
+
+
+@pytest.fixture
+def musica_estereo(tmp_path):
+    """Faixa de 20 s em estéreo a 44,1 kHz, como uma música baixada costuma vir."""
+    arquivo = tmp_path / "musica.mp3"
+    subprocess.run(
+        ["ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i", "sine=frequency=220:duration=20",
+         "-ac", "2", "-ar", "44100", str(arquivo)],
+        check=True,
+    )
+    return arquivo
+
+
+def _fala_de(segundos: float) -> Audio:
+    tempo = np.arange(int(24_000 * segundos)) / 24_000
+    return Audio.de_float(0.3 * np.sin(2 * np.pi * 440 * tempo), 24_000)
+
+
+@pytest.mark.parametrize(("encerramento", "esperado"), [(True, 10 + 6.5 + 8), (False, 10 + 6.5)])
+def test_vinheta_abre_por_baixo_da_primeira_fala_e_fecha_o_episodio(tmp_path, musica_estereo, encerramento, esperado):
+    vinheta = Vinheta(musica_estereo, inicio_s=5, duracao_s=8, fade_saida_s=3, sobreposicao_s=1.5, encerramento=encerramento)
+    destino = tmp_path / "episodio.mp3"
+
+    exportar_mp3(_fala_de(10), destino, bitrate_kbps=64, vinheta=vinheta)
+
+    assert duracao_mp3(destino) == pytest.approx(esperado, abs=0.15)
+
+
+def test_vinheta_rejeita_sobreposicao_maior_que_o_fade():
+    with pytest.raises(ValueError, match="sobreposicao_s"):
+        Vinheta(Path("x.mp3"), inicio_s=0, duracao_s=8, fade_saida_s=2, sobreposicao_s=3)

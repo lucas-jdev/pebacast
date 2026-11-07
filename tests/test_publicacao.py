@@ -163,3 +163,39 @@ def test_releases_republica_sem_mudar_a_url(tmp_path):
 
     assert url.endswith("/episodio-sw-001/pebacast-sw-001.mp3")
     assert gh.comandos[1][:3] == ["gh", "release", "upload"] and "--clobber" in gh.comandos[1]
+
+
+def _configurar_vinheta(projeto) -> None:
+    import yaml
+
+    arquivo = projeto.raiz / "config" / "pipeline.yaml"
+    config = yaml.safe_load(arquivo.read_text(encoding="utf-8"))
+    config["audio"]["vinheta"] = {"arquivo": "assets/vinheta.mp3", "inicio_s": 0, "duracao_s": 4,
+                                  "fade_saida_s": 2, "sobreposicao_s": 1}
+    arquivo.write_text(yaml.safe_dump(config, allow_unicode=True), encoding="utf-8")
+
+
+@precisa_ffmpeg
+def test_vinheta_configurada_entra_no_episodio(projeto, tmp_path):
+    _configurar_vinheta(projeto)
+    (projeto.raiz / "assets").mkdir()
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-f", "lavfi", "-i", "sine=duration=10",
+                    str(projeto.raiz / "assets" / "vinheta.mp3")], check=True)
+    _escrever_episodio(projeto, "sw-001")
+
+    resultado = _publicar(projeto, tmp_path)
+
+    publicacao = json.loads((projeto.episodios / "sw-001" / "publicacao.json").read_text(encoding="utf-8"))
+    assert resultado.avisos == [] and publicacao["vinheta"] is True
+    assert publicacao["duracao_segundos"] == 1 + 3 + 4  # fala falsa de 1 s, abertura e encerramento
+
+
+@precisa_ffmpeg
+def test_sem_o_arquivo_decifrado_publica_sem_vinheta_e_avisa(projeto, tmp_path):
+    _configurar_vinheta(projeto)
+    _escrever_episodio(projeto, "sw-001")
+
+    resultado = _publicar(projeto, tmp_path)
+
+    assert resultado.publicados == ["sw-001"]
+    assert "publicado sem vinheta" in resultado.avisos[0] and "VINHETA_SENHA" in resultado.avisos[0]

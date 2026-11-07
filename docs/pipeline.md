@@ -100,7 +100,7 @@ Cada fala é sintetizada pelo `TtsProvider` configurado, com no máximo dois fal
 
 ## 7. Montagem
 
-O ffmpeg concatena as falas, normaliza o volume com loudnorm e exporta em MP3 mono a 64 kbps, com cerca de 10 MB por episódio. A vinheta ainda não existe.
+O ffmpeg concatena as falas, normaliza o volume com loudnorm e exporta em MP3 mono a 64 kbps, com cerca de 10 MB por episódio. Com a vinheta configurada, o recorte toca na abertura, por baixo da primeira fala, e no encerramento ([docs/vinheta.md](vinheta.md)).
 
 ## 8. Publicação
 
