@@ -44,13 +44,19 @@ audio:
   # decifrada no Actions com o secret VINHETA_SENHA. Ver docs/vinheta.md.
   vinheta:
     arquivo: assets/vinheta.mp3
-    inicio_s: 0          # segundo da faixa onde o recorte começa
-    duracao_s: 8         # tamanho do recorte
-    fade_entrada_s: 0.5
-    fade_saida_s: 3      # a música abaixa nos últimos 3 s do recorte
-    sobreposicao_s: 1.5  # a primeira fala entra 1,5 s antes do fim do recorte
+    credito: Vinheta "Indie Rock", de AtlasAudio, via Pixabay (https://pixabay.com/pt/users/atlasaudio-54514918/)
     volume: 0.7
-    encerramento: true   # repete o recorte depois da última fala
+    sobreposicao_s: 1.5    # a primeira fala entra 1,5 s antes do fim da abertura
+    abertura:              # introdução da faixa, antes de a banda entrar
+      inicio_s: 1.0
+      duracao_s: 9.0
+      fade_entrada_s: 0.3
+      fade_saida_s: 3.0
+    encerramento:          # final natural da faixa (batida em 90,8 s e decaimento)
+      inicio_s: 85.0
+      duracao_s: 11.0
+      fade_entrada_s: 1.0
+      fade_saida_s: 0.5
 
 publicacao:
   audio: github_releases

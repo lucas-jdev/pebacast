@@ -6,11 +6,14 @@ A vinheta é um recorte de uma faixa musical de terceiros. Ela toca na abertura,
 
 | Campo | Valor |
 |---|---|
-| Faixa | indie rock, id 606263 na Pixabay. Título exato e autor: confirmar ao baixar |
+| Faixa | Indie Rock |
+| Autor | [AtlasAudio](https://pixabay.com/pt/users/atlasaudio-54514918/) |
 | Origem | [Pixabay](https://pixabay.com/pt/music/rocha-indie-rock-606263/) |
 | Licença | [Pixabay Content License](https://pixabay.com/pt/service/license-summary/) |
 
 A licença da Pixabay permite usar a faixa num podcast, sem pagamento e sem atribuição obrigatória. Ela não permite distribuir a faixa sozinha. Por isso, o MP3 original nunca entra no repositório público: só a versão cifrada `assets/vinheta.mp3.gpg` é versionada, e o `.gitignore` bloqueia o resto da pasta `assets/`.
+
+A atribuição não é obrigatória, mas o crédito (`audio.vinheta.credito`) vai nas show notes de cada episódio.
 
 Pela mesma razão, a vinheta fica fora da CC BY 4.0 do conteúdo. Ver [LICENSE-CONTENT.md](../LICENSE-CONTENT.md).
 

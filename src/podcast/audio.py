@@ -45,43 +45,78 @@ def concatenar(partes: Sequence[Audio], pausa_ms: int = 0) -> Audio:
 
 
 @dataclass(frozen=True)
-class Vinheta:
-    """Recorte de uma faixa musical tocado na abertura e, opcionalmente, no encerramento.
+class Recorte:
+    """Trecho de uma faixa musical, com fade de entrada e de saída."""
 
-    A primeira fala entra `sobreposicao_s` segundos antes do fim do recorte, por cima do fade-out.
-    """
-
-    arquivo: Path
     inicio_s: float
     duracao_s: float
     fade_entrada_s: float = 0.5
     fade_saida_s: float = 3.0
-    sobreposicao_s: float = 1.5
-    volume: float = 0.7
-    encerramento: bool = True
 
     def __post_init__(self) -> None:
-        if not 0 <= self.sobreposicao_s <= self.fade_saida_s <= self.duracao_s:
-            raise ValueError("A vinheta precisa de 0 <= sobreposicao_s <= fade_saida_s <= duracao_s.")
+        if not (self.inicio_s >= 0 and self.duracao_s > 0
+                and 0 <= self.fade_entrada_s + self.fade_saida_s <= self.duracao_s):
+            raise ValueError("Recorte inválido: os fades precisam caber na duração.")
+
+    def filtro(self, taxa: int, volume: float) -> str:
+        filtros = [
+            f"atrim=start={self.inicio_s}:duration={self.duracao_s}",
+            "asetpts=PTS-STARTPTS",
+            f"aformat=sample_rates={taxa}:channel_layouts=mono",
+            f"volume={volume}",
+        ]
+        if self.fade_entrada_s:
+            filtros.append(f"afade=t=in:d={self.fade_entrada_s}")
+        if self.fade_saida_s:
+            filtros.append(f"afade=t=out:st={self.duracao_s - self.fade_saida_s}:d={self.fade_saida_s}")
+        return ",".join(filtros)
+
+
+@dataclass(frozen=True)
+class Vinheta:
+    """Recortes de uma faixa musical na abertura e, opcionalmente, no encerramento.
+
+    A primeira fala entra `sobreposicao_s` segundos antes do fim da abertura, por cima do fade-out.
+    O encerramento começa logo depois da última fala.
+    """
+
+    arquivo: Path
+    abertura: Recorte
+    encerramento: Recorte | None = None
+    sobreposicao_s: float = 1.5
+    volume: float = 0.7
+
+    def __post_init__(self) -> None:
+        if not 0 <= self.sobreposicao_s <= self.abertura.fade_saida_s:
+            raise ValueError("A vinheta precisa de 0 <= sobreposicao_s <= abertura.fade_saida_s.")
+
+    @classmethod
+    def de_config(cls, arquivo: Path, config: dict) -> "Vinheta":
+        encerramento = config.get("encerramento")
+        # "credito" e "arquivo" são metadados da config, não parâmetros de montagem.
+        return cls(
+            arquivo=arquivo,
+            abertura=Recorte(**config["abertura"]),
+            encerramento=Recorte(**encerramento) if encerramento else None,
+            sobreposicao_s=config.get("sobreposicao_s", 1.5),
+            volume=config.get("volume", 0.7),
+        )
 
     def filtro(self, entrada_fala: str, entrada_musica: str, taxa: int) -> str:
         """Grafo do ffmpeg que mistura a vinheta com a fala e entrega o rótulo [episodio]."""
-        fade_saida_inicio = self.duracao_s - self.fade_saida_s
-        recorte = (
-            f"atrim=start={self.inicio_s}:duration={self.duracao_s},asetpts=PTS-STARTPTS,"
-            f"aformat=sample_rates={taxa}:channel_layouts=mono,volume={self.volume},"
-            f"afade=t=in:d={self.fade_entrada_s},afade=t=out:st={fade_saida_inicio}:d={self.fade_saida_s}"
-        )
-        atraso_ms = round((self.duracao_s - self.sobreposicao_s) * 1000)
+        atraso_ms = round((self.abertura.duracao_s - self.sobreposicao_s) * 1000)
         fala = f"[{entrada_fala}]adelay={atraso_ms}[fala]"
-        if not self.encerramento:
+        abertura = self.abertura.filtro(taxa, self.volume)
+        if self.encerramento is None:
             return ";".join([
-                f"[{entrada_musica}]{recorte}[abertura]",
+                f"[{entrada_musica}]{abertura}[abertura]",
                 fala,
                 "[abertura][fala]amix=inputs=2:duration=longest:normalize=0[episodio]",
             ])
         return ";".join([
-            f"[{entrada_musica}]{recorte},asplit=2[abertura][fecho]",
+            f"[{entrada_musica}]asplit=2[musica1][musica2]",
+            f"[musica1]{abertura}[abertura]",
+            f"[musica2]{self.encerramento.filtro(taxa, self.volume)}[fecho]",
             fala,
             "[abertura][fala]amix=inputs=2:duration=longest:normalize=0[corpo]",
             "[corpo][fecho]concat=n=2:v=0:a=1[episodio]",

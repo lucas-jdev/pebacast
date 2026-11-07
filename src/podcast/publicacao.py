@@ -111,8 +111,7 @@ def carregar_vinheta(projeto: Projeto, config_audio: Mapping[str, Any]) -> tuple
     arquivo = projeto.raiz / dados["arquivo"]
     if not arquivo.exists():
         return None, f"vinheta configurada, mas {dados['arquivo']} não existe (o secret VINHETA_SENHA está definido?)"
-    parametros = {chave: valor for chave, valor in dados.items() if chave != "arquivo"}
-    return Vinheta(arquivo=arquivo, **parametros), None
+    return Vinheta.de_config(arquivo, dados), None
 
 
 def publicar_pendentes(
@@ -213,7 +212,7 @@ def escrever_site(projeto: Projeto, site: Path) -> None:
 
 
 def show_notes(episodio: Mapping[str, Any], roteiro: Mapping[str, Any], noticia: Mapping[str, Any],
-               revisoes: Sequence[Mapping[str, Any]]) -> str:
+               revisoes: Sequence[Mapping[str, Any]], credito_vinheta: str | None = None) -> str:
     linhas = [
         "Conteúdo gerado por inteligência artificial e revisado contra as fontes citadas.",
         "",
@@ -232,25 +231,30 @@ def show_notes(episodio: Mapping[str, Any], roteiro: Mapping[str, Any], noticia:
         f"Revisão: {len(ultima['afirmacoes'])} afirmações verificadas, "
         f"aprovado na revisão {len(revisoes)}."
     )
+    if credito_vinheta:
+        linhas += ["", credito_vinheta]
     return "\n".join(linhas)
 
 
 def _episodios_publicados(projeto: Projeto) -> list[dict[str, Any]]:
+    credito = (projeto.config()["audio"].get("vinheta") or {}).get("credito")
     itens = []
     for saga in projeto.sagas().values():
         for episodio in saga.episodios:
             pasta = projeto.episodios / episodio.id
             if not (pasta / PUBLICACAO).exists():
                 continue
+            publicacao = _ler_json(pasta / PUBLICACAO)
             revisoes = sorted((pasta / PASTA_REVISOES).glob("*.json"), key=lambda a: int(a.stem))
             itens.append({
                 "episodio": episodio.dados,
-                "publicacao": _ler_json(pasta / PUBLICACAO),
+                "publicacao": publicacao,
                 "notas": show_notes(
                     episodio.dados,
                     _ler_json(pasta / ROTEIRO),
                     _ler_json(pasta / NOTICIA),
                     [_ler_json(arquivo) for arquivo in revisoes],
+                    credito if publicacao.get("vinheta") else None,
                 ),
             })
     return itens

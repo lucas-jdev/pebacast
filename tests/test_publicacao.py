@@ -170,8 +170,9 @@ def _configurar_vinheta(projeto) -> None:
 
     arquivo = projeto.raiz / "config" / "pipeline.yaml"
     config = yaml.safe_load(arquivo.read_text(encoding="utf-8"))
-    config["audio"]["vinheta"] = {"arquivo": "assets/vinheta.mp3", "inicio_s": 0, "duracao_s": 4,
-                                  "fade_saida_s": 2, "sobreposicao_s": 1}
+    config["audio"]["vinheta"] = {"arquivo": "assets/vinheta.mp3", "credito": "Vinheta de Fulano", "sobreposicao_s": 1,
+                                  "abertura": {"inicio_s": 0, "duracao_s": 4, "fade_saida_s": 2},
+                                  "encerramento": {"inicio_s": 5, "duracao_s": 4, "fade_saida_s": 0}}
     arquivo.write_text(yaml.safe_dump(config, allow_unicode=True), encoding="utf-8")
 
 
@@ -188,6 +189,7 @@ def test_vinheta_configurada_entra_no_episodio(projeto, tmp_path):
     publicacao = json.loads((projeto.episodios / "sw-001" / "publicacao.json").read_text(encoding="utf-8"))
     assert resultado.avisos == [] and publicacao["vinheta"] is True
     assert publicacao["duracao_segundos"] == 1 + 3 + 4  # fala falsa de 1 s, abertura e encerramento
+    assert "Vinheta de Fulano" in gerar_feed(projeto)
 
 
 @precisa_ffmpeg
@@ -199,3 +201,4 @@ def test_sem_o_arquivo_decifrado_publica_sem_vinheta_e_avisa(projeto, tmp_path):
 
     assert resultado.publicados == ["sw-001"]
     assert "publicado sem vinheta" in resultado.avisos[0] and "VINHETA_SENHA" in resultado.avisos[0]
+    assert "Vinheta de Fulano" not in gerar_feed(projeto)  # sem vinheta no áudio, sem crédito

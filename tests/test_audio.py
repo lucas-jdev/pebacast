@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from podcast.audio import Audio, Vinheta, concatenar, duracao_mp3, exportar_mp3
+from podcast.audio import Audio, Recorte, Vinheta, concatenar, duracao_mp3, exportar_mp3
 
 
 def test_concatenar_insere_pausa_entre_as_partes():
@@ -66,9 +66,9 @@ def _fala_de(segundos: float) -> Audio:
     return Audio.de_float(0.3 * np.sin(2 * np.pi * 440 * tempo), 24_000)
 
 
-@pytest.mark.parametrize(("encerramento", "esperado"), [(True, 10 + 6.5 + 8), (False, 10 + 6.5)])
+@pytest.mark.parametrize(("encerramento", "esperado"), [(Recorte(15, 5, 1, 0), 10 + 6.5 + 5), (None, 10 + 6.5)])
 def test_vinheta_abre_por_baixo_da_primeira_fala_e_fecha_o_episodio(tmp_path, musica_estereo, encerramento, esperado):
-    vinheta = Vinheta(musica_estereo, inicio_s=5, duracao_s=8, fade_saida_s=3, sobreposicao_s=1.5, encerramento=encerramento)
+    vinheta = Vinheta(musica_estereo, abertura=Recorte(5, 8, fade_saida_s=3), encerramento=encerramento, sobreposicao_s=1.5)
     destino = tmp_path / "episodio.mp3"
 
     exportar_mp3(_fala_de(10), destino, bitrate_kbps=64, vinheta=vinheta)
@@ -78,4 +78,19 @@ def test_vinheta_abre_por_baixo_da_primeira_fala_e_fecha_o_episodio(tmp_path, mu
 
 def test_vinheta_rejeita_sobreposicao_maior_que_o_fade():
     with pytest.raises(ValueError, match="sobreposicao_s"):
-        Vinheta(Path("x.mp3"), inicio_s=0, duracao_s=8, fade_saida_s=2, sobreposicao_s=3)
+        Vinheta(Path("x.mp3"), abertura=Recorte(0, 8, fade_saida_s=2), sobreposicao_s=3)
+
+
+def test_recorte_rejeita_fades_maiores_que_a_duracao():
+    with pytest.raises(ValueError, match="fades"):
+        Recorte(0, 3, fade_entrada_s=2, fade_saida_s=2)
+
+
+def test_vinheta_lida_da_config():
+    vinheta = Vinheta.de_config(Path("v.mp3"), {
+        "abertura": {"inicio_s": 1, "duracao_s": 9}, "encerramento": {"inicio_s": 85, "duracao_s": 11, "fade_saida_s": 0},
+        "sobreposicao_s": 2, "volume": 0.5,
+    })
+    assert vinheta.abertura == Recorte(1, 9)
+    assert vinheta.encerramento == Recorte(85, 11, fade_saida_s=0)
+    assert (vinheta.sobreposicao_s, vinheta.volume) == (2, 0.5)
