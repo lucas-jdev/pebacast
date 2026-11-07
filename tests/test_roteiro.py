@@ -42,7 +42,7 @@ CONFIG = {
     "tts": {"principal": "gemini-falso", "fallback": "kokoro-falso"},
     "audio": {"bitrate_kbps": 64},
     "feed": {
-        "titulo": "pebacast", "descricao": "Podcast de teste.", "autor": "Lucas", "url_site": "https://x.github.io/pebacast/",
+        "titulo": "Pebacast", "descricao": "Podcast de teste.", "autor": "Lucas", "url_site": "https://x.github.io/pebacast/",
         "url_repositorio": "https://github.com/x/pebacast", "idioma": "pt-br", "categoria": "Technology", "licenca": "CC BY 4.0",
     },
 }
@@ -252,7 +252,7 @@ def test_aceita_aprovacao_na_terceira_revisao(projeto):
     [
         (lambda r: r["falas"].insert(0, {"persona": "helena", "texto": "Oi, IA."}), "primeira fala precisa ser do apresentador"),
         (lambda r: r["falas"][0].update(texto="Bem-vindos ao Pebacast. Hoje com a Helena."), "aviso de conteúdo gerado por IA"),
-        (lambda r: r["falas"][0].update(texto="Episódio gerado por IA, com a Helena."), "apresentar o pebacast"),
+        (lambda r: r["falas"][0].update(texto="Episódio gerado por IA, com a Helena."), "apresentar o Pebacast"),
         (lambda r: r["falas"][0].update(texto="Bem-vindos ao Pebacast, episódio gerado por IA."), "apresentar Helena pelo nome"),
         (lambda r: r["falas"].insert(1, {"persona": "davi", "texto": "Antes de tudo, um recado rápido."}) or
                    r["falas"].insert(1, {"persona": "davi", "texto": "E mais um recado."}), "Helena precisa falar"),

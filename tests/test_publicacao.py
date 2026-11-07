@@ -119,7 +119,7 @@ def test_feed_lista_episodios_publicados_com_enclosure_e_guid(projeto, tmp_path)
     canal = ET.fromstring(gerar_feed(projeto)).find("channel")
     itens = canal.findall("item")
 
-    assert canal.find("title").text == "pebacast"
+    assert canal.find("title").text == "Pebacast"
     assert len(itens) == 1
     item = itens[0]
     assert item.find("title").text == "Um"

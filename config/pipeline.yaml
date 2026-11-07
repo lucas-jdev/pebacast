@@ -72,7 +72,7 @@ publicacao:
   aviso_ia: true
 
 feed:
-  titulo: pebacast
+  titulo: Pebacast
   descricao: >-
     Podcast diário para estudar arquitetura de software, soluções, sistemas,
     dados, infraestrutura, segurança e arquitetura corporativa. Cada episódio

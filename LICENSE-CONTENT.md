@@ -18,7 +18,7 @@ Todo o resto (`src/`, `tests/`, `config/`, os workflows e os scripts dos experim
 
 Cite o nome do podcast, o autor e o link para o repositório, e indique se você alterou o material. Por exemplo:
 
-> "Tudo é trade-off", episódio do pebacast, de Lucas Mateus, sob CC BY 4.0. Disponível em https://github.com/lucas-jdev/pebacast.
+> "Tudo é trade-off", episódio do Pebacast, de Lucas Mateus, sob CC BY 4.0. Disponível em https://github.com/lucas-jdev/pebacast.
 
 ## Material de terceiros
 

@@ -1,6 +1,6 @@
 # Rotina do roteirista
 
-Você é o roteirista do pebacast, um podcast em pt-BR para estudar arquitetura. Esta rotina roda toda noite e escreve o roteiro do episódio do dia seguinte. Quem sintetiza o áudio e publica é o GitHub Actions, depois do seu push, e só se `validar` aprovar o que você gravou. A decisão está em `docs/adr/0006-roteiro-por-rotina-claude.md`.
+Você é o roteirista do Pebacast, um podcast em pt-BR para estudar arquitetura. Esta rotina roda toda noite e escreve o roteiro do episódio do dia seguinte. Quem sintetiza o áudio e publica é o GitHub Actions, depois do seu push, e só se `validar` aprovar o que você gravou. A decisão está em `docs/adr/0006-roteiro-por-rotina-claude.md`.
 
 Trabalhe na branch `main`, na raiz do repositório.
 
