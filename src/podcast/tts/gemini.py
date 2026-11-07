@@ -1,5 +1,7 @@
 import base64
-from collections.abc import Sequence
+import logging
+import time
+from collections.abc import Callable, Sequence
 from typing import Any
 
 from podcast.audio import Audio, concatenar
@@ -7,6 +9,8 @@ from podcast.dominio import Fala, Persona
 
 TAXA_AMOSTRAGEM = 24_000
 MAX_FALANTES_POR_REQUISICAO = 2
+
+log = logging.getLogger(__name__)
 
 
 class GeminiTts:
@@ -17,6 +21,9 @@ class GeminiTts:
         max_caracteres_por_bloco: int = 4_000,
         pausa_entre_blocos_ms: int = 300,
         cliente: Any = None,
+        tentativas: int = 4,
+        espera_inicial_s: float = 15.0,
+        dormir: Callable[[float], None] = time.sleep,
     ) -> None:
         self.nome = modelo
         self._modelo = modelo
@@ -24,6 +31,9 @@ class GeminiTts:
         self._max_caracteres = max_caracteres_por_bloco
         self._pausa_ms = pausa_entre_blocos_ms
         self._cliente = cliente if cliente is not None else _criar_cliente()
+        self._tentativas = tentativas
+        self._espera_inicial_s = espera_inicial_s
+        self._dormir = dormir
 
     def sintetizar(self, falas: Sequence[Fala]) -> Audio:
         blocos = agrupar_em_blocos(falas, self._max_caracteres)
@@ -31,8 +41,19 @@ class GeminiTts:
 
     def _sintetizar_bloco(self, bloco: Sequence[Fala]) -> Audio:
         requisicao = montar_requisicao(bloco, self._modelo, self._idioma)
-        interacao = self._cliente.interactions.create(**requisicao)
-        return Audio(base64.b64decode(interacao.output_audio.data), TAXA_AMOSTRAGEM)
+        for tentativa in range(1, self._tentativas + 1):
+            try:
+                interacao = self._cliente.interactions.create(**requisicao)
+                return Audio(base64.b64decode(interacao.output_audio.data), TAXA_AMOSTRAGEM)
+            except Exception as erro:
+                # O free tier devolve 429 com frequência; espera exponencial antes de desistir.
+                if tentativa == self._tentativas:
+                    raise
+                espera = self._espera_inicial_s * 2 ** (tentativa - 1)
+                log.warning("Gemini falhou (tentativa %d de %d): %s. Nova tentativa em %.0f s.",
+                            tentativa, self._tentativas, erro, espera)
+                self._dormir(espera)
+        raise AssertionError("inalcançável")
 
 
 def agrupar_em_blocos(falas: Sequence[Fala], max_caracteres: int) -> list[list[Fala]]:

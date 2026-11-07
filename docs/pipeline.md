@@ -94,15 +94,17 @@ A rotina commita a pasta do episódio, aprovada ou não. O Actions roda `python 
 
 ## 6. Voz
 
-Cada fala é sintetizada pelo `TtsProvider` configurado, com no máximo dois falantes por requisição. Se o provedor principal falhar, a pipeline usa o fallback e registra o fato na issue do dia. A decisão está em [ADR 0001](adr/0001-tts-gemini-com-fallback-kokoro.md).
+Roda no GitHub Actions (`.github/workflows/publicar.yml`), com `python -m podcast.publicacao publicar`, só depois de o `validar` aprovar o roteiro de novo.
+
+Cada fala é sintetizada pelo `TtsProvider` configurado, com no máximo dois falantes por requisição. Cada bloco do Gemini tem até 4 tentativas, com espera exponencial a partir de 15 s, porque o free tier devolve 429 com frequência. Se o provedor principal ainda assim falhar, a pipeline usa o fallback e abre uma issue avisando. A decisão está em [ADR 0001](adr/0001-tts-gemini-com-fallback-kokoro.md).
 
 ## 7. Montagem
 
-O ffmpeg concatena as falas, normaliza o volume com loudnorm, adiciona a vinheta e exporta em MP3 mono a 64 kbps, com cerca de 10 MB por episódio.
+O ffmpeg concatena as falas, normaliza o volume com loudnorm e exporta em MP3 mono a 64 kbps, com cerca de 10 MB por episódio. A vinheta ainda não existe.
 
 ## 8. Publicação
 
-O MP3 vai para o `AudioStorage` e o `feed.xml` é atualizado com:
+O MP3 vai para o `AudioStorage` (um release `episodio-<id>` por episódio) e o Actions commita `publicacao.json`. O `feed.xml` é regenerado inteiro a partir de `episodios/` e publicado no GitHub Pages, em https://lucas-jdev.github.io/pebacast/feed.xml. Ele traz:
 
 - GUID imutável do episódio;
 - show notes com as fontes, o desafio e o resumo do relatório de revisão;

@@ -13,6 +13,7 @@ import yaml
 from podcast.audio import Audio, exportar_mp3
 from podcast.dominio import Fala, Persona
 from podcast.personas import carregar_personas
+from podcast.tts.fabrica import criar_provedor
 from podcast.tts.provedor import TtsProvider
 
 CANDIDATOS = ("gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts", "kokoro", "piper")
@@ -149,22 +150,6 @@ def _melhores_em(criterio: str, resultados: Sequence[Resultado]) -> str:
     return " e ".join(r.candidato for r in resultados if r.notas[criterio] == maior)
 
 
-def _criar_provedor(nome: str, diretorio_vozes_piper: Path) -> TtsProvider:
-    if nome.startswith("gemini-"):
-        from podcast.tts.gemini import GeminiTts
-
-        return GeminiTts(modelo=nome)
-    if nome == "kokoro":
-        from podcast.tts.kokoro import KokoroTts
-
-        return KokoroTts()
-    if nome == "piper":
-        from podcast.tts.piper import PiperTts
-
-        return PiperTts(diretorio_vozes_piper)
-    raise ValueError(f"Candidato desconhecido: {nome}")
-
-
 def _ler_bitrate(arquivo_config: Path) -> int:
     config = yaml.safe_load(arquivo_config.read_text(encoding="utf-8"))
     return config["audio"]["bitrate_kbps"]
@@ -191,7 +176,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         if args.comando == "gerar":
             falas = carregar_trecho(args.trecho, carregar_personas(args.personas))
-            provedores = [_criar_provedor(nome, args.vozes_piper) for nome in args.candidatos]
+            provedores = [criar_provedor(nome, args.vozes_piper) for nome in args.candidatos]
             gerar(falas, provedores, args.saida, _ler_bitrate(args.config))
             print(f"Amostras em {args.saida / PASTA_AMOSTRAS}. Preencha {args.saida / ARQUIVO_AVALIACAO}.")
         else:

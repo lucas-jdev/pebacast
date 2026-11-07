@@ -39,6 +39,12 @@ CONFIG = {
     "noticias": {"janelas_dias": [7, 30, 60], "nota_minima_relevancia": 7, "fallback": "cenario_hipotetico"},
     "revisao": {"max_ciclos": 2, "vereditos_reprovam": ["incorreta", "imprecisa"], "falhar_fechado": True},
     "feedback": {"ultimos_por_saga": 2},
+    "tts": {"principal": "gemini-falso", "fallback": "kokoro-falso"},
+    "audio": {"bitrate_kbps": 64},
+    "feed": {
+        "titulo": "pebacast", "descricao": "Podcast de teste.", "autor": "Lucas", "url_site": "https://x.github.io/pebacast/",
+        "url_repositorio": "https://github.com/x/pebacast", "idioma": "pt-br", "categoria": "Technology", "licenca": "CC BY 4.0",
+    },
 }
 
 SAGA = {
@@ -57,9 +63,10 @@ SAGA = {
     ],
 }
 
+VOZ = {"gemini": "Puck", "kokoro": "pm_alex", "piper": "pt_BR-faber-medium", "instrucao_de_estilo": "calmo"}
 PERSONAS = [
-    {"id": "davi", "nome": "Davi", "papel": "apresentador", "sagas": ["todas"]},
-    {"id": "helena", "nome": "Helena", "papel": "expert", "sagas": ["software"]},
+    {"id": "davi", "nome": "Davi", "papel": "apresentador", "sagas": ["todas"], "voz": VOZ},
+    {"id": "helena", "nome": "Helena", "papel": "expert", "sagas": ["software"], "voz": VOZ},
 ]
 
 

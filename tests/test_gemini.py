@@ -78,3 +78,33 @@ def test_sintetizar_faz_uma_requisicao_por_bloco_e_concatena(davi, helena, bruno
 
     assert len(cliente.requisicoes) == 2
     assert audio.duracao_segundos == pytest.approx(0.5)
+
+
+class ClienteInstavel(ClienteFalso):
+    def __init__(self, falhas: int) -> None:
+        super().__init__()
+        self._falhas = falhas
+
+    def create(self, **requisicao):
+        if self._falhas:
+            self._falhas -= 1
+            raise RuntimeError("429 RESOURCE_EXHAUSTED")
+        return super().create(**requisicao)
+
+
+def test_tenta_de_novo_com_espera_exponencial_quando_a_api_falha(davi):
+    esperas = []
+    tts = GeminiTts("modelo", cliente=ClienteInstavel(falhas=2), espera_inicial_s=10, dormir=esperas.append)
+
+    tts.sintetizar([Fala(davi, "Oi")])
+
+    assert esperas == [10, 20]
+
+
+def test_desiste_depois_do_limite_de_tentativas(davi):
+    esperas = []
+    tts = GeminiTts("modelo", cliente=ClienteInstavel(falhas=9), tentativas=3, dormir=esperas.append)
+
+    with pytest.raises(RuntimeError, match="429"):
+        tts.sintetizar([Fala(davi, "Oi")])
+    assert len(esperas) == 2

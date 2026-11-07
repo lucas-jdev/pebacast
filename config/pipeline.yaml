@@ -45,3 +45,18 @@ publicacao:
   audio: github_releases
   feed: github_pages
   aviso_ia: true
+
+feed:
+  titulo: pebacast
+  descricao: >-
+    Podcast diário para estudar arquitetura de software, soluções, sistemas,
+    dados, infraestrutura, segurança e arquitetura corporativa. Cada episódio
+    é um diálogo de 15 a 20 minutos que termina com um desafio prático.
+    Conteúdo gerado por inteligência artificial e revisado contra as fontes
+    citadas.
+  autor: Lucas Mateus
+  url_site: https://lucas-jdev.github.io/pebacast/
+  url_repositorio: https://github.com/lucas-jdev/pebacast
+  idioma: pt-br
+  categoria: Technology
+  licenca: CC BY 4.0
