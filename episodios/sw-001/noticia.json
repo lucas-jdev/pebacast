@@ -1,0 +1,9 @@
+{
+  "tipo": "noticia",
+  "titulo": "2 Engineers, Unlimited Tokens and Cisco's 98% Rewrite",
+  "url": "https://www.pymnts.com/news/artificial-intelligence/2026/2-engineers-unlimited-tokens-and-ciscos-98-rewrite/",
+  "fonte": "PYMNTS",
+  "data": "2026-11-02",
+  "nota_relevancia": 8,
+  "justificativa": "A Cisco quer refatorar 98% do código legado com IA e uma equipe de duas pessoas, e a matéria contrapõe a velocidade ao risco de perder regras de negócio (caso TSB). Isso serve ao objetivo 'toda decisão arquitetural é um trade-off'. O caso do Itaú, em que agentes fazem análise e código enquanto especialistas mantêm decisões, arquitetura e governança, serve ao objetivo sobre as expectativas do papel de arquiteto e à diferença entre arquitetura e design. Os 50% do tempo gastos entendendo o que o código faz ilustram a segunda lei: o porquê importa mais que o como."
+}

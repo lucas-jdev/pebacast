@@ -1,0 +1,140 @@
+{
+  "aprovado": false,
+  "roteiro_sha256": "e3545a796da6152246bbc6f48555c61014df32c6f9e6dc997c9dc9e8112970af",
+  "afirmacoes": [
+    {
+      "fala": 6,
+      "afirmacao": "Saiu no site PYMNTS, no dia dois de novembro. O presidente e diretor de produto da Cisco, Jeetu Patel, contou à revista Fortune que deu um orçamento ilimitado de tokens de IA pra um engenheiro de vinte e sete anos, o Padmanabhan Krishnamurthy. A missão é refatorar noventa e oito por cento do código legado da Cisco. Com uma equipe de duas pessoas [...] Ele se deu quatro semanas pra provar que a abordagem funciona, e a meta é terminar em vinte e quatro meses.",
+      "veredito": "correta",
+      "fonte": "PYMNTS, 2 Engineers, Unlimited Tokens and Cisco's 98% Rewrite, 2/11/2026 (https://www.pymnts.com/news/artificial-intelligence/2026/2-engineers-unlimited-tokens-and-ciscos-98-rewrite/)"
+    },
+    {
+      "fala": 8,
+      "afirmacao": "Segundo um estudo de caso da AWS citado na matéria, os engenheiros do Itaú gastavam metade do tempo só analisando o que o código existente fazia, e mais trinta por cento criando testes na mão. Com ferramentas de IA, a descoberta das aplicações, que levava três meses, passou a levar duas semanas. E o banco está a caminho de aposentar os mainframes até o fim de 2028.",
+      "veredito": "correta",
+      "fonte": "PYMNTS, 2/11/2026: \"said in an AWS case study that its engineers spent 50% of their time analyzing what existing code did\", \"another 30% manually creating tests\"; descoberta de 3 meses para 2 semanas; mainframes aposentados até o fim de 2028"
+    },
+    {
+      "fala": 17,
+      "afirmacao": "A matéria diz exatamente isso sobre os sistemas legados: antes de reescrever qualquer código, alguém precisa descobrir o que ele faz, e muitas das pessoas que escreveram esse código já se aposentaram.",
+      "veredito": "correta",
+      "fonte": "PYMNTS, 2/11/2026: alguém precisa primeiro descobrir o que o código faz; \"the people who wrote it have largely retired\""
+    },
+    {
+      "fala": 17,
+      "afirmacao": "No livro Fundamentals of Software Architecture, do Mark Richards e do Neal Ford, tem uma ideia que eles chamam de primeira lei da arquitetura de software: tudo em arquitetura de software é um trade-off. E ela vem com um corolário [...]: se um arquiteto acha que encontrou algo que não é um trade-off, o mais provável é que ele só ainda não identificou qual é o trade-off.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, Fundamentals of Software Architecture, 1ª ed. (2020), cap. 1, Laws of Software Architecture (First Law e Corollary 1)"
+    },
+    {
+      "fala": 23,
+      "afirmacao": "Código legado de banco carrega regra de transação, cálculo de juros, exigência regulatória. Uma versão gerada que perde uma única exceção pode precificar errado um empréstimo ou fazer um pagamento falhar.",
+      "veredito": "correta",
+      "fonte": "PYMNTS, 2/11/2026: \"Legacy banking code holds decades of transaction rules, interest calculations and regulatory requirements. A generated replacement that drops one exception can misprice a loan or fail a payment.\""
+    },
+    {
+      "fala": 23,
+      "afirmacao": "A matéria lembra o caso do TSB, um banco britânico. Em 2018, uma migração de plataforma deixou clientes sem acesso às próprias contas, e em 2022 os reguladores do Reino Unido multaram o banco em quarenta e oito vírgula sessenta e cinco milhões de libras.",
+      "veredito": "correta",
+      "fonte": "PYMNTS, 2/11/2026; conhecimento consolidado: multa conjunta FCA (£29,75 mi) e PRA (£18,9 mi), total de £48,65 mi, dezembro de 2022"
+    },
+    {
+      "fala": 25,
+      "afirmacao": "Segundo a matéria, eles construíram um framework de validação para confirmar que cada regra crítica de negócio sobreviveu à extração, antes de reconstruir o sistema.",
+      "veredito": "imprecisa",
+      "correcao": "A matéria diz que o framework confirma que cada regra crítica sobreviveu à extração antes de ela ser reconstruída (\"before it was rebuilt\"); a validação acompanha cada regra, não é uma etapa única antes de reconstruir o sistema inteiro. Sugestão: \"...para confirmar que cada regra crítica de negócio sobreviveu à extração antes de ser reconstruída.\"",
+      "fonte": "PYMNTS, 2/11/2026: \"built a validation framework to confirm that every business-critical rule survived extraction before it was rebuilt\""
+    },
+    {
+      "fala": 27,
+      "afirmacao": "O Richards e o Ford descrevem a arquitetura de um sistema como a combinação de quatro dimensões. A estrutura, que é o estilo arquitetural [...]. As características arquiteturais [...] escalabilidade, disponibilidade e segurança. As decisões arquiteturais, que são as regras de como o sistema deve ser construído. E os princípios de design, que são diretrizes, e não regras rígidas.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 1, Defining Software Architecture (structure, architecture characteristics, architecture decisions, design principles)"
+    },
+    {
+      "fala": 29,
+      "afirmacao": "Na visão tradicional, sim. O arquiteto decide as características, o estilo e a estrutura de componentes, e entrega para os desenvolvedores, que fazem os diagramas de classe, as telas e o código.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 2, Architecture Versus Design (modelo tradicional)"
+    },
+    {
+      "fala": 29,
+      "afirmacao": "As decisões do arquiteto nunca chegam inteiras ao time, e o que o time aprende escrevendo o código nunca volta para o arquiteto.",
+      "veredito": "imprecisa",
+      "correcao": "O livro não diz \"nunca\": diz que as decisões do arquiteto às vezes nunca chegam aos times e que as decisões dos times que mudam a arquitetura raramente voltam ao arquiteto. Sugestão: \"Algumas decisões do arquiteto nunca chegam ao time, e o que o time descobre escrevendo o código raramente volta para o arquiteto.\"",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 2, Architecture Versus Design: \"decisions an architect makes sometimes never make it to the development teams, and decisions development teams make that change the architecture rarely get back to the architect\""
+    },
+    {
+      "fala": 29,
+      "afirmacao": "A proposta deles é que a comunicação vá nos dois sentidos, com arquiteto e desenvolvedores trabalhando lado a lado, no mesmo time.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 2: relação bidirecional, arquiteto e desenvolvedores no mesmo time virtual"
+    },
+    {
+      "fala": 31,
+      "afirmacao": "uma frase que a matéria atribui à GFT, a empresa que trabalhou com o Itaú. Os agentes de IA cuidam das tarefas repetitivas, da análise, da geração de código e da validação, enquanto as equipes especialistas mantêm as decisões técnicas, a arquitetura e a governança.",
+      "veredito": "correta",
+      "fonte": "PYMNTS, 2/11/2026: GFT disse que \"the agents handle repetitive tasks, analysis, code generation and validation\", com equipes especialistas mantendo decisões técnicas, arquitetura e governança"
+    },
+    {
+      "fala": 33,
+      "afirmacao": "O livro lista oito expectativas sobre quem ocupa esse papel. Tomar decisões de arquitetura. Analisar continuamente a arquitetura. Manter-se atualizado com as tendências. Garantir que as decisões sejam seguidas. Ter exposição e experiência diversas. Conhecer o domínio do negócio. Ter habilidades interpessoais. E entender e navegar a política da organização.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 1, Expectations of an Architect (as oito expectativas)"
+    },
+    {
+      "fala": 37,
+      "afirmacao": "Cada um deles vai questionar a tua decisão, e não por maldade. Por isso o arquiteto precisa justificar as decisões, negociar e convencer.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 1, Understand and Navigate Politics: quase toda decisão do arquiteto será questionada, daí a necessidade de habilidades de negociação"
+    },
+    {
+      "fala": 39,
+      "afirmacao": "Isso conversa com a segunda lei do livro: o porquê é mais importante do que o como. Qualquer pessoa [...] consegue olhar o código e descobrir como ele funciona. O que se perde é o porquê.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 1, Second Law: \"Why is more important than how\""
+    },
+    {
+      "fala": 41,
+      "afirmacao": "O livro trata isso como parte do que eles chamam de pensamento arquitetural: entender os direcionadores de negócio e traduzir isso nas características que o sistema precisa ter.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 2, Architectural Thinking / Understanding Business Drivers"
+    },
+    {
+      "fala": 45,
+      "afirmacao": "O livro tem um exemplo ótimo. Imagina um sistema de leilão. Tem um serviço que recebe os lances, e vários outros que precisam desses lances: um que registra, um que acompanha, um que faz análise. [...] o produtor publica os lances num tópico [...] ou numa fila separada para cada consumidor?",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 2, Analyzing Trade-Offs (Bid Producer, Bid Capture, Bid Tracking, Bid Analytics; tópico vs. filas)"
+    },
+    {
+      "fala": 47,
+      "afirmacao": "Com o tópico, se amanhã aparecer um consumidor novo, ele só assina o tópico, e o produtor nem fica sabendo. Isso é extensibilidade. [...] Qualquer serviço pode assinar o tópico e ler os lances, o que é um problema de segurança e de acesso aos dados. Todos os consumidores precisam aceitar o mesmo contrato de dados. E fica mais difícil monitorar quantas mensagens estão esperando e escalar cada consumidor de forma independente.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 2: vantagem do tópico (extensibilidade); desvantagens (acesso a dados e segurança, contratos homogêneos, monitoramento e escalabilidade programática)"
+    },
+    {
+      "fala": 49,
+      "afirmacao": "Com fila, cada consumidor pode ter o seu contrato, você monitora e escala cada fila separadamente, e controla quem recebe o quê. Em troca, quando aparece um consumidor novo, o produtor precisa ser alterado para mandar para mais uma fila.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 2: vantagens das filas (contratos heterogêneos, monitoramento, segurança) e perda de extensibilidade"
+    },
+    {
+      "fala": 55,
+      "afirmacao": "Uma das ideias do livro é que o arquiteto precisa de amplitude técnica, e não só de profundidade. O desenvolvedor costuma investir em saber muito sobre poucas coisas. O arquiteto precisa saber um pouco sobre muitas coisas, o suficiente para saber que existem várias soluções e quais são os prós e contras de cada uma.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 2, Technical Breadth (pirâmide do conhecimento)"
+    },
+    {
+      "fala": 57,
+      "afirmacao": "Se o arquiteto pega a parte crítica do código para ele, vira o gargalo do time [...]. O livro sugere deixar o caminho crítico com o time e manter a mão no código de outras formas: provas de conceito, correção de bugs, histórias de débito técnico, automação e revisão de código.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., cap. 2, Balancing Architecture and Hands-On Coding (bottleneck trap e as formas de continuar programando)"
+    },
+    {
+      "fala": 60,
+      "afirmacao": "arquitetura não é só desenho de caixinha. É estrutura, características, decisões e princípios. [...] o arquiteto não só decide. Ele analisa, acompanha se a decisão está sendo seguida, conhece o negócio, conversa com gente e navega a política. Terceiro: tudo é trade-off. [...] E quarto: o porquê vale mais que o como.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, FoSA, 1ª ed., caps. 1 e 2 (resumo consistente com as falas 17, 27, 33 e 39)"
+    }
+  ]
+}
