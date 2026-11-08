@@ -1,0 +1,25 @@
+# Avaliação combinada do Lucas e de mais 3 amigos que ouviram o episódio.
+episodio: sw-001
+ouvido_em: 2026-11-07
+nota: 4.5
+
+gostei:
+  - Naturalidade da conversa na maior parte do episódio.
+  - Espontaneidade do Davi e da Helena.
+
+nao_gostei:
+  - >-
+    Em alguns trechos não dá para saber quem fala, se o Davi ou a Helena. As
+    vozes soam como dois homens com timbre parecido e, em pouquíssimos
+    momentos, parece haver três pessoas no episódio.
+
+erros_encontrados: []
+
+desafio:
+  feito: false
+  link_artefato: ""
+
+sugestoes_para_proximos:
+  - >-
+    Em todas as sagas, garantir que as vozes das personas sejam fáceis de
+    distinguir, para que se saiba sempre quem está falando.
