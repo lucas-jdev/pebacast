@@ -42,7 +42,12 @@ episodios:
     referencias:
       - fonte: fosa
         capitulos: [3]
-    referencias_verificadas: false
+    # Conferido em 2026-11-08 por resumos independentes do cap. 3 ("Modularity") e não no
+    # livro: coesão (tipos e LCOM), acoplamento aferente/eferente, abstração, instabilidade,
+    # distância da sequência principal, conascência estática e dinâmica, propriedades da
+    # conascência (força, localidade, grau) e regras para reduzi-la. O revisor continua
+    # reprovando atribuições que não conseguir confirmar.
+    referencias_verificadas: true
     desafio: >-
       Pegue dois módulos de um sistema que você mantém, classifique a
       conascência mais forte entre eles e proponha uma mudança que a

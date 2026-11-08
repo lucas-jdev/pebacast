@@ -51,7 +51,7 @@ Os testes usam provedores falsos e não chamam nenhuma API. Só o teste de expor
 
 ## Curadoria
 
-Todo episódio aponta livro e capítulo em `referencias`. O campo `referencias_verificadas` só vira `true` depois de conferir os capítulos no livro. Com `exigir_referencias_verificadas: true` em `config/pipeline.yaml`, episódios não verificados não são gerados.
+Todo episódio aponta livro e capítulo em `referencias`. O campo `referencias_verificadas` só vira `true` depois de conferir os capítulos no livro ou, sem acesso a ele, em pelo menos duas fontes secundárias independentes que concordem entre si. Nesse caso, um comentário no YAML registra o que foi conferido e onde. Com `exigir_referencias_verificadas: true` em `config/pipeline.yaml`, episódios não verificados não são gerados.
 
 ## Feedback
 
