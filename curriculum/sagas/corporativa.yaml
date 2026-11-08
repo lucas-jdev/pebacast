@@ -1,0 +1,83 @@
+id: corporativa
+nome: Arquitetura Corporativa
+pergunta_central: Como a tecnologia sustenta a estratégia da organização?
+expert: otavio
+
+referencias_base:
+  - id: elevator
+    titulo: "The Software Architect Elevator: Redefining the Architect's Role in the Digital Enterprise"
+    autores: [Gregor Hohpe]
+    edicao: 1ª edição (2020)
+    tipo: livro
+  - id: ea-strategy
+    titulo: "Enterprise Architecture as Strategy: Creating a Foundation for Business Execution"
+    autores: [Jeanne W. Ross, Peter Weill, David C. Robertson]
+    edicao: 1ª edição (2006)
+    tipo: livro
+  - id: togaf
+    titulo: The TOGAF Standard
+    autores: [The Open Group]
+    edicao: 10ª edição (2022)
+    url: https://www.opengroup.org/togaf
+    tipo: norma
+
+episodios:
+  - id: co-001
+    titulo: "O elevador do arquiteto: da sala da diretoria à sala de máquinas"
+    objetivos:
+      - Explicar o papel do arquiteto corporativo na ligação entre estratégia e tecnologia
+      - Diferenciar arquitetura corporativa de governança burocrática
+      - Reconhecer o arquiteto que só circula num andar da organização
+    pre_requisitos: []
+    referencias:
+      - fonte: elevator
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma decisão estratégica recente da sua empresa e descreva o
+      impacto dela no sistema que você mantém. Anote quem fez essa ponte, ou
+      se ninguém fez.
+
+  - id: co-002
+    titulo: "Modelo operacional: a estratégia que a arquitetura sustenta"
+    objetivos:
+      - Classificar um modelo operacional pelos eixos de integração e padronização
+      - Relacionar o modelo operacional com as escolhas de arquitetura
+      - Reconhecer o desalinhamento entre a estratégia declarada e os sistemas existentes
+    pre_requisitos: [co-001]
+    referencias:
+      - fonte: ea-strategy
+        capitulos: [2]
+    referencias_verificadas: false
+    desafio: >-
+      Classifique a sua empresa num dos quatro modelos operacionais e aponte
+      um sistema que reforça essa escolha e outro que a contradiz.
+
+  - id: co-003
+    titulo: "Mapa de capacidades de negócio"
+    objetivos:
+      - Definir capacidade de negócio e diferenciá-la de processo e de sistema
+      - Montar um mapa de capacidades de primeiro nível
+      - Usar o mapa para enxergar sobreposições no portfólio de aplicações
+    pre_requisitos: [co-001]
+    referencias:
+      - fonte: togaf
+    referencias_verificadas: false
+    desafio: >-
+      Monte o mapa de capacidades de primeiro nível da sua empresa, com no
+      máximo dez capacidades, e indique quais sistemas sustentam cada uma.
+      Marque as capacidades com mais de um sistema fazendo a mesma coisa.
+
+  - id: co-004
+    titulo: "Princípios de arquitetura que alguém usa"
+    objetivos:
+      - Escrever um princípio de arquitetura com justificativa e implicações
+      - Diferenciar princípio de regra e de preferência pessoal
+      - Usar os princípios para destravar decisões, em vez de bloqueá-las
+    pre_requisitos: [co-002]
+    referencias:
+      - fonte: togaf
+    referencias_verificadas: false
+    desafio: >-
+      Escreva três princípios de arquitetura para o seu time, cada um com
+      uma justificativa e uma implicação concreta. Teste cada um contra uma
+      decisão recente.

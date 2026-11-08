@@ -1,0 +1,103 @@
+id: sistemas
+nome: Arquitetura de Sistemas
+pergunta_central: Como as partes se comportam juntas, principalmente quando algo falha?
+expert: rafael
+
+referencias_base:
+  - id: ddia
+    titulo: Designing Data-Intensive Applications
+    autores: [Martin Kleppmann]
+    edicao: 1ª edição (2017)
+    tipo: livro
+  - id: release-it
+    titulo: "Release It!: Design and Deploy Production-Ready Software"
+    autores: [Michael T. Nygard]
+    edicao: 2ª edição (2018)
+    tipo: livro
+  - id: falacias
+    titulo: Fallacies of Distributed Computing Explained
+    autores: [Arnon Rotem-Gal-Oz]
+    ano: 2006
+    tipo: artigo
+
+episodios:
+  - id: si-001
+    titulo: "Tudo falha: as falácias da computação distribuída"
+    objetivos:
+      - Listar as falácias da computação distribuída e o que cada uma esconde
+      - Diferenciar falha parcial de falha total
+      - Reconhecer por que rede, relógio e processo não são confiáveis
+    pre_requisitos: []
+    referencias:
+      - fonte: ddia
+        capitulos: [8]
+      - fonte: falacias
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma chamada de rede de um sistema que você mantém e escreva o
+      que acontece se ela demorar trinta segundos, falhar no meio ou for
+      executada duas vezes.
+
+  - id: si-002
+    titulo: "Replicação: cópias que discordam"
+    objetivos:
+      - Comparar replicação com líder único, com vários líderes e sem líder
+      - Entender o atraso de replicação e as anomalias que ele causa
+      - Escolher quando ler da réplica é aceitável
+    pre_requisitos: [si-001]
+    referencias:
+      - fonte: ddia
+        capitulos: [5]
+    referencias_verificadas: false
+    desafio: >-
+      Encontre uma tela de um sistema que você conhece que lê de uma réplica,
+      ou poderia ler, e descreva o que o usuário veria se a réplica estivesse
+      dez segundos atrasada.
+
+  - id: si-003
+    titulo: "Particionamento: dividir sem perder o controle"
+    objetivos:
+      - Comparar particionamento por faixa de chave e por hash
+      - Reconhecer partições quentes e como evitá-las
+      - Entender o custo de rebalancear e de consultar várias partições
+    pre_requisitos: [si-001]
+    referencias:
+      - fonte: ddia
+        capitulos: [6]
+    referencias_verificadas: false
+    desafio: >-
+      Escolha a maior tabela de um sistema que você mantém e proponha uma
+      chave de particionamento. Aponte qual consulta ficaria mais cara com
+      essa escolha.
+
+  - id: si-004
+    titulo: "Consistência e consenso"
+    objetivos:
+      - Definir linearizabilidade e diferenciá-la de consistência eventual
+      - Entender o que o teorema CAP diz e o que ele não diz
+      - Reconhecer quando um problema exige consenso
+    pre_requisitos: [si-002]
+    referencias:
+      - fonte: ddia
+        capitulos: [9]
+    referencias_verificadas: false
+    desafio: >-
+      Liste três dados de um sistema que você mantém e decida, para cada um,
+      se ele precisa de consistência forte ou se aceita consistência
+      eventual. Justifique com o que o usuário perderia.
+
+  - id: si-005
+    titulo: "Timeouts, retentativas e circuit breakers"
+    objetivos:
+      - Reconhecer os antipadrões de estabilidade, como reações em cadeia e integrações sem timeout
+      - Aplicar timeout, retentativa com limite e circuit breaker
+      - Entender por que retentativa sem idempotência multiplica o problema
+    pre_requisitos: [si-001]
+    referencias:
+      - fonte: release-it
+        capitulos: [4, 5]
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma integração de um sistema que você mantém e confira o
+      timeout, a política de retentativa e o que acontece quando o outro
+      lado fica fora do ar por dez minutos.

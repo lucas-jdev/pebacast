@@ -1,0 +1,105 @@
+id: seguranca
+nome: Arquitetura de Segurança
+pergunta_central: Quem pode fazer o quê, e o que acontece quando alguém tenta o que não deveria?
+expert: yasmin
+
+referencias_base:
+  - id: shostack
+    titulo: "Threat Modeling: Designing for Security"
+    autores: [Adam Shostack]
+    edicao: 1ª edição (2014)
+    tipo: livro
+  - id: nist-zt
+    titulo: "NIST SP 800-207: Zero Trust Architecture"
+    autores: [Scott Rose, Oliver Borchert, Stu Mitchell, Sean Connelly]
+    ano: 2020
+    url: https://csrc.nist.gov/pubs/sp/800/207/final
+    tipo: norma
+  - id: owasp-segredos
+    titulo: OWASP Secrets Management Cheat Sheet
+    autores: [OWASP]
+    url: https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+    tipo: site
+  - id: owasp-top10
+    titulo: OWASP Top 10
+    autores: [OWASP]
+    edicao: 2021
+    url: https://owasp.org/Top10/
+    tipo: site
+
+episodios:
+  - id: se-001
+    titulo: "Pensar como atacante: modelagem de ameaças"
+    objetivos:
+      - Responder às quatro perguntas da modelagem de ameaças
+      - Desenhar um diagrama de fluxo de dados com as fronteiras de confiança
+      - Reconhecer por que a modelagem precisa acontecer no desenho, e não no fim
+    pre_requisitos: []
+    referencias:
+      - fonte: shostack
+        capitulos: [1]
+    referencias_verificadas: false
+    desafio: >-
+      Desenhe o fluxo de dados de uma funcionalidade que você mantém, marque
+      as fronteiras de confiança e anote o que poderia dar errado em cada
+      uma delas.
+
+  - id: se-002
+    titulo: "STRIDE na prática"
+    objetivos:
+      - Classificar ameaças nas seis categorias do STRIDE
+      - Relacionar cada categoria com a propriedade de segurança que ela viola
+      - Priorizar ameaças sem tentar resolver todas de uma vez
+    pre_requisitos: [se-001]
+    referencias:
+      - fonte: shostack
+        capitulos: [3]
+    referencias_verificadas: false
+    desafio: >-
+      Aplique o STRIDE ao fluxo que você desenhou no desafio anterior e
+      escolha a ameaça que trataria primeiro, justificando pela
+      probabilidade e pelo impacto.
+
+  - id: se-003
+    titulo: "Zero trust: identidade é o novo perímetro"
+    objetivos:
+      - Explicar os princípios da arquitetura zero trust
+      - Diferenciar a segurança baseada em perímetro da baseada em identidade
+      - Aplicar o menor privilégio no acesso entre serviços
+    pre_requisitos: [se-001]
+    referencias:
+      - fonte: nist-zt
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um serviço interno que você mantém e liste quem consegue
+      chamá-lo hoje. Proponha como restringir o acesso só a quem precisa.
+
+  - id: se-004
+    titulo: "Segredos: gestão, rotação e vazamento"
+    objetivos:
+      - Identificar onde os segredos de um sistema ficam guardados
+      - Aplicar gestão centralizada e rotação de segredos
+      - Planejar a resposta a um segredo vazado
+    pre_requisitos: [se-001]
+    referencias:
+      - fonte: owasp-segredos
+    referencias_verificadas: false
+    desafio: >-
+      Faça um inventário dos segredos de um sistema que você mantém: onde
+      ficam, quem tem acesso e quando foram trocados pela última vez. Escreva
+      o que faria se um deles vazasse hoje.
+
+  - id: se-005
+    titulo: "Segurança no ciclo de desenvolvimento"
+    objetivos:
+      - Reconhecer as categorias de risco mais comuns em aplicações web
+      - Posicionar análise estática, dependências e revisão no ciclo de desenvolvimento
+      - Equilibrar o bloqueio automático com o tempo de resposta do time
+    pre_requisitos: [se-002]
+    referencias:
+      - fonte: owasp-top10
+    referencias_verificadas: false
+    desafio: >-
+      Escolha três categorias do OWASP Top 10 e confira se o pipeline do seu
+      time detecta alguma delas automaticamente. Proponha uma verificação
+      para a que não é detectada.

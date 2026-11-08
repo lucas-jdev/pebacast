@@ -1,0 +1,129 @@
+id: dados
+nome: Arquitetura de Dados e Informação
+pergunta_central: Como a informação é modelada, governada e flui pela organização?
+expert: camila
+
+referencias_base:
+  - id: ddia
+    titulo: Designing Data-Intensive Applications
+    autores: [Martin Kleppmann]
+    edicao: 1ª edição (2017)
+    tipo: livro
+  - id: dmbok
+    titulo: "DAMA-DMBOK: Data Management Body of Knowledge"
+    autores: [DAMA International]
+    edicao: 2ª edição (2017)
+    tipo: livro
+  - id: fde
+    titulo: Fundamentals of Data Engineering
+    autores: [Joe Reis, Matt Housley]
+    edicao: 1ª edição (2022)
+    tipo: livro
+  - id: data-mesh
+    titulo: "Data Mesh: Delivering Data-Driven Value at Scale"
+    autores: [Zhamak Dehghani]
+    edicao: 1ª edição (2022)
+    tipo: livro
+  - id: lgpd
+    titulo: Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018)
+    autores: [Brasil]
+    ano: 2018
+    url: https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm
+    tipo: lei
+
+episodios:
+  - id: da-001
+    titulo: "Modelos de dados: relacional, documento e grafo"
+    objetivos:
+      - Comparar os modelos relacional, de documento e de grafo
+      - Escolher o modelo pelas relações e consultas do domínio
+      - Reconhecer o custo de forçar um domínio num modelo que não combina com ele
+    pre_requisitos: []
+    referencias:
+      - fonte: ddia
+        capitulos: [2]
+    referencias_verificadas: false
+    desafio: >-
+      Pegue uma entidade central de um sistema que você mantém e modele-a nos
+      três estilos. Diga qual consulta fica mais simples e qual fica mais
+      difícil em cada um.
+
+  - id: da-002
+    titulo: "Governança: dado sem dono é dado errado"
+    objetivos:
+      - Definir governança de dados e diferenciá-la de gestão de dados
+      - Identificar os papéis de dono e de curador do dado
+      - Reconhecer os sinais de um dado sem dono
+    pre_requisitos: [da-001]
+    referencias:
+      - fonte: dmbok
+        capitulos: [1, 3]
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um indicador que a sua empresa acompanha e descubra quem é o
+      dono da definição dele. Se ninguém souber responder, escreva a
+      definição e proponha um dono.
+
+  - id: da-003
+    titulo: "Qualidade, metadados e linhagem"
+    objetivos:
+      - Medir a qualidade de um dado por dimensões como completude, validade e atualidade
+      - Entender o papel dos metadados para encontrar e confiar num dado
+      - Rastrear a linhagem de um número até a origem
+    pre_requisitos: [da-002]
+    referencias:
+      - fonte: dmbok
+        capitulos: [12, 13]
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um número de um relatório que você usa e rastreie de onde ele
+      vem, passo a passo, até o sistema de origem. Anote cada transformação
+      no caminho.
+
+  - id: da-004
+    titulo: "O ciclo de vida do dado: da origem ao consumo"
+    objetivos:
+      - Descrever as etapas de geração, armazenamento, ingestão, transformação e consumo
+      - Diferenciar processamento em lote e em fluxo
+      - Reconhecer as preocupações que atravessam todo o ciclo, como segurança e orquestração
+    pre_requisitos: [da-001]
+    referencias:
+      - fonte: fde
+        capitulos: [2]
+    referencias_verificadas: false
+    desafio: >-
+      Desenhe o caminho de um dado da sua empresa, do momento em que é gerado
+      até o painel em que alguém o consome. Marque a etapa em que um erro
+      seria percebido mais tarde.
+
+  - id: da-005
+    titulo: "Data mesh: dado como produto"
+    objetivos:
+      - Explicar os quatro princípios do data mesh
+      - Diferenciar dado como produto de dado como subproduto
+      - Reconhecer quando a organização não está pronta para descentralizar
+    pre_requisitos: [da-002]
+    referencias:
+      - fonte: data-mesh
+        capitulos: [2, 3, 4, 5]
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um conjunto de dados que outras áreas consomem e escreva o que
+      faltaria para tratá-lo como produto: dono, documentação, garantia de
+      qualidade e forma de acesso.
+
+  - id: da-006
+    titulo: "Privacidade desde a modelagem: a LGPD na arquitetura"
+    objetivos:
+      - Aplicar os princípios da LGPD, como finalidade, necessidade e minimização
+      - Identificar dados pessoais e sensíveis num modelo de dados
+      - Projetar a privacidade desde a concepção, e não como remendo
+    pre_requisitos: [da-002]
+    referencias:
+      - fonte: lgpd
+        artigos: [5, 6, 46]
+    referencias_verificadas: false
+    desafio: >-
+      Pegue uma tabela com dados pessoais de um sistema que você mantém e
+      marque, coluna por coluna, para que ela serve. Aponte uma coluna que
+      poderia ser removida, anonimizada ou guardada por menos tempo.

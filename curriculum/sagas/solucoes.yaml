@@ -1,0 +1,89 @@
+id: solucoes
+nome: Arquitetura de Soluções
+pergunta_central: Quais peças resolvem este problema de negócio e como elas se conectam?
+expert: beatriz
+
+referencias_base:
+  - id: rozanski
+    titulo: "Software Systems Architecture: Working with Stakeholders Using Viewpoints and Perspectives"
+    autores: [Nick Rozanski, Eoin Woods]
+    edicao: 2ª edição (2011)
+    tipo: livro
+  - id: eip
+    titulo: "Enterprise Integration Patterns: Designing, Building, and Deploying Messaging Solutions"
+    autores: [Gregor Hohpe, Bobby Woolf]
+    edicao: 1ª edição (2003)
+    tipo: livro
+  - id: wardley
+    titulo: Wardley Maps
+    autores: [Simon Wardley]
+    ano: 2018
+    tipo: livro
+  - id: c4
+    titulo: The C4 model for visualising software architecture
+    autores: [Simon Brown]
+    url: https://c4model.com
+    tipo: site
+
+episodios:
+  - id: sl-001
+    titulo: "Do problema à solução: o que faz um arquiteto de soluções"
+    objetivos:
+      - Diferenciar arquitetura de soluções de arquitetura de software e corporativa
+      - Identificar os stakeholders de uma iniciativa e o que preocupa cada um
+      - Reconhecer quando um requisito é, na verdade, uma solução disfarçada
+    pre_requisitos: []
+    referencias:
+      - fonte: rozanski
+        capitulos: [5, 9]
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma iniciativa em andamento na sua empresa, liste os
+      stakeholders e escreva, para cada um, a pergunta que ele faria sobre
+      a solução. Marque as perguntas que ninguém respondeu ainda.
+
+  - id: sl-002
+    titulo: "Comprar, construir ou integrar"
+    objetivos:
+      - Separar o que diferencia o negócio do que é commodity
+      - Usar o estágio de evolução de um componente para decidir entre comprar e construir
+      - Reconhecer o custo escondido de customizar um produto comprado
+    pre_requisitos: [sl-001]
+    referencias:
+      - fonte: wardley
+    referencias_verificadas: false
+    desafio: >-
+      Liste cinco componentes de um sistema que você conhece e classifique
+      cada um como diferencial ou commodity. Aponte um que foi construído
+      em casa e poderia ter sido comprado, ou o contrário.
+
+  - id: sl-003
+    titulo: "Integração entre sistemas: os quatro estilos"
+    objetivos:
+      - Comparar transferência de arquivos, banco compartilhado, chamada remota e mensageria
+      - Escolher o estilo de integração pelo acoplamento e pela latência aceitáveis
+      - Reconhecer o banco compartilhado como integração, e não como atalho
+    pre_requisitos: [sl-001]
+    referencias:
+      - fonte: eip
+        capitulos: [2]
+    referencias_verificadas: false
+    desafio: >-
+      Desenhe as integrações de um sistema que você mantém e classifique
+      cada uma num dos quatro estilos. Escolha uma e explique o que mudaria
+      se ela usasse outro estilo.
+
+  - id: sl-004
+    titulo: "Diagramas que comunicam: contexto e contêineres com C4"
+    objetivos:
+      - Desenhar um diagrama de contexto e um de contêineres
+      - Escolher o nível de detalhe certo para cada público
+      - Evitar diagramas de caixas e setas sem legenda
+    pre_requisitos: [sl-001]
+    referencias:
+      - fonte: c4
+    referencias_verificadas: false
+    desafio: >-
+      Desenhe o diagrama de contexto de um sistema que você mantém, com os
+      usuários e os sistemas externos, e mostre para alguém de fora do time.
+      Anote o que precisou explicar em voz alta.

@@ -1,0 +1,99 @@
+id: infraestrutura
+nome: Arquitetura de Infraestrutura
+pergunta_central: Onde e como tudo isso roda, com qual custo e confiabilidade?
+expert: jorge
+
+referencias_base:
+  - id: iac
+    titulo: "Infrastructure as Code: Dynamic Systems for the Cloud Age"
+    autores: [Kief Morris]
+    edicao: 2ª edição (2020)
+    tipo: livro
+  - id: sre
+    titulo: "Site Reliability Engineering: How Google Runs Production Systems"
+    autores: [Betsy Beyer, Chris Jones, Jennifer Petoff, Niall Richard Murphy]
+    edicao: 1ª edição (2016)
+    url: https://sre.google/sre-book/table-of-contents/
+    tipo: livro
+  - id: finops
+    titulo: "Cloud FinOps: Collaborative, Real-Time Cloud Value"
+    autores: [J. R. Storment, Mike Fuller]
+    edicao: 2ª edição (2023)
+    tipo: livro
+
+episodios:
+  - id: in-001
+    titulo: "Infraestrutura como código: o que não está em código não existe"
+    objetivos:
+      - Explicar os benefícios da infraestrutura definida em código
+      - Diferenciar infraestrutura configurada à mão de infraestrutura reproduzível
+      - Reconhecer o desvio de configuração e como evitá-lo
+    pre_requisitos: []
+    referencias:
+      - fonte: iac
+        capitulos: [1]
+    referencias_verificadas: false
+    desafio: >-
+      Liste três recursos de infraestrutura que o seu time usa e diga quais
+      estão definidos em código. Para um que não está, escreva o que seria
+      preciso para recriá-lo do zero.
+
+  - id: in-002
+    titulo: "SLOs: quanta confiabilidade é suficiente"
+    objetivos:
+      - Diferenciar SLI, SLO e SLA
+      - Usar o orçamento de erro para equilibrar confiabilidade e velocidade
+      - Reconhecer por que 100% de disponibilidade é a meta errada
+    pre_requisitos: [in-001]
+    referencias:
+      - fonte: sre
+        capitulos: [3, 4]
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um serviço que você mantém, defina um SLI e um SLO para ele e
+      calcule quantos minutos de indisponibilidade por mês esse SLO permite.
+
+  - id: in-003
+    titulo: "Monitoramento de plataforma: alertar sem afogar o time"
+    objetivos:
+      - Aplicar os quatro sinais de ouro (latência, tráfego, erros e saturação)
+      - Diferenciar alerta que exige ação de informação para painel
+      - Reconhecer o custo de coletar e guardar tudo
+    pre_requisitos: [in-002]
+    referencias:
+      - fonte: sre
+        capitulos: [6]
+    referencias_verificadas: false
+    desafio: >-
+      Revise os alertas de um serviço que você mantém e marque os que
+      exigem que alguém faça algo agora. Proponha o que fazer com os outros.
+
+  - id: in-004
+    titulo: "Backup não é recuperação"
+    objetivos:
+      - Diferenciar backup de capacidade de restaurar
+      - Entender os objetivos de tempo e de ponto de recuperação
+      - Reconhecer por que um plano de recuperação que nunca foi testado não é plano
+    pre_requisitos: [in-001]
+    referencias:
+      - fonte: sre
+        capitulos: [26]
+    referencias_verificadas: false
+    desafio: >-
+      Descubra quando o banco de dados de um sistema que você mantém foi
+      restaurado pela última vez a partir do backup. Se nunca foi, escreva
+      o passo a passo de um teste de restauração.
+
+  - id: in-005
+    titulo: "FinOps: a fatura também é arquitetura"
+    objetivos:
+      - Explicar as fases de informar, otimizar e operar do FinOps
+      - Relacionar decisões de arquitetura com o custo de nuvem
+      - Atribuir custo a times e produtos para que alguém se responsabilize
+    pre_requisitos: [in-001]
+    referencias:
+      - fonte: finops
+    referencias_verificadas: false
+    desafio: >-
+      Encontre os três maiores itens de custo de infraestrutura do seu time
+      e, para cada um, aponte a decisão de arquitetura que o explica.
