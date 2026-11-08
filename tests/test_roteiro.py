@@ -99,7 +99,7 @@ def _revisao(roteiro: dict, aprovado: bool = True, veredito: str = "correta") ->
     return {
         "aprovado": aprovado,
         "roteiro_sha256": hash_do_roteiro(roteiro),
-        "afirmacoes": [{"fala": 1, "afirmacao": "toda decisão é trade-off", "veredito": veredito}],
+        "afirmacoes": [{"fala": 1, "afirmacao": "palavra palavra", "veredito": veredito}],
     }
 
 
@@ -300,6 +300,32 @@ def test_afirmacao_apontando_para_fala_inexistente(projeto):
     revisao["afirmacoes"][0]["fala"] = 99
     _escrever_episodio(projeto, "sw-001", revisoes=[revisao])
     assert any("fala inexistente" in p for p in _problemas(projeto, "sw-001"))
+
+
+def test_afirmacao_que_nao_esta_na_fala_indicada(projeto):
+    roteiro = _roteiro("sw-001")
+    roteiro["falas"][2]["texto"] += " Toda decisão é trade-off."
+    revisao = _revisao(roteiro)
+    revisao["afirmacoes"][0].update(fala=1, afirmacao="toda decisão é trade-off")
+    _escrever_episodio(projeto, "sw-001", revisoes=[revisao])
+    assert any("não aparece na fala 1" in p for p in _problemas(projeto, "sw-001"))
+
+
+def test_afirmacao_com_omissao_e_pontuacao_diferente_nas_pontas(projeto):
+    roteiro = _roteiro("sw-001")
+    roteiro["falas"][1]["texto"] = "Primeiro: tudo é trade-off. Depois vem   o resto. E o porquê vale mais que o como, sempre."
+    revisao = _revisao(roteiro)
+    revisao["afirmacoes"][0]["afirmacao"] = "Tudo é trade-off. [...] e o porquê vale mais que o como."
+    _escrever_episodio(projeto, "sw-001", roteiro=roteiro, revisoes=[revisao])
+    assert not any("não aparece" in p for p in _problemas(projeto, "sw-001"))
+
+
+def test_so_a_revisao_final_confere_o_trecho(projeto):
+    roteiro = _roteiro("sw-001")
+    antiga = _revisao(roteiro, aprovado=False, veredito="imprecisa")
+    antiga["afirmacoes"][0]["afirmacao"] = "frase de uma versão anterior do roteiro"
+    _escrever_episodio(projeto, "sw-001", revisoes=[antiga, _revisao(roteiro)])
+    assert _problemas(projeto, "sw-001") == []
 
 
 # Linha de comando

@@ -21,6 +21,10 @@ VEREDITOS = frozenset({"correta", "incorreta", "imprecisa", "nao_verificavel"})
 TIPOS_DE_CONTEXTO = frozenset({"noticia", "hipotetico"})
 AVISO_IA = re.compile(r"\bIA\b|intelig[êe]ncia artificial", re.IGNORECASE)
 PALAVRA = re.compile(r"\w+")
+# O revisor corta a citação com "[...]" quando pula parte da fala.
+OMISSAO = re.compile(r"\[\s*(?:\.\.\.|…)\s*\]")
+ESPACOS = re.compile(r"\s+")
+PONTUACAO_NAS_PONTAS = " .,;:!?…\"'“”‘’()"
 # O apresentador apresenta o podcast e a pessoa convidada logo no começo, antes de entrar no tema.
 FALAS_DA_APRESENTACAO = 3
 
@@ -244,7 +248,26 @@ def _validar_revisao_final(nome: str, revisao: dict[str, Any], roteiro: Any) -> 
         fala = afirmacao.get("fala") if isinstance(afirmacao, dict) else None
         if not isinstance(fala, int) or isinstance(fala, bool) or not 0 <= fala < len(falas):
             problemas.append(f"{prefixo}: afirmação {indice} aponta para uma fala inexistente ({fala!r})")
+        elif not _trecho_esta_na_fala(afirmacao.get("afirmacao"), falas[fala]):
+            problemas.append(
+                f"{prefixo}: afirmação {indice} não aparece na fala {fala}; "
+                "o índice da fala ou o trecho citado está errado"
+            )
     return problemas
+
+
+def _trecho_esta_na_fala(trecho: Any, fala: Any) -> bool:
+    """Cada parte do trecho, separada por "[...]", precisa estar no texto da fala indicada."""
+    texto = fala.get("texto") if isinstance(fala, dict) else None
+    if not _texto_preenchido(trecho) or not isinstance(texto, str):
+        return False
+    partes = [_normalizar(parte) for parte in OMISSAO.split(trecho)]
+    partes = [parte for parte in partes if parte]
+    return bool(partes) and all(parte in _normalizar(texto) for parte in partes)
+
+
+def _normalizar(texto: str) -> str:
+    return ESPACOS.sub(" ", texto).strip(PONTUACAO_NAS_PONTAS).casefold()
 
 
 def _texto_preenchido(valor: Any) -> bool:

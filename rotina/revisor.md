@@ -8,7 +8,7 @@ Você **não reescreve** o roteiro e não edita nenhum arquivo além do relatór
 
 Na pasta do episódio:
 
-- `roteiro.json`: o diálogo. As falas são numeradas a partir de 0, na ordem da lista.
+- `roteiro.json`: o diálogo. As falas são numeradas a partir de 0, na ordem da lista. Confira o índice de cada afirmação: a validação reprova o relatório se o trecho citado não estiver na fala indicada.
 - `noticia.json`: a notícia ou o cenário hipotético usado no episódio.
 
 No currículo, `curriculum/sagas/*.yaml`, o episódio com o mesmo `id` traz os objetivos e as referências, e `referencias_base` traz os dados de cada obra.
@@ -47,7 +47,7 @@ Grave o relatório no caminho que pediram, `revisoes/N.json`:
   "afirmacoes": [
     {
       "fala": 12,
-      "afirmacao": "o trecho, como aparece no roteiro",
+      "afirmacao": "o trecho copiado literalmente da fala; use [...] para pular partes",
       "veredito": "imprecisa",
       "correcao": "o que deveria ser dito (obrigatório se o veredito não for correta)",
       "fonte": "onde você confirmou: obra, URL ou conhecimento consolidado"
