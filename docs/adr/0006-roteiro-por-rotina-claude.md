@@ -58,7 +58,7 @@ Positivas:
 Negativas:
 
 - Roteirista e revisor continuam sendo o mesmo modelo. Sem contexto, o revisor perde o viés de quem escreveu, mas não as lacunas de conhecimento que os dois compartilham. Ele não tem acesso ao livro, então a regra de tratar como `imprecisa` uma atribuição que não dá para confirmar é a principal defesa.
-- Se a rotina não rodar, ninguém fica sabendo, porque o Actions só reage a push. Falta um workflow agendado que abra uma issue quando passar mais de 36 horas sem commit em `episodios/`.
+- Se a rotina não rodar, o Actions não percebe, porque só reage a push. O workflow `watchdog.yml` cobre isso: a cada 6 horas, abre uma issue se passar mais de 36 horas sem roteiro commitado em `episodios/` e a fecha quando a rotina volta.
 - O push direto na `main` é aceitável no MVP. Depois de validado, o fluxo pode passar por PR.
 - A rotina consome o plano do Claude. O Lucas aceitou esse custo.
 

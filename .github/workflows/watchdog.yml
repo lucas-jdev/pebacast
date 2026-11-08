@@ -1,0 +1,38 @@
+# Watchdog da rotina (ADR 0006): o Actions só reage a push, então uma rotina que
+# para de rodar ficaria em silêncio. Abre uma issue após 36 h sem roteiro novo
+# e fecha quando a rotina volta.
+name: Watchdog da rotina
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TITULO: "Rotina do roteirista parada"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Verificar o último roteiro
+        run: |
+          scripts/watchdog.sh 36 > resultado.txt
+          estado="$(head -n 1 resultado.txt)"
+          aberta="$(gh issue list --state open --search "\"$TITULO\" in:title" --json number --jq '.[0].number // empty')"
+
+          if [ "$estado" = parada ] && [ -z "$aberta" ]; then
+            tail -n +2 resultado.txt > corpo.md
+            gh issue create --title "$TITULO" --body-file corpo.md
+          elif [ "$estado" = ok ] && [ -n "$aberta" ]; then
+            gh issue close "$aberta" --comment "A rotina voltou a commitar roteiros."
+          fi
