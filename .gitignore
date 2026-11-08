@@ -6,5 +6,6 @@ experimentos/teste-vozes/saida/
 # Faixas de terceiros só entram cifradas (.gpg). Ver docs/vinheta.md.
 assets/*
 !assets/*.gpg
+!assets/capa.svg
 experimentos/teste-vozes/vozes-piper/
 _site/

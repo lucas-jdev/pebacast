@@ -176,19 +176,29 @@ def publicar_pendentes(
 def gerar_feed(projeto: Projeto) -> str:
     config = projeto.config()
     meta = config["feed"]
-    url_feed = meta["url_site"].rstrip("/") + "/" + ARQUIVO_FEED
+    url_site = meta["url_site"].rstrip("/") + "/"
+    url_feed = url_site + ARQUIVO_FEED
+    url_capa = url_site + meta["capa"]
 
     ET.register_namespace("itunes", ITUNES)
     ET.register_namespace("atom", ATOM)
     rss = ET.Element("rss", {"version": "2.0"})
     canal = ET.SubElement(rss, "channel")
     _sub(canal, "title", meta["titulo"])
-    _sub(canal, "link", meta["url_repositorio"])
+    _sub(canal, "link", url_site)
     _sub(canal, "description", meta["descricao"].strip())
     _sub(canal, "language", meta["idioma"])
     _sub(canal, "copyright", f"{meta['autor']}, {meta['licenca']}")
     ET.SubElement(canal, f"{{{ATOM}}}link", {"href": url_feed, "rel": "self", "type": "application/rss+xml"})
+    imagem = ET.SubElement(canal, "image")
+    _sub(imagem, "url", url_capa)
+    _sub(imagem, "title", meta["titulo"])
+    _sub(imagem, "link", url_site)
     _sub(canal, f"{{{ITUNES}}}author", meta["autor"])
+    dono = ET.SubElement(canal, f"{{{ITUNES}}}owner")
+    _sub(dono, f"{{{ITUNES}}}name", meta["autor"])
+    _sub(dono, f"{{{ITUNES}}}email", meta["email_dono"])
+    ET.SubElement(canal, f"{{{ITUNES}}}image", {"href": url_capa})
     _sub(canal, f"{{{ITUNES}}}explicit", "false")
     ET.SubElement(canal, f"{{{ITUNES}}}category", {"text": meta["categoria"]})
 

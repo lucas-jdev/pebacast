@@ -1,6 +1,6 @@
 # Licença do conteúdo
 
-Copyright (c) 2026 Lucas Mateus
+Copyright (c) 2026 Lucas Fernandes
 
 O código deste repositório está sob a licença MIT, descrita em [LICENSE](LICENSE). O conteúdo está sob a [Creative Commons Atribuição 4.0 Internacional (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/deed.pt_BR).
 
@@ -18,7 +18,7 @@ Todo o resto (`src/`, `tests/`, `config/`, os workflows e os scripts dos experim
 
 Cite o nome do podcast, o autor e o link para o repositório, e indique se você alterou o material. Por exemplo:
 
-> "Tudo é trade-off", episódio do Pebacast, de Lucas Mateus, sob CC BY 4.0. Disponível em https://github.com/lucas-jdev/pebacast.
+> "Tudo é trade-off", episódio do Pebacast, de Lucas Fernandes, sob CC BY 4.0. Disponível em https://github.com/lucas-jdev/pebacast.
 
 ## Material de terceiros
 

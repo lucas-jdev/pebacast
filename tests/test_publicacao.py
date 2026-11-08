@@ -138,6 +138,24 @@ def test_feed_vazio_e_valido(projeto):
     assert canal.findall("item") == []
 
 
+def test_feed_tem_capa_dono_e_link_do_site(projeto):
+    canal = ET.fromstring(gerar_feed(projeto)).find("channel")
+    itunes = "{http://www.itunes.com/dtds/podcast-1.0.dtd}"
+
+    assert canal.find("link").text == "https://x.github.io/pebacast/"
+    assert canal.find(f"{itunes}image").get("href") == "https://x.github.io/pebacast/capa.jpg"
+    assert canal.find("image/url").text == "https://x.github.io/pebacast/capa.jpg"
+    assert canal.find(f"{itunes}owner/{itunes}name").text == "Lucas"
+    assert canal.find(f"{itunes}owner/{itunes}email").text == "lucas@exemplo.com"
+
+
+def test_capa_publicada_e_quadrada_e_grande_o_bastante():
+    capa = Path(__file__).parent.parent / "site" / "capa.jpg"
+    dados = capa.read_bytes()
+    assert dados[:3] == bytes([0xFF, 0xD8, 0xFF])  # JPEG
+    assert len(dados) < 512 * 1024  # o Apple recomenda capas de até 512 KB
+
+
 class Gh:
     def __init__(self, release_existe: bool) -> None:
         self.release_existe = release_existe
