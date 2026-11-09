@@ -153,6 +153,7 @@ svg { display: block; }
   border-bottom: 1px solid var(--linha);
 }
 .topo__linha { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 66px; }
+@media (max-height: 560px) { .topo { position: static; } }
 .marca { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; }
 .marca__peba { width: 46px; height: 29px; color: var(--tinta); }
 .marca__nome { font-family: var(--serifa); font-weight: 750; font-size: 1.4rem; letter-spacing: -0.02em; }
