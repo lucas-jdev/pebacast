@@ -519,9 +519,6 @@ _PAGINA = """<!doctype html>
 <link rel="canonical" href="{url_site}">
 <link rel="alternate" type="application/rss+xml" title="{titulo}" href="{url_feed}">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..800,50&family=Instrument+Sans:wght@400..700&display=swap">
 <link rel="stylesheet" href="estilo.css">
 <script defer src="app.js"></script>
 </head>
