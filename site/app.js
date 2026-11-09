@@ -69,7 +69,7 @@
   if (chamadaParaOuvir && playDoMaisRecente) {
     chamadaParaOuvir.addEventListener("click", () => {
       if (playDoMaisRecente.closest(".player").querySelector("audio").paused) playDoMaisRecente.click();
-      playDoMaisRecente.focus();
+      setTimeout(() => playDoMaisRecente.focus({ preventScroll: true }));
     });
   }
 
