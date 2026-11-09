@@ -103,6 +103,7 @@ svg { display: block; }
 .largura { width: 100%; max-width: 1140px; margin-inline: auto; padding-inline: 24px; }
 @media (max-width: 560px) { .largura { padding-inline: 16px; } }
 
+.so-leitor { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .pular { position: absolute; left: 16px; top: -60px; background: var(--tinta); color: var(--papel); padding: 10px 14px; border-radius: 10px; z-index: 20; }
 .pular:focus { top: 12px; }
 
