@@ -3,94 +3,96 @@
   "falas": [
     {
       "persona": "davi",
-      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura de verdade, um episódio por dia. Aviso de sempre: este episódio foi gerado por inteligência artificial e revisado contra as fontes citadas. O tema de hoje é modularidade, ou seja, como saber se as partes do seu sistema estão bem separadas ou só parecem estar. E quem volta pra conversar comigo é a Helena. A Helena é arquiteta de software há quinze anos e hoje é a pessoa que o time chama antes de uma decisão difícil, não depois. Helena, bem-vinda de volta!"
-    },
-    {
-      "persona": "helena",
-      "texto": "Oi, Davi. Oi, você que está ouvindo. Aqui é a Helena, e eu adoro esse tema, porque é onde quase todo sistema começa a dar errado sem ninguém perceber."
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura de software sem decoreba. Aviso importante: este episódio foi gerado por inteligência artificial e revisado contra as fontes citadas. O tema de hoje é modularidade: como saber, com critério, se as partes do seu sistema estão bem separadas ou só parecem estar."
     },
     {
       "persona": "davi",
-      "texto": "Então vamos direto pro caso. E já aviso: o caso de hoje é hipotético. Imagine uma empresa de logística, parecida com a que eu trabalho, mas inventada. Ela tem um monólito com três módulos: pedidos, faturamento e rastreio."
+      "texto": "E pra essa conversa eu trouxe de volta a Helena. A Helena é arquiteta de software há quinze anos, começou num monólito legado de banco e hoje é a pessoa que o time chama antes de uma decisão difícil, e não depois. Helena, seja bem-vinda!"
     },
     {
       "persona": "helena",
-      "texto": "Até aqui, nada de errado. Continua, Davi."
+      "texto": "Obrigada, Davi. Oi, você que está ouvindo, aqui é a Helena. E já adianto: hoje a gente vai falar do assunto que mais derruba sistema sem fazer barulho."
     },
     {
       "persona": "davi",
-      "texto": "O status do pedido é guardado como um número inteiro. Um é criado, dois é em trânsito, três é entregue. E o faturamento, pra saber o que cobrar, lê esse número direto da tabela de pedidos. Aí um dia o time de pedidos cria um status novo, entregue parcialmente, e aproveita pra renumerar tudo. O três passa a ser entregue parcialmente, e o entregue vira quatro."
+      "texto": "Então vamos pro caso, Helena. E deixo claro pra quem está ouvindo: o caso de hoje é hipotético. Imagine uma empresa de logística, parecida com a que eu trabalho, mas inventada. Ela tem um monólito com três módulos: cotação, expedição e faturamento."
     },
     {
       "persona": "helena",
-      "texto": "E o faturamento continuou achando que três é entregue.",
-      "estilo": "com leve ironia"
+      "texto": "Um monólito com módulos. Até aqui eu não vejo crime nenhum, Davi. Continua."
     },
     {
       "persona": "davi",
-      "texto": "Exatamente, Helena. Imagina que o faturamento cobrou frete cheio de pedido que nem tinha chegado inteiro, e ninguém percebeu por três dias. Os testes de pedidos passaram. Os testes do faturamento passaram. Cada time olhou pro seu pedaço e estava tudo verde."
+      "texto": "Os três módulos calculam o peso cubado da encomenda. Pra quem não é da área: é um peso calculado a partir do volume da caixa, multiplicando as medidas por um fator de cubagem. Caixa grande e leve paga como se fosse pesada."
     },
     {
       "persona": "helena",
-      "texto": "Essa é a parte que mais me interessa. Cada pedaço estava certo sozinho, e o sistema estava errado. Mas antes de eu falar, me diz: se você fosse o arquiteto dessa empresa, o que você faria na segunda-feira?"
+      "texto": "E onde mora essa conta?"
     },
     {
       "persona": "davi",
-      "texto": "Olha, Helena, vou ser sincero. Minha primeira reação é: quebra em microsserviços. Pedidos vira um serviço, faturamento vira outro, rastreio vira outro. Cada um com seu banco, cada um com seu deploy. Aí o time de pedidos pode renumerar o que quiser, porque o faturamento nem enxerga mais a tabela."
+      "texto": "Aí é que está, Helena. Mora em três lugares. Cada módulo tem a sua própria cópia da fórmula, com o fator escrito direto no código, um número solto no meio da conta."
     },
     {
       "persona": "helena",
-      "texto": "Tá. E como o faturamento vai saber que um pedido foi entregue?"
+      "texto": "Deixa eu adivinhar o resto. Alguém mudou o número em um lugar só."
     },
     {
       "persona": "davi",
-      "texto": "Pela API. O serviço de pedidos publica um evento, pedido atualizado, com o status dentro."
+      "texto": "Exatamente. O time de expedição mudou o fator na cópia dele. As etiquetas passaram a sair com um peso, e o faturamento continuou cobrando pelo peso antigo. Durante duas semanas, cliente recebia cobrança que não batia com a etiqueta. E quem descobriu foi o suporte, não a engenharia."
     },
     {
       "persona": "helena",
-      "texto": "E o status vai dentro do evento como o quê?"
-    },
-    {
-      "persona": "davi",
-      "texto": "Hum. Como número, provavelmente, porque é o que já existe.",
-      "estilo": "hesitando"
-    },
-    {
-      "persona": "helena",
-      "texto": "Então, Davi, me diz: se o time de pedidos renumerar de novo, o que acontece com o faturamento?"
-    },
-    {
-      "persona": "davi",
-      "texto": "Peraí, deixa eu ver se eu entendi. O faturamento continua dependendo do significado do número três. Só que agora esse número viaja pela rede."
-    },
-    {
-      "persona": "helena",
-      "texto": "Isso. A dependência não sumiu. Ela mudou de endereço. E ficou mais longe, o que é pior, porque antes um teste de integração no mesmo repositório talvez pegasse o erro. Agora são dois deploys, dois times, talvez duas versões rodando ao mesmo tempo. Esse é um ponto que eu repito muito: modularidade vem antes de distribuição. Se você distribui um sistema mal modularizado, você ganha um sistema mal modularizado com latência."
-    },
-    {
-      "persona": "davi",
-      "texto": "Tá, Helena, isso doeu um pouco.",
+      "texto": "O suporte sempre descobre primeiro. Tá, Davi. E o que você faria?",
       "estilo": "rindo"
     },
     {
+      "persona": "davi",
+      "texto": "Olha, Helena, eu vou ser sincero. A minha primeira reação é: isso é um monólito, e monólito vira bagunça. Eu quebraria em microsserviços. Um serviço de cotação, um de expedição, um de faturamento, cada um com seu banco e seu deploy. Fronteira clara, time independente, problema resolvido."
+    },
+    {
       "persona": "helena",
-      "texto": "É pra doer um pouco. Mas olha, eu não estou dizendo que microsserviço é errado. Depende. Eu estou dizendo que a pergunta certa não é quantos deploys, é qual é a natureza da dependência entre esses módulos. E pra responder isso a gente precisa de vocabulário. O capítulo três de Fundamentals of Software Architecture, do Mark Richards e do Neal Ford, é justamente sobre como medir modularidade."
+      "texto": "Pergunta honesta: depois de separar em três serviços, quantas cópias da fórmula de cubagem continuam existindo?"
     },
     {
       "persona": "davi",
-      "texto": "Medir? Achei que modularidade era meio subjetivo, tipo código limpo."
+      "texto": "Hum. Três. Cada serviço continua com a sua."
     },
     {
       "persona": "helena",
-      "texto": "Tem uma parte subjetiva, sim. Mas o livro organiza a conversa em três ideias: coesão, acoplamento e conascência. Vamos uma por vez. Davi, o que você entende por coesão?"
+      "texto": "E quando a expedição mudar o fator de novo, o que impede o faturamento de ficar com o número velho?"
     },
     {
       "persona": "davi",
-      "texto": "Que as coisas de dentro do módulo têm a ver umas com as outras?"
+      "texto": "Peraí, deixa eu ver se eu entendi. Nada impede. Só que agora as cópias estão em repositórios diferentes, com deploys diferentes."
     },
     {
       "persona": "helena",
-      "texto": "É um bom começo. Coesão é o quanto as partes de um módulo pertencem ao mesmo módulo. Um módulo coeso é aquele em que, se você tentar separar as partes, vai precisar ligar tudo de volta com chamadas entre os pedaços. O livro apresenta uma escala de tipos de coesão, do melhor pro pior. No topo está a coesão funcional, em que tudo no módulo serve a uma única função. Depois vêm a sequencial, em que a saída de uma parte é a entrada da outra, e a comunicacional, em que as partes trabalham sobre os mesmos dados."
+      "texto": "Então a ligação entre eles não sumiu. Ela só ficou mais longe e mais difícil de enxergar. Você trocou um problema que dava pra achar com uma busca no código por um que precisa de três times conversando."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, me pegou. Mas então qual é o problema de verdade, Helena? Porque pra mim parecia ser o monólito."
+    },
+    {
+      "persona": "helena",
+      "texto": "O problema é que ninguém mediu a modularidade desse sistema. E é disso que trata o capítulo três de Fundamentals of Software Architecture, do Mark Richards e do Neal Ford. O capítulo organiza a medição em três ideias: coesão, acoplamento e conascência."
+    },
+    {
+      "persona": "davi",
+      "texto": "Três palavras difíceis. Começa pela mais fácil."
+    },
+    {
+      "persona": "helena",
+      "texto": "Coesão. É o quanto as partes de um módulo pertencem ao mesmo módulo. Um teste mental que eu uso: se você tentasse separar essas partes, ia precisar ligar tudo de novo com chamadas entre módulos? Se sim, elas pertencem juntas."
+    },
+    {
+      "persona": "davi",
+      "texto": "E existe coesão boa e coesão ruim?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Existe uma escala, Davi. O livro apresenta os tipos de coesão do melhor pro pior. No topo está a funcional, em que cada parte do módulo está ligada às outras e o módulo tem tudo o que é essencial pra sua função. Depois vêm a sequencial, a comunicacional e a procedural."
     },
     {
       "persona": "davi",
@@ -98,113 +100,144 @@
     },
     {
       "persona": "helena",
-      "texto": "Lá embaixo vêm a procedural, a temporal, a lógica e, no fundo do poço, a coincidental. Coesão temporal é quando as coisas estão juntas só porque acontecem no mesmo momento, tipo tudo que roda na inicialização. Coesão lógica é quando estão juntas porque são parecidas, mas fazem coisas diferentes. Sabe aquela classe utilitários?"
+      "texto": "Lá embaixo vêm a temporal, a lógica e, no fundo do poço, a coincidental. Temporal é quando as coisas estão juntas porque acontecem no mesmo momento, tipo tudo que roda na inicialização do sistema."
     },
     {
       "persona": "davi",
-      "texto": "Conheço. Todo projeto tem uma. A nossa tem formatar CPF, calcular frete e mandar e-mail.",
+      "texto": "E a lógica? Essa eu acho que eu conheço. Lá no trabalho tem uma classe de formatação que formata CPF, formata CNPJ e formata telefone."
+    },
+    {
+      "persona": "helena",
+      "texto": "Esse é um bom exemplo de coesão lógica, Davi. As coisas estão juntas porque são da mesma categoria, todas formatam texto, mas cada uma faz algo diferente e uma não depende da outra. O livro usa o exemplo de uma classe utilitária de strings."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a coincidental?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Coincidental é quando não existe relação nenhuma. As coisas estão no mesmo arquivo por acaso. Calcular imposto e reenviar senha na mesma classe, por exemplo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas como eu meço isso? Porque tipo de coesão me parece meio opinião."
+    },
+    {
+      "persona": "helena",
+      "texto": "Boa pergunta. Existe uma métrica que o livro discute, chamada LCOM, de lack of cohesion in methods, falta de coesão nos métodos. Simplificando, ela olha quais métodos de uma classe usam os mesmos campos. Se você encontra grupos de métodos que não compartilham campo nenhum entre si, é sinal de que a classe tem várias classes escondidas dentro dela."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então é só rodar a métrica e pronto?"
+    },
+    {
+      "persona": "helena",
+      "texto": "E aí vem a ressalva que o livro faz, Davi: essa métrica só enxerga a falta de coesão estrutural. Ela não sabe dizer se as partes fazem sentido juntas do ponto de vista do negócio. Isso continua sendo trabalho de gente."
+    },
+    {
+      "persona": "davi",
+      "texto": "Beleza. Coesão é sobre o que tem dentro. Acoplamento é sobre o que liga um módulo ao outro, certo?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Certo. E aqui a medição fica mais objetiva. Acoplamento aferente é quantas conexões chegam no módulo, ou seja, quem depende dele. Acoplamento eferente é quantas conexões saem, de quem ele depende."
+    },
+    {
+      "persona": "davi",
+      "texto": "Aferente chega, eferente sai. Vou guardar assim."
+    },
+    {
+      "persona": "helena",
+      "texto": "Com esses dois números você calcula a instabilidade. É o acoplamento eferente dividido pela soma do eferente com o aferente. O resultado vai de zero a um."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o que significa estar perto de um?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Perto de um, o módulo depende de muita coisa e quase ninguém depende dele. Ele muda fácil, mas também quebra fácil, porque qualquer dependência que mexer arrasta ele junto. Perto de zero, muita gente depende dele e ele depende de pouco. Ele é estável, e mudar dói, porque toda mudança atinge quem está pendurado nele."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, Helena. Estável parece elogio."
+    },
+    {
+      "persona": "helena",
+      "texto": "Parece, mas depende do que está estável. Por isso existe uma segunda medida, a abstração, que o livro define como a razão entre os artefatos abstratos do módulo, interfaces e classes abstratas, e os artefatos concretos, as implementações. E o livro junta abstração e instabilidade numa medida chamada distância da sequência principal."
+    },
+    {
+      "persona": "davi",
+      "texto": "Sequência principal. Isso soa como astronomia."
+    },
+    {
+      "persona": "helena",
+      "texto": "Soa mesmo. A ideia é que existe uma linha ideal em que abstração e instabilidade se equilibram. Quanto mais o módulo se afasta dessa linha, pior. E tem duas zonas que você quer evitar.",
       "estilo": "rindo"
     },
     {
+      "persona": "davi",
+      "texto": "Quais?"
+    },
+    {
       "persona": "helena",
-      "texto": "Pois é. E coincidental é quando não existe relação nenhuma, as coisas estão juntas por acaso. Agora, Davi, como você mediria isso sem depender da minha opinião?"
+      "texto": "A zona de dor e a zona de inutilidade. Na zona de dor fica o módulo muito concreto e muito estável: todo mundo depende dele e ele é cheio de implementação, então qualquer mudança dói em todo mundo. Na zona de inutilidade fica o módulo muito abstrato e muito instável: um monte de interface que quase ninguém usa."
     },
     {
       "persona": "davi",
-      "texto": "Não faço ideia, Helena. Contando linhas?"
+      "texto": "Eu conheço os dois. Tem um módulo de utilidades lá no trabalho que eu juro que mora na zona de dor."
     },
     {
       "persona": "helena",
-      "texto": "Existe uma métrica que o livro discute, chamada LCOM, que vem de lack of cohesion in methods, falta de coesão nos métodos. A ideia, simplificando, é olhar quais métodos de uma classe usam quais campos. Se você tem um grupo de métodos que mexe só num conjunto de campos e outro grupo que mexe só em outro conjunto, a classe provavelmente são duas classes coladas."
+      "texto": "E repara numa coisa, Davi: essas medidas contam conexões, mas não dizem que tipo de conexão é. No nosso caso, cotação, expedição e faturamento talvez nem chamem um ao outro. O acoplamento aferente e eferente entre eles pode ser quase zero."
     },
     {
       "persona": "davi",
-      "texto": "Ah, isso faz sentido. Se metade da classe nunca encosta na outra metade, por que elas estão juntas?"
+      "texto": "Peraí. Então pelas métricas eles estariam desacoplados. Mas quebraram juntos."
     },
     {
       "persona": "helena",
-      "texto": "Exato. Mas o livro faz uma ressalva importante: essa métrica só enxerga a falta de coesão estrutural. Ela não sabe dizer se as partes fazem sentido juntas do ponto de vista do negócio. Isso continua sendo julgamento. A métrica te diz onde olhar, não o que decidir."
+      "texto": "Isso. E é por isso que existe a terceira ideia, a conascência. O termo vem de Meilir Page-Jones, nos anos noventa, e o Richards e o Ford trazem pro capítulo. A definição é: dois componentes são conascentes se uma mudança em um exigir uma mudança no outro pra manter o sistema correto."
     },
     {
       "persona": "davi",
-      "texto": "Tá, coesão é o lado de dentro. E acoplamento é o lado de fora?"
+      "texto": "Então os três módulos são conascentes, mesmo sem nenhuma chamada entre eles."
     },
     {
       "persona": "helena",
-      "texto": "Isso. Acoplamento é sobre as conexões entre módulos. E aqui tem duas medidas clássicas que o livro traz. Acoplamento aferente é quantas conexões chegam no módulo, quem depende dele. Acoplamento eferente é quantas conexões saem, de quem ele depende."
+      "texto": "Exatamente, Davi. A mudança no fator exigia mudança nos outros dois. Não tem import, não tem chamada, e mesmo assim tem acoplamento. E a conascência tem tipos, divididos em dois grupos: estáticos e dinâmicos."
     },
     {
       "persona": "davi",
-      "texto": "Deixa eu traduzir pro nosso caso. O módulo de pedidos tem acoplamento aferente alto, porque faturamento e rastreio dependem dele. E o faturamento tem acoplamento eferente, porque ele depende de pedidos."
+      "texto": "Começa pelos estáticos."
     },
     {
       "persona": "helena",
-      "texto": "Perfeito, Davi. E a partir desses dois números o livro mostra uma métrica derivada, a instabilidade. É o acoplamento eferente dividido pela soma do eferente com o aferente. Vai de zero a um. Perto de um, o módulo depende de muita coisa e ninguém depende dele, então ele muda fácil, mas quebra fácil. Perto de zero, muita gente depende dele e ele depende de pouco, então ele é estável, no sentido de difícil de mudar."
+      "texto": "Estáticos são os que dá pra ver lendo o código. A mais fraca é a conascência de nome: dois módulos combinam o nome de uma coisa, tipo o nome de um método. Se alguém renomear, o outro quebra, mas a IDE renomeia tudo de uma vez e o compilador te avisa."
     },
     {
       "persona": "davi",
-      "texto": "Então estável não é elogio?"
+      "texto": "Essa é tranquila. E depois?"
     },
     {
       "persona": "helena",
-      "texto": "Não necessariamente. Estável aqui quer dizer que mexer custa caro. E aí entra a outra metade da conta, a abstração: que o livro define como a razão entre os artefatos abstratos do módulo, interfaces e classes abstratas, e os artefatos concretos, as implementações. O livro junta as duas numa medida chamada distância da sequência principal. A ideia é que um módulo saudável equilibra abstração e instabilidade."
+      "texto": "Conascência de tipo, quando os dois precisam concordar sobre o tipo de um dado. Depois, conascência de significado, também chamada de convenção: os dois precisam concordar sobre o que um valor quer dizer. Tipo combinar que o número um significa verdadeiro."
     },
     {
       "persona": "davi",
-      "texto": "E quem não equilibra?"
+      "texto": "O famoso número mágico."
     },
     {
       "persona": "helena",
-      "texto": "Cai numa de duas zonas. Na zona de dor fica o módulo muito concreto e muito estável: todo mundo depende dele e ele é cheio de implementação, então qualquer mudança dói em todo mundo. Na zona de inutilidade fica o módulo muito abstrato e que quase ninguém usa, abstração por abstração."
+      "texto": "Ele mesmo. E é mais forte que nome justamente porque nenhuma ferramenta te avisa quando um lado muda. Depois vem a conascência de posição, quando os dois precisam concordar sobre a ordem dos valores, tipo a ordem dos parâmetros de um método. E a última estática é a conascência de algoritmo, quando os dois precisam usar o mesmo algoritmo pra funcionar juntos."
     },
     {
       "persona": "davi",
-      "texto": "O nosso módulo de pedidos está na zona de dor. Todo mundo lê a tabela dele e ele é puro detalhe concreto."
+      "texto": "Peraí, deixa eu ver se eu entendi. A fórmula de cubagem copiada em três lugares é conascência de algoritmo. E o fator escrito solto no código, o número mágico, é conascência de significado."
     },
     {
       "persona": "helena",
-      "texto": "Eu diria que sim, mas repara numa coisa, Davi: essas métricas te dizem quanto acoplamento existe. Elas não te dizem que tipo de acoplamento é. Duas dependências podem contar igual no acoplamento aferente e ser completamente diferentes no risco. E é aí que entra a terceira ideia, a que dá nome ao episódio."
-    },
-    {
-      "persona": "davi",
-      "texto": "Conascência. Confesso que eu nunca tinha ouvido essa palavra antes de preparar o episódio."
-    },
-    {
-      "persona": "helena",
-      "texto": "Quase ninguém ouviu, e é uma pena. O termo vem de Meilir Page-Jones, nos anos noventa, e o Richards e o Ford trazem pro capítulo. A definição é mais ou menos assim: dois componentes são conascentes se uma mudança em um exigir uma mudança no outro pra manter o sistema correto."
-    },
-    {
-      "persona": "davi",
-      "texto": "Opa. Isso é literalmente o nosso caso. Mudou o número em pedidos, tinha que mudar o faturamento."
-    },
-    {
-      "persona": "helena",
-      "texto": "Isso. E a graça da conascência é que ela tem tipos, e os tipos têm força. Primeiro, as formas estáticas, que você enxerga lendo o código. A mais fraca é a conascência de nome: dois módulos combinam o nome de uma coisa, tipo o nome de um método. Se alguém renomear, o outro quebra. Mas a IDE renomeia pra você e o compilador avisa."
-    },
-    {
-      "persona": "davi",
-      "texto": "Essa é tranquila. Qual vem depois?"
-    },
-    {
-      "persona": "helena",
-      "texto": "Conascência de tipo, quando os dois precisam concordar sobre o tipo de um dado. Depois, conascência de significado, também chamada de convenção: os dois precisam concordar sobre o que um valor quer dizer. Davi, qual delas é o nosso status três?"
-    },
-    {
-      "persona": "davi",
-      "texto": "Significado! Os dois módulos combinaram que três quer dizer entregue, e ninguém escreveu esse combinado em lugar nenhum.",
-      "estilo": "empolgado"
-    },
-    {
-      "persona": "helena",
-      "texto": "Exatamente. O clássico número mágico. E é mais forte que nome justamente porque nenhuma ferramenta te avisa. O compilador fica feliz com qualquer inteiro. Depois vem a conascência de posição, quando os dois precisam concordar sobre a ordem dos valores, tipo os parâmetros de um método."
-    },
-    {
-      "persona": "davi",
-      "texto": "Ah, isso eu já vi. Uma função de calcular frete que recebe peso, distância e prioridade. Alguém trocou a ordem de dois números na chamada. Compilou, rodou, e o frete saiu absurdo."
-    },
-    {
-      "persona": "helena",
-      "texto": "Clássico. E a última estática é a conascência de algoritmo, quando os dois precisam usar o mesmo algoritmo. Pensa num dígito verificador de etiqueta calculado em pedidos e conferido em rastreio. Se um lado mudar a fórmula, o outro rejeita todas as etiquetas."
+      "texto": "É assim que eu classificaria, Davi. As três cópias precisam fazer a mesma conta, e todas precisam concordar sobre o que aquele número quer dizer. Se uma diverge, o sistema fica incorreto em silêncio."
     },
     {
       "persona": "davi",
@@ -212,100 +245,148 @@
     },
     {
       "persona": "helena",
-      "texto": "As dinâmicas só aparecem com o sistema rodando, e em geral são mais fortes que as estáticas, justamente porque são mais difíceis de enxergar. Conascência de execução é quando a ordem das chamadas importa: tem que abrir antes de gravar. Conascência de tempo é quando o momento importa, tipo duas threads disputando o mesmo recurso. Conascência de valores é quando vários valores precisam mudar juntos, e conascência de identidade é quando os componentes precisam apontar pra mesma instância de alguma coisa."
+      "texto": "As dinâmicas só aparecem com o sistema rodando. Conascência de execução é quando a ordem das chamadas importa, tipo ter que definir o destinatário de um e-mail antes de mandar. Conascência de tempo é quando o momento importa, tipo duas threads disputando o mesmo recurso. Conascência de valores é quando vários valores precisam mudar juntos, como dados que precisam ficar consistentes em vários bancos ao mesmo tempo. E conascência de identidade é quando dois componentes precisam apontar pra mesma instância de uma coisa, tipo a mesma fila compartilhada."
     },
     {
       "persona": "davi",
-      "texto": "Peraí, Helena. Execução no nosso caso seria o rastreio esperar que o pedido seja marcado como entregue antes de gerar a nota?"
+      "texto": "E qual grupo é pior?"
     },
     {
       "persona": "helena",
-      "texto": "Pode ser, se existir essa expectativa escondida. Muitas vezes existe e ninguém sabe até ela falhar."
+      "texto": "O livro recomenda preferir as estáticas às dinâmicas, porque as estáticas você descobre analisando o código fonte, e as ferramentas de hoje tornam trivial melhorá-las. A dinâmica você só descobre rodando, muitas vezes em produção."
     },
     {
       "persona": "davi",
-      "texto": "Tá, mas classificar é legal. Como isso me ajuda a decidir o que fazer na segunda-feira?"
+      "texto": "Tá, Helena. Agora eu sei dar nome pros bichos. Mas como eu sei qual atacar primeiro? Porque todo sistema tem conascência por todo lado."
     },
     {
       "persona": "helena",
-      "texto": "Aí entra a pergunta de sempre: tá, e qual é o trade-off? A conascência tem três propriedades. Força, que é o tipo que a gente acabou de ver. Localidade, que é a distância entre os componentes envolvidos: dentro do mesmo método, do mesmo módulo, ou entre módulos diferentes. E grau, que é quantos componentes são afetados. Conascência forte e próxima, dentro de um módulo, é aceitável. Às vezes é até desejável, porque é exatamente isso que significa coesão. Conascência forte e distante, cruzando fronteiras de módulo, é a que mata."
+      "texto": "E nem dá pra zerar, Davi. Sistema sem nenhuma conascência é sistema em que as partes não conversam. A pergunta certa é qual dói mais. E pra isso a conascência tem três propriedades. Força, que é a facilidade com que dá pra refatorar aquele tipo de acoplamento: cada tipo que a gente viu tem uma força diferente, e os mais fáceis de refatorar são os mais fracos. Localidade, que é a distância entre os componentes no código. E grau, que é o tamanho do impacto, quantos componentes são afetados."
     },
     {
       "persona": "davi",
-      "texto": "Então o que vale a pena reduzir primeiro é a combinação de forte, distante e com muita gente envolvida."
+      "texto": "Me dá um exemplo de como isso muda a prioridade."
     },
     {
       "persona": "helena",
-      "texto": "Isso. E as regras práticas são duas. A regra do grau diz: converta formas fortes em formas mais fracas. A regra da localidade diz: quanto maior a distância entre os componentes, mais fraca deve ser a conascência entre eles."
+      "texto": "Conascência forte e próxima, dentro de uma mesma classe, é aceitável, porque quem mexe num lado está olhando pro outro. Conascência forte e distante, cruzando fronteiras de módulo, é a que mata. E se o grau é alto, se dez módulos dependem daquela mesma convenção, o estrago de uma mudança se multiplica."
     },
     {
       "persona": "davi",
-      "texto": "Deixa eu tentar aplicar. O status três é conascência de significado, cruzando a fronteira entre pedidos e faturamento, e o grau é pelo menos dois, contando o rastreio talvez três. Então ele é o primeiro da fila."
+      "texto": "Então tem uma regra pra decidir?"
     },
     {
       "persona": "helena",
-      "texto": "Concordo. E como você enfraquece?"
+      "texto": "O livro traz duas regras práticas. A regra do grau diz: converta formas fortes de conascência em formas mais fracas. A regra da localidade diz: quanto maior a distância entre os componentes, mais fraca deve ser a conascência entre eles."
     },
     {
       "persona": "davi",
-      "texto": "Troco o número por algo com nome. Um enum, ou uma constante pública que o módulo de pedidos expõe, tipo status entregue. Aí o faturamento depende do nome, não do número. Se pedidos renumerar, o nome continua o mesmo."
+      "texto": "Aplica no nosso caso, Helena."
     },
     {
       "persona": "helena",
-      "texto": "Você acabou de transformar conascência de significado em conascência de nome. E o que mais?"
+      "texto": "Me diz você. Qual é a força da ligação entre os três módulos?"
     },
     {
       "persona": "davi",
-      "texto": "Hum. O faturamento parar de ler a tabela de pedidos direto?"
+      "texto": "Algoritmo, que é a mais forte das estáticas, e significado, que já é bem mais forte que nome."
     },
     {
       "persona": "helena",
-      "texto": "Isso também, porque ler a tabela de outro módulo é se acoplar a todos os detalhes internos dele, e não só ao status. Se pedidos oferecer uma interface pequena, tipo uma pergunta simples, este pedido está entregue, o faturamento depende só dessa pergunta. Você diminuiu o grau e trocou detalhe por contrato."
+      "texto": "Localidade?"
     },
     {
       "persona": "davi",
-      "texto": "E aí, Helena, depois disso eu posso quebrar em microsserviços?",
-      "estilo": "provocando"
+      "texto": "Longe. Três módulos diferentes, três times."
     },
     {
       "persona": "helena",
-      "texto": "Aí você pode discutir microsserviços com muito mais honestidade. Porque agora a fronteira está clara e o que cruza ela é fraco. Mas olha o trade-off nos dois sentidos. Enfraquecer conascência tem custo: mais interfaces, mais nomes, mais indireção. Se você fizer isso dentro de um módulo pequeno, você só cria burocracia. E distribuir piora a localidade de tudo que sobrar, porque a rede adiciona tempo e falha parcial, e aí conascência de execução e de tempo ficam bem mais caras."
+      "texto": "Grau?"
     },
     {
       "persona": "davi",
-      "texto": "Helena, isso já aconteceu com você?"
+      "texto": "Três módulos. E aposto que tem um relatório em algum canto fazendo a mesma conta."
     },
     {
       "persona": "helena",
-      "texto": "Já. Na migração que eu liderei, a gente separou um módulo de contas em um serviço próprio. Só que outro serviço dependia da ordem exata em que os eventos chegavam, primeiro abertura, depois saldo. No monólito isso era garantido, porque era tudo uma transação. Na rede, de vez em quando o saldo chegava antes. Isso é conascência de execução que a gente não tinha mapeado, e ela ficou muito mais cara quando a distância aumentou, porque a localidade piorou. Uma parte dessa migração foi desfeita por causas assim."
+      "texto": "Sempre tem. Então essa é a primeira da fila: forte, distante e com grau alto. Agora, o que você faria pra enfraquecer?",
+      "estilo": "rindo"
     },
     {
       "persona": "davi",
-      "texto": "Uau. E se vocês tivessem mapeado antes?"
+      "texto": "Eu tiraria a fórmula das três cópias e colocaria num lugar só. Um módulo de cubagem, com uma função calcular peso cubado. E o fator vira uma constante com nome, dentro desse módulo."
     },
     {
       "persona": "helena",
-      "texto": "Na minha opinião, a gente teria deixado aquelas duas partes juntas, no mesmo módulo, e separado outras coisas primeiro. Conascência forte é um sinal de que talvez as duas partes devessem morar juntas."
+      "texto": "E o que os outros três passam a conhecer?"
     },
     {
       "persona": "davi",
-      "texto": "Isso é interessante, Helena, porque inverte a lógica. Às vezes a resposta não é enfraquecer, é aproximar."
+      "texto": "Só o nome da função. Ah, então eu transformei conascência de algoritmo e de significado em conascência de nome."
     },
     {
       "persona": "helena",
-      "texto": "Exato. A regra da localidade funciona nos dois sentidos. Ou você enfraquece a ligação, ou você diminui a distância. Os dois resolvem."
+      "texto": "Isso. Você trocou as formas mais fortes pela mais fraca. E repara que você fez isso sem microsserviço nenhum, dentro do mesmo monólito."
     },
     {
       "persona": "davi",
-      "texto": "Beleza. Deixa eu resumir com as minhas palavras, e você me corrige. Primeiro: coesão é o quanto as partes de um módulo pertencem juntas. Tem uma escala, de funcional, a melhor, até coincidental, a pior. E dá pra medir a falta de coesão estrutural com o LCOM, mas a métrica só aponta onde olhar."
+      "texto": "Tá, e qual é o trade-off? Porque você sempre pergunta."
     },
     {
       "persona": "helena",
-      "texto": "Certo."
+      "texto": "Você roubou o meu bordão, Davi. Tá, e qual é o trade-off? Esse novo módulo de cubagem vai ter acoplamento aferente alto, todo mundo depende dele, e ele é concreto. Lembra onde mora o módulo concreto do qual todo mundo depende?"
     },
     {
       "persona": "davi",
-      "texto": "Segundo: acoplamento se mede pelo que chega, o aferente, e pelo que sai, o eferente. Com isso eu calculo instabilidade, junto com abstração, e vejo se o módulo está na zona de dor, concreto e todo mundo dependendo, ou na zona de inutilidade, abstrato e sem uso."
+      "texto": "Na zona de dor. Caramba."
+    },
+    {
+      "persona": "helena",
+      "texto": "Pois é. Então ele precisa ser pequeno e mudar pouco, e qualquer mudança nele precisa de teste que proteja quem depende dele. Na minha experiência, isso é muito mais barato do que três cópias divergindo em silêncio. Mas você ganhou um ponto central que precisa ser tratado com cuidado."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se a empresa insistir nos microsserviços?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Aí a regra da localidade cobra a conta. Se os módulos viram serviços, a distância entre eles aumenta, e a conascência que cruza essa fronteira precisa ser ainda mais fraca. Cada serviço chamando a cubagem pela rede é conascência de nome, mas agora com rede no meio, falha parcial e versão de contrato. Se cada serviço guardar a sua cópia da fórmula de novo, você está de volta ao começo, só que com deploy separado."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se eu fizer uma biblioteca compartilhada com a fórmula?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Depende. Você enfraquece o algoritmo, mas cada serviço pode estar numa versão diferente da biblioteca. Se a regra de negócio exige que todo mundo use o mesmo fator no mesmo dia, você criou uma dependência de tempo de deploy que nenhuma ferramenta vai te mostrar. Não é proibido. Só não é de graça."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então a moral é que microsserviço é ruim?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Não, Davi. A moral é que distribuir não resolve acoplamento, distribuir aumenta a distância do acoplamento que você já tem. Primeiro você mede e enfraquece. Depois, se tiver um motivo de verdade pra separar, você separa um sistema que já sabe onde estão as costuras."
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu resumir com as minhas palavras, Helena, e você me corrige."
+    },
+    {
+      "persona": "helena",
+      "texto": "Vai lá."
+    },
+    {
+      "persona": "davi",
+      "texto": "Coesão é o quanto as partes de um módulo pertencem juntas. Tem uma escala, da funcional, a melhor, até a coincidental, a pior, e a LCOM ajuda a achar falta de coesão estrutural, mas não substitui o julgamento sobre o negócio."
+    },
+    {
+      "persona": "helena",
+      "texto": "Até aqui, perfeito."
+    },
+    {
+      "persona": "davi",
+      "texto": "Acoplamento eu meço pelo que chega, o aferente, e pelo que sai, o eferente. Com isso eu calculo instabilidade, junto com a abstração eu vejo a distância da sequência principal, e fico de olho pra nenhum módulo morar na zona de dor ou na de inutilidade."
     },
     {
       "persona": "helena",
@@ -313,24 +394,31 @@
     },
     {
       "persona": "davi",
-      "texto": "Terceiro: conascência diz o tipo da dependência. Estáticas, de nome, tipo, significado, posição e algoritmo. Dinâmicas, de execução, tempo, valores e identidade. E o que eu ataco primeiro é a conascência forte, distante e de grau alto, transformando em uma forma mais fraca ou aproximando os componentes. E distribuir antes de fazer isso só leva o problema pra mais longe."
+      "texto": "Só que essas métricas contam conexões e não dizem o tipo. Pro tipo existe a conascência. Estáticas: nome, tipo, significado, posição e algoritmo. Dinâmicas: execução, tempo, valores e identidade. E na hora de priorizar eu olho força, localidade e grau: ataco primeiro a mais forte, mais distante e que afeta mais módulos, e tento transformá-la numa forma mais fraca."
     },
     {
       "persona": "helena",
-      "texto": "Eu não mudaria nada. Só acrescentaria uma coisa: depende. Cada uma dessas decisões tem custo, e vale registrar por que você escolheu enfraquecer aqui e aproximar ali. Decisão que não foi registrada vai ser tomada de novo, provavelmente pior."
+      "texto": "E o trade-off?"
     },
     {
       "persona": "davi",
-      "texto": "Anotado, Helena. E agora o desafio do episódio. Pegue dois módulos de um sistema que você mantém, classifique a conascência mais forte entre eles e proponha uma mudança que a enfraqueça. Vale um número mágico, uma ordem de parâmetros, uma ordem de chamadas que ninguém documentou. Se quiser, conta pra gente o que você encontrou."
+      "texto": "Centralizar enfraquece a conascência, mas cria um módulo de quem todo mundo depende, que precisa ser pequeno e bem testado. E distribuir não apaga acoplamento, só aumenta a distância."
     },
     {
       "persona": "helena",
-      "texto": "E se você não achar nenhuma conascência forte entre os dois módulos, olha de novo. Ela costuma estar no lugar onde ninguém escreveu o combinado.",
-      "estilo": "sorrindo"
+      "texto": "Davi, eu não resumiria melhor."
     },
     {
       "persona": "davi",
-      "texto": "Helena, muito obrigado mais uma vez. Foi ótimo."
+      "texto": "Então vamos pro desafio de hoje. Pegue dois módulos de um sistema que você mantém, classifique a conascência mais forte entre eles e proponha uma mudança que a enfraqueça. Vale qualquer sistema, do trabalho ou de estudo."
+    },
+    {
+      "persona": "helena",
+      "texto": "E uma dica minha: procure primeiro número solto e conta repetida. É ali que costuma morar a mais forte."
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado. Helena, muito obrigado pela conversa de hoje."
     },
     {
       "persona": "helena",
@@ -338,7 +426,7 @@
     },
     {
       "persona": "davi",
-      "texto": "E você que ouviu até aqui, obrigado por estar com a gente. Este foi o Pebacast. Até o próximo episódio!"
+      "texto": "E você que ouviu até aqui, obrigado pela companhia. Este foi o Pebacast. Até amanhã!"
     }
   ],
   "desafio": "Pegue dois módulos de um sistema que você mantém, classifique a conascência mais forte entre eles e proponha uma mudança que a enfraqueça.",
