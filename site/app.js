@@ -16,6 +16,7 @@
     const barra = player.querySelector(".player__barra");
     const atual = player.querySelector(".player__atual");
     const velocidade = player.querySelector(".player__velocidade");
+    const valorDaVelocidade = velocidade.querySelector(".player__velocidade-valor");
     let arrastando = false;
 
     audio.removeAttribute("controls");
@@ -60,7 +61,7 @@
     velocidade.addEventListener("click", () => {
       const proxima = VELOCIDADES[(VELOCIDADES.indexOf(audio.playbackRate) + 1) % VELOCIDADES.length];
       audio.playbackRate = proxima;
-      velocidade.textContent = `${String(proxima).replace(".", ",")}×`;
+      valorDaVelocidade.textContent = `${String(proxima).replace(".", ",")}×`;
     });
   });
 

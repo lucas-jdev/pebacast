@@ -268,7 +268,7 @@ def _episodio(item: Mapping[str, Any], personas: Mapping[str, Any], destaque: bo
         <input class="player__barra" type="range" min="0" max="{publicacao['duracao_segundos']}" value="0" step="1" aria-label="Posição no episódio">
         <div class="player__tempos"><span class="player__atual">0:00</span><span>{escape(_duracao(publicacao['duracao_segundos']))}</span></div>
       </div>
-      <button class="player__velocidade" type="button" aria-label="Velocidade de reprodução">1×</button>
+      <button class="player__velocidade" type="button"><span class="so-leitor">Velocidade de reprodução: </span><span class="player__velocidade-valor">1×</span></button>
     </div>
     <div class="episodio__detalhes">
       <div>
