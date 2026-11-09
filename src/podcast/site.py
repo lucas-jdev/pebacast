@@ -53,7 +53,7 @@ def gerar_index(projeto: Projeto, arquivo_feed: str) -> str:
     ultimo, anteriores = (publicados[0], publicados[1:]) if publicados else (None, [])
     proximos = [
         (saga, episodio)
-        for saga in sagas.values()
+        for saga in _sagas_na_ordem_de_estudo(sagas, publicados)
         for episodio in saga.episodios
         if not (projeto.episodios / episodio.id / PUBLICACAO).exists()
     ]
@@ -103,6 +103,12 @@ def _publicados(projeto: Projeto) -> list[dict[str, Any]]:
             })
     itens.sort(key=lambda item: item["publicacao"]["publicado_em"], reverse=True)
     return itens
+
+
+def _sagas_na_ordem_de_estudo(sagas: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]]) -> list[Any]:
+    em_andamento = {item["saga"].id for item in publicados}
+    posicao = {sid: indice for indice, (sid, _, _) in enumerate(SAGAS)}
+    return sorted(sagas.values(), key=lambda saga: (saga.id not in em_andamento, posicao.get(saga.id, len(SAGAS))))
 
 
 def _ler_json(arquivo: Path) -> Any:
@@ -277,7 +283,7 @@ def _episodio(item: Mapping[str, Any], personas: Mapping[str, Any], destaque: bo
     {selo}
     <details class="dobra">
       <summary>Transcrição <span class="dobra__extra">{palavras} palavras</span></summary>
-      <div class="transcricao">{transcricao}</div>
+      <div class="transcricao" tabindex="0" role="region" aria-label="Transcrição do episódio">{transcricao}</div>
     </details>
     <details class="dobra">
       <summary>Fontes</summary>
@@ -344,9 +350,9 @@ def _secao_sagas(sagas: Mapping[str, Any], publicados: Sequence[Mapping[str, Any
     cartoes = []
     for indice, (sid, nome, pergunta) in enumerate(SAGAS, start=1):
         saga = sagas.get(sid)
-        if saga:
+        feitos = por_saga.get(sid, 0)
+        if saga and feitos:
             total = len(saga.episodios)
-            feitos = por_saga.get(sid, 0)
             estado = f'<span class="saga__estado saga__estado--ativa">No ar · {feitos} de {total}</span>'
             progresso = f'<span class="saga__progresso" style="--p:{feitos / total if total else 0:.3f}"></span>'
             classe = "saga saga--ativa"
