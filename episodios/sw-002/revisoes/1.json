@@ -1,199 +1,205 @@
 {
   "aprovado": false,
-  "roteiro_sha256": "f4159993c9173f7ee7e2ddf143f096b7c640b9590bfdea099b2d76b8fbf0ad2d",
+  "roteiro_sha256": "8996fb16252b8dacca49f329cc3674d6a507e47a565304f6c110938545c4d9f2",
   "afirmacoes": [
     {
-      "fala": 2,
-      "afirmacao": "o caso de hoje é hipotético. Imagine uma empresa de logística, parecida com a que eu trabalho, mas inventada. Ela tem um monólito com três módulos: pedidos, faturamento e rastreio.",
+      "fala": 3,
+      "afirmacao": "o caso de hoje é hipotético",
       "veredito": "correta",
-      "fonte": "noticia.json (tipo hipotetico): o roteiro declara o caso como hipotético"
+      "fonte": "noticia.json (tipo hipotetico)"
     },
     {
-      "fala": 4,
-      "afirmacao": "O status do pedido é guardado como um número inteiro. [...] E o faturamento, pra saber o que cobrar, lê esse número direto da tabela de pedidos. Aí um dia o time de pedidos cria um status novo, entregue parcialmente, e aproveita pra renumerar tudo.",
+      "fala": 5,
+      "afirmacao": "é um peso calculado a partir do volume da caixa, multiplicando as medidas por um fator de cubagem",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado de logística (peso cubado = C x L x A x fator de cubagem)"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "O time de expedição mudou o fator na cópia dele. [...] E quem descobriu foi o suporte, não a engenharia.",
       "veredito": "correta",
       "fonte": "noticia.json"
     },
     {
-      "fala": 6,
-      "afirmacao": "Imagina que o faturamento cobrou frete cheio de pedido que nem tinha chegado inteiro, e ninguém percebeu por três dias.",
+      "fala": 18,
+      "afirmacao": "O capítulo organiza a medição em três ideias: coesão, acoplamento e conascência.",
       "veredito": "correta",
-      "fonte": "noticia.json"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, seção Measuring Modularity"
     },
     {
-      "fala": 17,
-      "afirmacao": "O capítulo três de Fundamentals of Software Architecture, do Mark Richards e do Neal Ford, é justamente sobre como medir modularidade.",
+      "fala": 20,
+      "afirmacao": "Coesão. É o quanto as partes de um módulo pertencem ao mesmo módulo.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (\"Modularity\", seção \"Measuring Modularity\")"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Cohesion"
     },
     {
-      "fala": 19,
-      "afirmacao": "o livro organiza a conversa em três ideias: coesão, acoplamento e conascência.",
+      "fala": 22,
+      "afirmacao": "O livro apresenta os tipos de coesão do melhor pro pior. No topo está a funcional, em que cada parte do módulo está ligada às outras e o módulo tem tudo o que é essencial pra sua função. Depois vêm a sequencial, a comunicacional e a procedural.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Cohesion"
     },
     {
-      "fala": 21,
-      "afirmacao": "Coesão é o quanto as partes de um módulo pertencem ao mesmo módulo. Um módulo coeso é aquele em que, se você tentar separar as partes, vai precisar ligar tudo de volta com chamadas entre os pedaços.",
+      "fala": 24,
+      "afirmacao": "Lá embaixo vêm a temporal, a lógica e, no fundo do poço, a coincidental. Temporal é quando as coisas estão juntas porque acontecem no mesmo momento, tipo tudo que roda na inicialização do sistema.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (definição de cohesion)"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Cohesion"
     },
     {
-      "fala": 21,
-      "afirmacao": "O livro apresenta uma escala de tipos de coesão, do melhor pro pior. No topo está a coesão funcional, em que tudo no módulo serve a uma única função. Depois vêm a sequencial, em que a saída de uma parte é a entrada da outra, e a comunicacional, em que as partes trabalham sobre os mesmos dados.",
+      "fala": 26,
+      "afirmacao": "As coisas estão juntas porque são da mesma categoria, todas formatam texto, mas cada uma faz algo diferente e uma não depende da outra. O livro usa o exemplo de uma classe utilitária de strings.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3; Yourdon e Constantine, Structured Design"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Cohesion (exemplo StringUtils: métodos estáticos que operam sobre String, mas sem relação entre si)"
     },
     {
-      "fala": 23,
-      "afirmacao": "Lá embaixo vêm a procedural, a temporal, a lógica e, no fundo do poço, a coincidental.",
+      "fala": 28,
+      "afirmacao": "Coincidental é quando não existe relação nenhuma. As coisas estão no mesmo arquivo por acaso.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Cohesion"
     },
     {
-      "fala": 23,
-      "afirmacao": "Coesão temporal é quando as coisas estão juntas só porque acontecem no mesmo momento, tipo tudo que roda na inicialização. Coesão lógica é quando estão juntas porque são parecidas, mas fazem coisas diferentes.",
+      "fala": 30,
+      "afirmacao": "Existe uma métrica que o livro discute, chamada LCOM, de lack of cohesion in methods, falta de coesão nos métodos. Simplificando, ela olha quais métodos de uma classe usam os mesmos campos.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (exemplos de inicialização e de StringUtils)"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, métrica LCOM de Chidamber e Kemerer"
     },
     {
-      "fala": 25,
-      "afirmacao": "coincidental é quando não existe relação nenhuma, as coisas estão juntas por acaso.",
+      "fala": 32,
+      "afirmacao": "essa métrica só enxerga a falta de coesão estrutural. Ela não sabe dizer se as partes fazem sentido juntas do ponto de vista do negócio.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, LCOM"
     },
     {
-      "fala": 27,
-      "afirmacao": "Existe uma métrica que o livro discute, chamada LCOM, que vem de lack of cohesion in methods, falta de coesão nos métodos. A ideia, simplificando, é olhar quais métodos de uma classe usam quais campos.",
+      "fala": 34,
+      "afirmacao": "Acoplamento aferente é quantas conexões chegam no módulo, ou seja, quem depende dele. Acoplamento eferente é quantas conexões saem, de quem ele depende.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (LCOM de Chidamber e Kemerer)"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Coupling"
     },
     {
-      "fala": 29,
-      "afirmacao": "o livro faz uma ressalva importante: essa métrica só enxerga a falta de coesão estrutural. Ela não sabe dizer se as partes fazem sentido juntas do ponto de vista do negócio.",
+      "fala": 36,
+      "afirmacao": "É o acoplamento eferente dividido pela soma do eferente com o aferente. O resultado vai de zero a um.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (LCOM só encontra falta de coesão estrutural, não lógica)"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, I = Ce / (Ce + Ca)"
     },
     {
-      "fala": 31,
-      "afirmacao": "Acoplamento aferente é quantas conexões chegam no módulo, quem depende dele. Acoplamento eferente é quantas conexões saem, de quem ele depende.",
+      "fala": 38,
+      "afirmacao": "Perto de um, o módulo depende de muita coisa e quase ninguém depende dele. [...] Perto de zero, muita gente depende dele e ele depende de pouco.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Instability"
     },
     {
-      "fala": 33,
-      "afirmacao": "a instabilidade. É o acoplamento eferente dividido pela soma do eferente com o aferente. Vai de zero a um.",
+      "fala": 40,
+      "afirmacao": "a abstração, que o livro define como a razão entre os artefatos abstratos do módulo, interfaces e classes abstratas, e os artefatos concretos, as implementações. E o livro junta abstração e instabilidade numa medida chamada distância da sequência principal.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (I = Ce / (Ce + Ca))"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Abstractness, Instability, and Distance from the Main Sequence"
     },
     {
-      "fala": 33,
-      "afirmacao": "Perto de um, o módulo depende de muita coisa e ninguém depende dele, então ele muda fácil, mas quebra fácil. Perto de zero, muita gente depende dele e ele depende de pouco, então ele é estável, no sentido de difícil de mudar.",
+      "fala": 42,
+      "afirmacao": "A ideia é que existe uma linha ideal em que abstração e instabilidade se equilibram. Quanto mais o módulo se afasta dessa linha, pior.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3; Robert C. Martin, métricas de pacote"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Distance from the Main Sequence"
     },
     {
-      "fala": 35,
-      "afirmacao": "a abstração: a proporção de coisas abstratas, interfaces e classes abstratas, em relação ao total do módulo.",
+      "fala": 44,
+      "afirmacao": "Na zona de dor fica o módulo muito concreto e muito estável [...] Na zona de inutilidade fica o módulo muito abstrato e muito instável",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Zone of Pain / Zone of Uselessness"
+    },
+    {
+      "fala": 48,
+      "afirmacao": "O termo vem de Meilir Page-Jones, nos anos noventa, e o Richards e o Ford trazem pro capítulo. A definição é: dois componentes são conascentes se uma mudança em um exigir uma mudança no outro pra manter o sistema correto.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Connascence (Page-Jones, 1996)"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "E a conascência tem tipos, divididos em dois grupos: estáticos e dinâmicos.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Connascence"
+    },
+    {
+      "fala": 52,
+      "afirmacao": "Estáticos são os que dá pra ver lendo o código. A mais fraca é a conascência de nome: dois módulos combinam o nome de uma coisa, tipo o nome de um método.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Static connascence; connascence.io (Page-Jones/Weirich)"
+    },
+    {
+      "fala": 54,
+      "afirmacao": "Conascência de tipo, quando os dois precisam concordar sobre o tipo de um dado. Depois, conascência de significado, também chamada de convenção: os dois precisam concordar sobre o que um valor quer dizer. Tipo combinar que o número um significa verdadeiro.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Connascence of Type / Meaning (exemplo int TRUE = 1)"
+    },
+    {
+      "fala": 56,
+      "afirmacao": "Depois vem a conascência de posição, quando os dois precisam concordar sobre a ordem dos valores, tipo a ordem dos parâmetros de um método. E a última estática é a conascência de algoritmo, quando os dois precisam usar o mesmo algoritmo pra funcionar juntos.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Connascence of Position / Algorithm"
+    },
+    {
+      "fala": 58,
+      "afirmacao": "É assim que eu classificaria, Davi. As três cópias precisam fazer a mesma conta, e todas precisam concordar sobre o que aquele número quer dizer.",
+      "veredito": "correta",
+      "fonte": "Aplicação das definições do cap. 3 (algoritmo duplicado = CoA; número mágico = CoM), declarada como opinião da persona"
+    },
+    {
+      "fala": 60,
+      "afirmacao": "Conascência de execução é quando a ordem das chamadas importa, tipo ter que definir o destinatário de um e-mail antes de mandar. Conascência de tempo é quando o momento importa, tipo duas threads disputando o mesmo recurso. Conascência de valores é quando vários valores precisam mudar juntos, como dados que precisam ficar consistentes em vários bancos ao mesmo tempo. E conascência de identidade é quando dois componentes precisam apontar pra mesma instância de uma coisa, tipo a mesma fila compartilhada.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Dynamic connascence (exemplos do e-mail, race condition, transação distribuída, fila distribuída)"
+    },
+    {
+      "fala": 62,
+      "afirmacao": "O livro recomenda preferir as estáticas às dinâmicas, porque as estáticas você descobre analisando o código fonte, e as ferramentas de hoje tornam trivial melhorá-las.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Dynamic connascence"
+    },
+    {
+      "fala": 64,
+      "afirmacao": "a conascência tem três propriedades. Força, que é o tipo que a gente acabou de ver. Localidade, que é a distância entre os componentes envolvidos. E grau, que é quantos componentes são afetados.",
       "veredito": "imprecisa",
-      "correcao": "O livro define abstração como a razão entre artefatos abstratos (interfaces, classes abstratas) e artefatos concretos (equação 3-1, abstratos sobre concretos); a forma 'abstratos sobre o total' é a de Robert C. Martin. Ou citar a definição do livro, ou dizer que essa é a formulação original de Martin, sem atribuí-la ao capítulo.",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (equação 3-1); Robert C. Martin, Agile Software Development"
+      "correcao": "A conascência tem três propriedades: força, localidade e grau. Força é a facilidade com que se consegue refatorar aquele tipo de acoplamento; cada tipo visto tem uma força diferente, e os mais fáceis de refatorar são os mais fracos. Localidade é a distância entre os componentes no código, e grau é o tamanho do impacto, quantos componentes são afetados.",
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Connascence Properties: Strength ('ease with which a developer can refactor that type of coupling'), Locality, Degree"
     },
     {
-      "fala": 35,
-      "afirmacao": "O livro junta as duas numa medida chamada distância da sequência principal. A ideia é que um módulo saudável equilibra abstração e instabilidade.",
+      "fala": 66,
+      "afirmacao": "Conascência forte e próxima, dentro de uma mesma classe, é aceitável, porque quem mexe num lado está olhando pro outro. Conascência forte e distante, cruzando fronteiras de módulo, é a que mata.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (D = |A + I - 1|)"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Locality (código próximo tolera formas mais fortes de conascência)"
     },
     {
-      "fala": 37,
-      "afirmacao": "Na zona de dor fica o módulo muito concreto e muito estável: todo mundo depende dele e ele é cheio de implementação, então qualquer mudança dói em todo mundo. Na zona de inutilidade fica o módulo muito abstrato e que quase ninguém usa, abstração por abstração.",
+      "fala": 68,
+      "afirmacao": "A regra do grau diz: converta formas fortes de conascência em formas mais fracas. A regra da localidade diz: quanto maior a distância entre os componentes, mais fraca deve ser a conascência entre eles.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (zone of pain, zone of uselessness)"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3, Rule of Degree e Rule of Locality (de Jim Weirich, citadas no capítulo)"
     },
     {
-      "fala": 41,
-      "afirmacao": "O termo vem de Meilir Page-Jones, nos anos noventa, e o Richards e o Ford trazem pro capítulo.",
+      "fala": 79,
+      "afirmacao": "Ah, então eu transformei conascência de algoritmo e de significado em conascência de nome.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (credita Page-Jones, What Every Programmer Should Know About Object-Oriented Design, 1996)"
+      "fonte": "Aplicação da regra do grau, Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3"
     },
     {
-      "fala": 41,
-      "afirmacao": "dois componentes são conascentes se uma mudança em um exigir uma mudança no outro pra manter o sistema correto.",
+      "fala": 82,
+      "afirmacao": "Esse novo módulo de cubagem vai ter acoplamento aferente alto, todo mundo depende dele, e ele é concreto.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3"
+      "fonte": "Aplicação de instabilidade/abstração e zona de dor, Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3"
     },
     {
-      "fala": 43,
-      "afirmacao": "A mais fraca é a conascência de nome: dois módulos combinam o nome de uma coisa, tipo o nome de um método.",
+      "fala": 86,
+      "afirmacao": "Se os módulos viram serviços, a distância entre eles aumenta, e a conascência que cruza essa fronteira precisa ser ainda mais fraca.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3; Page-Jones"
+      "fonte": "Regra da localidade, Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3"
     },
     {
-      "fala": 45,
-      "afirmacao": "Conascência de tipo, quando os dois precisam concordar sobre o tipo de um dado. Depois, conascência de significado, também chamada de convenção: os dois precisam concordar sobre o que um valor quer dizer.",
+      "fala": 93,
+      "afirmacao": "Tem uma escala, da funcional, a melhor, até a coincidental, a pior, e a LCOM ajuda a achar falta de coesão estrutural",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3"
     },
     {
-      "fala": 47,
-      "afirmacao": "Depois vem a conascência de posição, quando os dois precisam concordar sobre a ordem dos valores, tipo os parâmetros de um método.",
+      "fala": 97,
+      "afirmacao": "Estáticas: nome, tipo, significado, posição e algoritmo. Dinâmicas: execução, tempo, valores e identidade.",
       "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3"
-    },
-    {
-      "fala": 49,
-      "afirmacao": "a última estática é a conascência de algoritmo, quando os dois precisam usar o mesmo algoritmo.",
-      "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3"
-    },
-    {
-      "fala": 51,
-      "afirmacao": "As dinâmicas só aparecem com o sistema rodando, e em geral são mais fortes que as estáticas",
-      "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3; Page-Jones"
-    },
-    {
-      "fala": 51,
-      "afirmacao": "Conascência de execução é quando a ordem das chamadas importa: tem que abrir antes de gravar. Conascência de tempo é quando o momento importa, tipo duas threads disputando o mesmo recurso. Conascência de valores é quando vários valores precisam mudar juntos, e conascência de identidade é quando os componentes precisam apontar pra mesma instância de alguma coisa.",
-      "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3"
-    },
-    {
-      "fala": 55,
-      "afirmacao": "A conascência tem três propriedades. Força, que é o tipo que a gente acabou de ver. Localidade, que é a distância entre os componentes envolvidos [...] E grau, que é quantos componentes são afetados.",
-      "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (strength, locality, degree)"
-    },
-    {
-      "fala": 57,
-      "afirmacao": "A regra do grau diz: converta formas fortes em formas mais fracas. A regra da localidade diz: quanto maior a distância entre os componentes, mais fraca deve ser a conascência entre eles.",
-      "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (regras de Jim Weirich citadas no capítulo)"
-    },
-    {
-      "fala": 61,
-      "afirmacao": "Você acabou de transformar conascência de significado em conascência de nome.",
-      "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3 (constantes nomeadas no lugar de números mágicos)"
-    },
-    {
-      "fala": 65,
-      "afirmacao": "distribuir piora a localidade de tudo que sobrar, porque a rede adiciona tempo e falha parcial, e aí conascência de execução e de tempo ficam bem mais caras.",
-      "veredito": "correta",
-      "fonte": "conhecimento consolidado"
-    },
-    {
-      "fala": 71,
-      "afirmacao": "A regra da localidade funciona nos dois sentidos. Ou você enfraquece a ligação, ou você diminui a distância.",
-      "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3; Page-Jones (maximizar a conascência dentro das fronteiras de encapsulamento)"
-    },
-    {
-      "fala": 76,
-      "afirmacao": "Estáticas, de nome, tipo, significado, posição e algoritmo. Dinâmicas, de execução, tempo, valores e identidade.",
-      "veredito": "correta",
-      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 1ª ed., 2020), cap. 3"
+      "fonte": "Fundamentals of Software Architecture (Richards e Ford, 2020), cap. 3"
     }
   ]
 }
