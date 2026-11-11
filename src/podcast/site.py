@@ -174,8 +174,6 @@ def _hero(ultimo: Mapping[str, Any] | None) -> str:
         {acao}
         <a class="botao botao--contorno" href="#assinar">Assinar o feed</a>
       </div>
-      <p class="pronuncia"><span class="pronuncia__fala">PÉ-ba-cast</span>
-        com E aberto, de tatu-peba: o bicho da caatinga que não para de cavar.</p>
     </div>
     {_ILUSTRACAO_TOCA}
   </div>
@@ -298,18 +296,36 @@ def _episodio(item: Mapping[str, Any], personas: Mapping[str, Any], destaque: bo
 def _secao_proximos(proximos: Sequence[tuple[Any, Any]]) -> str:
     if not proximos:
         return ""
-    itens = "\n".join(
-        f'<li><span class="proximo__num">{escape(_numero(ep.id))}</span>'
-        f'<span class="proximo__titulo">{escape(ep.titulo)}</span>'
-        f'<span class="proximo__saga">{escape(saga.nome)}</span></li>'
-        for saga, ep in proximos[:6]
-    )
-    return f"""<section class="secao secao--sem-topo">
+    saga, episodio = proximos[0]
+    numero = escape(_numero(episodio.id))
+    objetivos = "".join(f"<li>{escape(o)}</li>" for o in episodio.dados.get("objetivos", []))
+    aprendizado = f"""
+      <h3 class="proximo__rotulo">Ao final, você deve conseguir</h3>
+      <ul class="lista-marcada">{objetivos}</ul>""" if objetivos else ""
+    return f"""<section class="secao secao--sem-topo" id="proximo">
   <div class="largura">
-    <h2 class="secao__titulo secao__titulo--menor">Na sequência</h2>
-    <ol class="proximos">{itens}</ol>
+    <article class="proximo">
+      <div class="proximo__capa" aria-hidden="true"><span class="proximo__numero">{numero}</span></div>
+      <div class="proximo__corpo">
+        <p class="sobretitulo">Próximo episódio</p>
+        <h2 class="proximo__titulo">{escape(episodio.titulo)}</h2>
+        <p class="proximo__saga">{escape(saga.nome)}, episódio {numero}</p>{aprendizado}
+        {_depois_do_proximo(proximos)}
+      </div>
+    </article>
   </div>
 </section>"""
+
+
+def _depois_do_proximo(proximos: Sequence[tuple[Any, Any]]) -> str:
+    saga_atual = proximos[0][0]
+    restantes = sum(1 for saga, _ in proximos[1:] if saga.id == saga_atual.id)
+    if restantes:
+        quantos = "mais 1 episódio" if restantes == 1 else f"mais {restantes} episódios"
+        return f'<p class="proximo__depois">Depois dele, {quantos} desta saga.</p>'
+    if len(proximos) > 1:
+        return f'<p class="proximo__depois">Depois dele começa a saga {escape(proximos[1][0].nome)}.</p>'
+    return ""
 
 
 def _secao_vozes(personas: Mapping[str, Any], sagas: Mapping[str, Any]) -> str:

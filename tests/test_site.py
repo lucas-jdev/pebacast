@@ -41,4 +41,16 @@ def test_saga_so_fica_no_ar_quando_tem_episodio_publicado(projeto, tmp_path):
 
     assert pagina.count("saga__estado--ativa") == 1
     assert "No ar · 1 de 3" in pagina
-    assert pagina.index("Dois") < pagina.index("Elevador do arquiteto")
+    assert "Dois" in pagina
+    assert "Elevador do arquiteto" not in pagina
+
+
+def test_proximo_episodio_e_destacado_sem_listar_a_fila(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    _publicar(projeto, tmp_path)
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert pagina.count('class="proximo__titulo"') == 1
+    assert "Depois dele, mais 1 episódio desta saga." in pagina
+    assert "PÉ-ba-cast" not in pagina
