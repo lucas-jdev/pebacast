@@ -54,3 +54,13 @@ def test_proximo_episodio_e_destacado_sem_listar_a_fila(projeto, tmp_path):
     assert pagina.count('class="proximo__titulo"') == 1
     assert "Depois dele, mais 1 episódio desta saga." in pagina
     assert "PÉ-ba-cast" not in pagina
+
+
+def test_proximo_episodio_vem_antes_dos_anteriores(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    _escrever_episodio(projeto, "sw-002")
+    _publicar(projeto, tmp_path)
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert pagina.index('id="proximo"') < pagina.index('id="anteriores"')

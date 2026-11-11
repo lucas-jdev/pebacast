@@ -443,8 +443,8 @@ body { line-height: 1.7; }
 .hero::before { content: ""; top: auto; bottom: 0; height: 100%; min-height: 51.25vw; }
 #episodios { --cena-topo: var(--cena-mar-aberto); }
 #episodios::before { content: ""; --cena-altura: 480px; }
-.secao--sem-topo { --cena-base: var(--cena-mar-fundo); padding-bottom: clamp(9rem, 17vw, 15rem); }
-.secao--sem-topo::after { content: ""; --cena-altura: 300px; }
+#proximo { --cena-base: var(--cena-mar-fundo); padding-bottom: clamp(9rem, 17vw, 15rem); }
+#proximo::after { content: ""; --cena-altura: 300px; }
 #vozes { --cena-topo: var(--cena-ceu); --cena-base: var(--cena-vila); padding-bottom: clamp(13rem, 24vw, 21rem); }
 #vozes::before { content: ""; --cena-altura: 300px; }
 #vozes::after { content: ""; --cena-altura: 460px; }
@@ -467,8 +467,8 @@ body { line-height: 1.7; }
   }
   .hero { padding-bottom: calc(250px * var(--cena-escala)); }
   .hero::before { --cena-altura: calc(250px * var(--cena-escala)); --cena-lado: center; }
-  .secao--sem-topo { --cena-base: var(--cena-mar-aberto); padding-bottom: calc(290px * var(--cena-escala)); }
-  .secao--sem-topo::after { --cena-altura: calc(300px * var(--cena-escala)); }
+  #proximo { --cena-base: var(--cena-mar-aberto); padding-bottom: calc(290px * var(--cena-escala)); }
+  #proximo::after { --cena-altura: calc(300px * var(--cena-escala)); }
   #vozes { padding-bottom: calc(330px * var(--cena-escala)); }
   #vozes::after { --cena-altura: calc(330px * var(--cena-escala)); }
   #sagas { --cena-base: var(--cena-sertao); padding-bottom: calc(300px * var(--cena-escala)); }
