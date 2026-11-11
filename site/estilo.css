@@ -333,7 +333,7 @@ body { line-height: 1.7; }
 .hero h1 { font-size: clamp(2.8rem, 7vw, 5.4rem); line-height: 1.02; }
 .hero h1 em { font-style: normal; text-decoration: underline 6px var(--destaque); text-underline-offset: 0.08em; }
 .hero__lead { color: var(--texto); }
-.toca { border: 6px solid var(--texto); outline: 2px solid var(--texto); outline-offset: 5px; background: #fff; padding: 0; }
+.toca { border: 18px solid var(--texto); border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='54' viewBox='0 0 54 54'%3E %3Crect width='54' height='54' fill='%2315110c'/%3E %3Cg fill='%23efe4c8'%3E %3Cpath d='M18 14l9-9 9 9zM18 40l9 9 9-9zM14 18l-9 9 9 9zM40 18l9 9-9 9z'/%3E %3Cpath d='M9 4l5 5-5 5-5-5zM45 4l5 5-5 5-5-5zM9 40l5 5-5 5-5-5zM45 40l5 5-5 5-5-5z'/%3E %3C/g%3E %3C/svg%3E") 18 round; background: #fff; padding: 0; }
 .toca svg { border-radius: 0; }
 .toca__pedras { opacity: 0.6; }
 .toca__rotulos { fill: var(--texto); opacity: 1; font-family: var(--fonte-titulo); font-weight: 400; }
@@ -351,8 +351,8 @@ body { line-height: 1.7; }
 .botao--contorno:hover { background: var(--texto); color: var(--destaque); }
 .pronuncia__fala { background: var(--destaque); border: 2px solid var(--texto); border-radius: 2px; }
 
-.faixa { height: 30px; background: var(--texto); -webkit-mask: radial-gradient(circle at 15px 0, transparent 9px, #000 10px) 0 0 / 30px 30px repeat-x; mask: radial-gradient(circle at 15px 0, transparent 9px, #000 10px) 0 0 / 30px 30px repeat-x; }
-.faixa--fina { height: 15px; -webkit-mask-size: 15px 15px; mask-size: 15px 15px; }
+.faixa { height: 56px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='56' viewBox='0 0 240 56'%3E %3Cg stroke='%2315110c' stroke-width='2.5' stroke-linejoin='round'%3E %3Cpath d='M6 8v34l15-9 15 9V8z' fill='%23f2a7bf'/%3E %3Cpath d='M54 8v34l15-9 15 9V8z' fill='%23f2c53d'/%3E %3Cpath d='M102 8v34l15-9 15 9V8z' fill='%231e4f8f'/%3E %3Cpath d='M150 8v34l15-9 15 9V8z' fill='%23fffaf0'/%3E %3Cpath d='M198 8v34l15-9 15 9V8z' fill='%233b5a24'/%3E %3C/g%3E %3Cpath d='M0 6h240' stroke='%2315110c' stroke-width='4'/%3E %3C/svg%3E") left top / auto 56px repeat-x; }
+.faixa--fina { height: 36px; background-size: auto 36px; }
 
 .secao__titulo { font-size: clamp(2rem, 4.6vw, 3.2rem); }
 .secao__lead { color: var(--texto-suave); }
@@ -360,8 +360,8 @@ body { line-height: 1.7; }
 .secao--escura { --texto-suave: #e2d4b2; }
 .secao--escura .sobretitulo { color: var(--destaque); }
 
-.episodio { box-shadow: 8px 8px 0 var(--texto); border: 4px solid var(--texto); background: #fffaf0; }
-.episodio__capa { border-right: 4px solid var(--texto); background-image: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(21, 17, 12, 0.15) 7px 8px); }
+.episodio { box-shadow: 9px 9px 0 var(--destaque), 9px 9px 0 3px var(--texto); border: 4px solid var(--texto); background: #fffaf0; }
+.episodio__capa { border-right: 4px solid var(--texto); outline: 2px solid var(--texto); outline-offset: -12px; background-image: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(21, 17, 12, 0.15) 7px 8px); }
 @media (max-width: 760px) { .episodio__capa { border-right: 0; border-bottom: 4px solid var(--texto); } }
 .episodio__numero { font-weight: 400; }
 .episodio__peba { --corte: #f2a7bf; }
@@ -377,13 +377,19 @@ body { line-height: 1.7; }
 .fala__quem { color: var(--acento-2); }
 .fala__quem--davi { color: #b0154f; }
 
-.voz { border: 4px solid var(--texto); box-shadow: 6px 6px 0 var(--texto); border-radius: 2px; }
-.voz--helena { background: #cfe0f5; }
-.voz--davi { background: #fbe3a0; }
+.voz { border: 0; box-shadow: none; border-radius: 2px; background: var(--chapa, var(--fundo)); isolation: isolate; }
+.voz::before { content: ""; position: absolute; inset: 0; z-index: -1; border: 4px solid var(--texto); translate: -7px -7px; pointer-events: none; }
+.voz--helena { --chapa: #cfe0f5; }
+.voz--davi { --chapa: #fbe3a0; }
 .voz__inicial { border-radius: 2px; border: 3px solid var(--texto); font-weight: 400; }
 .voz__papel { color: var(--texto); font-style: italic; }
 
-.saga { border: 3px solid var(--texto); border-radius: 2px; background: #fffaf0; }
+.sagas { row-gap: 3rem; padding-top: 30px; }
+.saga { border: 3px solid var(--texto); border-radius: 2px; background: #fffaf0; overflow: visible; transform-origin: top center; }
+.saga:nth-child(odd) { rotate: -0.7deg; }
+.saga:nth-child(even) { rotate: 0.6deg; }
+.saga::before { content: ""; position: absolute; top: -21px; left: calc(-0.5rem - 3px); right: calc(-0.5rem - 3px); height: 3px; background: var(--texto); }
+.saga::after { content: ""; position: absolute; top: -33px; left: 0; right: 0; height: 40px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='40' viewBox='0 0 16 40'%3E %3Cpath d='M3 2h10v34l-5 2-5-2z' fill='%23b9a67d' stroke='%2315110c' stroke-width='2.5' stroke-linejoin='round'/%3E %3Cpath d='M3 15h10' stroke='%2315110c' stroke-width='3'/%3E %3Cpath d='M8 22v12' stroke='%2315110c' stroke-width='1.5'/%3E %3C/svg%3E") 18% 0 / 16px 40px no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='40' viewBox='0 0 16 40'%3E %3Cpath d='M3 2h10v34l-5 2-5-2z' fill='%23b9a67d' stroke='%2315110c' stroke-width='2.5' stroke-linejoin='round'/%3E %3Cpath d='M3 15h10' stroke='%2315110c' stroke-width='3'/%3E %3Cpath d='M8 22v12' stroke='%2315110c' stroke-width='1.5'/%3E %3C/svg%3E") 82% 0 / 16px 40px no-repeat; }
 .saga:nth-child(4n+1) { background: #f8d6df; } .saga:nth-child(4n+2) { background: #fbe3a0; } .saga:nth-child(4n+3) { background: #cfe0f5; } .saga:nth-child(4n) { background: #d6e8c4; }
 .saga--ativa { outline: 3px solid var(--texto); outline-offset: 4px; }
 .saga__numero { font-weight: 400; color: var(--texto); }
@@ -392,9 +398,9 @@ body { line-height: 1.7; }
 .saga__progresso::before { background: var(--texto); border-radius: 0; }
 .passos li { border-top: 3px solid var(--escura-texto); }
 .passo__num { border-radius: 2px; font-weight: 400; }
-.feed { border: 4px solid var(--texto); background: #fffaf0; box-shadow: 6px 6px 0 var(--texto); }
+.feed { border: 4px solid var(--texto); background: #fffaf0; box-shadow: 8px 8px 0 var(--destaque), 8px 8px 0 3px var(--texto); }
 .feed__url { border: 3px solid var(--texto); }
-.rodape { border-top: 4px solid var(--texto); }
+.rodape { border-top: 0; }
 
 /* Marcas d'água: paisagens do Nordeste em traço de xilogravura. O SVG é só a máscara; cor e opacidade vêm daqui. */
 .hero, #episodios, #vozes, #sagas, #como, #assinar { position: relative; isolation: isolate; overflow: clip; }
@@ -412,3 +418,7 @@ body { line-height: 1.7; }
 @media (max-width: 560px) {
   .hero::before, #episodios::before, #vozes::before, #sagas::before, #assinar::before { --marca-opacidade: 0.08; }
 }
+
+/* Papel-jornal e tinta falhada: o grão cobre a página inteira; a máscara tira pontinhos de tinta só das letras grandes. */
+body::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E %3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.06 0 0 0 0 0.04 0 0 0 1.4 -0.62'/%3E%3C/filter%3E %3Crect width='220' height='220' filter='url%28%23g%29'/%3E %3C/svg%3E"); mix-blend-mode: multiply; opacity: 0.28; }
+.hero h1, .episodio__numero { -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E %3Cfilter id='t' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.38' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -18 14.2'/%3E%3C/filter%3E %3Crect width='260' height='260' filter='url%28%23t%29'/%3E %3C/svg%3E") 0 0 / 260px; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E %3Cfilter id='t' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.38' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -18 14.2'/%3E%3C/filter%3E %3Crect width='260' height='260' filter='url%28%23t%29'/%3E %3C/svg%3E") 0 0 / 260px; }
