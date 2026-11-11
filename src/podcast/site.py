@@ -321,7 +321,7 @@ def _secao_vozes(personas: Mapping[str, Any], sagas: Mapping[str, Any]) -> str:
             papel = "Apresentador, em todas as sagas"
         else:
             nomes = [nomes_saga.get(s, s) for s in persona.get("sagas", [])]
-            papel = f"Convidada da saga {', '.join(nomes)}" if nomes else "Convidada"
+            papel = f"Voz convidada da saga {', '.join(nomes)}" if nomes else "Voz convidada"
         bordao = (persona.get("bordoes") or [""])[0]
         cartoes.append(f"""<article class="voz voz--{escape(persona['id'])}">
   <div class="voz__inicial" aria-hidden="true">{escape(persona['nome'][0])}</div>
