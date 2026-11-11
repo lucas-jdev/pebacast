@@ -444,26 +444,28 @@ body { line-height: 1.7; }
 #assinar::after { content: ""; --cena-altura: 360px; }
 
 @media (max-width: 1180px) {
-  :root { --cena-opacidade: 0.28; }
+  :root { --cena-opacidade: 0.28; --cena-escala: 1; }
   .secao--alternada { --cena-opacidade: 0.3; }
   .secao::before { content: none !important; }
   .hero::before, .secao::after {
     top: auto; bottom: 0; height: var(--cena-altura); min-height: 0;
     -webkit-mask-size: auto 100%; mask-size: auto 100%; -webkit-mask-position: var(--cena-lado, right) bottom; mask-position: var(--cena-lado, right) bottom;
   }
-  .hero { padding-bottom: 250px; }
-  .hero::before { --cena-altura: 250px; --cena-lado: center; }
-  .secao--sem-topo { --cena-base: var(--cena-mar-aberto); padding-bottom: 290px; }
-  .secao--sem-topo::after { --cena-altura: 300px; }
-  #vozes { padding-bottom: 330px; }
-  #vozes::after { --cena-altura: 330px; }
-  #sagas { --cena-base: var(--cena-sertao); padding-bottom: 300px; }
-  #sagas::after { --cena-altura: 290px; }
-  #como { --cena-base: var(--cena-noite); --cena-lado: 90%; padding-bottom: 290px; }
-  #como::after { --cena-altura: 300px; }
-  #assinar { --cena-lado: 82%; padding-bottom: 280px; }
-  #assinar::after { --cena-altura: 280px; }
+  .hero { padding-bottom: calc(250px * var(--cena-escala)); }
+  .hero::before { --cena-altura: calc(250px * var(--cena-escala)); --cena-lado: center; }
+  .secao--sem-topo { --cena-base: var(--cena-mar-aberto); padding-bottom: calc(290px * var(--cena-escala)); }
+  .secao--sem-topo::after { --cena-altura: calc(300px * var(--cena-escala)); }
+  #vozes { padding-bottom: calc(330px * var(--cena-escala)); }
+  #vozes::after { --cena-altura: calc(330px * var(--cena-escala)); }
+  #sagas { --cena-base: var(--cena-sertao); padding-bottom: calc(300px * var(--cena-escala)); }
+  #sagas::after { --cena-altura: calc(290px * var(--cena-escala)); }
+  #como { --cena-base: var(--cena-noite); --cena-lado: 90%; padding-bottom: calc(290px * var(--cena-escala)); }
+  #como::after { --cena-altura: calc(300px * var(--cena-escala)); }
+  #assinar { --cena-lado: 82%; padding-bottom: calc(280px * var(--cena-escala)); }
+  #assinar::after { --cena-altura: calc(280px * var(--cena-escala)); }
 }
+/* Com zoom alto a janela fica baixa: faixas menores para o desenho não custar telas inteiras de rolagem. */
+@media (max-width: 1180px) and (max-height: 560px) { :root { --cena-escala: 0.6; } }
 
 /* Halo de papel: apaga o traço da paisagem logo em volta das letras que ficam direto sobre o fundo. */
 .hero__texto, .secao__cabeca, .secao__titulo--menor, .proximos, .passos, .assinar > div:first-child {
