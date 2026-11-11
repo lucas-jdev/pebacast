@@ -16,6 +16,7 @@
     const barra = player.querySelector(".player__barra");
     const atual = player.querySelector(".player__atual");
     const velocidade = player.querySelector(".player__velocidade");
+    const valorDaVelocidade = velocidade.querySelector(".player__velocidade-valor");
     let arrastando = false;
 
     audio.removeAttribute("controls");
@@ -24,7 +25,9 @@
     const pintar = () => {
       const max = Number(barra.max) || 1;
       barra.style.setProperty("--progresso", `${(Number(barra.value) / max) * 100}%`);
+      barra.setAttribute("aria-valuetext", `${formatar(barra.value)} de ${formatar(barra.max)}`);
     };
+    pintar();
 
     play.addEventListener("click", () => {
       if (audio.paused) {
@@ -39,6 +42,7 @@
     audio.addEventListener("pause", () => { player.classList.remove("player--tocando"); play.setAttribute("aria-label", "Tocar"); });
     audio.addEventListener("loadedmetadata", () => {
       if (Number.isFinite(audio.duration)) barra.max = Math.round(audio.duration);
+      pintar();
     });
     audio.addEventListener("timeupdate", () => {
       if (arrastando) return;
@@ -57,11 +61,25 @@
     velocidade.addEventListener("click", () => {
       const proxima = VELOCIDADES[(VELOCIDADES.indexOf(audio.playbackRate) + 1) % VELOCIDADES.length];
       audio.playbackRate = proxima;
-      velocidade.textContent = `${String(proxima).replace(".", ",")}×`;
+      valorDaVelocidade.textContent = `${String(proxima).replace(".", ",")}×`;
     });
   });
 
+  const chamadaParaOuvir = document.querySelector('.hero__acoes a[href="#episodios"]');
+  const playDoMaisRecente = document.querySelector("#episodios .player__play");
+  if (chamadaParaOuvir && playDoMaisRecente) {
+    chamadaParaOuvir.addEventListener("click", () => {
+      if (playDoMaisRecente.closest(".player").querySelector("audio").paused) playDoMaisRecente.click();
+      setTimeout(() => playDoMaisRecente.focus({ preventScroll: true }));
+    });
+  }
+
   document.querySelectorAll("[data-copiar]").forEach((botao) => {
+    const aviso = document.createElement("span");
+    aviso.className = "so-leitor";
+    aviso.setAttribute("role", "status");
+    botao.after(aviso);
+
     botao.addEventListener("click", async () => {
       const campo = document.getElementById(botao.dataset.copiar);
       try {
@@ -72,7 +90,8 @@
       }
       const original = botao.textContent;
       botao.textContent = "Copiado!";
-      setTimeout(() => { botao.textContent = original; }, 1800);
+      aviso.textContent = "Endereço do feed copiado.";
+      setTimeout(() => { botao.textContent = original; aviso.textContent = ""; }, 1800);
     });
   });
 })();

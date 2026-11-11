@@ -53,7 +53,7 @@ def gerar_index(projeto: Projeto, arquivo_feed: str) -> str:
     ultimo, anteriores = (publicados[0], publicados[1:]) if publicados else (None, [])
     proximos = [
         (saga, episodio)
-        for saga in sagas.values()
+        for saga in _sagas_na_ordem_de_estudo(sagas, publicados)
         for episodio in saga.episodios
         if not (projeto.episodios / episodio.id / PUBLICACAO).exists()
     ]
@@ -62,8 +62,8 @@ def gerar_index(projeto: Projeto, arquivo_feed: str) -> str:
         _hero(ultimo),
         _faixa(),
         _secao_ultimo(ultimo, personas),
-        _secao_anteriores(anteriores, personas),
         _secao_proximos(proximos),
+        _secao_anteriores(anteriores, personas),
         _secao_vozes(personas, sagas),
         _secao_sagas(sagas, publicados),
         _secao_como(config),
@@ -103,6 +103,12 @@ def _publicados(projeto: Projeto) -> list[dict[str, Any]]:
             })
     itens.sort(key=lambda item: item["publicacao"]["publicado_em"], reverse=True)
     return itens
+
+
+def _sagas_na_ordem_de_estudo(sagas: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]]) -> list[Any]:
+    em_andamento = {item["saga"].id for item in publicados}
+    posicao = {sid: indice for indice, (sid, _, _) in enumerate(SAGAS)}
+    return sorted(sagas.values(), key=lambda saga: (saga.id not in em_andamento, posicao.get(saga.id, len(SAGAS))))
 
 
 def _ler_json(arquivo: Path) -> Any:
@@ -168,8 +174,6 @@ def _hero(ultimo: Mapping[str, Any] | None) -> str:
         {acao}
         <a class="botao botao--contorno" href="#assinar">Assinar o feed</a>
       </div>
-      <p class="pronuncia"><span class="pronuncia__fala">PÉ-ba-cast</span>
-        com E aberto, de tatu-peba: o bicho da caatinga que não para de cavar.</p>
     </div>
     {_ILUSTRACAO_TOCA}
   </div>
@@ -260,9 +264,9 @@ def _episodio(item: Mapping[str, Any], personas: Mapping[str, Any], destaque: bo
       </button>
       <div class="player__trilha">
         <input class="player__barra" type="range" min="0" max="{publicacao['duracao_segundos']}" value="0" step="1" aria-label="Posição no episódio">
-        <div class="player__tempos"><span class="player__atual">0:00</span><span>{escape(_duracao(publicacao['duracao_segundos']))}</span></div>
+        <div class="player__tempos"><span class="player__atual">0:00</span><span><span class="so-leitor">de </span>{escape(_duracao(publicacao['duracao_segundos']))}</span></div>
       </div>
-      <button class="player__velocidade" type="button" aria-label="Velocidade de reprodução">1×</button>
+      <button class="player__velocidade" type="button"><span class="so-leitor">Velocidade de reprodução: </span><span class="player__velocidade-valor">1×</span></button>
     </div>
     <div class="episodio__detalhes">
       <div>
@@ -277,7 +281,7 @@ def _episodio(item: Mapping[str, Any], personas: Mapping[str, Any], destaque: bo
     {selo}
     <details class="dobra">
       <summary>Transcrição <span class="dobra__extra">{palavras} palavras</span></summary>
-      <div class="transcricao">{transcricao}</div>
+      <div class="transcricao" tabindex="0" role="region" aria-label="Transcrição do episódio">{transcricao}</div>
     </details>
     <details class="dobra">
       <summary>Fontes</summary>
@@ -292,18 +296,36 @@ def _episodio(item: Mapping[str, Any], personas: Mapping[str, Any], destaque: bo
 def _secao_proximos(proximos: Sequence[tuple[Any, Any]]) -> str:
     if not proximos:
         return ""
-    itens = "\n".join(
-        f'<li><span class="proximo__num">{escape(_numero(ep.id))}</span>'
-        f'<span class="proximo__titulo">{escape(ep.titulo)}</span>'
-        f'<span class="proximo__saga">{escape(saga.nome)}</span></li>'
-        for saga, ep in proximos[:6]
-    )
-    return f"""<section class="secao secao--sem-topo">
+    saga, episodio = proximos[0]
+    numero = escape(_numero(episodio.id))
+    objetivos = "".join(f"<li>{escape(o)}</li>" for o in episodio.dados.get("objetivos", []))
+    aprendizado = f"""
+      <h3 class="proximo__rotulo">Ao final, você deve conseguir</h3>
+      <ul class="lista-marcada">{objetivos}</ul>""" if objetivos else ""
+    return f"""<section class="secao secao--sem-topo" id="proximo">
   <div class="largura">
-    <h2 class="secao__titulo secao__titulo--menor">Na sequência</h2>
-    <ol class="proximos">{itens}</ol>
+    <article class="proximo">
+      <div class="proximo__capa" aria-hidden="true"><span class="proximo__numero">{numero}</span></div>
+      <div class="proximo__corpo">
+        <p class="sobretitulo">Próximo episódio</p>
+        <h2 class="proximo__titulo">{escape(episodio.titulo)}</h2>
+        <p class="proximo__saga">{escape(saga.nome)}, episódio {numero}</p>{aprendizado}
+        {_depois_do_proximo(proximos)}
+      </div>
+    </article>
   </div>
 </section>"""
+
+
+def _depois_do_proximo(proximos: Sequence[tuple[Any, Any]]) -> str:
+    saga_atual = proximos[0][0]
+    restantes = sum(1 for saga, _ in proximos[1:] if saga.id == saga_atual.id)
+    if restantes:
+        quantos = "mais 1 episódio" if restantes == 1 else f"mais {restantes} episódios"
+        return f'<p class="proximo__depois">Depois dele, {quantos} desta saga.</p>'
+    if len(proximos) > 1:
+        return f'<p class="proximo__depois">Depois dele começa a saga {escape(proximos[1][0].nome)}.</p>'
+    return ""
 
 
 def _secao_vozes(personas: Mapping[str, Any], sagas: Mapping[str, Any]) -> str:
@@ -315,7 +337,7 @@ def _secao_vozes(personas: Mapping[str, Any], sagas: Mapping[str, Any]) -> str:
             papel = "Apresentador, em todas as sagas"
         else:
             nomes = [nomes_saga.get(s, s) for s in persona.get("sagas", [])]
-            papel = f"Convidada da saga {', '.join(nomes)}" if nomes else "Convidada"
+            papel = f"Voz convidada da saga {', '.join(nomes)}" if nomes else "Voz convidada"
         bordao = (persona.get("bordoes") or [""])[0]
         cartoes.append(f"""<article class="voz voz--{escape(persona['id'])}">
   <div class="voz__inicial" aria-hidden="true">{escape(persona['nome'][0])}</div>
@@ -344,9 +366,9 @@ def _secao_sagas(sagas: Mapping[str, Any], publicados: Sequence[Mapping[str, Any
     cartoes = []
     for indice, (sid, nome, pergunta) in enumerate(SAGAS, start=1):
         saga = sagas.get(sid)
-        if saga:
+        feitos = por_saga.get(sid, 0)
+        if saga and feitos:
             total = len(saga.episodios)
-            feitos = por_saga.get(sid, 0)
             estado = f'<span class="saga__estado saga__estado--ativa">No ar · {feitos} de {total}</span>'
             progresso = f'<span class="saga__progresso" style="--p:{feitos / total if total else 0:.3f}"></span>'
             classe = "saga saga--ativa"
@@ -513,9 +535,6 @@ _PAGINA = """<!doctype html>
 <link rel="canonical" href="{url_site}">
 <link rel="alternate" type="application/rss+xml" title="{titulo}" href="{url_feed}">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..800,50&family=Instrument+Sans:wght@400..700&display=swap">
 <link rel="stylesheet" href="estilo.css">
 <script defer src="app.js"></script>
 </head>
