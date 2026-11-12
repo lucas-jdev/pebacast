@@ -191,10 +191,10 @@ button { font: inherit; }
 .player { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; margin-top: 1.5rem; padding: 0.75rem 0.9rem 0.75rem 0.75rem; background: var(--fundo); border: var(--borda) solid var(--linha); border-radius: var(--raio-botao); }
 .player audio { grid-column: 1 / -1; width: 100%; }
 .player > button, .player__trilha { display: none; }
-.player--js audio { display: none; }
-.player--js .player__trilha { display: block; }
-.player--js .player__play { display: grid; }
-.player--js .player__velocidade { display: inline-block; }
+.js .player audio { display: none; }
+.js .player__trilha { display: block; }
+.js .player__play { display: grid; }
+.js .player__velocidade { display: inline-block; }
 .player__play { place-items: center; width: 52px; height: 52px; border-radius: 50%; border: 0; cursor: pointer; background: var(--acento); color: var(--sobre-acento); transition: background 0.15s ease; }
 .player__play:hover { background: var(--acento-forte); }
 .player__play svg { width: 22px; height: 22px; }
@@ -263,8 +263,12 @@ button { font: inherit; }
 @media (max-width: 760px) { .proximo__peba { width: 84px; height: 52px; } }
 
 /* arquivo de episódios */
-.filtro { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 2.4rem; }
-.filtro[hidden], .mes[hidden], .item[hidden] { display: none; }
+/* A classe .js entra no <html> por um script no <head>, antes da pintura: o que depende de JS já nasce no lugar, sem deslocar a página. */
+.filtro { display: none; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 2.4rem; }
+.js .filtro { display: flex; }
+/* No celular os filtros rolam de lado em vez de quebrar linha: a altura não muda quando a fonte carrega nem quando surgem sagas novas. */
+@media (max-width: 760px) { .js .filtro { flex-wrap: nowrap; overflow-x: auto; padding: 0 4px 8px 0; scrollbar-width: thin; } .filtro__opcao { flex: none; } }
+.mes[hidden], .item[hidden] { display: none; }
 .filtro__opcao { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; padding: 0 1rem; border: var(--borda) solid var(--linha); border-radius: var(--raio-botao); background: var(--fundo); color: var(--texto); font-weight: 600; cursor: pointer; }
 .filtro__opcao[aria-pressed="true"] { background: var(--texto); color: var(--fundo); border-color: var(--texto); }
 .filtro__total { font-size: 0.85rem; font-variant-numeric: tabular-nums; opacity: 0.75; }

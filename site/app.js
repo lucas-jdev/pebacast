@@ -20,7 +20,6 @@
     let arrastando = false;
 
     audio.removeAttribute("controls");
-    player.classList.add("player--js");
 
     const pintar = () => {
       const max = Number(barra.max) || 1;
@@ -107,7 +106,6 @@
     };
 
     opcoes.forEach((opcao) => opcao.addEventListener("click", () => aplicar(opcao.dataset.saga)));
-    filtro.hidden = false;
   }
 
   document.querySelectorAll("[data-copiar]").forEach((botao) => {

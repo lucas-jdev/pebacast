@@ -398,7 +398,7 @@ def _secao_arquivo(publicados: Sequence[Mapping[str, Any]], personas: Mapping[st
 
 
 def _filtro_por_saga(publicados: Sequence[Mapping[str, Any]]) -> str:
-    """Só aparece com duas sagas ou mais. Fica escondido até o app.js ligar, já que sem JS não filtra nada."""
+    """Só aparece com duas sagas ou mais, e só com JS (classe .js no <html>), já que sem JS não filtra nada."""
     contagem: dict[str, int] = {}
     for item in publicados:
         contagem[item["saga"].id] = contagem.get(item["saga"].id, 0) + 1
@@ -412,7 +412,7 @@ def _filtro_por_saga(publicados: Sequence[Mapping[str, Any]]) -> str:
         f'{escape(nome)} <span class="filtro__total">{quantos}</span></button>'
         for sid, nome, quantos in opcoes
     )
-    return f"""<div class="filtro" role="group" aria-label="Filtrar por saga" hidden>{botoes}
+    return f"""<div class="filtro" role="group" aria-label="Filtrar por saga">{botoes}
   <p class="so-leitor" role="status" data-filtro-status></p>
 </div>"""
 
@@ -775,6 +775,7 @@ _PAGINA = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>document.documentElement.classList.add("js")</script>
 <title>{titulo}</title>
 <meta name="description" content="{descricao}">
 <meta name="author" content="{autor}">
@@ -802,6 +803,11 @@ _PAGINA = """<!doctype html>
 <link rel="icon" href="favicon.ico" sizes="48x48">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="fontes/literata-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fontes/literata-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fontes/alfa-slab-one-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="amarracao-verso.svg" as="image" fetchpriority="high">
+<link rel="preload" href="amarracao-frente.svg" as="image" fetchpriority="high">
 <link rel="stylesheet" href="estilo.css">
 <script defer src="app.js"></script>
 <script type="application/ld+json">{dados_estruturados}</script>
