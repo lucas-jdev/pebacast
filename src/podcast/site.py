@@ -1,8 +1,8 @@
-"""Página inicial do Pebacast no GitHub Pages.
+"""Páginas do Pebacast no GitHub Pages.
 
-Gera o index.html a partir do que já está no repositório (currículo, personas e
-episódios publicados) e copia os arquivos estáticos de site/. O feed continua
-saindo de podcast.publicacao: esta página é só a vitrine.
+Gera o index.html (vitrine: último episódio e o próximo) e o episodios.html (arquivo
+de tudo que já foi publicado) a partir do que está no repositório, e copia os
+arquivos estáticos de site/. O feed continua saindo de podcast.publicacao.
 
     python -m podcast.publicacao --site _site feed
 """
@@ -10,15 +10,24 @@ saindo de podcast.publicacao: esta página é só a vitrine.
 import json
 import shutil
 from collections.abc import Mapping, Sequence
-from datetime import datetime
+from datetime import date, datetime
 from html import escape
+from itertools import groupby
 from pathlib import Path
 from typing import Any
 
-from podcast.roteiro import FUSO_BRASILIA, Projeto
+from podcast.roteiro import (
+    AGUARDANDO_PUBLICACAO,
+    FUSO_BRASILIA,
+    Projeto,
+    Proximo,
+    data_de_publicacao,
+    proximo_a_publicar,
+)
 from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO
 
 ARQUIVOS_ESTATICOS = "site"
+PAGINA_EPISODIOS = "episodios.html"
 
 MESES = ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
          "agosto", "setembro", "outubro", "novembro", "dezembro")
@@ -40,46 +49,70 @@ def escrever_pagina(projeto: Projeto, site: Path, arquivo_feed: str) -> None:
     if estaticos.is_dir():
         shutil.copytree(estaticos, site, dirs_exist_ok=True)
     (site / "index.html").write_text(gerar_index(projeto, arquivo_feed), encoding="utf-8")
+    (site / PAGINA_EPISODIOS).write_text(gerar_pagina_episodios(projeto, arquivo_feed), encoding="utf-8")
 
 
-def gerar_index(projeto: Projeto, arquivo_feed: str) -> str:
+def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -> str:
     config = projeto.config()
     meta = config["feed"]
     sagas = projeto.sagas()
     personas = projeto.personas()
     publicados = _publicados(projeto)
-    url_feed = meta["url_site"].rstrip("/") + "/" + arquivo_feed
-
-    ultimo, anteriores = (publicados[0], publicados[1:]) if publicados else (None, [])
-    proximos = [
-        (saga, episodio)
-        for saga in _sagas_na_ordem_de_estudo(sagas, publicados)
-        for episodio in saga.episodios
-        if not (projeto.episodios / episodio.id / PUBLICACAO).exists()
-    ]
+    ultimo = publicados[0] if publicados else None
+    proximo = proximo_a_publicar(projeto, data or data_de_publicacao())
 
     secoes = [
         _hero(ultimo),
         _faixa(),
-        _secao_ultimo(ultimo, personas),
-        _secao_proximos(proximos),
-        _secao_anteriores(anteriores, personas),
+        _secao_ultimo(ultimo, personas, total_publicados=len(publicados)),
+        _secao_proximo(proximo),
         _secao_vozes(personas, sagas),
         _secao_sagas(sagas, publicados),
         _secao_como(config),
-        _secao_assinar(url_feed, meta),
+        _secao_assinar(_url_feed(meta, arquivo_feed), meta),
     ]
-    descricao = " ".join(meta["descricao"].split())
-    return _PAGINA.format(
-        titulo=escape(meta["titulo"]),
-        descricao=escape(descricao),
-        url_site=escape(meta["url_site"]),
-        url_feed=escape(url_feed),
-        simbolos=_SIMBOLOS,
-        cabecalho=_cabecalho(meta),
+    return _documento(
+        config, arquivo_feed,
+        titulo=f"{meta['titulo']} · arquitetura, um porquê por dia",
+        url=meta["url_site"],
+        pular_para="episodios",
+        cabecalho=_cabecalho(meta, na_inicial=True),
         conteudo="\n".join(s for s in secoes if s),
+    )
+
+
+def gerar_pagina_episodios(projeto: Projeto, arquivo_feed: str) -> str:
+    config = projeto.config()
+    meta = config["feed"]
+    return _documento(
+        config, arquivo_feed,
+        titulo=f"Episódios · {meta['titulo']}",
+        url=meta["url_site"].rstrip("/") + "/" + PAGINA_EPISODIOS,
+        pular_para="arquivo",
+        cabecalho=_cabecalho(meta, na_inicial=False),
+        conteudo=_secao_arquivo(_publicados(projeto), projeto.personas()),
+    )
+
+
+def _documento(config: Mapping[str, Any], arquivo_feed: str, *, titulo: str, url: str, pular_para: str,
+               cabecalho: str, conteudo: str) -> str:
+    meta = config["feed"]
+    return _PAGINA.format(
+        titulo=escape(titulo),
+        nome=escape(meta["titulo"]),
+        descricao=escape(" ".join(meta["descricao"].split())),
+        url=escape(url),
+        url_feed=escape(_url_feed(meta, arquivo_feed)),
+        simbolos=_SIMBOLOS,
+        pular_para=pular_para,
+        cabecalho=cabecalho,
+        conteudo=conteudo,
         rodape=_rodape(meta, config),
     )
+
+
+def _url_feed(meta: Mapping[str, Any], arquivo_feed: str) -> str:
+    return meta["url_site"].rstrip("/") + "/" + arquivo_feed
 
 
 # ---------------------------------------------------------------- dados
@@ -105,12 +138,6 @@ def _publicados(projeto: Projeto) -> list[dict[str, Any]]:
     return itens
 
 
-def _sagas_na_ordem_de_estudo(sagas: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]]) -> list[Any]:
-    em_andamento = {item["saga"].id for item in publicados}
-    posicao = {sid: indice for indice, (sid, _, _) in enumerate(SAGAS)}
-    return sorted(sagas.values(), key=lambda saga: (saga.id not in em_andamento, posicao.get(saga.id, len(SAGAS))))
-
-
 def _ler_json(arquivo: Path) -> Any:
     return json.loads(arquivo.read_text(encoding="utf-8"))
 
@@ -120,8 +147,13 @@ def _data_por_extenso(iso: str) -> str:
     return f"{data.day} de {MESES[data.month - 1]} de {data.year}"
 
 
-def _data_curta(iso: str) -> str:
-    return datetime.fromisoformat(iso).astimezone(FUSO_BRASILIA).date().isoformat()
+def _mes_por_extenso(iso: str) -> str:
+    data = datetime.fromisoformat(iso).astimezone(FUSO_BRASILIA)
+    return f"{MESES[data.month - 1].capitalize()} de {data.year}"
+
+
+def _nome_curto(saga: Any) -> str:
+    return next((nome for sid, nome, _ in SAGAS if sid == saga.id), saga.nome)
 
 
 def _duracao(segundos: int) -> str:
@@ -139,18 +171,20 @@ def _numero(episodio_id: str) -> str:
 # ---------------------------------------------------------------- seções
 
 
-def _cabecalho(meta: Mapping[str, Any]) -> str:
+def _cabecalho(meta: Mapping[str, Any], na_inicial: bool) -> str:
+    inicial = "" if na_inicial else "./"
+    atual = "" if na_inicial else ' aria-current="page"'
     return f"""<header class="topo">
   <div class="largura topo__linha">
-    <a class="marca" href="#inicio" aria-label="{escape(meta['titulo'])}, início">
+    <a class="marca" href="{inicial}#inicio" aria-label="{escape(meta['titulo'])}, início">
       <svg class="marca__peba" viewBox="0 0 128 80" aria-hidden="true"><use href="#peba"/></svg>
       <span class="marca__nome">{escape(meta['titulo'])}</span>
     </a>
     <nav class="topo__nav" aria-label="Seções">
-      <a href="#episodios">Episódios</a>
-      <a href="#sagas">Sagas</a>
-      <a href="#como">Como funciona</a>
-      <a class="botao botao--pequeno" href="#assinar">Assinar</a>
+      <a href="{PAGINA_EPISODIOS}"{atual}>Episódios</a>
+      <a href="{inicial}#sagas">Sagas</a>
+      <a href="{inicial}#como">Como funciona</a>
+      <a class="botao botao--pequeno" href="{inicial}#assinar">Assinar</a>
     </nav>
   </div>
 </header>"""
@@ -184,91 +218,167 @@ def _faixa() -> str:
     return '<div class="faixa" role="presentation"></div>'
 
 
-def _secao_ultimo(item: Mapping[str, Any] | None, personas: Mapping[str, Any]) -> str:
+def _secao_ultimo(item: Mapping[str, Any] | None, personas: Mapping[str, Any], total_publicados: int) -> str:
     if item is None:
         return """<section class="secao" id="episodios">
   <div class="largura"><h2 class="secao__titulo">Episódios</h2>
   <p class="vazio">O primeiro episódio está sendo cavado. Assine o feed pra receber assim que sair.</p></div>
 </section>"""
+    arquivo = ""
+    if total_publicados > 1:
+        arquivo = (f'<p class="chamada-arquivo"><a class="botao botao--contorno" href="{PAGINA_EPISODIOS}">'
+                   f"Ver os {total_publicados} episódios publicados</a></p>")
     return f"""<section class="secao" id="episodios">
   <div class="largura">
     <div class="secao__cabeca">
       <p class="sobretitulo">Episódio mais recente</p>
       <h2 class="secao__titulo">Pra ouvir agora</h2>
     </div>
-    {_episodio(item, personas, destaque=True)}
+    {_episodio_destaque(item, personas)}
+    {arquivo}
   </div>
 </section>"""
 
 
-def _secao_anteriores(itens: Sequence[Mapping[str, Any]], personas: Mapping[str, Any]) -> str:
-    if not itens:
-        return ""
-    lista = "\n".join(_episodio(item, personas, destaque=False) for item in itens)
-    return f"""<section class="secao secao--sem-topo" id="anteriores">
-  <div class="largura">
-    <h2 class="secao__titulo secao__titulo--menor">Episódios anteriores</h2>
-    <div class="lista-episodios">{lista}</div>
-  </div>
-</section>"""
-
-
-def _episodio(item: Mapping[str, Any], personas: Mapping[str, Any], destaque: bool) -> str:
-    episodio, publicacao, roteiro = item["episodio"], item["publicacao"], item["roteiro"]
-    noticia, revisoes, saga = item["noticia"], item["revisoes"], item["saga"]
+def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any]) -> str:
+    episodio, roteiro, saga = item["episodio"], item["roteiro"], item["saga"]
     eid = escape(episodio["id"])
-    objetivos = "".join(f"<li>{escape(o)}</li>" for o in episodio.get("objetivos", []))
-    fontes = "".join(f"<li>{escape(f)}</li>" for f in roteiro.get("fontes", []))
-
-    if noticia.get("tipo") == "noticia":
-        caso = (f'<p class="caso"><span class="caso__rotulo">Ponto de partida</span>'
-                f'<a href="{escape(noticia["url"])}" rel="noopener">{escape(noticia["titulo"])}</a>'
-                f' <span class="caso__fonte">{escape(noticia["fonte"])}</span></p>')
-    else:
-        caso = '<p class="caso"><span class="caso__rotulo">Ponto de partida</span>Um cenário hipotético.</p>'
-
-    selo = ""
-    if revisoes:
-        afirmacoes = len(revisoes[-1].get("afirmacoes", []))
-        ciclos = len(revisoes)
-        selo = (f'<p class="selo"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-check"/></svg>'
-                f"{afirmacoes} afirmações checadas contra as fontes, aprovado na {ciclos}ª revisão</p>")
-
-    transcricao = "\n".join(
-        f'<p><span class="fala__quem fala__quem--{escape(f["persona"])}">'
-        f'{escape(personas.get(f["persona"], {}).get("nome", f["persona"]))}</span>{escape(f["texto"])}</p>'
-        for f in roteiro.get("falas", [])
-    )
-    palavras = f'{sum(len(f["texto"].split()) for f in roteiro.get("falas", [])):,}'.replace(",", ".")
-
-    classe = "episodio episodio--destaque" if destaque else "episodio"
-    return f"""<article class="{classe}" id="{eid}">
+    return f"""<article class="episodio episodio--destaque" id="{eid}" data-saga="{escape(saga.id)}">
   <div class="episodio__capa" aria-hidden="true">
     <span class="episodio__saga">{escape(saga.nome)}</span>
     <span class="episodio__numero">{escape(_numero(episodio['id']))}</span>
     <svg class="episodio__peba" viewBox="0 0 128 80"><use href="#peba"/></svg>
   </div>
   <div class="episodio__corpo">
-    <p class="episodio__meta">
+    {_meta(item)}
+    <h3 class="episodio__titulo">{escape(episodio['titulo'])}</h3>
+    {_caso(item["noticia"])}
+    {_player(item["publicacao"])}
+    {_objetivos_e_desafio(episodio, roteiro)}
+    {_selo(item["revisoes"])}
+    {_dobra_transcricao(roteiro, personas)}
+    <details class="dobra">
+      <summary>Fontes</summary>
+      {_fontes(roteiro)}
+    </details>
+    {_links(item, f"{PAGINA_EPISODIOS}#{eid}")}
+  </div>
+</article>"""
+
+
+def _secao_arquivo(publicados: Sequence[Mapping[str, Any]], personas: Mapping[str, Any]) -> str:
+    total = len(publicados)
+    if not publicados:
+        lead = "Nenhum episódio publicado ainda. O primeiro está sendo cavado."
+    elif total == 1:
+        lead = "1 episódio publicado, com áudio, desafio, transcrição e fontes."
+    else:
+        lead = f"{total} episódios publicados, do mais recente ao mais antigo, com áudio, desafio, transcrição e fontes."
+    meses = groupby(publicados, key=lambda item: _mes_por_extenso(item["publicacao"]["publicado_em"]))
+    grupos = "\n".join(
+        f"""<section class="mes" aria-labelledby="mes-{indice}">
+  <h2 class="mes__titulo" id="mes-{indice}">{escape(mes)}</h2>
+  <ol class="mes__lista">{''.join(_episodio_compacto(item, personas) for item in itens)}</ol>
+</section>"""
+        for indice, (mes, itens) in enumerate(meses, start=1)
+    )
+    return f"""<section class="secao" id="arquivo">
+  <div class="largura">
+    <div class="secao__cabeca">
+      <p class="sobretitulo">Arquivo</p>
+      <h1 class="secao__titulo">Todos os episódios</h1>
+      <p class="secao__lead">{escape(lead)}</p>
+    </div>
+    {_filtro_por_saga(publicados)}
+    <div class="arquivo">{grupos}</div>
+  </div>
+</section>"""
+
+
+def _filtro_por_saga(publicados: Sequence[Mapping[str, Any]]) -> str:
+    """Só aparece com duas sagas ou mais. Fica escondido até o app.js ligar, já que sem JS não filtra nada."""
+    contagem: dict[str, int] = {}
+    for item in publicados:
+        contagem[item["saga"].id] = contagem.get(item["saga"].id, 0) + 1
+    if len(contagem) < 2:
+        return ""
+    opcoes = [("", "Todas", len(publicados))] + [
+        (sid, nome, contagem[sid]) for sid, nome, _ in SAGAS if sid in contagem
+    ]
+    botoes = "".join(
+        f'<button class="filtro__opcao" type="button" data-saga="{escape(sid)}" aria-pressed="{"true" if not sid else "false"}">'
+        f'{escape(nome)} <span class="filtro__total">{quantos}</span></button>'
+        for sid, nome, quantos in opcoes
+    )
+    return f"""<div class="filtro" role="group" aria-label="Filtrar por saga" hidden>{botoes}
+  <p class="so-leitor" role="status" data-filtro-status></p>
+</div>"""
+
+
+def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any]) -> str:
+    episodio, roteiro, saga = item["episodio"], item["roteiro"], item["saga"]
+    eid = escape(episodio["id"])
+    return f"""<li class="item" id="{eid}" data-saga="{escape(saga.id)}">
+  <div class="item__capa" aria-hidden="true">
+    <span class="item__saga">{escape(_nome_curto(saga))}</span>
+    <span class="item__numero">{escape(_numero(episodio['id']))}</span>
+  </div>
+  <article class="item__corpo" aria-labelledby="titulo-{eid}">
+    {_meta(item)}
+    <h3 class="item__titulo" id="titulo-{eid}">{escape(episodio['titulo'])}</h3>
+    {_caso(item["noticia"])}
+    {_player(item["publicacao"])}
+    <details class="dobra">
+      <summary>Objetivos e desafio</summary>
+      {_objetivos_e_desafio(episodio, roteiro)}
+    </details>
+    {_dobra_transcricao(roteiro, personas)}
+    <details class="dobra">
+      <summary>Fontes</summary>
+      {_selo(item["revisoes"])}
+      {_fontes(roteiro)}
+    </details>
+    {_links(item, f"#{eid}")}
+  </article>
+</li>"""
+
+
+def _meta(item: Mapping[str, Any]) -> str:
+    publicacao, saga, eid = item["publicacao"], item["saga"], item["episodio"]["id"]
+    return f"""<p class="episodio__meta">
       <time datetime="{escape(publicacao['publicado_em'])}">{escape(_data_por_extenso(publicacao['publicado_em']))}</time>
       <span aria-hidden="true">·</span> {escape(_minutos(publicacao['duracao_segundos']))}
-      <span aria-hidden="true">·</span> {escape(saga.nome)}, episódio {escape(_numero(episodio['id']))}
-    </p>
-    <h3 class="episodio__titulo">{escape(episodio['titulo'])}</h3>
-    {caso}
-    <div class="player" data-duracao="{publicacao['duracao_segundos']}">
+      <span aria-hidden="true">·</span> {escape(saga.nome)}, episódio {escape(_numero(eid))}
+    </p>"""
+
+
+def _caso(noticia: Mapping[str, Any]) -> str:
+    if noticia.get("tipo") == "noticia":
+        return (f'<p class="caso"><span class="caso__rotulo">Ponto de partida</span>'
+                f'<a href="{escape(noticia["url"])}" rel="noopener">{escape(noticia["titulo"])}</a>'
+                f' <span class="caso__fonte">{escape(noticia["fonte"])}</span></p>')
+    return '<p class="caso"><span class="caso__rotulo">Ponto de partida</span>Um cenário hipotético.</p>'
+
+
+def _player(publicacao: Mapping[str, Any]) -> str:
+    duracao = publicacao["duracao_segundos"]
+    return f"""<div class="player" data-duracao="{duracao}">
       <audio controls preload="none" src="{escape(publicacao['url_audio'])}"></audio>
       <button class="player__play" type="button" aria-label="Tocar">
         <svg class="player__icone-play" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-play"/></svg>
         <svg class="player__icone-pausa" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-pause"/></svg>
       </button>
       <div class="player__trilha">
-        <input class="player__barra" type="range" min="0" max="{publicacao['duracao_segundos']}" value="0" step="1" aria-label="Posição no episódio">
-        <div class="player__tempos"><span class="player__atual">0:00</span><span><span class="so-leitor">de </span>{escape(_duracao(publicacao['duracao_segundos']))}</span></div>
+        <input class="player__barra" type="range" min="0" max="{duracao}" value="0" step="1" aria-label="Posição no episódio">
+        <div class="player__tempos"><span class="player__atual">0:00</span><span><span class="so-leitor">de </span>{escape(_duracao(duracao))}</span></div>
       </div>
       <button class="player__velocidade" type="button"><span class="so-leitor">Velocidade de reprodução: </span><span class="player__velocidade-valor">1×</span></button>
-    </div>
-    <div class="episodio__detalhes">
+    </div>"""
+
+
+def _objetivos_e_desafio(episodio: Mapping[str, Any], roteiro: Mapping[str, Any]) -> str:
+    objetivos = "".join(f"<li>{escape(o)}</li>" for o in episodio.get("objetivos", []))
+    return f"""<div class="episodio__detalhes">
       <div>
         <h4>Ao final, você deve conseguir</h4>
         <ul class="lista-marcada">{objetivos}</ul>
@@ -277,55 +387,85 @@ def _episodio(item: Mapping[str, Any], personas: Mapping[str, Any], destaque: bo
         <h4>Desafio do episódio</h4>
         <p>{escape(roteiro.get('desafio', ''))}</p>
       </div>
-    </div>
-    {selo}
-    <details class="dobra">
+    </div>"""
+
+
+def _selo(revisoes: Sequence[Mapping[str, Any]]) -> str:
+    if not revisoes:
+        return ""
+    afirmacoes = len(revisoes[-1].get("afirmacoes", []))
+    return (f'<p class="selo"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-check"/></svg>'
+            f"{afirmacoes} afirmações checadas contra as fontes, aprovado na {len(revisoes)}ª revisão</p>")
+
+
+def _dobra_transcricao(roteiro: Mapping[str, Any], personas: Mapping[str, Any]) -> str:
+    falas = roteiro.get("falas", [])
+    transcricao = "\n".join(
+        f'<p><span class="fala__quem fala__quem--{escape(f["persona"])}">'
+        f'{escape(personas.get(f["persona"], {}).get("nome", f["persona"]))}</span>{escape(f["texto"])}</p>'
+        for f in falas
+    )
+    palavras = f'{sum(len(f["texto"].split()) for f in falas):,}'.replace(",", ".")
+    return f"""<details class="dobra">
       <summary>Transcrição <span class="dobra__extra">{palavras} palavras</span></summary>
       <div class="transcricao" tabindex="0" role="region" aria-label="Transcrição do episódio">{transcricao}</div>
-    </details>
-    <details class="dobra">
-      <summary>Fontes</summary>
-      <ul class="fontes">{fontes}</ul>
-    </details>
-    <p class="episodio__links"><a href="{escape(publicacao['url_audio'])}" download>Baixar o MP3</a>
-      <span aria-hidden="true">·</span> <a href="#{eid}">Link deste episódio</a></p>
-  </div>
-</article>"""
+    </details>"""
 
 
-def _secao_proximos(proximos: Sequence[tuple[Any, Any]]) -> str:
-    if not proximos:
-        return ""
-    saga, episodio = proximos[0]
-    numero = escape(_numero(episodio.id))
-    objetivos = "".join(f"<li>{escape(o)}</li>" for o in episodio.dados.get("objetivos", []))
+def _fontes(roteiro: Mapping[str, Any]) -> str:
+    return f'<ul class="fontes">{"".join(f"<li>{escape(f)}</li>" for f in roteiro.get("fontes", []))}</ul>'
+
+
+def _links(item: Mapping[str, Any], link_permanente: str) -> str:
+    return f"""<p class="episodio__links"><a href="{escape(item['publicacao']['url_audio'])}" download>Baixar o MP3</a>
+      <span aria-hidden="true">·</span> <a href="{escape(link_permanente)}">Link deste episódio</a></p>"""
+
+
+_ESTADO_DO_PROXIMO = {
+    AGUARDANDO_PUBLICACAO: "Roteiro aprovado na revisão. Falta só gravar a voz e publicar.",
+}
+_ESTADO_PADRAO = "Fontes conferidas. O roteiro é o próximo a ser escrito."
+
+
+def _secao_proximo(proximo: Proximo | None) -> str:
+    if proximo is None:
+        return _secao_proximo_vazio()
+    numero = escape(_numero(proximo.episodio.id))
+    objetivos = "".join(f"<li>{escape(o)}</li>" for o in proximo.episodio.dados.get("objetivos", []))
     aprendizado = f"""
       <h3 class="proximo__rotulo">Ao final, você deve conseguir</h3>
       <ul class="lista-marcada">{objetivos}</ul>""" if objetivos else ""
+    estado = _ESTADO_DO_PROXIMO.get(proximo.estado, _ESTADO_PADRAO)
     return f"""<section class="secao secao--sem-topo" id="proximo">
   <div class="largura">
     <article class="proximo">
       <div class="proximo__capa" aria-hidden="true"><span class="proximo__numero">{numero}</span></div>
       <div class="proximo__corpo">
         <p class="sobretitulo">Próximo episódio</p>
-        <h2 class="proximo__titulo">{escape(episodio.titulo)}</h2>
-        <p class="proximo__saga">{escape(saga.nome)}, episódio {numero}</p>{aprendizado}
-        {_depois_do_proximo(proximos)}
+        <h2 class="proximo__titulo">{escape(proximo.episodio.titulo)}</h2>
+        <p class="proximo__saga">{escape(proximo.saga.nome)}, episódio {numero}</p>{aprendizado}
+        <p class="proximo__estado">{escape(estado)}</p>
       </div>
     </article>
   </div>
 </section>"""
 
 
-def _depois_do_proximo(proximos: Sequence[tuple[Any, Any]]) -> str:
-    saga_atual = proximos[0][0]
-    restantes = sum(1 for saga, _ in proximos[1:] if saga.id == saga_atual.id)
-    if restantes:
-        quantos = "mais 1 episódio" if restantes == 1 else f"mais {restantes} episódios"
-        return f'<p class="proximo__depois">Depois dele, {quantos} desta saga.</p>'
-    if len(proximos) > 1:
-        return f'<p class="proximo__depois">Depois dele começa a saga {escape(proximos[1][0].nome)}.</p>'
-    return ""
+def _secao_proximo_vazio() -> str:
+    return """<section class="secao secao--sem-topo" id="proximo">
+  <div class="largura">
+    <article class="proximo proximo--vazio">
+      <div class="proximo__capa" aria-hidden="true"><svg class="proximo__peba" viewBox="0 0 128 80"><use href="#peba"/></svg></div>
+      <div class="proximo__corpo">
+        <p class="sobretitulo">Próximo episódio</p>
+        <h2 class="proximo__titulo">Ainda cavando o próximo</h2>
+        <p class="proximo__texto">Episódio novo só sai depois que as referências dele são conferidas no livro.
+          Assim que isso acontecer, ele aparece aqui e chega sozinho no seu app de podcast.</p>
+        <p class="proximo__acao"><a class="botao botao--contorno" href="#assinar">Assinar o feed</a></p>
+      </div>
+    </article>
+  </div>
+</section>"""
 
 
 def _secao_vozes(personas: Mapping[str, Any], sagas: Mapping[str, Any]) -> str:
@@ -523,24 +663,24 @@ _PAGINA = """<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{titulo} · arquitetura, um porquê por dia</title>
+<title>{titulo}</title>
 <meta name="description" content="{descricao}">
 <meta name="theme-color" content="#f4ecdd" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{titulo}">
 <meta property="og:description" content="{descricao}">
-<meta property="og:url" content="{url_site}">
+<meta property="og:url" content="{url}">
 <meta property="og:locale" content="pt_BR">
-<link rel="canonical" href="{url_site}">
-<link rel="alternate" type="application/rss+xml" title="{titulo}" href="{url_feed}">
+<link rel="canonical" href="{url}">
+<link rel="alternate" type="application/rss+xml" title="{nome}" href="{url_feed}">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="estilo.css">
 <script defer src="app.js"></script>
 </head>
 <body>
 {simbolos}
-<a class="pular" href="#episodios">Pular para os episódios</a>
+<a class="pular" href="#{pular_para}">Pular para os episódios</a>
 {cabecalho}
 <main>
 {conteudo}

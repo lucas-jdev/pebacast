@@ -1,4 +1,4 @@
-// Player dos episódios e botão de copiar o feed. Sem JS, o <audio controls> nativo continua lá.
+// Player dos episódios, filtro do arquivo e botão de copiar o feed. Sem JS, o <audio controls> nativo continua lá e o arquivo mostra tudo.
 (() => {
   const VELOCIDADES = [1, 1.25, 1.5, 1.75, 2, 0.75];
 
@@ -72,6 +72,38 @@
       if (playDoMaisRecente.closest(".player").querySelector("audio").paused) playDoMaisRecente.click();
       setTimeout(() => playDoMaisRecente.focus({ preventScroll: true }));
     });
+  }
+
+  // Links antigos apontavam para index.html#sw-001; hoje só o episódio mais recente mora na página inicial.
+  const ancora = decodeURIComponent(location.hash.slice(1));
+  if (document.getElementById("inicio") && /^[a-z]{2}-\d{3}$/.test(ancora) && !document.getElementById(ancora)) {
+    location.replace(`episodios.html#${ancora}`);
+  }
+
+  const filtro = document.querySelector(".filtro");
+  if (filtro) {
+    const opcoes = [...filtro.querySelectorAll(".filtro__opcao")];
+    const meses = [...document.querySelectorAll(".mes")];
+    const status = filtro.querySelector("[data-filtro-status]");
+
+    const aplicar = (saga) => {
+      let visiveis = 0;
+      meses.forEach((mes) => {
+        const itens = [...mes.querySelectorAll(".item")];
+        itens.forEach((item) => {
+          item.hidden = Boolean(saga) && item.dataset.saga !== saga;
+          if (item.hidden) item.querySelector("audio").pause();
+        });
+        const doMes = itens.filter((item) => !item.hidden).length;
+        mes.hidden = doMes === 0;
+        visiveis += doMes;
+      });
+      opcoes.forEach((opcao) => opcao.setAttribute("aria-pressed", String(opcao.dataset.saga === saga)));
+      status.textContent = `${visiveis} ${visiveis === 1 ? "episódio" : "episódios"}`;
+    };
+
+    opcoes.forEach((opcao) => opcao.addEventListener("click", () => aplicar(opcao.dataset.saga)));
+    filtro.hidden = false;
   }
 
   document.querySelectorAll("[data-copiar]").forEach((botao) => {

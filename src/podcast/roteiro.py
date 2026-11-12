@@ -202,14 +202,40 @@ def sagas_candidatas(projeto: Projeto, config: Mapping[str, Any], data: date) ->
     return [sagas[saga_do_dia(config, data)]]
 
 
+def estados_dos_episodios(projeto: Projeto, sagas: Sequence[Saga]) -> dict[str, str]:
+    return {episodio.id: estado_do_episodio(projeto, saga, episodio.id) for saga in sagas for episodio in saga.episodios}
+
+
+@dataclass(frozen=True)
+class Proximo:
+    saga: Saga
+    episodio: Episodio
+    estado: str
+
+
+def proximo_a_publicar(projeto: Projeto, data: date) -> Proximo | None:
+    """O episódio que a pipeline vai publicar em seguida, ou None se nenhum está elegível.
+
+    Um roteiro já aprovado sai antes de qualquer outro; sem ele, vale a mesma seleção da rotina.
+    """
+    config = projeto.config()
+    candidatas = sagas_candidatas(projeto, config, data)
+    estados = estados_dos_episodios(projeto, candidatas)
+    for saga in candidatas:
+        for episodio in saga.episodios:
+            if estados[episodio.id] == AGUARDANDO_PUBLICACAO:
+                return Proximo(saga, episodio, AGUARDANDO_PUBLICACAO)
+    try:
+        saga, episodio = selecionar_na_fila(candidatas, estados, config["episodio"]["exigir_referencias_verificadas"])
+    except SemEpisodio:
+        return None
+    return Proximo(saga, episodio, PENDENTE)
+
+
 def montar_contexto(projeto: Projeto, data: date) -> dict[str, Any]:
     config = projeto.config()
     candidatas = sagas_candidatas(projeto, config, data)
-    estados = {
-        episodio.id: estado_do_episodio(projeto, saga, episodio.id)
-        for saga in candidatas
-        for episodio in saga.episodios
-    }
+    estados = estados_dos_episodios(projeto, candidatas)
     saga, episodio = selecionar_na_fila(candidatas, estados, config["episodio"]["exigir_referencias_verificadas"])
 
     personas = projeto.personas()
