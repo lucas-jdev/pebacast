@@ -306,7 +306,7 @@ button { font: inherit; }
   .etiqueta__longo { display: none; }
   .etiqueta__curto { display: inline; }
   .episodio__capa, .item__capa, .proximo__capa { padding-top: 3.6rem; }
-  .episodio__capa .episodio__numero { margin: 0; }
+  .episodio__capa .episodio__numero { margin-block: 0; }
   .item__capa { justify-content: flex-start; }
 }
 
@@ -574,6 +574,6 @@ body { line-height: 1.7; }
 /* Papel-jornal e tinta falhada: o grão cobre a página inteira; a máscara tira pontinhos de tinta só das letras grandes. */
 body::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E %3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.06 0 0 0 0 0.04 0 0 0 1.4 -0.62'/%3E%3C/filter%3E %3Crect width='220' height='220' filter='url%28%23g%29'/%3E %3C/svg%3E"); mix-blend-mode: multiply; opacity: 0.28; }
 .hero h1, .episodio__numero, .proximo__numero, .item__numero { -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E %3Cfilter id='t' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.38' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -18 14.2'/%3E%3C/filter%3E %3Crect width='260' height='260' filter='url%28%23t%29'/%3E %3C/svg%3E") 0 0 / 260px; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E %3Cfilter id='t' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.38' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -18 14.2'/%3E%3C/filter%3E %3Crect width='260' height='260' filter='url%28%23t%29'/%3E %3C/svg%3E") 0 0 / 260px; }
-/* A máscara recorta pela caixa do elemento: com line-height baixo, o topo dos dígitos e as pernas do p e do q ficavam de fora. */
-.episodio__numero, .proximo__numero, .item__numero { padding-block: 0.14em; }
+/* A máscara recorta pela caixa do elemento: com line-height baixo e letter-spacing negativo, as bordas dos dígitos e as pernas do p e do q ficavam de fora. */
+.episodio__numero, .proximo__numero, .item__numero { padding: 0.14em 0.1em; margin-inline: -0.1em; }
 .hero h1 { padding-bottom: 0.2em; margin-bottom: -0.2em; }
