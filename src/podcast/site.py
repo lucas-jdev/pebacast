@@ -8,6 +8,7 @@ arquivos estáticos de site/. O feed continua saindo de podcast.publicacao.
 """
 
 import json
+import re
 import shutil
 from collections.abc import Mapping, Sequence
 from datetime import date, datetime
@@ -28,6 +29,11 @@ from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO
 
 ARQUIVOS_ESTATICOS = "site"
 PAGINA_EPISODIOS = "episodios.html"
+SITEMAP = "sitemap.xml"
+# Gerada de assets/og.svg por scripts/gerar_imagens.sh; o tamanho vai nas meta tags de Open Graph.
+IMAGEM_COMPARTILHAMENTO = "og.jpg"
+TAMANHO_DA_IMAGEM_COMPARTILHAMENTO = (1200, 630)
+DESCRICAO_DA_IMAGEM = "Capa de cordel do Pebacast com o tatu-peba e a frase: cava até achar o porquê."
 
 MESES = ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
          "agosto", "setembro", "outubro", "novembro", "dezembro")
@@ -50,6 +56,7 @@ def escrever_pagina(projeto: Projeto, site: Path, arquivo_feed: str) -> None:
         shutil.copytree(estaticos, site, dirs_exist_ok=True)
     (site / "index.html").write_text(gerar_index(projeto, arquivo_feed), encoding="utf-8")
     (site / PAGINA_EPISODIOS).write_text(gerar_pagina_episodios(projeto, arquivo_feed), encoding="utf-8")
+    (site / SITEMAP).write_text(gerar_sitemap(projeto), encoding="utf-8")
 
 
 def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -> str:
@@ -74,7 +81,9 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
     return _documento(
         config, arquivo_feed,
         titulo=f"{meta['titulo']} · arquitetura, um porquê por dia",
+        descricao=_config_do_site(config)["descricao"],
         url=meta["url_site"],
+        dados_estruturados=_serie(config, arquivo_feed),
         pular_para="episodios",
         cabecalho=_cabecalho(meta, na_inicial=True),
         conteudo="\n".join(s for s in secoes if s),
@@ -84,25 +93,104 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
 def gerar_pagina_episodios(projeto: Projeto, arquivo_feed: str) -> str:
     config = projeto.config()
     meta = config["feed"]
+    publicados = _publicados(projeto)
+    serie = _serie(config, arquivo_feed)
+    serie["episode"] = [_episodio_estruturado(item, meta, serie["@id"]) for item in publicados]
     return _documento(
         config, arquivo_feed,
         titulo=f"Episódios · {meta['titulo']}",
-        url=meta["url_site"].rstrip("/") + "/" + PAGINA_EPISODIOS,
+        descricao=f"Todos os episódios do {meta['titulo']}, do mais recente ao mais antigo, com áudio, desafio, transcrição e fontes.",
+        url=_url(meta, PAGINA_EPISODIOS),
+        dados_estruturados=serie,
         pular_para="arquivo",
         cabecalho=_cabecalho(meta, na_inicial=False),
-        conteudo=_secao_arquivo(_publicados(projeto), projeto.personas()),
+        conteudo=_secao_arquivo(publicados, projeto.personas()),
     )
 
 
-def _documento(config: Mapping[str, Any], arquivo_feed: str, *, titulo: str, url: str, pular_para: str,
-               cabecalho: str, conteudo: str) -> str:
+def gerar_sitemap(projeto: Projeto) -> str:
+    meta = projeto.config()["feed"]
+    publicados = _publicados(projeto)
+    ultima = (f"<lastmod>{_data_iso(publicados[0]['publicacao']['publicado_em'])}</lastmod>" if publicados else "")
+    urls = "".join(f"<url><loc>{escape(_url(meta, caminho))}</loc>{ultima}</url>" for caminho in ("", PAGINA_EPISODIOS))
+    return ('<?xml version="1.0" encoding="UTF-8"?>\n'
+            f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n')
+
+
+def _config_do_site(config: Mapping[str, Any]) -> dict[str, str]:
+    site = config.get("site") or {}
+    descricao = site.get("descricao") or config["feed"]["descricao"]
+    return {
+        "descricao": " ".join(descricao.split()),
+        "imagem": site.get("imagem_compartilhamento") or IMAGEM_COMPARTILHAMENTO,
+        "goatcounter": site.get("goatcounter") or "",
+    }
+
+
+def _serie(config: Mapping[str, Any], arquivo_feed: str) -> dict[str, Any]:
     meta = config["feed"]
+    return {
+        "@context": "https://schema.org",
+        "@type": "PodcastSeries",
+        "@id": _url(meta, "#podcast"),
+        "name": meta["titulo"],
+        "description": " ".join(meta["descricao"].split()),
+        "url": meta["url_site"],
+        "webFeed": _url_feed(meta, arquivo_feed),
+        "image": _url(meta, meta["capa"]),
+        "inLanguage": "pt-BR",
+        "author": {"@type": "Person", "name": meta["autor"]},
+    }
+
+
+def _episodio_estruturado(item: Mapping[str, Any], meta: Mapping[str, Any], serie: str) -> dict[str, Any]:
+    episodio, publicacao = item["episodio"], item["publicacao"]
+    return {
+        "@type": "PodcastEpisode",
+        "name": episodio["titulo"],
+        "url": _url(meta, f"{PAGINA_EPISODIOS}#{episodio['id']}"),
+        "datePublished": publicacao["publicado_em"],
+        "timeRequired": f"PT{max(1, round(publicacao['duracao_segundos'] / 60))}M",
+        "description": " ".join(episodio.get("objetivos", [])),
+        "associatedMedia": {"@type": "MediaObject", "contentUrl": publicacao["url_audio"]},
+        "partOfSeries": {"@id": serie},
+    }
+
+
+def _json_ld(dados: Mapping[str, Any]) -> str:
+    """JSON dentro de <script>: escapa o < para nenhum texto do conteúdo fechar a tag antes da hora."""
+    return json.dumps(dados, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+
+
+def _analytics(codigo: str) -> str:
+    """GoatCounter: sem cookie e sem dado pessoal, então dispensa banner de consentimento. Sem código, nada é carregado."""
+    if not re.fullmatch(r"[a-z0-9-]+", codigo):
+        return ""
+    return f'<script data-goatcounter="https://{codigo}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
+
+
+def _url(meta: Mapping[str, Any], caminho: str) -> str:
+    return meta["url_site"].rstrip("/") + "/" + caminho
+
+
+def _documento(config: Mapping[str, Any], arquivo_feed: str, *, titulo: str, descricao: str, url: str,
+               dados_estruturados: Mapping[str, Any], pular_para: str, cabecalho: str, conteudo: str) -> str:
+    meta = config["feed"]
+    site = _config_do_site(config)
+    largura, altura = TAMANHO_DA_IMAGEM_COMPARTILHAMENTO
     return _PAGINA.format(
         titulo=escape(titulo),
         nome=escape(meta["titulo"]),
-        descricao=escape(" ".join(meta["descricao"].split())),
+        autor=escape(meta["autor"]),
+        descricao=escape(descricao),
         url=escape(url),
         url_feed=escape(_url_feed(meta, arquivo_feed)),
+        imagem=escape(_url(meta, site["imagem"])),
+        imagem_largura=largura,
+        imagem_altura=altura,
+        imagem_descricao=escape(DESCRICAO_DA_IMAGEM),
+        dados_estruturados=_json_ld(dados_estruturados),
+        analytics=_analytics(site["goatcounter"]),
         simbolos=_SIMBOLOS,
         pular_para=pular_para,
         cabecalho=cabecalho,
@@ -112,7 +200,7 @@ def _documento(config: Mapping[str, Any], arquivo_feed: str, *, titulo: str, url
 
 
 def _url_feed(meta: Mapping[str, Any], arquivo_feed: str) -> str:
-    return meta["url_site"].rstrip("/") + "/" + arquivo_feed
+    return _url(meta, arquivo_feed)
 
 
 # ---------------------------------------------------------------- dados
@@ -145,6 +233,10 @@ def _ler_json(arquivo: Path) -> Any:
 def _data_por_extenso(iso: str) -> str:
     data = datetime.fromisoformat(iso).astimezone(FUSO_BRASILIA)
     return f"{data.day} de {MESES[data.month - 1]} de {data.year}"
+
+
+def _data_iso(iso: str) -> str:
+    return datetime.fromisoformat(iso).astimezone(FUSO_BRASILIA).date().isoformat()
 
 
 def _mes_por_extenso(iso: str) -> str:
@@ -253,7 +345,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any]) -> 
     {_meta(item)}
     <h3 class="episodio__titulo">{escape(episodio['titulo'])}</h3>
     {_caso(item["noticia"])}
-    {_player(item["publicacao"])}
+    {_player(item["publicacao"], episodio["id"])}
     {_objetivos_e_desafio(episodio, roteiro)}
     {_selo(item["revisoes"])}
     {_dobra_transcricao(roteiro, personas)}
@@ -327,7 +419,7 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any]) -> 
     {_meta(item)}
     <h3 class="item__titulo" id="titulo-{eid}">{escape(episodio['titulo'])}</h3>
     {_caso(item["noticia"])}
-    {_player(item["publicacao"])}
+    {_player(item["publicacao"], episodio["id"])}
     <details class="dobra">
       <summary>Objetivos e desafio</summary>
       {_objetivos_e_desafio(episodio, roteiro)}
@@ -370,9 +462,9 @@ def _caso(noticia: Mapping[str, Any]) -> str:
     return '<p class="caso"><span class="caso__rotulo">Ponto de partida</span>Um cenário hipotético.</p>'
 
 
-def _player(publicacao: Mapping[str, Any]) -> str:
+def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
     duracao = publicacao["duracao_segundos"]
-    return f"""<div class="player" data-duracao="{duracao}">
+    return f"""<div class="player" data-duracao="{duracao}" data-episodio="{escape(episodio_id)}">
       <audio controls preload="none" src="{escape(publicacao['url_audio'])}"></audio>
       <button class="player__play" type="button" aria-label="Tocar">
         <svg class="player__icone-play" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-play"/></svg>
@@ -675,6 +767,8 @@ _PAGINA = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{titulo}</title>
 <meta name="description" content="{descricao}">
+<meta name="author" content="{autor}">
+<meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#f4ecdd" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
@@ -682,11 +776,24 @@ _PAGINA = """<!doctype html>
 <meta property="og:description" content="{descricao}">
 <meta property="og:url" content="{url}">
 <meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="{nome}">
+<meta property="og:image" content="{imagem}">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="{imagem_largura}">
+<meta property="og:image:height" content="{imagem_altura}">
+<meta property="og:image:alt" content="{imagem_descricao}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{titulo}">
+<meta name="twitter:description" content="{descricao}">
+<meta name="twitter:image" content="{imagem}">
+<meta name="twitter:image:alt" content="{imagem_descricao}">
 <link rel="canonical" href="{url}">
 <link rel="alternate" type="application/rss+xml" title="{nome}" href="{url_feed}">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="estilo.css">
 <script defer src="app.js"></script>
+<script type="application/ld+json">{dados_estruturados}</script>
+{analytics}
 </head>
 <body>
 {simbolos}

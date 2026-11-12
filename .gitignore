@@ -7,5 +7,6 @@ experimentos/teste-vozes/saida/
 assets/*
 !assets/*.gpg
 !assets/capa.svg
+!assets/og.svg
 experimentos/teste-vozes/vozes-piper/
 _site/

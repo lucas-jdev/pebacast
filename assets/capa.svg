@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3000 3000" width="3000" height="3000">
-  <!-- Capa do Pebacast. Fonte da arte; o JPG publicado sai de scripts/gerar_capa.sh. -->
+  <!-- Capa do Pebacast. Fonte da arte; o JPG publicado sai de scripts/gerar_imagens.sh. -->
   <defs>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..800,50&amp;family=Instrument+Sans:wght@400..700&amp;display=block");

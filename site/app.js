@@ -39,6 +39,10 @@
     });
 
     audio.addEventListener("play", () => { player.classList.add("player--tocando"); play.setAttribute("aria-label", "Pausar"); });
+    // Conta uma audição por episódio e visita no GoatCounter, quando o analytics está ligado.
+    audio.addEventListener("play", () => {
+      window.goatcounter?.count?.({ path: `ouviu/${player.dataset.episodio}`, title: "Play no site", event: true });
+    }, { once: true });
     audio.addEventListener("pause", () => { player.classList.remove("player--tocando"); play.setAttribute("aria-label", "Tocar"); });
     audio.addEventListener("loadedmetadata", () => {
       if (Number.isFinite(audio.duration)) barra.max = Math.round(audio.duration);

@@ -1,6 +1,21 @@
-from podcast.site import escrever_pagina, gerar_index, gerar_pagina_episodios
+import json
+import re
+
+from podcast.site import (
+    escrever_pagina,
+    gerar_index,
+    gerar_pagina_episodios,
+    gerar_sitemap,
+)
 from tests.test_publicacao import _publicar
-from tests.test_roteiro import SAGA, _escrever_episodio, _gravar, _usar_fila, projeto  # noqa: F401 (fixture)
+from tests.test_roteiro import (  # noqa: F401 (fixture)
+    CONFIG,
+    SAGA,
+    _escrever_episodio,
+    _gravar,
+    _usar_fila,
+    projeto,
+)
 
 SAGA_SEM_EPISODIO_PUBLICADO = {
     **SAGA,
@@ -129,6 +144,7 @@ def test_escreve_inicial_e_arquivo(projeto, tmp_path):
 
     assert (site / "index.html").exists()
     assert (site / "episodios.html").exists()
+    assert (site / "sitemap.xml").exists()
 
 
 def test_etiqueta_mostra_a_saga_e_a_posicao_do_episodio(projeto):
@@ -143,3 +159,57 @@ def test_etiqueta_mostra_a_saga_e_a_posicao_do_episodio(projeto):
     assert posicao in arquivo
     assert 'class="amarracao amarracao--verso"' in arquivo
     assert 'class="proximo" data-saga="software"' in inicial
+
+
+def _dados_estruturados(pagina):
+    return json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', pagina, re.DOTALL).group(1))
+
+
+def test_paginas_tem_previa_de_compartilhamento_com_imagem(projeto):
+    pagina = gerar_pagina_episodios(projeto, "feed.xml")
+
+    assert '<meta property="og:image" content="https://x.github.io/pebacast/og.jpg">' in pagina
+    assert '<meta property="og:image:width" content="1200">' in pagina
+    assert '<meta name="twitter:card" content="summary_large_image">' in pagina
+    assert '<link rel="canonical" href="https://x.github.io/pebacast/episodios.html">' in pagina
+
+
+def test_arquivo_descreve_a_serie_e_os_episodios_para_buscadores(projeto):
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    serie = _dados_estruturados(gerar_pagina_episodios(projeto, "feed.xml"))
+
+    assert serie["@type"] == "PodcastSeries"
+    assert serie["webFeed"] == "https://x.github.io/pebacast/feed.xml"
+    [episodio] = serie["episode"]
+    assert episodio["url"] == "https://x.github.io/pebacast/episodios.html#sw-001"
+    assert episodio["timeRequired"] == "PT16M"
+    assert episodio["associatedMedia"]["contentUrl"] == "https://cdn/sw-001.mp3"
+
+
+def test_dados_estruturados_nao_deixam_o_conteudo_fechar_o_script(projeto):
+    _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "feed": {**CONFIG["feed"], "titulo": "Peba</script><b>"}})
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert "Peba</script><b>" not in pagina
+    assert _dados_estruturados(pagina)["name"] == "Peba</script><b>"
+
+
+def test_analytics_so_carrega_com_codigo_valido(projeto):
+    assert "goatcounter" not in gerar_index(projeto, "feed.xml")
+
+    _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "site": {"goatcounter": "pebacast"}})
+    assert 'data-goatcounter="https://pebacast.goatcounter.com/count"' in gerar_index(projeto, "feed.xml")
+
+    _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "site": {"goatcounter": 'x" onload="alert(1)'}})
+    assert "goatcounter" not in gerar_index(projeto, "feed.xml")
+
+
+def test_sitemap_lista_as_paginas_com_a_data_do_ultimo_episodio(projeto):
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    sitemap = gerar_sitemap(projeto)
+
+    assert "<loc>https://x.github.io/pebacast/</loc><lastmod>2026-11-07</lastmod>" in sitemap
+    assert "<loc>https://x.github.io/pebacast/episodios.html</loc>" in sitemap

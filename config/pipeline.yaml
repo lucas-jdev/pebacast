@@ -84,10 +84,21 @@ feed:
   autor: Lucas Fernandes
   # Público no feed: o Spotify e o Apple mandam o código de verificação para cá.
   email_dono: lucas.jdev1@gmail.com
-  # Relativa ao url_site; gerada de assets/capa.svg por scripts/gerar_capa.sh.
+  # Relativa ao url_site; gerada de assets/capa.svg por scripts/gerar_imagens.sh.
   capa: capa.jpg
   url_site: https://lucas-jdev.github.io/pebacast/
   url_repositorio: https://github.com/lucas-jdev/pebacast
   idioma: pt-br
   categoria: Technology
   licenca: CC BY 4.0
+
+site:
+  # Descrição curta das páginas para buscadores e prévias de link (o Google corta perto de 155 caracteres).
+  descricao: >-
+    Podcast diário de arquitetura de software: um diálogo de 15 a 20 minutos
+    por dia, com um desafio prático no fim de cada episódio.
+  # Relativa ao url_site; gerada de assets/og.svg por scripts/gerar_imagens.sh.
+  imagem_compartilhamento: og.jpg
+  # Código do site no GoatCounter (o "xxx" de xxx.goatcounter.com): analytics sem cookie.
+  # Vazio, nenhum script de analytics é carregado.
+  goatcounter: ""
