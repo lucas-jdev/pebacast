@@ -24,6 +24,11 @@ referencias_base:
     autores: [Simon Brown]
     url: https://c4model.com
     tipo: site
+  - id: sa-handbook
+    titulo: "Solutions Architect's Handbook"
+    autores: [Saurabh Shrivastava, Neelanjali Srivastav]
+    edicao: 1ª edição (2020)
+    tipo: livro
 
 episodios:
   - id: sl-001
@@ -35,8 +40,19 @@ episodios:
     pre_requisitos: []
     referencias:
       - fonte: rozanski
-        capitulos: [5, 9]
-    referencias_verificadas: false
+        capitulos: [5, 8, 9]
+      - fonte: sa-handbook
+        capitulos: [2]
+    # Conferido em 2026-11-11 pelo sumário da editora e por material de terceiros, e não no livro.
+    # Rozanski cap. 5: "Architectural Specializations" e "The Organizational Context" (só o sumário).
+    # Rozanski cap. 8: "Problem-Focused Concerns" e "Solution-Focused Concerns", base do terceiro
+    # objetivo (sumário e aulas da CSCE 742 baseadas no livro). Rozanski cap. 9: seleção e classes
+    # de stakeholders, proxies e grupos. Handbook cap. 2: tipos de arquiteto (corporativo, de
+    # soluções, técnico), base do primeiro objetivo. Ressalva: Eoin Woods agrupa arquiteto de
+    # soluções e de software em "System Architecture", e o próprio Handbook admite que os papéis se
+    # sobrepõem conforme a organização. A fronteira entre os papéis é tratada como debate, não como
+    # definição fechada.
+    referencias_verificadas: true
     desafio: >-
       Escolha uma iniciativa em andamento na sua empresa, liste os
       stakeholders e escreva, para cada um, a pergunta que ele faria sobre

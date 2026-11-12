@@ -37,8 +37,15 @@ episodios:
     pre_requisitos: []
     referencias:
       - fonte: shostack
-        capitulos: [1]
-    referencias_verificadas: false
+        capitulos: [1, 2, 7]
+    # Conferido em 2026-11-11 pelo sumário do livro, pela apresentação da Parte I e por um trecho do
+    # cap. 7 publicado pelo autor, e não no livro inteiro. Cap. 1: as quatro perguntas e um diagrama
+    # de quadro branco com fronteiras de confiança. Cap. 2: "Types of Diagrams" e "Trust
+    # Boundaries", base do diagrama de fluxo de dados. Cap. 7: quando e por onde começar a
+    # modelagem, base do terceiro objetivo. A redação de 2014 é "What are you building?" e "Did you
+    # do a decent job of analysis?"; "What are we working on?" e "Did we do a good job?" são da
+    # formulação posterior e não podem ser atribuídas a este livro.
+    referencias_verificadas: true
     desafio: >-
       Desenhe o fluxo de dados de uma funcionalidade que você mantém, marque
       as fronteiras de confiança e anote o que poderia dar errado em cada

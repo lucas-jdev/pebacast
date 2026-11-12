@@ -31,8 +31,13 @@ episodios:
     pre_requisitos: []
     referencias:
       - fonte: iac
-        capitulos: [1]
-    referencias_verificadas: false
+        capitulos: [1, 2]
+    # Conferido em 2026-11-11 pelo sumário do livro e pela prévia da O'Reilly, e não no livro.
+    # Cap. 1: "From the Iron Age to the Cloud Age", "Benefits of Infrastructure as Code" e as três
+    # práticas centrais. Cap. 2: "Configuration Drift" e "Ensure That You Can Repeat Any Process",
+    # base dos objetivos sobre reprodutibilidade e desvio de configuração. A cópia impressa traz
+    # copyright 2021, embora a O'Reilly date o lançamento em dezembro de 2020.
+    referencias_verificadas: true
     desafio: >-
       Liste três recursos de infraestrutura que o seu time usa e diga quais
       estão definidos em código. Para um que não está, escreva o que seria
