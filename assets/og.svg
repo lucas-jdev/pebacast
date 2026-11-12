@@ -54,7 +54,9 @@
   <text class="texto" x="536" y="468" font-size="27">Um diálogo de 15 a 20 minutos por dia,</text>
   <text class="texto" x="536" y="506" font-size="27">sempre terminando com um desafio.</text>
 
-  <!-- Faixa em zigue-zague, como no site -->
-  <path d="M536 552l14-12 14 12 14-12 14 12 14-12 14 12 14-12 14 12 14-12 14 12 14-12 14 12 14-12 14 12 14-12 14 12 14-12 14 12 14-12 14 12 14-12 14 12 14-12 14 12 14-12 14 12 14-12 14 12" fill="none" stroke="#15110c" stroke-width="4" stroke-linejoin="round"/>
-  <text class="rotulo" x="536" y="598" font-size="22">lucas-jdev.github.io/pebacast</text>
+  <!-- Chamada para ouvir, no mesmo formato dos botões do site. O endereço já aparece no card da rede social. -->
+  <rect x="544" y="540" width="402" height="62" fill="#15110c"/>
+  <rect x="536" y="532" width="402" height="62" fill="#f2c53d" stroke="#15110c" stroke-width="4"/>
+  <path d="M562 549v28l22-14z" fill="#15110c"/>
+  <text class="rotulo" x="600" y="572" font-size="24" letter-spacing="0">Ouvir o episódio de hoje</text>
 </svg>

@@ -94,12 +94,13 @@ feed:
   licenca: CC BY 4.0
 
 site:
-  # Descrição curta das páginas para buscadores e prévias de link (o Google corta perto de 155 caracteres).
+  # Descrição curta das páginas para buscadores e prévias de link. Até 125 caracteres: é o que as
+  # prévias de redes sociais mostram sem cortar no celular (tests/test_site.py confere).
   descricao: >-
-    Podcast diário de arquitetura de software: um diálogo de 15 a 20 minutos
-    por dia, com um desafio prático no fim de cada episódio.
+    Podcast diário de arquitetura de software: 15 a 20 minutos por dia, com
+    um desafio prático no fim de cada episódio.
   # Relativa ao url_site; gerada de assets/og.svg por scripts/gerar_imagens.sh.
-  imagem_compartilhamento: og-kraft.jpg
+  imagem_compartilhamento: og.jpg
   # Código do site no GoatCounter (o "xxx" de xxx.goatcounter.com): analytics sem cookie.
   # Vazio, nenhum script de analytics é carregado.
   goatcounter: ""

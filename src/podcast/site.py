@@ -7,6 +7,7 @@ arquivos estáticos de site/. O feed continua saindo de podcast.publicacao.
     python -m podcast.publicacao --site _site feed
 """
 
+import hashlib
 import json
 import re
 import shutil
@@ -31,7 +32,7 @@ ARQUIVOS_ESTATICOS = "site"
 PAGINA_EPISODIOS = "episodios.html"
 SITEMAP = "sitemap.xml"
 # Gerada de assets/og.svg por scripts/gerar_imagens.sh; o tamanho vai nas meta tags de Open Graph.
-IMAGEM_COMPARTILHAMENTO = "og-kraft.jpg"
+IMAGEM_COMPARTILHAMENTO = "og.jpg"
 TAMANHO_DA_IMAGEM_COMPARTILHAMENTO = (1200, 630)
 DESCRICAO_DA_IMAGEM = "Capa de cordel do Pebacast com o tatu-peba e a frase: cava até achar o porquê."
 
@@ -83,6 +84,7 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
         titulo=f"{meta['titulo']} · arquitetura, um porquê por dia",
         descricao=_config_do_site(config)["descricao"],
         url=meta["url_site"],
+        estaticos=projeto.raiz / ARQUIVOS_ESTATICOS,
         dados_estruturados=_serie(config, arquivo_feed),
         pular_para="episodios",
         cabecalho=_cabecalho(meta, na_inicial=True),
@@ -101,6 +103,7 @@ def gerar_pagina_episodios(projeto: Projeto, arquivo_feed: str) -> str:
         titulo=f"Episódios · {meta['titulo']}",
         descricao=f"Todos os episódios do {meta['titulo']}, do mais recente ao mais antigo, com áudio, desafio, transcrição e fontes.",
         url=_url(meta, PAGINA_EPISODIOS),
+        estaticos=projeto.raiz / ARQUIVOS_ESTATICOS,
         dados_estruturados=serie,
         pular_para="arquivo",
         cabecalho=_cabecalho(meta, na_inicial=False),
@@ -173,7 +176,14 @@ def _url(meta: Mapping[str, Any], caminho: str) -> str:
     return meta["url_site"].rstrip("/") + "/" + caminho
 
 
-def _documento(config: Mapping[str, Any], arquivo_feed: str, *, titulo: str, descricao: str, url: str,
+def _versionada(url: str, arquivo: Path) -> str:
+    """Põe um hash curto do conteúdo na URL: quando a imagem muda, redes sociais e apps buscam a nova em vez do cache."""
+    if not arquivo.exists():
+        return url
+    return f"{url}?v={hashlib.sha256(arquivo.read_bytes()).hexdigest()[:8]}"
+
+
+def _documento(config: Mapping[str, Any], arquivo_feed: str, *, titulo: str, descricao: str, url: str, estaticos: Path,
                dados_estruturados: Mapping[str, Any], pular_para: str, cabecalho: str, conteudo: str) -> str:
     meta = config["feed"]
     site = _config_do_site(config)
@@ -185,7 +195,7 @@ def _documento(config: Mapping[str, Any], arquivo_feed: str, *, titulo: str, des
         descricao=escape(descricao),
         url=escape(url),
         url_feed=escape(_url_feed(meta, arquivo_feed)),
-        imagem=escape(_url(meta, site["imagem"])),
+        imagem=escape(_versionada(_url(meta, site["imagem"]), estaticos / site["imagem"])),
         imagem_largura=largura,
         imagem_altura=altura,
         imagem_descricao=escape(DESCRICAO_DA_IMAGEM),

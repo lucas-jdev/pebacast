@@ -1,5 +1,8 @@
 import json
 import re
+from pathlib import Path
+
+import yaml
 
 from podcast.site import (
     escrever_pagina,
@@ -168,7 +171,7 @@ def _dados_estruturados(pagina):
 def test_paginas_tem_previa_de_compartilhamento_com_imagem(projeto):
     pagina = gerar_pagina_episodios(projeto, "feed.xml")
 
-    assert '<meta property="og:image" content="https://x.github.io/pebacast/og-kraft.jpg">' in pagina
+    assert '<meta property="og:image" content="https://x.github.io/pebacast/og.jpg">' in pagina
     assert '<meta property="og:image:width" content="1200">' in pagina
     assert '<meta name="twitter:card" content="summary_large_image">' in pagina
     assert '<link rel="canonical" href="https://x.github.io/pebacast/episodios.html">' in pagina
@@ -215,3 +218,21 @@ def test_sitemap_lista_as_paginas_com_a_data_do_ultimo_episodio(projeto):
 
     assert "<loc>https://x.github.io/pebacast/</loc><lastmod>2026-11-07</lastmod>" in sitemap
     assert "<loc>https://x.github.io/pebacast/episodios.html</loc>" in sitemap
+
+
+def test_imagem_de_compartilhamento_leva_a_versao_do_conteudo_na_url(projeto):
+    (projeto.raiz / "site").mkdir()
+    (projeto.raiz / "site" / "og.jpg").write_bytes(b"primeira arte")
+    antes = gerar_index(projeto, "feed.xml")
+
+    (projeto.raiz / "site" / "og.jpg").write_bytes(b"arte nova")
+    depois = gerar_index(projeto, "feed.xml")
+
+    versao = re.compile(r'<meta property="og:image" content="https://x.github.io/pebacast/og.jpg\?v=([0-9a-f]{8})">')
+    assert versao.search(antes).group(1) != versao.search(depois).group(1)
+
+
+def test_descricao_do_site_cabe_na_previa_das_redes_sociais():
+    config = yaml.safe_load((Path(__file__).parent.parent / "config" / "pipeline.yaml").read_text(encoding="utf-8"))
+
+    assert len(" ".join(config["site"]["descricao"].split())) <= 125
