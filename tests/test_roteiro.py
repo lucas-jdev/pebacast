@@ -44,7 +44,7 @@ CONFIG = {
     "tts": {"principal": "gemini-falso", "fallback": "kokoro-falso"},
     "audio": {"bitrate_kbps": 64},
     "feed": {
-        "titulo": "Pebacast", "descricao": "Podcast de teste.", "autor": "Lucas", "email_dono": "lucas@exemplo.com", "capa": "capa.jpg", "url_site": "https://x.github.io/pebacast/",
+        "titulo": "Pebacast", "descricao": "Podcast de teste.", "autor": "Lucas", "email_dono": "lucas@exemplo.com", "capa": "capa-cordel.jpg", "url_site": "https://x.github.io/pebacast/",
         "url_repositorio": "https://github.com/x/pebacast", "idioma": "pt-br", "categoria": "Technology", "licenca": "CC BY 4.0",
     },
 }

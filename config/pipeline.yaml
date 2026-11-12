@@ -85,7 +85,8 @@ feed:
   # Público no feed: o Spotify e o Apple mandam o código de verificação para cá.
   email_dono: lucas.jdev1@gmail.com
   # Relativa ao url_site; gerada de assets/capa.svg por scripts/gerar_imagens.sh.
-  capa: capa.jpg
+  # O nome muda junto com a arte: apps de podcast guardam a capa em cache pela URL.
+  capa: capa-cordel.jpg
   url_site: https://lucas-jdev.github.io/pebacast/
   url_repositorio: https://github.com/lucas-jdev/pebacast
   idioma: pt-br
