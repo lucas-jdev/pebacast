@@ -1,0 +1,444 @@
+{
+  "episodio": "si-001",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura sem decoreba. Aviso importante: este episódio foi gerado por inteligência artificial e revisado contra as fontes citadas. E hoje a gente abre uma saga nova, sobre arquitetura de sistemas, com um tema que parece pessimista, mas é libertador: em sistema distribuído, tudo falha."
+    },
+    {
+      "persona": "davi",
+      "texto": "E pra essa saga eu trouxe um convidado novo, o Rafael. O Rafael trabalha com sistemas distribuídos há catorze anos. Começou com sensores em máquinas agrícolas, onde a rede caía todo dia, e depois foi pra uma empresa de pagamentos, onde participou da integração com o Pix. Rafael, seja bem-vindo!"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Obrigado, Davi. Oi, você que está ouvindo, aqui é o Rafael. E pode ficar tranquilo: hoje ninguém vai ser acordado de madrugada. Pelo menos não durante o episódio.",
+      "estilo": "com humor seco"
+    },
+    {
+      "persona": "davi",
+      "texto": "Rafael, eu quero começar com um caso. E já deixo claro pra quem está ouvindo: o caso de hoje é hipotético. Imagine uma loja online brasileira, de médio porte, no pico da Black Friday."
+    },
+    {
+      "persona": "rafael",
+      "texto": "A noite preferida de todo mundo que faz plantão.",
+      "estilo": "rindo baixo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Pois é. Essa loja tem um serviço de checkout que chama o serviço de pagamento pela rede. O checkout espera três segundos. Se não vier resposta, ele tenta de novo, até três vezes. Parece prudente, né?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Parece. Continua."
+    },
+    {
+      "persona": "davi",
+      "texto": "Só que o pagamento fica lento com o pico. E aí muita cobrança é aprovada depois que o checkout já desistiu e mandou outra. Resultado: um monte de cliente cobrado duas vezes."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Já vi esse filme. Inclusive já passei uma madrugada inteira caçando uma transação que foi processada duas vezes. Não recomendo."
+    },
+    {
+      "persona": "davi",
+      "texto": "E não para aí. Na mesma noite, um cupom que vencia à meia-noite foi aceito por alguns servidores e recusado por outros. Os relógios das máquinas não concordavam. E, pra fechar, um worker que reserva estoque travou uns segundos, outro worker assumiu a reserva, e os dois mandaram o mesmo pedido pro depósito."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Três problemas, uma noite só. E eu aposto que no dia seguinte alguém disse que foi azar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Mas olha, Rafael, eu vou ser honesto. Se eu fosse o dev dessa loja, eu ia sair consertando assim: aumenta o timeout pra trinta segundos, porque três era pouco. Coloca mais retentativa, porque uma hora passa. Pro cupom, sincroniza os relógios direito, liga o NTP em tudo. E pro worker, coloca uma máquina maior, que não trava. Pronto. Resolvido?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Beleza. E quando a rede cair?",
+      "estilo": "pausado"
+    },
+    {
+      "persona": "davi",
+      "texto": "Aí... o timeout de trinta segundos segura, ué. Dá tempo da rede voltar."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Deixa eu montar o cenário com você, passo a passo. O checkout manda o pedido de cobrança. Passam trinta segundos e não volta nada. O que aconteceu com a cobrança?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Não foi feita, né? Não voltou resposta."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Será? Pensa nas possibilidades. Pode ser que o pedido se perdeu no caminho. Pode ser que ele está parado numa fila, num roteador sobrecarregado. Pode ser que o serviço de pagamento caiu. Pode ser que ele está vivo, mas parado, pensando. Ou pode ser que ele cobrou o cliente, respondeu, e a resposta é que se perdeu na volta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí. Então do lado do checkout tudo isso parece igual?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Exatamente igual. Silêncio. É isso que o Martin Kleppmann mostra no capítulo oito do Designing Data-Intensive Applications, que é justamente sobre os problemas dos sistemas distribuídos. Numa rede assíncrona, como a que a gente usa no dia a dia, quem enviou não tem como saber se o pedido chegou, se foi processado ou se a resposta se perdeu. A única ferramenta que sobra é o timeout. E o timeout não te diz o que aconteceu. Ele só te diz que você cansou de esperar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Nossa. O timeout não é a resposta, é a desistência."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Bonito isso. Pode roubar pro resumo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Mas então qual é o timeout certo? Três segundos ou trinta?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Essa é a parte desconfortável: não existe um valor certo. Timeout curto declara morto um serviço que só estava lento, e aí você tenta de novo e duplica o trabalho. Timeout longo deixa o cliente olhando pra tela de carregamento, e as conexões presas se acumulam no seu servidor. Kleppmann discute exatamente esse dilema, e a saída que ele aponta é escolher o timeout olhando o comportamento medido da rede, e não chutando."
+    },
+    {
+      "persona": "davi",
+      "texto": "E por que a rede ficou lenta, afinal? Era só uma Black Friday."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Só uma Black Friday, ele diz.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Na rede, quando muita gente manda pacote pro mesmo lugar, forma fila. Fila no switch, fila no sistema operacional, fila no próprio serviço. Ninguém garante quanto tempo um pacote vai ficar esperando. Isso é o que se chama de atraso sem limite. E repara numa coisa: com retentativa automática, cada cobrança lenta vira até quatro chamadas. Você está jogando mais carga justamente em quem já não aguenta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Caramba. O retry que eu achei prudente vira gasolina no incêndio."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Vira. Por isso eu defendo retentativa com limite e com espera crescente entre uma e outra. Mas o mais importante não é isso. O mais importante é: se a operação pode ser executada duas vezes, executar duas vezes precisa ter o mesmo efeito que executar uma vez só."
+    },
+    {
+      "persona": "davi",
+      "texto": "Idempotência."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Isso. O checkout manda junto um identificador único do pedido de cobrança. Se o pagamento recebe o mesmo identificador de novo, ele não cobra outra vez, só devolve o resultado da primeira. Aí a retentativa deixa de ser perigosa. Isso é prática consolidada em pagamento."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas agora eu quero entender o nome da coisa. O título do episódio fala de falácias. Que falácias são essas?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "São as falácias da computação distribuída. Uma lista que nasceu na Sun Microsystems, nos anos noventa. Peter Deutsch costuma receber o crédito pelas primeiras sete, e James Gosling, o criador do Java, acrescentou a oitava. A referência que a gente usa hoje é o artigo Fallacies of Distributed Computing Explained, do Arnon Rotem-Gal-Oz, que pega cada uma e explica o estrago que ela faz."
+    },
+    {
+      "persona": "davi",
+      "texto": "O criador do Java! Olha aí, meu mundo. E quais são as oito?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Vou dizer a falácia e você me diz o que ela esconde, combinado? A primeira: a rede é confiável."
+    },
+    {
+      "persona": "davi",
+      "texto": "Essa a gente acabou de desmontar. Ela esconde que pacote se perde, conexão cai, e você não sabe o que aconteceu do outro lado."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Perfeito. A segunda: a latência é zero."
+    },
+    {
+      "persona": "davi",
+      "texto": "Esconde que cada chamada de rede custa tempo. Tipo, se eu faço cem chamadas pequenas em sequência, o tempo de ida e volta se soma."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Isso. Chamada de rede não é chamada de método, por mais que o framework faça parecer. A terceira: a largura de banda é infinita."
+    },
+    {
+      "persona": "davi",
+      "texto": "Essa eu chuto que esconde o custo de mandar coisa demais. Aquele endpoint que devolve o objeto inteiro, com todos os relacionamentos, quando eu só precisava do nome."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Isso. E o Rotem-Gal-Oz aponta que as duas puxam pra lados opostos. Pra fugir da latência, você manda menos chamadas, com mais dados. Pra fugir da banda, você manda menos dados. Não dá pra otimizar as duas de graça. A quarta: a rede é segura."
+    },
+    {
+      "persona": "davi",
+      "texto": "Essa eu conheço da pior forma. Esconde que qualquer coisa que trafega pode ser lida ou alterada se você não proteger."
+    },
+    {
+      "persona": "rafael",
+      "texto": "A quinta: a topologia não muda."
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Essa eu não sei direito.",
+      "estilo": "pensativo"
+    },
+    {
+      "persona": "rafael",
+      "texto": "É a ideia de que o caminho entre as máquinas é sempre o mesmo. Na nuvem, servidor nasce e morre o tempo todo, o IP muda, a rota muda. Se você fixou um endereço no código, um dia ele aponta pro nada."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ah, o famoso IP chumbado no arquivo de configuração. Já vi."
+    },
+    {
+      "persona": "rafael",
+      "texto": "A sexta: existe um só administrador."
+    },
+    {
+      "persona": "davi",
+      "texto": "Esconde que tem um monte de gente mexendo. O time de rede, o provedor de nuvem, o time do outro serviço, que faz deploy na hora que quer."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Exato. Quando cai, você nem sabe pra quem ligar. A sétima: o custo de transporte é zero."
+    },
+    {
+      "persona": "davi",
+      "texto": "Custo de dinheiro ou de tempo?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Dos dois. Tem o custo de transformar o objeto em bytes e de volta, que gasta processamento, e tem o custo da infraestrutura de rede, que alguém paga. E a oitava, a do Gosling: a rede é homogênea."
+    },
+    {
+      "persona": "davi",
+      "texto": "Essa esconde que do outro lado pode ter outra linguagem, outro protocolo, outro formato de dado. Meu Java conversando com um serviço em Go que fala outra coisa."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Viu? Você sabia mais do que achava. E, na minha opinião, essas falácias não são burrice de ninguém. São suposições que a gente faz sem perceber, porque dentro de uma máquina só elas são quase verdade."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. Dentro do meu monólito, chamar um método é confiável, instantâneo e de graça. Quando eu separo em dois serviços, aquela chamada vira uma viagem pela rede, e todas essas garantias somem."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Somem. E é aqui que entra o segundo conceito do episódio, que pra mim é o mais importante: falha parcial."
+    },
+    {
+      "persona": "davi",
+      "texto": "Falha parcial. Em vez de falha total?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Isso. Pensa no seu notebook. Quando ele dá pau, ele trava inteiro. Tela azul, kernel panic, desligou. Kleppmann observa que o computador é projetado assim de propósito: se algo interno dá errado, é melhor parar tudo do que devolver um resultado errado. Isso é falha total. É chato, mas é honesto. Você sabe que caiu."
+    },
+    {
+      "persona": "davi",
+      "texto": "E num sistema distribuído?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Num sistema distribuído, uma parte quebra e as outras continuam funcionando, sem saber. O pagamento está lento, o checkout está ótimo, o estoque está meio a meio. E pior: Kleppmann chama essas falhas parciais de não determinísticas. A mesma operação pode funcionar agora e falhar daqui a um segundo, e às vezes você nem sabe se ela funcionou ou não."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tipo a cobrança dupla. Funcionou, mas o checkout acha que não."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Exatamente. E repara na diferença de mentalidade. Com falha total, a estratégia é reiniciar. Kleppmann conta que o mundo da supercomputação faz mais ou menos isso: salva o estado de tempos em tempos e, se um nó morre, para tudo e recomeça do último ponto salvo. Num serviço na internet, que precisa atender cliente o tempo todo, você não pode parar tudo. Você precisa continuar funcionando com um pedaço quebrado."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então projetar sistema distribuído é projetar pro pedaço quebrado."
+    },
+    {
+      "persona": "rafael",
+      "texto": "É construir um sistema confiável a partir de peças que não são. E isso nos leva ao cupom."
+    },
+    {
+      "persona": "davi",
+      "texto": "O cupom! Eu falei pra sincronizar os relógios com NTP. Não resolve?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Ajuda. Não resolve. Me diz uma coisa: o relógio de cada servidor é o quê, fisicamente?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Sei lá, um chip?",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Um cristal de quartzo, na maioria das máquinas. E quartzo não é perfeito: cada um anda um pouquinho mais rápido ou mais devagar, e isso varia até com a temperatura. Kleppmann chama isso de drift, o desvio do relógio. O NTP corrige de tempos em tempos, consultando um servidor de hora pela rede."
+    },
+    {
+      "persona": "davi",
+      "texto": "Pela rede."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Pela rede. Aquela mesma rede, com aquele mesmo atraso imprevisível. Então a correção também tem erro. E, se o relógio da máquina estiver muito adiantado, o NTP pode puxar ele pra trás. O horário pula pra trás."
+    },
+    {
+      "persona": "davi",
+      "texto": "O horário pula pra trás? Então eu posso medir que uma operação levou tempo negativo?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Pode, se você medir duração com o relógio de hora do dia. Por isso Kleppmann diferencia dois tipos de relógio. O relógio de hora do dia, que tenta dizer que horas são e pode pular. E o relógio monotônico, que só serve pra medir intervalo, nunca volta, mas o valor dele sozinho não significa nada. Medir timeout é com o monotônico."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o cupom? Meia-noite de qual servidor?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Essa é a pergunta. Se um servidor está dois segundos adiantado, pra ele o cupom já venceu. Pro vizinho, não. O mesmo pedido, a mesma hora real, duas respostas. E o problema fica pior quando você usa horário pra decidir quem escreveu por último. Kleppmann mostra que, se a regra é a última escrita vence pelo carimbo de tempo, uma máquina com o relógio atrasado pode ter a escrita dela descartada em silêncio, mesmo tendo chegado depois."
+    },
+    {
+      "persona": "davi",
+      "texto": "Em silêncio é a pior parte."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Sempre é. Barulho a gente conserta. Silêncio a gente descobre no extrato do cliente.",
+      "estilo": "seco"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, e o worker do estoque? Eu falei de máquina maior. Pelo jeito também não é isso."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Vamos montar. O worker pega uma reserva, uma espécie de trava com prazo de validade, que os sistemas costumam chamar de lease. Digamos que vale dez segundos. Ele confere: minha lease está válida? Está. Aí, bem nessa hora, o processo para."
+    },
+    {
+      "persona": "davi",
+      "texto": "Para por quê?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Pode ser uma pausa de garbage collection, daquelas que param o mundo. Pode ser a máquina virtual sendo pausada pelo provedor. Pode ser o sistema operacional ocupado com outra coisa. Kleppmann lista vários motivos assim. O ponto é que o processo não percebe que parou. Quando ele volta, quinze segundos depois, ele continua da linha seguinte, achando que ainda tem a lease."
+    },
+    {
+      "persona": "davi",
+      "texto": "E nesse meio-tempo a lease venceu, outro worker pegou, e os dois mandam o pedido."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Exatamente. Máquina maior não resolve, porque o problema não é força. É que o processo não pode confiar na própria percepção de tempo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Java com garbage collector. Isso é meu dia a dia, Rafael. E agora estou com medo.",
+      "estilo": "surpreso"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Medo saudável. E tem saída. Uma das que Kleppmann descreve é o fencing token. Cada vez que alguém recebe a lease, ganha também um número que sempre cresce. O depósito guarda o maior número que já viu e recusa qualquer pedido com número menor. O worker atrasado chega com um número velho e leva um não."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então quem protege não é o worker, é quem recebe o pedido."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Isso. Você para de confiar que cada nó sabe a verdade sobre si mesmo. Kleppmann tem uma ideia forte nesse capítulo: um nó sozinho não pode confiar no próprio julgamento. Quem decide se um nó está vivo, ou quem é o dono de um recurso, costuma ser a maioria, um quórum."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi o padrão. Rede, relógio e processo. Os três mentem, e nenhum deles avisa que está mentindo."
+    },
+    {
+      "persona": "rafael",
+      "texto": "É isso. A rede atrasa ou perde sem avisar. O relógio desvia ou pula sem avisar. O processo pausa sem perceber. E é por isso que nada disso aparece na sua máquina de desenvolvimento."
+    },
+    {
+      "persona": "davi",
+      "texto": "O famoso funciona na minha máquina."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Na sua máquina não tem Black Friday.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, então vamos aos trade-offs, porque eu sei que vem um depende."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Vem. Começa pelo timeout. Curto, você responde rápido ao cliente e libera recurso, mas paga com mais falsos alarmes e mais trabalho duplicado. Longo, você erra menos o diagnóstico, mas segura conexão e deixa o usuário esperando. Não tem valor certo, tem o valor que você escolheu de olhos abertos."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a retentativa?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Retentativa aumenta a chance de sucesso, mas multiplica carga e duplica efeitos. Ela só é segura com idempotência, e idempotência custa: você precisa guardar os identificadores, decidir por quanto tempo, e tratar o caso de duas tentativas chegando ao mesmo tempo. É trabalho de verdade, não é uma anotação no código."
+    },
+    {
+      "persona": "davi",
+      "texto": "E pro relógio?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Usar o horário da máquina pra ordenar eventos é simples e quase sempre funciona. O quase é o problema. Trocar isso por fencing token, por números de versão ou por um quórum dá mais garantia, mas traz mais peças, mais mensagens pela rede e mais coisa pra entender quando dá errado. Em muitos dados, o horário aproximado basta. No dinheiro do cliente, na minha opinião, não basta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então a escolha é por dado, não pelo sistema inteiro."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Por dado. E a outra escolha grande é de mentalidade. Você pode tratar falha como exceção rara, e o código fica mais simples, até o dia em que ela acontece. Ou tratar falha como caso normal, e o código fica mais longo, mas a madrugada fica mais curta. Eu já escolhi o meu lado faz tempo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu tentar resumir, com as minhas palavras. Primeiro: as oito falácias são coisas que a gente assume sem perceber quando sai de uma máquina só. Que a rede é confiável, que a latência é zero, que a banda é infinita, que a rede é segura, que a topologia não muda, que tem um só administrador, que o transporte não custa nada e que a rede é toda igual. Nenhuma é verdade."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Até aqui, perfeito."
+    },
+    {
+      "persona": "davi",
+      "texto": "Segundo: numa máquina só, quando dá ruim, geralmente cai tudo, e isso é falha total. No sistema distribuído, um pedaço quebra e o resto continua, às vezes sem saber se a operação deu certo. Isso é falha parcial, e é com ela que a gente tem que projetar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Terceiro: rede, relógio e processo não são confiáveis. O timeout não diz o que aconteceu, só que eu desisti. O relógio desvia e pode até voltar, então pra medir duração é relógio monotônico e pra ordenar coisa importante não dá pra confiar no horário. E o processo pode parar sem saber, então quem recebe o pedido tem que se proteger, com fencing token, por exemplo. E retentativa só com idempotência."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Você explicou aquela noite melhor do que muito post-mortem que eu já li."
+    },
+    {
+      "persona": "davi",
+      "texto": "Valeu! E agora o desafio pra você que está ouvindo. Escolha uma chamada de rede de um sistema que você mantém e escreva o que acontece se ela demorar trinta segundos, falhar no meio ou for executada duas vezes. Escreve mesmo. Aposto que uma das respostas vai te tirar o sono."
+    },
+    {
+      "persona": "rafael",
+      "texto": "E se nenhuma tirar, olha de novo.",
+      "estilo": "seco"
+    },
+    {
+      "persona": "davi",
+      "texto": "Rafael, muito obrigado pela conversa. Foi um começo de saga e tanto."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Eu que agradeço, Davi. E, pra quem está ouvindo: tudo falha. A única pergunta é como."
+    },
+    {
+      "persona": "davi",
+      "texto": "Pra fontes, a gente usou o capítulo oito do Designing Data-Intensive Applications, do Martin Kleppmann, e o artigo Fallacies of Distributed Computing Explained, do Arnon Rotem-Gal-Oz. Eu sou o Davi, este foi o Pebacast, e até o próximo episódio!"
+    }
+  ],
+  "desafio": "Escolha uma chamada de rede de um sistema que você mantém e escreva o que acontece se ela demorar trinta segundos, falhar no meio ou for executada duas vezes.",
+  "fontes": [
+    "Designing Data-Intensive Applications, Martin Kleppmann, 1ª edição, cap. 8",
+    "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+  ]
+}

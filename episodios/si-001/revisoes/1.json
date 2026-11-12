@@ -1,0 +1,315 @@
+{
+  "aprovado": false,
+  "roteiro_sha256": "fcd493150205e95e146f6228da1a94df9c30ee5780531496295cf0f8ebc34025",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "o caso de hoje é hipotético",
+      "veredito": "correta",
+      "fonte": "noticia.json (tipo: hipotetico)"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "O checkout espera três segundos. Se não vier resposta, ele tenta de novo, até três vezes",
+      "veredito": "correta",
+      "fonte": "noticia.json: timeout de três segundos e até três retentativas automáticas"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "muita cobrança é aprovada depois que o checkout já desistiu e mandou outra. Resultado: um monte de cliente cobrado duas vezes",
+      "veredito": "correta",
+      "fonte": "noticia.json"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "um cupom que vencia à meia-noite foi aceito por alguns servidores e recusado por outros. Os relógios das máquinas não concordavam",
+      "veredito": "correta",
+      "fonte": "noticia.json"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "um worker que reserva estoque travou uns segundos, outro worker assumiu a reserva, e os dois mandaram o mesmo pedido pro depósito",
+      "veredito": "correta",
+      "fonte": "noticia.json (pausa de garbage collection; a causa é revelada na fala 77)"
+    },
+    {
+      "fala": 16,
+      "afirmacao": "Pode ser que o pedido se perdeu no caminho. [...] Ou pode ser que ele cobrou o cliente, respondeu, e a resposta é que se perdeu na volta",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Unreliable Networks\" (lista de possibilidades da figura 8-1)"
+    },
+    {
+      "fala": 18,
+      "afirmacao": "o Martin Kleppmann mostra no capítulo oito do Designing Data-Intensive Applications, que é justamente sobre os problemas dos sistemas distribuídos",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, \"The Trouble with Distributed Systems\""
+    },
+    {
+      "fala": 18,
+      "afirmacao": "Numa rede assíncrona, como a que a gente usa no dia a dia, quem enviou não tem como saber se o pedido chegou, se foi processado ou se a resposta se perdeu. A única ferramenta que sobra é o timeout. E o timeout não te diz o que aconteceu",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Unreliable Networks\""
+    },
+    {
+      "fala": 22,
+      "afirmacao": "Timeout curto declara morto um serviço que só estava lento, e aí você tenta de novo e duplica o trabalho. Timeout longo deixa o cliente olhando pra tela de carregamento",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Timeouts and Unbounded Delays\""
+    },
+    {
+      "fala": 22,
+      "afirmacao": "Kleppmann discute exatamente esse dilema, e a saída que ele aponta é escolher o timeout olhando o comportamento medido da rede, e não chutando",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Timeouts and Unbounded Delays\" (escolher timeouts experimentalmente, medindo a distribuição dos tempos de ida e volta)"
+    },
+    {
+      "fala": 25,
+      "afirmacao": "Fila no switch, fila no sistema operacional, fila no próprio serviço. Ninguém garante quanto tempo um pacote vai ficar esperando. Isso é o que se chama de atraso sem limite",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Network congestion and queueing\" e \"Timeouts and Unbounded Delays\""
+    },
+    {
+      "fala": 25,
+      "afirmacao": "com retentativa automática, cada cliente lento vira três clientes",
+      "veredito": "imprecisa",
+      "correcao": "No cenário, o checkout faz a chamada original e mais até três retentativas, ou seja, cada cobrança lenta pode virar até quatro chamadas. Dizer \"vira até quatro chamadas\" ou, sem número, \"cada cliente lento vira vários\".",
+      "fonte": "Cenário do episódio (noticia.json e fala 5): uma tentativa original mais até três retentativas"
+    },
+    {
+      "fala": 27,
+      "afirmacao": "se a operação pode ser executada duas vezes, ela precisa dar o mesmo resultado nas duas",
+      "veredito": "imprecisa",
+      "correcao": "Idempotência é executar duas (ou N) vezes ter o mesmo efeito que executar uma vez só. \"Dar o mesmo resultado nas duas\" deixa margem para entender que duas cobranças aprovadas seriam aceitáveis porque ambas \"retornaram aprovado\". Sugestão: \"se a operação pode ser executada duas vezes, a segunda execução não pode ter efeito nenhum além do da primeira\".",
+      "fonte": "Definição consolidada de idempotência (efeito de N execuções igual ao de uma)"
+    },
+    {
+      "fala": 29,
+      "afirmacao": "Se o pagamento recebe o mesmo identificador de novo, ele não cobra outra vez, só devolve o resultado da primeira",
+      "veredito": "correta",
+      "fonte": "Prática consolidada de chave de idempotência em APIs de pagamento (ex.: cabeçalho Idempotency-Key da Stripe)"
+    },
+    {
+      "fala": 31,
+      "afirmacao": "Uma lista que nasceu na Sun Microsystems, nos anos noventa. Peter Deutsch costuma receber o crédito pelas primeiras sete, e James Gosling, o criador do Java, acrescentou a oitava",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006 (Deutsch, 1994, sete falácias; Gosling, por volta de 1997, a oitava)"
+    },
+    {
+      "fala": 31,
+      "afirmacao": "A referência que a gente usa hoje é o artigo Fallacies of Distributed Computing Explained, do Arnon Rotem-Gal-Oz, que pega cada uma e explica o estrago que ela faz",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 33,
+      "afirmacao": "A primeira: a rede é confiável",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 35,
+      "afirmacao": "A segunda: a latência é zero",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 36,
+      "afirmacao": "se eu faço cem chamadas pequenas em sequência, o tempo de ida e volta se soma",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006 (seção sobre latência)"
+    },
+    {
+      "fala": 37,
+      "afirmacao": "A terceira: a largura de banda é infinita",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 39,
+      "afirmacao": "o Rotem-Gal-Oz aponta que as duas puxam pra lados opostos. Pra fugir da latência, você manda menos chamadas, com mais dados. Pra fugir da banda, você manda menos dados",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006 (seção sobre largura de banda, tensão com a falácia da latência)"
+    },
+    {
+      "fala": 39,
+      "afirmacao": "A quarta: a rede é segura",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 41,
+      "afirmacao": "A quinta: a topologia não muda",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 43,
+      "afirmacao": "É a ideia de que o caminho entre as máquinas é sempre o mesmo",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 45,
+      "afirmacao": "A sexta: existe um só administrador",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 47,
+      "afirmacao": "A sétima: o custo de transporte é zero",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 49,
+      "afirmacao": "Tem o custo de transformar o objeto em bytes e de volta, que gasta processamento, e tem o custo da infraestrutura de rede, que alguém paga",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006 (os dois aspectos do custo de transporte: serialização e infraestrutura)"
+    },
+    {
+      "fala": 49,
+      "afirmacao": "E a oitava, a do Gosling: a rede é homogênea",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 51,
+      "afirmacao": "E o ponto do artigo é que essas falácias não são burrice de ninguém. São suposições que a gente faz sem perceber, porque dentro de uma máquina só elas são quase verdade",
+      "veredito": "imprecisa",
+      "correcao": "O artigo apresenta as falácias como suposições que arquitetos e projetistas de sistemas distribuídos tendem a fazer e que se mostram falsas com o tempo, e explica a consequência de cada uma. A justificativa \"porque dentro de uma máquina só elas são quase verdade\" não foi possível confirmar no artigo (várias falácias, como administrador único e rede homogênea, nem se aplicam a uma máquina). Tirar a atribuição (\"o ponto do artigo\") e apresentar essa explicação como leitura do Rafael, ou ficar só com \"são suposições que a gente faz sem perceber e que se mostram falsas\".",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 55,
+      "afirmacao": "Kleppmann observa que o computador é projetado assim de propósito: se algo interno dá errado, é melhor parar tudo do que devolver um resultado errado",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Faults and Partial Failures\""
+    },
+    {
+      "fala": 57,
+      "afirmacao": "Kleppmann chama essas falhas parciais de não determinísticas. A mesma operação pode funcionar agora e falhar daqui a um segundo, e às vezes você nem sabe se ela funcionou ou não",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Faults and Partial Failures\""
+    },
+    {
+      "fala": 59,
+      "afirmacao": "Kleppmann conta que o mundo da supercomputação faz mais ou menos isso: salva o estado de tempos em tempos e, se um nó morre, para tudo e recomeça do último ponto salvo",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Cloud Computing and Supercomputing\""
+    },
+    {
+      "fala": 61,
+      "afirmacao": "É construir um sistema confiável a partir de peças que não são",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Building a Reliable System from Unreliable Components\""
+    },
+    {
+      "fala": 65,
+      "afirmacao": "Um cristal de quartzo, na maioria das máquinas. E quartzo não é perfeito: cada um anda um pouquinho mais rápido ou mais devagar, e isso varia até com a temperatura. Kleppmann chama isso de drift",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Clock Synchronization and Accuracy\""
+    },
+    {
+      "fala": 65,
+      "afirmacao": "O NTP corrige de tempos em tempos, consultando um servidor de hora pela rede",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Unreliable Clocks\""
+    },
+    {
+      "fala": 67,
+      "afirmacao": "a correção também tem erro. E, se o relógio da máquina estiver muito adiantado, o NTP pode puxar ele pra trás. O horário pula pra trás",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Clock Synchronization and Accuracy\" e \"Time-of-day clocks\""
+    },
+    {
+      "fala": 69,
+      "afirmacao": "Por isso Kleppmann diferencia dois tipos de relógio. O relógio de hora do dia, que tenta dizer que horas são e pode pular. E o relógio monotônico, que só serve pra medir intervalo, nunca volta, mas o valor dele sozinho não significa nada. Medir timeout é com o monotônico",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Monotonic Versus Time-of-Day Clocks\""
+    },
+    {
+      "fala": 71,
+      "afirmacao": "Kleppmann mostra que, se a regra é a última escrita vence pelo carimbo de tempo, uma máquina com o relógio atrasado pode ter a escrita dela descartada em silêncio, mesmo tendo chegado depois",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Timestamps for ordering events\" (figura 8-3)"
+    },
+    {
+      "fala": 75,
+      "afirmacao": "uma espécie de trava com prazo de validade, que os sistemas costumam chamar de lease",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Process Pauses\" (\"a lease is like a lock with a timeout\")"
+    },
+    {
+      "fala": 77,
+      "afirmacao": "Pode ser uma pausa de garbage collection, daquelas que param o mundo. Pode ser a máquina virtual sendo pausada pelo provedor. Pode ser o sistema operacional ocupado com outra coisa. Kleppmann lista vários motivos assim",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Process Pauses\""
+    },
+    {
+      "fala": 77,
+      "afirmacao": "O ponto é que o processo não percebe que parou. Quando ele volta, quinze segundos depois, ele continua da linha seguinte, achando que ainda tem a lease",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Process Pauses\""
+    },
+    {
+      "fala": 81,
+      "afirmacao": "Uma das que Kleppmann descreve é o fencing token. Cada vez que alguém recebe a lease, ganha também um número que sempre cresce. O depósito guarda o maior número que já viu e recusa qualquer pedido com número menor",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Fencing tokens\""
+    },
+    {
+      "fala": 83,
+      "afirmacao": "Kleppmann tem uma ideia forte nesse capítulo: um nó sozinho não pode confiar no próprio julgamento. Quem decide se um nó está vivo, ou quem é o dono de um recurso, costuma ser a maioria, um quórum",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"The Truth Is Defined by the Majority\""
+    },
+    {
+      "fala": 89,
+      "afirmacao": "Curto, você responde rápido ao cliente e libera recurso, mas paga com mais falsos alarmes e mais trabalho duplicado. Longo, você erra menos o diagnóstico, mas segura conexão e deixa o usuário esperando",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Timeouts and Unbounded Delays\""
+    },
+    {
+      "fala": 91,
+      "afirmacao": "Ela só é segura com idempotência, e idempotência custa: você precisa guardar os identificadores, decidir por quanto tempo, e tratar o caso de duas tentativas chegando ao mesmo tempo",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado sobre chaves de idempotência"
+    },
+    {
+      "fala": 93,
+      "afirmacao": "Trocar isso por fencing token, por números de versão ou por um quórum dá mais garantia, mas traz mais peças, mais mensagens pela rede",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8 (seções sobre relógios lógicos, fencing tokens e quórum)"
+    },
+    {
+      "fala": 96,
+      "afirmacao": "Que a rede é confiável, que a latência é zero, que a banda é infinita, que a rede é segura, que a topologia não muda, que tem um só administrador, que o transporte não custa nada e que a rede é toda igual",
+      "veredito": "correta",
+      "fonte": "Fallacies of Distributed Computing Explained, Arnon Rotem-Gal-Oz, 2006"
+    },
+    {
+      "fala": 98,
+      "afirmacao": "numa máquina só, quando dá ruim, geralmente cai tudo, e isso é falha total. No sistema distribuído, um pedaço quebra e o resto continua, às vezes sem saber se a operação deu certo. Isso é falha parcial",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Faults and Partial Failures\""
+    },
+    {
+      "fala": 99,
+      "afirmacao": "O relógio desvia e pode até voltar, então pra medir duração é relógio monotônico e pra ordenar coisa importante não dá pra confiar no horário",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Unreliable Clocks\""
+    },
+    {
+      "fala": 99,
+      "afirmacao": "quem recebe o pedido tem que se proteger, com fencing token, por exemplo. E retentativa só com idempotência",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 8, seção \"Fencing tokens\""
+    },
+    {
+      "fala": 105,
+      "afirmacao": "Pra fontes, a gente usou o capítulo oito do Designing Data-Intensive Applications, do Martin Kleppmann, e o artigo Fallacies of Distributed Computing Explained, do Arnon Rotem-Gal-Oz",
+      "veredito": "correta",
+      "fonte": "curriculum/sagas/sistemas.yaml, referências de si-001 (ddia cap. 8 e falacias)"
+    }
+  ]
+}
