@@ -110,6 +110,8 @@ O MP3 vai para o `AudioStorage` (um release `episodio-<id>` por episódio) e o A
 - show notes com as fontes, o desafio e o resumo do relatório de revisão;
 - aviso de conteúdo gerado por IA.
 
+Mudanças que só afetam o site ou o feed (`site/`, `src/podcast/site.py`, `src/podcast/publicacao.py`, `curriculum/`, `config/`) são publicadas por `.github/workflows/site.yml`, sem esperar episódio novo. Ele também pode ser disparado à mão.
+
 Decisão de hospedagem em [ADR 0002](adr/0002-hospedagem-pages-releases.md).
 
 ## Falhas

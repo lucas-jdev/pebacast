@@ -3,8 +3,8 @@
 Roda no GitHub Actions depois do push da rotina do roteirista. Antes de gastar qualquer
 chamada de TTS, valida o roteiro de novo: a rotina não é a fonte de verdade da aprovação.
 
-    python -m podcast.publicacao publicar --repo dono/repo --site _site
-    python -m podcast.publicacao feed --site _site
+    python -m podcast.publicacao --site _site publicar --repo dono/repo
+    python -m podcast.publicacao --site _site feed
 """
 
 import argparse

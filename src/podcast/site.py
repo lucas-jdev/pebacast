@@ -4,7 +4,7 @@ Gera o index.html a partir do que já está no repositório (currículo, persona
 episódios publicados) e copia os arquivos estáticos de site/. O feed continua
 saindo de podcast.publicacao: esta página é só a vitrine.
 
-    python -m podcast.publicacao feed --site _site
+    python -m podcast.publicacao --site _site feed
 """
 
 import json

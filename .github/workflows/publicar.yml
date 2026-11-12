@@ -10,11 +10,6 @@ on:
       - "episodios/*/noticia.json"
       - "episodios/*/revisoes/**"
   workflow_dispatch:
-    inputs:
-      apenas_feed:
-        description: Só regenerar o feed, sem publicar episódios
-        type: boolean
-        default: false
 
 concurrency:
   group: publicar
@@ -56,7 +51,7 @@ jobs:
       # Faixa de terceiros: só a versão cifrada fica no repositório (docs/vinheta.md).
       - name: Decifrar a vinheta
         # Se falhar (secret ausente ou errado), o episódio sai sem vinheta e a publicação abre um aviso.
-        if: ${{ !inputs.apenas_feed && hashFiles('assets/vinheta.mp3.gpg') != '' }}
+        if: ${{ hashFiles('assets/vinheta.mp3.gpg') != '' }}
         continue-on-error: true
         env:
           VINHETA_SENHA: ${{ secrets.VINHETA_SENHA }}
@@ -66,18 +61,12 @@ jobs:
 
       - name: Publicar episódios pendentes
         id: publicar
-        if: ${{ !inputs.apenas_feed }}
         continue-on-error: true
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python -m podcast.publicacao publicar --repo "$GITHUB_REPOSITORY"
 
-      - name: Regenerar o feed
-        if: ${{ inputs.apenas_feed }}
-        run: python -m podcast.publicacao feed
-
       - name: Registrar a publicação no repositório
-        if: ${{ !inputs.apenas_feed }}
         run: |
           git add episodios/*/publicacao.json 2>/dev/null || true
           if git diff --cached --quiet; then
