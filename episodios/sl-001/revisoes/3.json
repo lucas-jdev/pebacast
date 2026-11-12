@@ -1,0 +1,241 @@
+{
+  "aprovado": false,
+  "roteiro_sha256": "39da3bf42285c09057294a1aff269c65a0fa389c1181bfc5efe90f61da7c56c1",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "Saiu ontem, onze de novembro, no El Nuevo Día, que é um jornal de Porto Rico.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json). O episódio é publicado no dia seguinte à geração (data_de_publicacao em src/podcast/roteiro.py), 12/11, então 'ontem' confere."
+    },
+    {
+      "fala": 3,
+      "afirmacao": "O governo de lá lançou um ERP, um sistema de gestão integrada, chamado Íntegra PR, pra cuidar de finanças e compras das agências do governo.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): plataforma ERP do governo batizada de Íntegra PR, para gestão administrativa e financeira (compras, ordens de compra, pagamentos a fornecedores, estados financeiros)."
+    },
+    {
+      "fala": 3,
+      "afirmacao": "A governadora anunciou o lançamento no dia oito de julho como uma das conquistas da gestão.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json), legenda da foto: 'El pasado 8 de julio, la gobernadora Jenniffer González [...] presentó el lanzamiento del ERP como uno de los logros de su gobierno.'"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "o jornal conseguiu cartas e e-mails mostrando que, semanas antes do lançamento, duas áreas avisaram que ia dar problema. Uma foi o Departamento de Educação. A outra foi a Administração de Serviços Gerais, que é o órgão central de compras do governo.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): 'Semanas antes de que el gobierno anunciara la puesta en vigor de la plataforma'; avisos do DE e da ASG, cuja lei orgânica (Lei 73 de 2019) trata do catálogo de ordens de compra."
+    },
+    {
+      "fala": 7,
+      "afirmacao": "A de Educação mandou um e-mail em maio dizendo que seria a agência mais afetada, porque tem um orçamento enorme, com dinheiro federal e estadual, e operações complexas que não dá pra automatizar. E listou cenários que o sistema não contemplava: compras sem contrato, emergências, ajustes, cancelamentos.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): 'El DE advirtió el 6 de mayo, en un correo electrónico'; agência mais prejudicada, orçamento com fundos federais e estaduais, operações que não podem ser automatizadas; cenários atípicos: compras sem contrato, emergências, ajustes, cancelamentos."
+    },
+    {
+      "fala": 7,
+      "afirmacao": "A de compras mandou uma carta em junho dizendo que o sistema não permitia transações entre agências e que ia atrasar ordens de compra.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): 'En una carta del 22 de junio de este año', Karla G. Mercado Rivera (ASG): o ERP não permitia transações interagenciais e causaria demoras na emissão de ordens de compra."
+    },
+    {
+      "fala": 8,
+      "afirmacao": "as duas disseram que não eram contra o ERP. Pediram pra reconsiderar o lançamento e trabalhar mais com a plataforma antes de colocar em produção.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): os documentos dizem que as agências não se opunham ao ERP e pediram para reconsiderar o lançamento e trabalhar mais com a plataforma antes de pô-la em vigor."
+    },
+    {
+      "fala": 9,
+      "afirmacao": "E o governo lançou mesmo assim. Hoje o próprio secretário de Educação reconhece que os problemas do sistema atrasaram pagamentos a empresas de transporte escolar e de educação especial.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): o secretário Eliezer Ramos Parés 'reconoció, en múltiples ocasiones' que os problemas com o ERP causaram atrasos em pagamentos a provedores de transporte escolar e de Educação Especial."
+    },
+    {
+      "fala": 9,
+      "afirmacao": "E o jornal diz que a Educação está com noventa por cento menos compras do que na mesma data do ano passado.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): 'El Nuevo Día supo que el DE tiene hoy día un 90% menos de compras, al compararlo con la misma fecha el año pasado.'"
+    },
+    {
+      "fala": 10,
+      "afirmacao": "Noventa por cento. Quer dizer que o problema não ficou na tela de ninguém. Ele chegou nas empresas que levam as crianças pra escola, que estão recebendo com atraso.",
+      "veredito": "imprecisa",
+      "correcao": "Duas distorções pequenas: a fala deduz o atraso no transporte a partir dos 90%, que medem queda de compras, e põe o atraso no presente, o que a matéria não afirma. Sugestão: 'Noventa por cento. Quer dizer que o problema não ficou na tela de ninguém. E o atraso nos pagamentos chegou nas empresas que levam as crianças pra escola.'",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): os 90% são queda de compras do DE; o atraso no pagamento ao transporte escolar é outro fato, reconhecido pelo secretário no passado ('los problemas con el ERP eran la causa'). A matéria não diz que os atrasos continuam."
+    },
+    {
+      "fala": 16,
+      "afirmacao": "Então a sua suíte automatizada ia passar inteirinha, verde, bonita. Ela confirma que o sistema faz o que alguém escreveu. Ela não descobre o que ninguém escreveu.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: verificação ('construímos o sistema certo segundo a especificação?') x validação ('construímos o sistema certo para o usuário?'), Boehm; IEEE 1012."
+    },
+    {
+      "fala": 16,
+      "afirmacao": "Uma homologação com casos reais até poderia achar o buraco, mas só se a Educação estivesse lá testando.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: teste de aceitação pelo usuário é a etapa de validação; depende de quem conhece os casos reais participar."
+    },
+    {
+      "fala": 16,
+      "afirmacao": "O buraco aqui não estava no código, Davi. Estava em quem foi levado a sério e em quem não foi.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): as falhas relatadas vêm de cenários e regras que as agências apontaram por escrito antes do lançamento; a matéria não atribui o problema a defeito de código."
+    },
+    {
+      "fala": 20,
+      "afirmacao": "Vou usar a divisão que aparece no Solutions Architect's Handbook, de Saurabh Shrivastava e Neelanjali Srivastav. No capítulo sobre o lugar do arquiteto de soluções na organização, eles falam de um arquiteto corporativo, que eles chamam de enterprise solution architect, focado na estratégia da organização e na arquitetura de negócio. Depois, o arquiteto de soluções, focado no desenho da solução e na integração. E o arquiteto técnico, focado no design e no desenvolvimento do software.",
+      "veredito": "correta",
+      "fonte": "Solutions Architect's Handbook, 1ª ed. (2020), cap. 2 'Solution Architects in an Organization', seção 'Types of solution architect role': Enterprise solution architect (Organization strategy, Business architecture), Solution architect (Solution design, Solution integration), Technical architect (Software design, Software development). https://ibooks.qq.com/read/1034725255/34"
+    },
+    {
+      "fala": 22,
+      "afirmacao": "O livro diz que o arquiteto de soluções atua num nível mais tático do que o corporativo.",
+      "veredito": "correta",
+      "fonte": "Solutions Architect's Handbook, 1ª ed. (2020), cap. 2 'Solution Architects in an Organization': 'Overall, the solution architect gets to engage on a more tactical level compared to the enterprise architect.' https://ibooks.qq.com/read/1034725255/36"
+    },
+    {
+      "fala": 22,
+      "afirmacao": "O corporativo pensa em padrões para a organização toda e num horizonte longo. [...] Ele pega uma iniciativa específica, como esse ERP, e responde quais peças resolvem o problema e como elas se conectam. Já o arquiteto de software entra na estrutura interna de cada sistema: módulos, camadas, como o código se organiza.",
+      "veredito": "correta",
+      "fonte": "Solutions Architect's Handbook, 1ª ed. (2020), cap. 2 'Solution Architects in an Organization' (estratégia da organização x desenho e integração da solução x design e desenvolvimento do software); pergunta central da saga em curriculum/sagas/solucoes.yaml. O Handbook usa 'software architect' e 'technical architect' como títulos próximos (https://ibooks.qq.com/read/1034725255/36)."
+    },
+    {
+      "fala": 26,
+      "afirmacao": "O próprio livro admite que as responsabilidades se sobrepõem conforme a estrutura da organização.",
+      "veredito": "correta",
+      "fonte": "Solutions Architect's Handbook, 1ª ed. (2020), cap. 2 'Solution Architects in an Organization': 'However, the responsibilities of the solution architect overlap, depending on an organization's structure.' https://ibooks.qq.com/read/1034725255/36"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "Em empresa pequena, a mesma pessoa faz os três. Em banco grande, são três times.",
+      "veredito": "correta",
+      "fonte": "Solutions Architect's Handbook, 1ª ed. (2020), cap. 2 'Solution Architects in an Organization': o livro diz que o arquiteto de soluções pode assumir outros papéis conforme a necessidade ('Sometimes, the solution architect takes on the role of an enterprise architect'). Os dois exemplos são ilustração coerente com isso, sem atribuição ao livro."
+    },
+    {
+      "fala": 30,
+      "afirmacao": "No caso de Porto Rico foi um pouco diferente: quem avisou estava na lista, mas não foi levado a sério.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): DE e ASG, agências usuárias do ERP, escreveram à OGP e a Itza García, que liderava o projeto; segundo uma fonte, 'La reacción (de García) siempre fue hay que seguir', e o lançamento saiu mesmo assim."
+    },
+    {
+      "fala": 30,
+      "afirmacao": "Rozanski e Woods, no Software Systems Architecture, dedicam um capítulo inteiro a identificar e engajar stakeholders. E eles lembram logo no começo que as pessoas afetadas por um sistema não se limitam a quem usa o sistema.",
+      "veredito": "correta",
+      "fonte": "Rozanski e Woods, Software Systems Architecture, 2ª ed., cap. 9 'Identifying and Engaging Stakeholders', abertura: 'As we saw in Part I, the people affected by a system are not limited to those who use it.' https://www.oreilly.com/library/view/software-systems-architecture/9780321580207/ch9.html"
+    },
+    {
+      "fala": 33,
+      "afirmacao": "O governo central. O escritório de orçamento, a secretaria que tocava o projeto.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): avisos dirigidos à Oficina de Gerencia y Presupuesto (OGP) e a Itza García, então secretária da Governadoria, que tinha o projeto a seu cargo."
+    },
+    {
+      "fala": 37,
+      "afirmacao": "o órgão central de compras, que tem uma lei própria. E a Educação, que mexe com dinheiro federal e presta contas pra fora.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): a ASG invoca a sua lei orgânica (Lei 73 de 2019); o DE administra fundos federais sob síndico do Departamento de Educação federal, sindicatura estendida até 26/02/2027."
+    },
+    {
+      "fala": 40,
+      "afirmacao": "o livro organiza isso em classes de stakeholders, que vão além do usuário: quem adquire o sistema, quem avalia se ele está em conformidade, quem desenvolve, quem mantém, quem opera, quem dá suporte, quem testa.",
+      "veredito": "correta",
+      "fonte": "Rozanski e Woods, Software Systems Architecture, 2ª ed., cap. 9, classes de stakeholders: acquirers, assessors ('oversee system conformance to legal regulations and standards'), communicators, developers, maintainers, production engineers, suppliers, support staff, system administrators, testers, users. Aulas da CSCE 742, que usam o livro como texto-base: https://greg4cr.github.io/courses/fall18csce742/Lectures/Fall18-Lecture5Context.pdf"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "Repara que, pela matéria, as perguntas da Educação e do órgão de compras foram feitas por escrito. Elas não ficaram sem pergunta. Ficaram sem ser atendidas: o lançamento saiu mesmo assim.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): e-mail do DE (6/5) e carta da ASG (22/6); o governo pôs a plataforma em vigor semanas depois."
+    },
+    {
+      "fala": 42,
+      "afirmacao": "O órgão de compras pergunta: quem controla o catálogo de compras e como duas agências fazem uma transação entre si.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): a ASG reclamou que o catálogo de ordens de compra passaria às agências, contra a Lei 73 de 2019, e que o ERP não permitia transações interagenciais."
+    },
+    {
+      "fala": 44,
+      "afirmacao": "O livro fala de proxy stakeholders, pessoas que representam um grupo que não tem como participar diretamente, e de grupos de stakeholders, quando você precisa de um representante por grupo.",
+      "veredito": "correta",
+      "fonte": "Rozanski e Woods, Software Systems Architecture, 2ª ed., cap. 9, 'Proxy Stakeholders' e 'Stakeholder Groups'. Aulas da CSCE 742 baseadas no livro: proxies são 'individuals or groups that predict the concerns of the real stakeholders', úteis quando eles não podem ser entrevistados; critério 'Representative'. https://greg4cr.github.io/courses/fall18csce742/Lectures/Fall18-Lecture5Context.pdf"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "Rozanski e Woods sugerem procurar gente informada, comprometida, com autoridade pra tomar decisões e que represente de verdade o grupo.",
+      "veredito": "correta",
+      "fonte": "Rozanski e Woods, Software Systems Architecture, 2ª ed., cap. 9, critérios de seleção: informed, committed, authorized ('allowed to make binding decisions'), representative. https://greg4cr.github.io/courses/fall18csce742/Lectures/Fall18-Lecture5Context.pdf"
+    },
+    {
+      "fala": 47,
+      "afirmacao": "Os avisos chegaram a quem tocava o projeto, e o lançamento saiu semanas depois, mesmo assim.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): cartas e e-mails dirigidos à OGP e a Itza García; o governo anunciou a entrada em vigor semanas depois."
+    },
+    {
+      "fala": 54,
+      "afirmacao": "Rozanski e Woods têm uma distinção que ajuda muito aqui, no capítulo sobre concerns, princípios e decisões. Eles separam as preocupações focadas no problema das preocupações focadas na solução. As focadas no problema dizem por que o sistema existe e o que ele precisa fazer. As focadas na solução restringem como ele vai ser construído e com o quê.",
+      "veredito": "correta",
+      "fonte": "Rozanski e Woods, Software Systems Architecture, 2ª ed., cap. 8 'Concerns, Principles, and Decisions' (título conferido em pearson.com), seções 'Problem-Focused Concerns' e 'Solution-Focused Concerns'. Aula da CSCE 742: problem-focused 'Address \"why\" and \"what\" questions'; solution-focused 'Constrain the solution [...] Address \"how\" and \"with what\" questions'. https://greg4cr.github.io/courses/fall18csce742/Lectures/Fall18-Lecture6Concerns.pdf. 'Solução disfarçada de requisito' é apresentado como termo da persona ('É o que eu chamo de')."
+    },
+    {
+      "fala": 56,
+      "afirmacao": "No caso, a lei do órgão de compras é uma restrição de verdade, e o sistema precisava respeitar.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): a ASG apontou que o desenho do ERP violava a sua lei orgânica (Lei 73 de 2019)."
+    },
+    {
+      "fala": 58,
+      "afirmacao": "Repara que eu estou chutando, a matéria não diz qual era a justificativa oficial.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): a matéria não traz a justificativa oficial do projeto."
+    },
+    {
+      "fala": 64,
+      "afirmacao": "Ouvir as agências leva tempo, e um governo tem pressão política pra mostrar resultado. Ignorar custa barato no lançamento e caro depois, como a gente viu.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): a governadora apresentou o lançamento como logro do governo; vieram depois atrasos de pagamento e queda de 90% nas compras do DE."
+    },
+    {
+      "fala": 66,
+      "afirmacao": "Um ERP traz valor justamente porque padroniza processos. Se você acomoda cada exceção de cada agência, perde a padronização e o custo explode.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado sobre implantação de ERP: padronização de processos x custo de customização."
+    },
+    {
+      "fala": 68,
+      "afirmacao": "Lançar tudo de uma vez tem uma vantagem: ninguém fica mantendo dois sistemas em paralelo. A desvantagem é que, se der errado, dá errado em todo lugar ao mesmo tempo. Lançar em ondas custa mais, porque você convive com o antigo e o novo por um tempo, mas cada onda te ensina alguma coisa antes da próxima.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado sobre estratégias de implantação de ERP (big bang x faseada)."
+    },
+    {
+      "fala": 68,
+      "afirmacao": "Teria a Educação, que se declarou a agência mais afetada",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): o DE escreveu que seria a agência mais prejudicada."
+    },
+    {
+      "fala": 71,
+      "afirmacao": "o arquiteto corporativo olha a organização inteira e a estratégia, o de software olha a estrutura de cada sistema, e o de soluções fica no meio, pegando uma iniciativa e respondendo quais peças resolvem o problema e como elas se conectam. A fronteira muda de empresa pra empresa",
+      "veredito": "correta",
+      "fonte": "Solutions Architect's Handbook, 1ª ed. (2020), cap. 2 'Solution Architects in an Organization' (tipos de arquiteto e sobreposição conforme a organização)."
+    },
+    {
+      "fala": 73,
+      "afirmacao": "No caso de Porto Rico, as perguntas foram feitas e o lançamento saiu mesmo assim.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, Gloria Ruiz Kuilan, 11/11/2026 (URL de noticia.json): avisos por escrito em maio e junho; entrada em vigor semanas depois."
+    },
+    {
+      "fala": 75,
+      "afirmacao": "Às vezes a restrição é legítima, tipo uma lei.",
+      "veredito": "correta",
+      "fonte": "Rozanski e Woods, Software Systems Architecture, 2ª ed., cap. 8: concerns focados na solução incluem restrições legítimas; conhecimento consolidado."
+    },
+    {
+      "fala": 76,
+      "afirmacao": "suíte automatizada nenhuma salva um requisito que ninguém escreveu.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: verificação x validação."
+    }
+  ]
+}

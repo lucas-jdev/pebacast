@@ -1,0 +1,338 @@
+{
+  "episodio": "sl-001",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura sem decoreba. Aviso de sempre: este episódio foi gerado por inteligência artificial e revisado contra as fontes citadas. Hoje a gente abre uma saga nova, a de arquitetura de soluções, e a pergunta do dia é simples de falar e difícil de responder: o que faz, afinal, um arquiteto de soluções?"
+    },
+    {
+      "persona": "davi",
+      "texto": "E pra isso eu trouxe uma convidada nova. A Beatriz é arquiteta de soluções com doze anos de carreira. Começou como analista de negócios num hospital, passou por uma consultoria que atende varejo e saúde, e hoje desenha iniciativas inteiras, da conversa com a diretoria até o diagrama de integração. Beatriz, seja muito bem-vinda!"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Obrigada, Davi. Oi, você que está ouvindo, aqui é a Beatriz. Prometo que hoje a gente vai falar mais de problema do que de ferramenta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então vamos direto pro caso, porque ele é fresquinho. Saiu ontem, onze de novembro, no El Nuevo Día, que é um jornal de Porto Rico. O governo de lá lançou um ERP, um sistema de gestão integrada, chamado Íntegra PR, pra cuidar de finanças e compras das agências do governo. A governadora anunciou o lançamento no dia oito de julho como uma das conquistas da gestão."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Até aqui, nada de errado. Unificar finanças de governo é um objetivo bem razoável."
+    },
+    {
+      "persona": "davi",
+      "texto": "Pois é. Só que o jornal conseguiu cartas e e-mails mostrando que, semanas antes do lançamento, duas áreas avisaram que ia dar problema. Uma foi o Departamento de Educação. A outra foi a Administração de Serviços Gerais, que é o órgão central de compras do governo."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E o que elas disseram, Davi? Esse é o pedaço que mais me interessa."
+    },
+    {
+      "persona": "davi",
+      "texto": "A de Educação mandou um e-mail em maio dizendo que seria a agência mais afetada, porque tem um orçamento enorme, com dinheiro federal e estadual, e operações complexas que não dá pra automatizar. E listou cenários que o sistema não contemplava: compras sem contrato, emergências, ajustes, cancelamentos. A de compras mandou uma carta em junho dizendo que o sistema não permitia transações entre agências e que ia atrasar ordens de compra."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E tem um detalhe importante: as duas disseram que não eram contra o ERP. Pediram pra reconsiderar o lançamento e trabalhar mais com a plataforma antes de colocar em produção."
+    },
+    {
+      "persona": "davi",
+      "texto": "Exato. E o governo lançou mesmo assim. Hoje o próprio secretário de Educação reconhece que os problemas do sistema atrasaram pagamentos a empresas de transporte escolar e de educação especial. E o jornal diz que a Educação está com noventa por cento menos compras do que na mesma data do ano passado."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Noventa por cento. Quer dizer que o problema não ficou na tela de ninguém. Ele chegou nas empresas que levam as crianças pra escola, que estão recebendo com atraso."
+    },
+    {
+      "persona": "davi",
+      "texto": "E aí, Beatriz, deixa eu fazer o papel do dev empolgado. Pra mim isso é clássico: faltou teste. Se eu fosse o arquiteto, eu colocava uma suíte de testes automatizados pesada, homologação com dados reais e um rollout em ondas, agência por agência. Pronto, problema resolvido."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Rollout em ondas é uma boa ideia, guarda ela que a gente volta. Mas deixa eu te perguntar uma coisa antes. Testar contra o quê?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Contra os requisitos, ué."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E quem escreveu os requisitos colocou lá compra sem contrato? Compra de emergência? Transação entre duas agências?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Pelo que a matéria conta, parece que não. Senão as duas áreas não precisariam ter avisado."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Então a sua suíte automatizada ia passar inteirinha, verde, bonita. Ela confirma que o sistema faz o que alguém escreveu. Ela não descobre o que ninguém escreveu. Uma homologação com casos reais até poderia achar o buraco, mas só se a Educação estivesse lá testando. O buraco aqui não estava no código, Davi. Estava em quem foi levado a sério e em quem não foi."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. Você está dizendo que o problema começou antes de qualquer linha de código."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Começou na pergunta. Que problema a gente tá resolvendo mesmo? E pra quem? É aí que entra o arquiteto de soluções. E é aí que eu quero separar três papéis que muita gente mistura."
+    },
+    {
+      "persona": "davi",
+      "texto": "Arquiteto corporativo, arquiteto de soluções e arquiteto de software. Confesso que pra mim tudo isso é arquiteto e pronto."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Você não está sozinho. Vou usar a divisão que aparece no Solutions Architect's Handbook, de Saurabh Shrivastava e Neelanjali Srivastav. No capítulo sobre o lugar do arquiteto de soluções na organização, eles falam de um arquiteto corporativo, que eles chamam de enterprise solution architect, focado na estratégia da organização e na arquitetura de negócio. Depois, o arquiteto de soluções, focado no desenho da solução e na integração. E o arquiteto técnico, focado no design e no desenvolvimento do software."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o corporativo olha a empresa inteira, o de soluções olha uma iniciativa e o de software olha um sistema por dentro?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "É um bom resumo. O corporativo pensa em padrões para a organização toda e num horizonte longo. O livro diz que o arquiteto de soluções atua num nível mais tático do que o corporativo. Ele pega uma iniciativa específica, como esse ERP, e responde quais peças resolvem o problema e como elas se conectam. Já o arquiteto de software entra na estrutura interna de cada sistema: módulos, camadas, como o código se organiza."
+    },
+    {
+      "persona": "davi",
+      "texto": "E no caso do Íntegra PR, cada um teria olhado pra quê?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "O olhar corporativo pergunta se faz sentido o governo ter uma plataforma única de finanças e compras. E provavelmente faz. O olhar de software pergunta como o ERP é configurado, como os dados migram, como as integrações funcionam. Mas tem um espaço no meio. Quem pergunta como essa plataforma vai conviver com a compra de emergência da Educação? Com a lei que diz o que é responsabilidade do órgão central de compras? Com o fornecedor de transporte escolar que precisa receber no fim do mês?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Esse espaço no meio é o arquiteto de soluções."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "É o trabalho que eu faço. E vou ser honesta com você: essa fronteira não é rígida. O próprio livro admite que as responsabilidades se sobrepõem conforme a estrutura da organização. Em empresa pequena, a mesma pessoa faz os três. Em banco grande, são três times. O título importa menos do que a pergunta que alguém precisa estar fazendo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Gostei disso. Então não é sobre o crachá, é sobre quem segura qual pergunta."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Exatamente. E a pergunta principal do arquiteto de soluções começa por uma lista. A lista de stakeholders."
+    },
+    {
+      "persona": "davi",
+      "texto": "Stakeholder eu sei o que é. É o usuário, né? E o cliente que paga."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Na minha experiência, esse é o erro mais comum. No caso de Porto Rico foi um pouco diferente: quem avisou estava na lista, mas não foi levado a sério. Mesmo assim, vale começar pela lista. Rozanski e Woods, no Software Systems Architecture, dedicam um capítulo inteiro a identificar e engajar stakeholders. E eles lembram logo no começo que as pessoas afetadas por um sistema não se limitam a quem usa o sistema."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas quem mais é afetado por um ERP de compras?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Vamos montar juntos. Quem paga e aprova o projeto?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O governo central. O escritório de orçamento, a secretaria que tocava o projeto."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Quem usa todo dia?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Os servidores das agências que lançam compras e pagamentos."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Quem tem que garantir que as regras estão sendo cumpridas?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Ah, aí entra o órgão central de compras, que tem uma lei própria. E a Educação, que mexe com dinheiro federal e presta contas pra fora."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E quem nunca vai abrir uma tela desse sistema, mas sente o efeito dele?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O fornecedor! A empresa de transporte escolar. E, no fim da linha, a família da criança."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Viu como a lista cresceu? E o livro organiza isso em classes de stakeholders, que vão além do usuário: quem adquire o sistema, quem avalia se ele está em conformidade, quem desenvolve, quem mantém, quem opera, quem dá suporte, quem testa. Cada classe olha pro mesmo sistema e faz uma pergunta diferente."
+    },
+    {
+      "persona": "davi",
+      "texto": "E qual era a pergunta de cada um aqui?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Vamos lá. O governo central pergunta: quando a gente lança e quanto custa. A Educação pergunta: como eu faço uma compra de emergência e como eu presto contas do dinheiro federal. O órgão de compras pergunta: quem controla o catálogo de compras e como duas agências fazem uma transação entre si. O fornecedor pergunta: quando eu recebo. Repara que, pela matéria, as perguntas da Educação e do órgão de compras foram feitas por escrito. Elas não ficaram sem pergunta. Ficaram sem ser atendidas: o lançamento saiu mesmo assim."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso é pior, né? Porque alguém sabia."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "É pior. E isso me leva a outro ponto do capítulo. Nem todo mundo pode estar na sala. O livro fala de proxy stakeholders, pessoas que representam um grupo que não tem como participar diretamente, e de grupos de stakeholders, quando você precisa de um representante por grupo. Ninguém ia chamar cada empresa de transporte escolar pra uma reunião de requisitos. Mas alguém precisava falar por elas."
+    },
+    {
+      "persona": "davi",
+      "texto": "E como você escolhe quem fala por um grupo?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Rozanski e Woods sugerem procurar gente informada, comprometida, com autoridade pra tomar decisões e que represente de verdade o grupo. Na minha experiência, o que mais falta é a autoridade. Você ouve alguém da operação, a pessoa aponta o risco, e ninguém com poder de mudar o cronograma está escutando."
+    },
+    {
+      "persona": "davi",
+      "texto": "Parecido com o que a matéria descreve. Os avisos chegaram a quem tocava o projeto, e o lançamento saiu semanas depois, mesmo assim."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E agora vem a parte que eu acho mais traiçoeira. Davi, se eu te perguntasse qual era o requisito desse projeto, o que você diria?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Sei lá. Implantar um ERP único pra finanças e compras de todas as agências até julho?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Isso é um requisito?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Parece. Tem escopo, tem prazo."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Mas fala alguma coisa sobre o problema? Ou fala só sobre a solução?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Fala da solução. ERP único é um como, não é um quê."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Isso. É o que eu chamo de solução disfarçada de requisito. Rozanski e Woods têm uma distinção que ajuda muito aqui, no capítulo sobre concerns, princípios e decisões. Eles separam as preocupações focadas no problema das preocupações focadas na solução. As focadas no problema dizem por que o sistema existe e o que ele precisa fazer. As focadas na solução restringem como ele vai ser construído e com o quê."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então quando alguém me entrega um requisito que já responde como e com o quê, é um sinal de alerta."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "É um sinal pra fazer perguntas, não pra recusar. Porque às vezes a restrição é legítima. Uma lei, um padrão da empresa, um contrato já assinado. No caso, a lei do órgão de compras é uma restrição de verdade, e o sistema precisava respeitar. O problema é quando a solução chega fantasiada de requisito e ninguém pergunta de onde ela veio."
+    },
+    {
+      "persona": "davi",
+      "texto": "E como eu desmonto a fantasia?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Pergunta por quê até chegar num problema de negócio. Por que um ERP único? Talvez a resposta seja: porque hoje ninguém consegue ver os gastos de todas as agências num lugar só. Ótimo, esse é um problema. Por que isso importa? Talvez porque os pagamentos atrasam e ninguém sabe onde a fatura parou. Repara que eu estou chutando, a matéria não diz qual era a justificativa oficial. Mas, se fosse essa, o projeto que atrasa pagamento estaria fracassando no próprio objetivo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Nossa. Resolver o problema errado com muita competência."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Acontece mais do que você imagina. No hospital onde eu comecei, um diretor pediu um aplicativo pros médicos pedirem exames pelo celular. Quando a gente foi ver de perto, o problema era que o pedido em papel se perdia entre a enfermaria e o laboratório. O aplicativo não teria resolvido isso, porque quem levava o papel nem era o médico."
+    },
+    {
+      "persona": "davi",
+      "texto": "E no meu mundo de dev isso aparece toda hora. Precisa ser em microsserviços. Precisa ter um app. O relatório tem que sair em Excel."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "O relatório em Excel é ótimo de exemplo. Às vezes o que a pessoa quer é mexer nos números depois. Às vezes ela só precisa mandar pro chefe, e um PDF resolveria. Você só descobre perguntando o que ela faz com o arquivo depois que ele chega."
+    },
+    {
+      "persona": "davi",
+      "texto": "Beleza, então vamos pros trade-offs, porque eu já sei que não existe resposta de graça."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Não existe. O primeiro é ouvir todo mundo contra entregar no prazo. Ouvir as agências leva tempo, e um governo tem pressão política pra mostrar resultado. Ignorar custa barato no lançamento e caro depois, como a gente viu."
+    },
+    {
+      "persona": "davi",
+      "texto": "O segundo deve ser padronizar contra acomodar exceção."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Isso. Um ERP traz valor justamente porque padroniza processos. Se você acomoda cada exceção de cada agência, perde a padronização e o custo explode. Se não acomoda nenhuma, a compra de emergência da Educação não tem por onde passar. O trabalho é decidir quais exceções são o negócio de verdade e quais são só costume."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o terceiro é aquele rollout em ondas que eu falei lá no começo."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Esse eu guardei pra você. Lançar tudo de uma vez tem uma vantagem: ninguém fica mantendo dois sistemas em paralelo. A desvantagem é que, se der errado, dá errado em todo lugar ao mesmo tempo. Lançar em ondas custa mais, porque você convive com o antigo e o novo por um tempo, mas cada onda te ensina alguma coisa antes da próxima. Teria a Educação, que se declarou a agência mais afetada, ido na primeira onda ou na última? Essa decisão é de arquitetura de soluções."
+    },
+    {
+      "persona": "davi",
+      "texto": "Eu colocaria na última. Ou faria um piloto só com ela, pra aprender com o caso mais difícil."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "As duas respostas têm defesa. O importante é que alguém tenha feito a pergunta com a Educação na sala."
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu tentar resumir, Beatriz, e você me corrige. Primeiro: o arquiteto corporativo olha a organização inteira e a estratégia, o de software olha a estrutura de cada sistema, e o de soluções fica no meio, pegando uma iniciativa e respondendo quais peças resolvem o problema e como elas se conectam. A fronteira muda de empresa pra empresa, mas a pergunta precisa ter dono."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Perfeito até aqui."
+    },
+    {
+      "persona": "davi",
+      "texto": "Segundo: stakeholder não é só usuário. É quem paga, quem opera, quem fiscaliza, quem sente o efeito sem nunca abrir a tela. E cada um faz uma pergunta diferente sobre a mesma solução. No caso de Porto Rico, as perguntas foram feitas e o lançamento saiu mesmo assim."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Isso."
+    },
+    {
+      "persona": "davi",
+      "texto": "Terceiro: quando um requisito já vem dizendo como e com o quê, pode ser uma solução disfarçada. Aí eu pergunto por quê até achar o problema de negócio. Às vezes a restrição é legítima, tipo uma lei. Às vezes é só a solução de alguém que chegou primeiro."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E o meu adendo: suíte automatizada nenhuma salva um requisito que ninguém escreveu."
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado. E agora o desafio da semana. Escolha uma iniciativa em andamento na sua empresa, liste os stakeholders e escreva, para cada um, a pergunta que ele faria sobre a solução. Marque as perguntas que ninguém respondeu ainda. Eu já sei que a minha lista vai ter um fornecedor que eu nunca tinha considerado."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E não esquece de quem nunca vai abrir a tela, Davi. Geralmente é ali que mora a pergunta sem resposta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Beatriz, muito obrigado. Foi uma estreia de saga e tanto."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Eu que agradeço. Até a próxima."
+    },
+    {
+      "persona": "davi",
+      "texto": "E você que ouviu até aqui, obrigado por estar com a gente no Pebacast. Faz o desafio, me conta o que encontrou, e até o próximo episódio!"
+    }
+  ],
+  "desafio": "Escolha uma iniciativa em andamento na sua empresa, liste os stakeholders e escreva, para cada um, a pergunta que ele faria sobre a solução. Marque as perguntas que ninguém respondeu ainda.",
+  "fontes": [
+    "Software Systems Architecture: Working with Stakeholders Using Viewpoints and Perspectives, Rozanski e Woods, 2ª edição, caps. 5, 8 e 9",
+    "Solutions Architect's Handbook, Shrivastava e Srivastav, 1ª edição, cap. 2"
+  ]
+}

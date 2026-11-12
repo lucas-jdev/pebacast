@@ -1,0 +1,177 @@
+{
+  "aprovado": false,
+  "roteiro_sha256": "81dba50cdf7d0159f591b3f238f25ee7963a80d05f5c0db708182c10f3ec578e",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "Saiu ontem, onze de novembro, no El Nuevo Día, que é um jornal de Porto Rico.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día, matéria de Gloria Ruiz Kuilan publicada em 11/11/2026. O episódio é publicado em 12/11 (data_de_publicacao = amanhã), então 'ontem' confere."
+    },
+    {
+      "fala": 3,
+      "afirmacao": "O governo de lá lançou um ERP, um sistema de gestão integrada, chamado Íntegra PR, pra cuidar de finanças e compras das agências do governo. A governadora anunciou o lançamento no dia oito de julho como uma das conquistas da gestão.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día (URL de noticia.json): ERP 'bautizado como Íntegra PR'; legenda: 'El pasado 8 de julio, la gobernadora Jenniffer González [...] presentó el lanzamiento del ERP' como um dos logros do governo. A matéria trata de compras, pagamentos, estados financeiros e folha."
+    },
+    {
+      "fala": 5,
+      "afirmacao": "o jornal conseguiu cartas e e-mails mostrando que, semanas antes do lançamento, duas áreas avisaram que ia dar problema. Uma foi o Departamento de Educação. A outra foi a Administração de Serviços Gerais, que é o órgão central de compras do governo.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día: 'El Nuevo Día obtuvo cartas y correos electrónicos de ambas agencias', enviados semanas antes do lançamento; a ASG é o órgão central de compras (Lei 73 de 2019)."
+    },
+    {
+      "fala": 7,
+      "afirmacao": "A de Educação mandou um e-mail em maio dizendo que seria a agência mais afetada, porque tem um orçamento enorme, com dinheiro federal e estadual, e operações complexas que não dá pra automatizar. E listou cenários que o sistema não contemplava: compras sem contrato, emergências, ajustes, cancelamentos.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día: e-mail de 6 de maio, 'sería la agencia más perjudicada', orçamento com fundos federais e estaduais, operações que não podem ser automatizadas, e o ERP 'no considera ciertos escenarios operacionales atípicos' (compras sem contrato, emergências, ajustes, cancelamentos)."
+    },
+    {
+      "fala": 7,
+      "afirmacao": "A de compras mandou uma carta em junho dizendo que o sistema não permitia transações entre agências e que ia atrasar ordens de compra.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día: carta de 22 de junho de Karla G. Mercado Rivera (ASG): o ERP não permitia transações interagenciais, o que 'inevitablemente demorarían la emisión de órdenes de compra'."
+    },
+    {
+      "fala": 8,
+      "afirmacao": "as duas disseram que não eram contra o ERP. Pediram pra reconsiderar o lançamento e trabalhar mais com a plataforma antes de colocar em produção.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día: as agências disseram não se opor ao ERP e pediram para reconsiderar o lançamento, esperar e trabalhar mais com a plataforma."
+    },
+    {
+      "fala": 9,
+      "afirmacao": "Hoje o próprio secretário de Educação reconhece que os problemas do sistema atrasaram pagamentos a empresas de transporte escolar e de educação especial. E o jornal diz que a Educação está com noventa por cento menos compras do que na mesma data do ano passado.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día: o secretário Eliezer Ramos Parés 'reconoció, en múltiples ocasiones' que o ERP causou atrasos em pagamentos a provedores de transporte escolar e Educação Especial; 'el DE tiene hoy día un 90% menos de compras, al compararlo con la misma fecha el año pasado'."
+    },
+    {
+      "fala": 15,
+      "afirmacao": "Pelo que a matéria conta, parece que não. Senão as duas áreas não precisariam ter avisado.",
+      "veredito": "correta",
+      "fonte": "Inferência apresentada com ressalva ('parece'), coerente com a matéria: o DE escreveu que o ERP 'no considera' esses cenários."
+    },
+    {
+      "fala": 16,
+      "afirmacao": "Teste confirma que o sistema faz o que alguém escreveu. Ele não descobre o que ninguém escreveu.",
+      "veredito": "imprecisa",
+      "correcao": "Vale para testes automatizados escritos a partir da especificação (verificação: 'construímos o sistema certo do jeito certo?'). Não vale para teste em geral: teste de aceitação e homologação com usuários e dados reais, que o próprio Davi propôs na fala 11, são validação e são justamente uma das formas clássicas de descobrir requisitos que ninguém escreveu. Sugestão: 'A sua suíte automatizada confirma o que alguém escreveu; ela não descobre o que ninguém escreveu. Homologação com a Educação usando casos reais até poderia achar o buraco, mas só se a Educação estivesse lá.'",
+      "fonte": "Conhecimento consolidado de engenharia de software: distinção verificação x validação (Boehm; IEEE 1012; ISTQB, teste de aceitação do usuário)."
+    },
+    {
+      "fala": 20,
+      "afirmacao": "Vou usar a divisão que aparece no Solutions Architect's Handbook, de Saurabh Shrivastava e Neelanjali Srivastav. No capítulo sobre o lugar do arquiteto de soluções na organização, eles falam de um arquiteto corporativo, que eles chamam de enterprise solution architect, focado na estratégia da organização e na arquitetura de negócio. Depois, o arquiteto de soluções, focado no desenho da solução e na integração. E o arquiteto técnico, focado no design e no desenvolvimento do software.",
+      "veredito": "correta",
+      "fonte": "Solutions Architect's Handbook (Shrivastava e Srivastav, 1ª ed.), cap. 2 'Solution Architects in an Organization', figura 'Types of solution architect': Enterprise solution architect (Organization strategy, Business architecture), Solution architect (Solution design, Solution integration), Technical architect (Software design, Software development). Conferido em https://ibooks.qq.com/read/1034725255/34."
+    },
+    {
+      "fala": 22,
+      "afirmacao": "O corporativo pensa em padrões para a organização toda e num horizonte longo. O livro diz que o arquiteto de soluções atua num nível mais tático do que o corporativo.",
+      "veredito": "correta",
+      "fonte": "Solutions Architect's Handbook, cap. 2: 'Overall, the solution architect gets to engage on a more tactical level compared to the enterprise architect'; enterprise architects 'define best practices, culture, and suitable technologies' e 'handle solution design across the organization' (https://ibooks.qq.com/read/1034725255/35 e /36)."
+    },
+    {
+      "fala": 22,
+      "afirmacao": "Ele pega uma iniciativa específica, como esse ERP, e responde quais peças resolvem o problema e como elas se conectam. Já o arquiteto de software entra na estrutura interna de cada sistema: módulos, camadas, como o código se organiza.",
+      "veredito": "correta",
+      "fonte": "Coerente com o Handbook, cap. 2 (solution design e integration x software design e development) e com a pergunta central da saga em curriculum/sagas/solucoes.yaml."
+    },
+    {
+      "fala": 26,
+      "afirmacao": "O próprio livro admite que as responsabilidades se sobrepõem conforme a estrutura da organização.",
+      "veredito": "correta",
+      "fonte": "Solutions Architect's Handbook, cap. 2: 'the responsibilities of the solution architect overlap, depending on an organization's structure' (https://ibooks.qq.com/read/1034725255/36)."
+    },
+    {
+      "fala": 30,
+      "afirmacao": "Esse é o erro mais comum, e foi o erro desse caso.",
+      "veredito": "imprecisa",
+      "correcao": "A matéria não mostra que o erro do caso foi reduzir stakeholder a usuário e cliente. A Educação e a ASG, que são agências usuárias do ERP, avisaram por escrito e foram ignoradas (segundo uma fonte, a reação de Itza García 'siempre fue hay que seguir'). O próprio roteiro diz isso nas falas 42 e 47. Sugestão: 'Esse é o erro mais comum. No caso de Porto Rico, o problema foi outro: quem avisou estava na lista, mas não foi levado a sério.' Ou apresentar como hipótese da Beatriz sobre outras partes afetadas, como fornecedores e famílias.",
+      "fonte": "El Nuevo Día (URL de noticia.json)."
+    },
+    {
+      "fala": 30,
+      "afirmacao": "Rozanski e Woods, no Software Systems Architecture, dedicam um capítulo inteiro a identificar e engajar stakeholders. E eles lembram logo no começo que as pessoas afetadas por um sistema não se limitam a quem usa o sistema.",
+      "veredito": "correta",
+      "fonte": "Rozanski e Woods, Software Systems Architecture, 2ª ed., cap. 9 'Identifying and Engaging Stakeholders', abertura: 'the people affected by a system are not limited to those who use it' (https://www.oreilly.com/library/view/software-systems-architecture/9780321580207/ch9.html)."
+    },
+    {
+      "fala": 37,
+      "afirmacao": "o órgão central de compras, que tem uma lei própria. E a Educação, que mexe com dinheiro federal e presta contas pra fora.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día: ASG cita a sua lei orgânica, Lei 73 de 2019; o DE administra fundos federais e está sob monitor financeiro (sindicatura) do Departamento de Educação federal."
+    },
+    {
+      "fala": 40,
+      "afirmacao": "o livro organiza isso em classes de stakeholders, que vão além do usuário: quem adquire o sistema, quem avalia se ele está em conformidade, quem desenvolve, quem mantém, quem opera, quem dá suporte, quem testa.",
+      "veredito": "correta",
+      "fonte": "Rozanski e Woods, 2ª ed., cap. 9, classes de stakeholders: acquirers, assessors, communicators, developers, maintainers, production engineers, suppliers, support staff, system administrators, testers, users (conhecimento consolidado; índice da obra registra 'Acquirers, 111, 112', dentro do cap. 9)."
+    },
+    {
+      "fala": 42,
+      "afirmacao": "Repara que, pela matéria, as perguntas da Educação e do órgão de compras foram feitas por escrito. Elas não ficaram sem pergunta. Ficaram sem resposta.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día: avisos por carta e e-mail; nenhuma resposta oficial relatada, e a reação relatada por uma fonte foi 'hay que seguir'."
+    },
+    {
+      "fala": 44,
+      "afirmacao": "O livro fala de proxy stakeholders, pessoas que representam um grupo que não tem como participar diretamente, e de grupos de stakeholders, quando você precisa de um representante por grupo.",
+      "veredito": "correta",
+      "fonte": "Rozanski e Woods, 2ª ed., cap. 9, seções 'Proxy Stakeholders' e 'Stakeholder Groups' (conhecimento consolidado; confirmado pela nota de verificação em curriculum/sagas/solucoes.yaml)."
+    },
+    {
+      "fala": 46,
+      "afirmacao": "Rozanski e Woods sugerem procurar gente informada, comprometida, com autoridade pra tomar decisões e que represente de verdade o grupo.",
+      "veredito": "correta",
+      "fonte": "Rozanski e Woods, 2ª ed., cap. 9, critérios para bons stakeholders: informed, committed, authorized, representative."
+    },
+    {
+      "fala": 47,
+      "afirmacao": "Os avisos foram pra quem tocava o projeto, e o lançamento saiu na data.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día: cartas e e-mails dirigidos à OGP e à então secretária da Governadoria Itza García, que liderava o projeto; a reação foi 'hay que seguir' e o lançamento foi apresentado em 8 de julho."
+    },
+    {
+      "fala": 54,
+      "afirmacao": "Rozanski e Woods têm uma distinção que ajuda muito aqui, no capítulo sobre concerns, princípios e decisões. Eles separam as preocupações focadas no problema das preocupações focadas na solução. As focadas no problema dizem por que o sistema existe e o que ele precisa fazer. As focadas na solução restringem como ele vai ser construído e com o quê.",
+      "veredito": "correta",
+      "fonte": "Rozanski e Woods, 2ª ed., cap. 8 'Concerns, Principles, and Decisions', seções 'Problem-Focused Concerns' e 'Solution-Focused Concerns' (conhecimento consolidado; nota de verificação em curriculum/sagas/solucoes.yaml)."
+    },
+    {
+      "fala": 56,
+      "afirmacao": "No caso, a lei do órgão de compras é uma restrição de verdade, e o sistema precisava respeitar.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día: a ASG apontou que o ERP violava a sua lei orgânica (Lei 73 de 2019) ao transferir o catálogo de ordens de compra para cada agência."
+    },
+    {
+      "fala": 66,
+      "afirmacao": "Um ERP traz valor justamente porque padroniza processos. Se você acomoda cada exceção de cada agência, perde a padronização e o custo explode.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado sobre implantação de ERP (padronização de processos e custo de customização)."
+    },
+    {
+      "fala": 68,
+      "afirmacao": "Lançar tudo de uma vez tem uma vantagem: ninguém fica mantendo dois sistemas em paralelo. A desvantagem é que, se der errado, dá errado em todo lugar ao mesmo tempo. Lançar em ondas custa mais, porque você convive com o antigo e o novo por um tempo, mas cada onda te ensina alguma coisa antes da próxima. Teria a Educação, que se declarou a agência mais afetada",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado (big bang x implantação faseada); El Nuevo Día: o DE disse que 'sería la agencia más perjudicada'."
+    },
+    {
+      "fala": 71,
+      "afirmacao": "o arquiteto corporativo olha a organização inteira e a estratégia, o de software olha a estrutura de cada sistema, e o de soluções fica no meio, pegando uma iniciativa e respondendo quais peças resolvem o problema e como elas se conectam. A fronteira muda de empresa pra empresa",
+      "veredito": "correta",
+      "fonte": "Solutions Architect's Handbook, cap. 2 (tipos de arquiteto e sobreposição conforme a organização)."
+    },
+    {
+      "fala": 73,
+      "afirmacao": "No caso de Porto Rico, as perguntas foram feitas e ficaram sem resposta.",
+      "veredito": "correta",
+      "fonte": "El Nuevo Día: avisos por escrito antes do lançamento; nenhuma resposta oficial relatada; reação 'hay que seguir'."
+    },
+    {
+      "fala": 76,
+      "afirmacao": "teste nenhum salva um requisito que ninguém escreveu.",
+      "veredito": "imprecisa",
+      "correcao": "Generaliza demais, como na fala 16: teste de aceitação e homologação com usuários reais podem revelar requisitos que ninguém escreveu. Sugestão: 'suíte de teste automatizado nenhuma salva um requisito que ninguém escreveu' ou 'teste nenhum salva um requisito de quem não foi ouvido'.",
+      "fonte": "Conhecimento consolidado: distinção verificação x validação (Boehm; IEEE 1012; ISTQB)."
+    }
+  ]
+}
