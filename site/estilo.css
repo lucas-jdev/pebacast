@@ -297,7 +297,7 @@ button { font: inherit; }
 .amarracao { position: absolute; z-index: 3; top: -130px; left: -90px; width: 320px; height: 260px; background: url("amarracao-frente.svg") no-repeat; pointer-events: none; }
 .amarracao--verso { z-index: -1; background-image: url("amarracao-verso.svg"); }
 .episodio--destaque { margin-top: 4rem; }
-.episodio__capa .episodio__numero { margin-top: auto; margin-bottom: 1rem; }
+.episodio__capa .episodio__numero { margin-block: auto; }
 .item__capa { justify-content: flex-end; }
 #proximo .largura { padding-top: 3.4rem; }
 @media (max-width: 760px) {
