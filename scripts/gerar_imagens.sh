@@ -2,6 +2,7 @@
 # Gera as imagens publicadas do site a partir das artes em assets/:
 #   site/capa-kraft.jpg (3000x3000), capa do podcast no feed, de assets/capa.svg
 #   site/og.jpg (1200x630), prévia de compartilhamento (Open Graph), de assets/og.svg
+#   site/apple-touch-icon.png (180x180) e site/favicon.ico (48x48), de site/favicon.svg
 # Precisa do Chrome (ou de outro Chromium em $CHROME) e do ffmpeg.
 set -euo pipefail
 
@@ -22,5 +23,16 @@ renderizar() {
   echo "site/$destino: $(wc -c < "$raiz/site/$destino") bytes"
 }
 
+icone() {
+  local tamanho="$1" destino="$2"
+  "$chrome" --headless=new --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
+    --window-size="$tamanho,$tamanho" --default-background-color=00000000 \
+    --screenshot="$(caminho "$temp/icone.png")" "file:///$(caminho "$raiz/site/favicon.svg")" 2>/dev/null
+  ffmpeg -loglevel error -y -i "$temp/icone.png" "$raiz/site/$destino"
+  echo "site/$destino: $(wc -c < "$raiz/site/$destino") bytes"
+}
+
 renderizar capa.svg 3000 3000 capa-kraft.jpg
 renderizar og.svg 1200 630 og.jpg
+icone 180 apple-touch-icon.png
+icone 48 favicon.ico

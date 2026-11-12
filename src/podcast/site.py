@@ -789,7 +789,9 @@ _PAGINA = """<!doctype html>
 <meta name="twitter:image:alt" content="{imagem_descricao}">
 <link rel="canonical" href="{url}">
 <link rel="alternate" type="application/rss+xml" title="{nome}" href="{url_feed}">
+<link rel="icon" href="favicon.ico" sizes="48x48">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="estilo.css">
 <script defer src="app.js"></script>
 <script type="application/ld+json">{dados_estruturados}</script>

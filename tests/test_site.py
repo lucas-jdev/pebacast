@@ -172,6 +172,8 @@ def test_paginas_tem_previa_de_compartilhamento_com_imagem(projeto):
     assert '<meta property="og:image:width" content="1200">' in pagina
     assert '<meta name="twitter:card" content="summary_large_image">' in pagina
     assert '<link rel="canonical" href="https://x.github.io/pebacast/episodios.html">' in pagina
+    assert '<link rel="apple-touch-icon" href="apple-touch-icon.png">' in pagina
+    assert '<link rel="icon" href="favicon.ico" sizes="48x48">' in pagina
 
 
 def test_arquivo_descreve_a_serie_e_os_episodios_para_buscadores(projeto):
