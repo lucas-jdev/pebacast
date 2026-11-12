@@ -39,11 +39,11 @@
     },
     {
       "persona": "davi",
-      "texto": "Exato. E o governo lançou mesmo assim. Hoje o próprio secretário de Educação reconhece que os problemas do sistema atrasaram pagamentos a empresas de transporte escolar e de educação especial. E o jornal diz que a Educação está com noventa por cento menos compras do que na mesma data do ano passado."
+      "texto": "Exato. E o governo lançou mesmo assim. O próprio secretário de Educação já reconheceu, mais de uma vez, que os problemas do sistema atrasaram pagamentos a empresas de transporte escolar e de educação especial. E o jornal informa que a Educação registra noventa por cento menos compras do que na mesma data do ano passado."
     },
     {
       "persona": "beatriz",
-      "texto": "Noventa por cento. Quer dizer que o problema não ficou na tela de ninguém. Ele chegou nas empresas que levam as crianças pra escola, que estão recebendo com atraso."
+      "texto": "Noventa por cento. Quer dizer que o problema não ficou na tela de ninguém. E o atraso nos pagamentos chegou nas empresas que levam as crianças pra escola."
     },
     {
       "persona": "davi",
@@ -99,7 +99,7 @@
     },
     {
       "persona": "beatriz",
-      "texto": "O olhar corporativo pergunta se faz sentido o governo ter uma plataforma única de finanças e compras. E provavelmente faz. O olhar de software pergunta como o ERP é configurado, como os dados migram, como as integrações funcionam. Mas tem um espaço no meio. Quem pergunta como essa plataforma vai conviver com a compra de emergência da Educação? Com a lei que diz o que é responsabilidade do órgão central de compras? Com o fornecedor de transporte escolar que precisa receber no fim do mês?"
+      "texto": "O olhar corporativo pergunta se faz sentido o governo ter uma plataforma única de finanças e compras. E provavelmente faz. O olhar de software pergunta como o ERP é configurado, como os dados migram, como as integrações funcionam. Mas tem um espaço no meio. Quem pergunta como essa plataforma vai conviver com a compra de emergência da Educação? Com a lei que diz o que é responsabilidade do órgão central de compras? Com o fornecedor de transporte escolar que precisa receber em dia?"
     },
     {
       "persona": "davi",
@@ -123,7 +123,7 @@
     },
     {
       "persona": "beatriz",
-      "texto": "Na minha experiência, esse é o erro mais comum. No caso de Porto Rico foi um pouco diferente: quem avisou estava na lista, mas não foi levado a sério. Mesmo assim, vale começar pela lista. Rozanski e Woods, no Software Systems Architecture, dedicam um capítulo inteiro a identificar e engajar stakeholders. E eles lembram logo no começo que as pessoas afetadas por um sistema não se limitam a quem usa o sistema."
+      "texto": "Na minha experiência, esse é o erro mais comum. No caso de Porto Rico foi um pouco diferente: quem avisou estava na lista, mas não foi levado a sério. Mesmo assim, vale começar pela lista. Rozanski e Woods, no Software Systems Architecture, dedicam um capítulo inteiro a identificar e engajar stakeholders. E eles lembram que as pessoas afetadas por um sistema não se limitam a quem usa o sistema."
     },
     {
       "persona": "davi",
@@ -199,7 +199,7 @@
     },
     {
       "persona": "davi",
-      "texto": "Sei lá. Implantar um ERP único pra finanças e compras de todas as agências até julho?"
+      "texto": "Sei lá. Implantar um ERP único pra finanças e compras de todas as agências?"
     },
     {
       "persona": "beatriz",
@@ -207,7 +207,7 @@
     },
     {
       "persona": "davi",
-      "texto": "Parece. Tem escopo, tem prazo."
+      "texto": "Parece. Tem escopo, tem um objetivo claro."
     },
     {
       "persona": "beatriz",
@@ -275,7 +275,7 @@
     },
     {
       "persona": "beatriz",
-      "texto": "Esse eu guardei pra você. Lançar tudo de uma vez tem uma vantagem: ninguém fica mantendo dois sistemas em paralelo. A desvantagem é que, se der errado, dá errado em todo lugar ao mesmo tempo. Lançar em ondas custa mais, porque você convive com o antigo e o novo por um tempo, mas cada onda te ensina alguma coisa antes da próxima. Teria a Educação, que se declarou a agência mais afetada, ido na primeira onda ou na última? Essa decisão é de arquitetura de soluções."
+      "texto": "Esse eu guardei pra você. Lançar tudo de uma vez tem uma vantagem: ninguém fica mantendo dois sistemas em paralelo. A desvantagem é que, se der errado, dá errado em todo lugar ao mesmo tempo. Lançar em ondas custa mais, porque você convive com o antigo e o novo por um tempo, mas cada onda te ensina alguma coisa antes da próxima. Teria a Educação, que avisou que seria a agência mais afetada, ido na primeira onda ou na última? Essa decisão é de arquitetura de soluções."
     },
     {
       "persona": "davi",
