@@ -6,9 +6,19 @@ from typing import Any
 
 from podcast.audio import Audio, concatenar
 from podcast.dominio import Fala, Persona
+from podcast.tts.provedor import RequisicaoRecusada
 
 TAXA_AMOSTRAGEM = 24_000
 MAX_FALANTES_POR_REQUISICAO = 2
+
+VOZES = frozenset({
+    "Achernar", "Achird", "Algenib", "Algieba", "Alnilam", "Aoede", "Autonoe", "Callirrhoe",
+    "Charon", "Despina", "Enceladus", "Erinome", "Fenrir", "Gacrux", "Iapetus", "Kore",
+    "Laomedeia", "Leda", "Orus", "Puck", "Pulcherrima", "Rasalgethi", "Sadachbia",
+    "Sadaltager", "Schedar", "Sulafat", "Umbriel", "Vindemiatrix", "Zephyr", "Zubenelgenubi",
+})
+STATUS_TRANSITORIOS = frozenset({408, 429})
+STATUS_DE_ACESSO = frozenset({401, 403})
 
 log = logging.getLogger(__name__)
 
@@ -46,14 +56,29 @@ class GeminiTts:
                 interacao = self._cliente.interactions.create(**requisicao)
                 return Audio(base64.b64decode(interacao.output_audio.data), TAXA_AMOSTRAGEM)
             except Exception as erro:
+                if _recusa_do_pedido(erro):
+                    raise RequisicaoRecusada(str(erro)) from erro
                 # O free tier devolve 429 com frequência; espera exponencial antes de desistir.
-                if tentativa == self._tentativas:
+                if tentativa == self._tentativas or _falha_de_acesso(erro):
                     raise
                 espera = self._espera_inicial_s * 2 ** (tentativa - 1)
                 log.warning("Gemini falhou (tentativa %d de %d): %s. Nova tentativa em %.0f s.",
                             tentativa, self._tentativas, erro, espera)
                 self._dormir(espera)
         raise AssertionError("inalcançável")
+
+
+def _recusa_do_pedido(erro: Exception) -> bool:
+    status = getattr(erro, "status_code", None)
+    return (
+        status is not None
+        and 400 <= status < 500
+        and status not in STATUS_TRANSITORIOS | STATUS_DE_ACESSO
+    )
+
+
+def _falha_de_acesso(erro: Exception) -> bool:
+    return getattr(erro, "status_code", None) in STATUS_DE_ACESSO
 
 
 def agrupar_em_blocos(falas: Sequence[Fala], max_caracteres: int) -> list[list[Fala]]:

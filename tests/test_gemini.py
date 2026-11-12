@@ -1,10 +1,13 @@
 import base64
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from podcast.dominio import Fala
-from podcast.tts.gemini import GeminiTts, agrupar_em_blocos, montar_requisicao
+from podcast.personas import carregar_personas
+from podcast.tts.gemini import VOZES, GeminiTts, agrupar_em_blocos, montar_requisicao
+from podcast.tts.provedor import RequisicaoRecusada
 
 
 class ClienteFalso:
@@ -108,3 +111,53 @@ def test_desiste_depois_do_limite_de_tentativas(davi):
     with pytest.raises(RuntimeError, match="429"):
         tts.sintetizar([Fala(davi, "Oi")])
     assert len(esperas) == 2
+
+
+class ErroDaApi(Exception):
+    def __init__(self, status_code: int) -> None:
+        super().__init__(f"Error code: {status_code}")
+        self.status_code = status_code
+
+
+class ClienteQueFalhaCom(ClienteFalso):
+    def __init__(self, status_code: int) -> None:
+        super().__init__()
+        self.status_code = status_code
+
+    def create(self, **requisicao):
+        raise ErroDaApi(self.status_code)
+
+
+def test_pedido_recusado_nao_tenta_de_novo(davi):
+    esperas = []
+    tts = GeminiTts("modelo", cliente=ClienteQueFalhaCom(400), dormir=esperas.append)
+
+    with pytest.raises(RequisicaoRecusada, match="400"):
+        tts.sintetizar([Fala(davi, "Oi")])
+    assert esperas == []
+
+
+def test_falha_de_acesso_sobe_sem_tentar_de_novo_para_o_fallback_cobrir(davi):
+    esperas = []
+    tts = GeminiTts("modelo", cliente=ClienteQueFalhaCom(403), dormir=esperas.append)
+
+    with pytest.raises(ErroDaApi):
+        tts.sintetizar([Fala(davi, "Oi")])
+    assert esperas == []
+
+
+@pytest.mark.parametrize("status_code", [429, 503])
+def test_erro_transitorio_tenta_de_novo(davi, status_code):
+    esperas = []
+    tts = GeminiTts("modelo", cliente=ClienteQueFalhaCom(status_code), tentativas=3, dormir=esperas.append)
+
+    with pytest.raises(ErroDaApi):
+        tts.sintetizar([Fala(davi, "Oi")])
+    assert len(esperas) == 2
+
+
+def test_toda_persona_do_curriculo_tem_voz_do_gemini_valida():
+    personas = carregar_personas(Path(__file__).parent.parent / "curriculum" / "personas")
+
+    invalidas = {p.id: p.voz.gemini for p in personas.values() if p.voz.gemini not in VOZES}
+    assert invalidas == {}

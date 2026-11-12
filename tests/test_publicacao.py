@@ -14,8 +14,14 @@ from podcast.publicacao import (
     publicar_pendentes,
     sintetizar_com_fallback,
 )
+from podcast.tts.provedor import RequisicaoRecusada
 from tests.conftest import ProvedorFalso, ProvedorQuebrado
-from tests.test_roteiro import _escrever_episodio, _revisao, _roteiro, projeto  # noqa: F401 (fixture)
+from tests.test_roteiro import (  # noqa: F401 (fixture)
+    _escrever_episodio,
+    _revisao,
+    _roteiro,
+    projeto,
+)
 
 precisa_ffmpeg = pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="ffmpeg fora do PATH")
 AGORA = datetime(2026, 11, 8, 1, 0, tzinfo=timezone.utc)
@@ -107,6 +113,29 @@ def test_fallback_tambem_cobre_falha_ao_criar_o_principal(davi):
 
     _, provedor, erro = sintetizar_com_fallback([], sem_chave, lambda: ProvedorFalso("kokoro"))
     assert provedor == "kokoro" and "GEMINI_API_KEY" in erro
+
+
+class ProvedorQueRecusa:
+    nome = "gemini-falso"
+
+    def sintetizar(self, falas):
+        raise RequisicaoRecusada("No matching speaker voice found for name: PENDENTE")
+
+
+def test_pedido_recusado_reprova_o_episodio_sem_cair_no_fallback(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    criados = []
+
+    def fabrica(nome):
+        criados.append(nome)
+        return ProvedorQueRecusa() if nome == "gemini-falso" else ProvedorFalso(nome)
+
+    resultado = _publicar(projeto, tmp_path, fabrica)
+
+    assert resultado.publicados == []
+    assert "PENDENTE" in resultado.reprovados["sw-001"][0]
+    assert criados == ["gemini-falso"]
+    assert not (projeto.episodios / "sw-001" / "publicacao.json").exists()
 
 
 @precisa_ffmpeg

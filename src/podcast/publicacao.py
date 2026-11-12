@@ -26,7 +26,7 @@ from podcast.personas import carregar_personas
 from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
 from podcast.roteiro import Projeto, regras_para
 from podcast.site import escrever_pagina
-from podcast.tts.provedor import TtsProvider
+from podcast.tts.provedor import RequisicaoRecusada, TtsProvider
 from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, validar_episodio
 
 log = logging.getLogger(__name__)
@@ -99,6 +99,8 @@ def sintetizar_com_fallback(
     try:
         principal = criar_principal()
         return principal.sintetizar(falas), principal.nome, None
+    except RequisicaoRecusada:
+        raise
     except Exception as erro:
         log.exception("Provedor principal falhou; usando o fallback.")
         fallback = criar_fallback()
@@ -141,11 +143,15 @@ def publicar_pendentes(
 
         roteiro = _ler_json(pasta / ROTEIRO)
         falas = aplicar_pronuncias(carregar_falas(roteiro, personas), carregar_pronuncias(config["tts"]))
-        audio, provedor, erro_principal = sintetizar_com_fallback(
-            falas,
-            lambda: criar_provedor(config["tts"]["principal"]),
-            lambda: criar_provedor(config["tts"]["fallback"]),
-        )
+        try:
+            audio, provedor, erro_principal = sintetizar_com_fallback(
+                falas,
+                lambda: criar_provedor(config["tts"]["principal"]),
+                lambda: criar_provedor(config["tts"]["fallback"]),
+            )
+        except RequisicaoRecusada as erro:
+            reprovados[episodio_id] = [f"o TTS principal recusou o pedido (configuração?): {erro}"]
+            continue
         if erro_principal:
             avisos.append(f"{episodio_id}: sintetizado com o fallback {provedor}. Erro do principal: {erro_principal}")
 
