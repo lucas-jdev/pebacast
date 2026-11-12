@@ -129,3 +129,17 @@ def test_escreve_inicial_e_arquivo(projeto, tmp_path):
 
     assert (site / "index.html").exists()
     assert (site / "episodios.html").exists()
+
+
+def test_etiqueta_mostra_a_saga_e_a_posicao_do_episodio(projeto):
+    _ja_publicado(projeto, "sw-002", "2026-11-09T15:00:00+00:00")
+
+    inicial = gerar_index(projeto, "feed.xml")
+    arquivo = gerar_pagina_episodios(projeto, "feed.xml")
+
+    posicao = '<span class="etiqueta__longo">episódio</span><span class="etiqueta__curto">ep.</span> 2 de 3'
+    assert 'class="etiqueta__papel">Saga Software' in inicial
+    assert posicao in inicial
+    assert posicao in arquivo
+    assert 'class="amarracao amarracao--verso"' in arquivo
+    assert 'class="proximo" data-saga="software"' in inicial

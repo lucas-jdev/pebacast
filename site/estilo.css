@@ -167,10 +167,9 @@ button { font: inherit; }
 .vazio { color: var(--texto-suave); }
 
 /* episódio */
-.episodio { display: grid; grid-template-columns: 280px 1fr; background: var(--fundo-2); border: var(--borda) solid var(--linha); border-radius: var(--raio-cartao); overflow: hidden; box-shadow: var(--sombra); }
+.episodio { display: grid; grid-template-columns: 280px 1fr; background: var(--fundo-2); border: var(--borda) solid var(--linha); border-radius: var(--raio-cartao); box-shadow: var(--sombra); }
 .episodio + .episodio { margin-top: 1.5rem; }
 .episodio__capa { position: relative; display: flex; flex-direction: column; justify-content: space-between; padding: 1.6rem; min-height: 280px; background: var(--capa-fundo); color: var(--capa-texto); isolation: isolate; overflow: hidden; }
-.episodio__saga { font-size: 0.85rem; font-weight: 650; letter-spacing: 0.08em; }
 .episodio__numero { font-family: var(--fonte-titulo); font-size: 6.5rem; font-weight: 800; line-height: 0.85; letter-spacing: -0.04em; }
 .episodio__peba { width: 112px; height: 70px; align-self: flex-end; color: var(--capa-peba); --corte: var(--capa-fundo); }
 .episodio__corpo { padding: clamp(1.4rem, 3vw, 2.2rem); min-width: 0; }
@@ -184,7 +183,6 @@ button { font: inherit; }
 @media (max-width: 760px) {
   .episodio { grid-template-columns: 1fr; }
   .episodio__capa { min-height: 0; flex-direction: row; align-items: flex-end; padding: 1.2rem 1.4rem; gap: 1rem; }
-  .episodio__saga { position: absolute; top: 1.1rem; left: 1.4rem; }
   .episodio__numero { font-size: 4.2rem; margin-top: 1.6rem; }
   .episodio__peba { width: 92px; height: 58px; }
 }
@@ -242,12 +240,11 @@ button { font: inherit; }
 .episodio__links a { display: inline-block; padding-block: 0.4rem; }
 
 /* próximo episódio */
-.proximo { display: grid; grid-template-columns: 220px 1fr; border: var(--borda) dashed var(--linha); border-radius: var(--raio-cartao); overflow: hidden; background: var(--fundo-2); }
+.proximo { display: grid; grid-template-columns: 220px 1fr; border: var(--borda) dashed var(--linha); border-radius: var(--raio-cartao); background: var(--fundo-2); }
 .proximo__capa { display: grid; place-items: center; padding: 1.4rem; border-right: var(--borda) dashed var(--linha); }
 .proximo__numero { font-family: var(--fonte-titulo); font-size: 5.5rem; font-weight: 800; line-height: 0.85; letter-spacing: -0.04em; color: var(--texto-suave); }
 .proximo__corpo { padding: clamp(1.4rem, 3vw, 2.2rem); min-width: 0; }
 .proximo__titulo { font-size: clamp(1.6rem, 3.2vw, 2.3rem); }
-.proximo__saga { margin-top: 0.4rem; font-size: 0.95rem; color: var(--texto-suave); }
 .proximo__rotulo { font-family: var(--fonte-texto); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--texto-suave); margin: 1.4rem 0 0.7rem; text-transform: none; }
 .proximo__estado { margin-top: 1.4rem; padding-top: 1rem; border-top: var(--borda) solid var(--linha); font-size: 0.95rem; color: var(--texto-suave); }
 @media (max-width: 760px) {
@@ -272,11 +269,10 @@ button { font: inherit; }
 .filtro__opcao[aria-pressed="true"] { background: var(--texto); color: var(--fundo); border-color: var(--texto); }
 .filtro__total { font-size: 0.85rem; font-variant-numeric: tabular-nums; opacity: 0.75; }
 .arquivo { display: grid; gap: 3rem; }
-.mes__titulo { font-size: clamp(1.4rem, 2.6vw, 1.8rem); margin-bottom: 1.3rem; }
-.mes__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.6rem; }
-.item { display: grid; grid-template-columns: 150px 1fr; background: var(--fundo-2); border: var(--borda) solid var(--linha); border-radius: var(--raio-cartao); overflow: hidden; scroll-margin-top: 96px; }
+.mes__titulo { font-size: clamp(1.4rem, 2.6vw, 1.8rem); margin-bottom: 4rem; }
+.mes__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 4rem; }
+.item { display: grid; grid-template-columns: 150px 1fr; background: var(--fundo-2); border: var(--borda) solid var(--linha); border-radius: var(--raio-cartao); scroll-margin-top: 96px; }
 .item__capa { display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; padding: 1.2rem; background: var(--capa-fundo); color: var(--capa-texto); }
-.item__saga { font-size: 0.85rem; font-weight: 650; letter-spacing: 0.04em; line-height: 1.25; }
 .item__numero { font-family: var(--fonte-titulo); font-size: 3.4rem; line-height: 0.85; letter-spacing: -0.02em; }
 .item__corpo { padding: clamp(1.2rem, 2.6vw, 1.8rem); min-width: 0; }
 .item__titulo { font-size: clamp(1.35rem, 2.6vw, 1.75rem); margin-top: 0.4rem; }
@@ -288,6 +284,30 @@ button { font: inherit; }
   .item { grid-template-columns: 1fr; }
   .item__capa { flex-direction: row; align-items: center; padding: 0.75rem 1.2rem; }
   .item__numero { font-size: 2.2rem; }
+}
+
+/* Etiqueta da saga, amarrada ao card com cordão de sisal (scripts/gerar_amarracao.py).
+   A etiqueta gira em torno do próprio furo, que precisa bater com o furo desenhado no SVG. */
+.episodio, .item, .proximo { position: relative; }
+.etiqueta { position: absolute; z-index: 2; top: -44px; left: 26px; height: 42px; margin: 0; transform: rotate(-3deg); transform-origin: 18px 21px; filter: drop-shadow(3px 4px 0 rgba(21, 17, 12, 0.9)); }
+.etiqueta__papel { position: relative; isolation: isolate; display: flex; align-items: center; gap: 0.45rem; height: 100%; padding: 0 1rem 0 36px; background: var(--texto); clip-path: polygon(16px 0, 100% 0, 100% 100%, 16px 100%, 0 50%); font-family: var(--fonte-titulo); font-size: 1rem; line-height: 1; white-space: nowrap; color: var(--texto); }
+.etiqueta__papel::before { content: ""; position: absolute; inset: 3px; z-index: -1; background-color: var(--capa-fundo); background-image: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(21, 17, 12, 0.08) 7px 8px); clip-path: polygon(14px 0, 100% 0, 100% 100%, 14px 100%, 0 50%); }
+.etiqueta__posicao { font-family: var(--fonte-texto); font-weight: 700; font-size: 0.88rem; }
+.etiqueta__curto { display: none; }
+.amarracao { position: absolute; z-index: 3; top: -130px; left: -90px; width: 320px; height: 260px; background: url("amarracao-frente.svg") no-repeat; pointer-events: none; }
+.amarracao--verso { z-index: -1; background-image: url("amarracao-verso.svg"); }
+.episodio--destaque { margin-top: 4rem; }
+.episodio__capa .episodio__numero { margin-top: auto; margin-bottom: 1rem; }
+.item__capa { justify-content: flex-end; }
+#proximo .largura { padding-top: 3.4rem; }
+@media (max-width: 760px) {
+  .etiqueta__papel { font-size: 0.9rem; padding-right: 0.8rem; }
+  .etiqueta__posicao { font-size: 0.8rem; }
+  .etiqueta__longo { display: none; }
+  .etiqueta__curto { display: inline; }
+  .episodio__capa, .item__capa, .proximo__capa { padding-top: 3.6rem; }
+  .episodio__capa .episodio__numero { margin: 0; }
+  .item__capa { justify-content: flex-start; }
 }
 
 /* vozes */
@@ -431,7 +451,6 @@ body { line-height: 1.7; }
 .proximo__numero { font-size: 4.2rem; font-weight: 400; letter-spacing: 0.02em; color: transparent; -webkit-text-stroke: 3px var(--texto); paint-order: stroke fill; }
 @media (max-width: 760px) { .proximo__numero { font-size: 3.2rem; } }
 .proximo .sobretitulo { display: inline-block; background: var(--destaque); border: 2px solid var(--texto); padding: 0.1rem 0.6rem; margin-bottom: 0.9rem; }
-.proximo__saga { font-style: italic; }
 .proximo__estado { border-top: 2px dashed var(--texto); font-weight: 600; color: var(--texto); }
 .proximo--vazio .proximo__peba { color: var(--texto); --corte: #fffaf0; }
 .proximo--vazio .proximo__texto { color: var(--texto); }
@@ -446,7 +465,6 @@ body { line-height: 1.7; }
 .mes__titulo::after { content: ""; flex: 1; height: 14px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='14' viewBox='0 0 20 14'%3E%3Cpath d='M0 11L10 3l10 8' fill='none' stroke='%2315110c' stroke-width='2.6' stroke-linejoin='round'/%3E%3C/svg%3E") left center / auto 14px repeat-x; }
 .item { border: 4px solid var(--texto); border-radius: 2px; background: #fffaf0; box-shadow: 6px 6px 0 var(--texto); }
 .item__capa { border-right: 4px solid var(--texto); background-image: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(21, 17, 12, 0.15) 7px 8px); }
-.item__saga { font-family: var(--fonte-titulo); font-weight: 400; }
 .item__numero { font-weight: 400; }
 .item:target { box-shadow: 6px 6px 0 var(--destaque), 6px 6px 0 3px var(--texto); }
 @media (max-width: 760px) { .item__capa { border-right: 0; border-bottom: 4px solid var(--texto); } }

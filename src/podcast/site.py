@@ -244,8 +244,8 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any]) -> 
     episodio, roteiro, saga = item["episodio"], item["roteiro"], item["saga"]
     eid = escape(episodio["id"])
     return f"""<article class="episodio episodio--destaque" id="{eid}" data-saga="{escape(saga.id)}">
+  {_etiqueta(saga, episodio["id"])}
   <div class="episodio__capa" aria-hidden="true">
-    <span class="episodio__saga">{escape(saga.nome)}</span>
     <span class="episodio__numero">{escape(_numero(episodio['id']))}</span>
     <svg class="episodio__peba" viewBox="0 0 128 80"><use href="#peba"/></svg>
   </div>
@@ -319,8 +319,8 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any]) -> 
     episodio, roteiro, saga = item["episodio"], item["roteiro"], item["saga"]
     eid = escape(episodio["id"])
     return f"""<li class="item" id="{eid}" data-saga="{escape(saga.id)}">
+  {_etiqueta(saga, episodio["id"])}
   <div class="item__capa" aria-hidden="true">
-    <span class="item__saga">{escape(_nome_curto(saga))}</span>
     <span class="item__numero">{escape(_numero(episodio['id']))}</span>
   </div>
   <article class="item__corpo" aria-labelledby="titulo-{eid}">
@@ -344,12 +344,22 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any]) -> 
 
 
 def _meta(item: Mapping[str, Any]) -> str:
-    publicacao, saga, eid = item["publicacao"], item["saga"], item["episodio"]["id"]
+    publicacao = item["publicacao"]
     return f"""<p class="episodio__meta">
       <time datetime="{escape(publicacao['publicado_em'])}">{escape(_data_por_extenso(publicacao['publicado_em']))}</time>
       <span aria-hidden="true">·</span> {escape(_minutos(publicacao['duracao_segundos']))}
-      <span aria-hidden="true">·</span> {escape(saga.nome)}, episódio {escape(_numero(eid))}
     </p>"""
+
+
+def _etiqueta(saga: Any, episodio_id: str) -> str:
+    """Etiqueta da saga amarrada ao card. O cordão é o mesmo em todo card e vem dos SVGs de site/."""
+    ids = [episodio.id for episodio in saga.episodios]
+    posicao = f"{ids.index(episodio_id) + 1} de {len(ids)}"
+    return (f'<p class="etiqueta"><span class="etiqueta__papel">Saga {escape(_nome_curto(saga))}'
+            f'<span class="etiqueta__posicao">· <span class="etiqueta__longo">episódio</span>'
+            f'<span class="etiqueta__curto">ep.</span> {posicao}</span></span></p>'
+            '<span class="amarracao" aria-hidden="true"></span>'
+            '<span class="amarracao amarracao--verso" aria-hidden="true"></span>')
 
 
 def _caso(noticia: Mapping[str, Any]) -> str:
@@ -438,12 +448,12 @@ def _secao_proximo(proximo: Proximo | None) -> str:
     estado = _ESTADO_DO_PROXIMO.get(proximo.estado, _ESTADO_PADRAO)
     return f"""<section class="secao secao--sem-topo" id="proximo">
   <div class="largura">
-    <article class="proximo">
+    <article class="proximo" data-saga="{escape(proximo.saga.id)}">
+      {_etiqueta(proximo.saga, proximo.episodio.id)}
       <div class="proximo__capa" aria-hidden="true"><span class="proximo__numero">{numero}</span></div>
       <div class="proximo__corpo">
         <p class="sobretitulo">Próximo episódio</p>
-        <h2 class="proximo__titulo">{escape(proximo.episodio.titulo)}</h2>
-        <p class="proximo__saga">{escape(proximo.saga.nome)}, episódio {numero}</p>{aprendizado}
+        <h2 class="proximo__titulo">{escape(proximo.episodio.titulo)}</h2>{aprendizado}
         <p class="proximo__estado">{escape(estado)}</p>
       </div>
     </article>
