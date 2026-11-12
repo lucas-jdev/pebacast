@@ -99,7 +99,7 @@ site:
     Podcast diário de arquitetura de software: um diálogo de 15 a 20 minutos
     por dia, com um desafio prático no fim de cada episódio.
   # Relativa ao url_site; gerada de assets/og.svg por scripts/gerar_imagens.sh.
-  imagem_compartilhamento: og.jpg
+  imagem_compartilhamento: og-kraft.jpg
   # Código do site no GoatCounter (o "xxx" de xxx.goatcounter.com): analytics sem cookie.
   # Vazio, nenhum script de analytics é carregado.
   goatcounter: ""

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gera as imagens publicadas do site a partir das artes em assets/:
 #   site/capa-kraft.jpg (3000x3000), capa do podcast no feed, de assets/capa.svg
-#   site/og.jpg (1200x630), prévia de compartilhamento (Open Graph), de assets/og.svg
+#   site/og-kraft.jpg (1200x630), prévia de compartilhamento (Open Graph), de assets/og.svg
 #   site/apple-touch-icon.png (180x180) e site/favicon.ico (48x48), de site/favicon.svg
 # Precisa do Chrome (ou de outro Chromium em $CHROME) e do ffmpeg.
 set -euo pipefail
@@ -33,6 +33,6 @@ icone() {
 }
 
 renderizar capa.svg 3000 3000 capa-kraft.jpg
-renderizar og.svg 1200 630 og.jpg
+renderizar og.svg 1200 630 og-kraft.jpg
 icone 180 apple-touch-icon.png
 icone 48 favicon.ico

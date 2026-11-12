@@ -168,7 +168,7 @@ def _dados_estruturados(pagina):
 def test_paginas_tem_previa_de_compartilhamento_com_imagem(projeto):
     pagina = gerar_pagina_episodios(projeto, "feed.xml")
 
-    assert '<meta property="og:image" content="https://x.github.io/pebacast/og.jpg">' in pagina
+    assert '<meta property="og:image" content="https://x.github.io/pebacast/og-kraft.jpg">' in pagina
     assert '<meta property="og:image:width" content="1200">' in pagina
     assert '<meta name="twitter:card" content="summary_large_image">' in pagina
     assert '<link rel="canonical" href="https://x.github.io/pebacast/episodios.html">' in pagina

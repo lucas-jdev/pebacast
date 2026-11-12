@@ -31,7 +31,7 @@ ARQUIVOS_ESTATICOS = "site"
 PAGINA_EPISODIOS = "episodios.html"
 SITEMAP = "sitemap.xml"
 # Gerada de assets/og.svg por scripts/gerar_imagens.sh; o tamanho vai nas meta tags de Open Graph.
-IMAGEM_COMPARTILHAMENTO = "og.jpg"
+IMAGEM_COMPARTILHAMENTO = "og-kraft.jpg"
 TAMANHO_DA_IMAGEM_COMPARTILHAMENTO = (1200, 630)
 DESCRICAO_DA_IMAGEM = "Capa de cordel do Pebacast com o tatu-peba e a frase: cava até achar o porquê."
 
