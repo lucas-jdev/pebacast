@@ -80,7 +80,26 @@ def saga_do_dia(config: Mapping[str, Any], data: date) -> str:
     agenda = config["agenda"]
     if agenda["modo"] == "saga_unica":
         return agenda["saga_unica"]
-    return agenda["rotacao_semanal"][DIAS_DA_SEMANA[data.weekday()]]
+    if agenda["modo"] == "rotacao_semanal":
+        return agenda["rotacao_semanal"][DIAS_DA_SEMANA[data.weekday()]]
+    raise ValueError(f"O modo de agenda {agenda['modo']} não tem saga do dia.")
+
+
+def ultima_publicacao_por_saga(projeto: Projeto, sagas: Mapping[str, Saga]) -> dict[str, str]:
+    saga_do_episodio = {episodio.id: saga.id for saga in sagas.values() for episodio in saga.episodios}
+    ultimas: dict[str, str] = {}
+    for arquivo in projeto.episodios.glob(f"*/{PUBLICACAO}"):
+        saga = saga_do_episodio.get(arquivo.parent.name)
+        if saga is None:
+            continue
+        publicado_em = str(json.loads(arquivo.read_text(encoding="utf-8")).get("publicado_em", ""))
+        ultimas[saga] = max(ultimas.get(saga, ""), publicado_em)
+    return ultimas
+
+
+def ordem_da_fila(fila: Sequence[str], ultimas_publicacoes: Mapping[str, str]) -> list[str]:
+    """Saga nunca publicada vem primeiro; depois, a publicada há mais tempo. Empates seguem a fila."""
+    return sorted(fila, key=lambda saga: ultimas_publicacoes.get(saga, ""))
 
 
 def apresentador(personas: Mapping[str, Mapping[str, Any]], saga: str) -> str:
@@ -141,9 +160,7 @@ def selecionar(saga: Saga, estados: Mapping[str, str], exigir_referencias_verifi
     Só um episódio fica em produção por vez: se algum já tem roteiro aprovado e ainda não foi
     publicado, nada novo é escrito. Isso evita acumular roteiros quando a publicação quebra.
     """
-    aguardando = [id_ for id_, estado in estados.items() if estado == AGUARDANDO_PUBLICACAO]
-    if aguardando:
-        raise SemEpisodio(f"{', '.join(aguardando)} já tem roteiro aprovado e aguarda publicação.")
+    _garantir_nada_aguardando(estados)
 
     motivos = []
     for episodio in saga.episodios:
@@ -161,12 +178,39 @@ def selecionar(saga: Saga, estados: Mapping[str, str], exigir_referencias_verifi
     raise SemEpisodio(f"Nenhum episódio elegível na saga {saga.id}: {detalhe}.")
 
 
+def selecionar_na_fila(
+    sagas: Sequence[Saga], estados: Mapping[str, str], exigir_referencias_verificadas: bool
+) -> tuple[Saga, Episodio]:
+    """Devolve o primeiro episódio elegível percorrendo as sagas na ordem recebida."""
+    _garantir_nada_aguardando(estados)
+
+    motivos = []
+    for saga in sagas:
+        try:
+            return saga, selecionar(saga, estados, exigir_referencias_verificadas)
+        except SemEpisodio as motivo:
+            motivos.append(str(motivo))
+    raise SemEpisodio(" ".join(motivos))
+
+
+def sagas_candidatas(projeto: Projeto, config: Mapping[str, Any], data: date) -> list[Saga]:
+    sagas = projeto.sagas()
+    agenda = config["agenda"]
+    if agenda["modo"] == "fila":
+        ordem = ordem_da_fila(agenda["fila"], ultima_publicacao_por_saga(projeto, sagas))
+        return [sagas[saga] for saga in ordem]
+    return [sagas[saga_do_dia(config, data)]]
+
+
 def montar_contexto(projeto: Projeto, data: date) -> dict[str, Any]:
     config = projeto.config()
-    sagas = projeto.sagas()
-    saga = sagas[saga_do_dia(config, data)]
-    estados = {episodio.id: estado_do_episodio(projeto, saga, episodio.id) for episodio in saga.episodios}
-    episodio = selecionar(saga, estados, config["episodio"]["exigir_referencias_verificadas"])
+    candidatas = sagas_candidatas(projeto, config, data)
+    estados = {
+        episodio.id: estado_do_episodio(projeto, saga, episodio.id)
+        for saga in candidatas
+        for episodio in saga.episodios
+    }
+    saga, episodio = selecionar_na_fila(candidatas, estados, config["episodio"]["exigir_referencias_verificadas"])
 
     personas = projeto.personas()
     regras = regras_para(projeto, saga, episodio.id)
@@ -188,6 +232,12 @@ def montar_contexto(projeto: Projeto, data: date) -> dict[str, Any]:
         "noticias_ja_usadas": sorted(regras.urls_ja_usadas),
         "feedbacks_recentes": projeto.feedbacks_recentes(saga.id, config["feedback"]["ultimos_por_saga"]),
     }
+
+
+def _garantir_nada_aguardando(estados: Mapping[str, str]) -> None:
+    aguardando = [id_ for id_, estado in estados.items() if estado == AGUARDANDO_PUBLICACAO]
+    if aguardando:
+        raise SemEpisodio(f"{', '.join(aguardando)} já tem roteiro aprovado e aguarda publicação.")
 
 
 def _saga_do_episodio(projeto: Projeto, episodio_id: str) -> Saga:

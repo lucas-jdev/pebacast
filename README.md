@@ -10,7 +10,7 @@ MVP privado: uma saga (Software), quatro episódios, um expert. O feed é consum
 
 ## Como funciona
 
-1. Seleciona o próximo episódio pendente da saga do dia, respeitando pré-requisitos.
+1. Seleciona o próximo episódio pendente com referências verificadas, de qualquer saga, começando pela publicada há mais tempo e respeitando pré-requisitos.
 2. Busca notícias relacionadas em cascata (7 dias, 30 dias, 60 dias) ou cria um cenário hipotético.
 3. O roteirista (Claude Opus 5.5, numa rotina agendada) gera o diálogo em JSON a partir da especificação do episódio e das personas.
 4. Um subagente revisor, sem o contexto do roteirista, verifica cada afirmação contra as referências curadas e aponta correções.

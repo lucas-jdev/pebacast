@@ -1,5 +1,8 @@
 agenda:
-  modo: saga_unica
+  # fila: o próximo episódio verificado de qualquer saga, começando pela publicada há mais tempo.
+  # saga_unica e rotacao_semanal: só a saga fixa ou a do dia da semana.
+  modo: fila
+  fila: [software, solucoes, sistemas, dados, infraestrutura, seguranca, corporativa]
   saga_unica: software
   rotacao_semanal:
     segunda: software

@@ -17,6 +17,7 @@ from podcast.roteiro import (
     estado_do_episodio,
     main,
     montar_contexto,
+    ordem_da_fila,
     regras_para,
     saga_do_dia,
     selecionar,
@@ -30,6 +31,7 @@ CONFIG = {
     "agenda": {
         "modo": "saga_unica",
         "saga_unica": "software",
+        "fila": ["software", "solucoes", "seguranca"],
         "rotacao_semanal": {
             "segunda": "software", "terca": "solucoes", "quarta": "sistemas", "quinta": "dados",
             "sexta": "infraestrutura", "sabado": "seguranca", "domingo": "corporativa",
@@ -115,9 +117,29 @@ def _escrever_episodio(projeto: Projeto, episodio: str, **alteracoes: object) ->
     return pasta
 
 
-def _publicar(projeto: Projeto, episodio: str) -> None:
+def _publicar(projeto: Projeto, episodio: str, publicado_em: str = "2026-11-07T15:00:00+00:00") -> None:
     _escrever_episodio(projeto, episodio)
-    _gravar(projeto.episodios / episodio / "publicacao.json", {"guid": episodio})
+    _gravar(projeto.episodios / episodio / "publicacao.json", {"guid": episodio, "publicado_em": publicado_em})
+
+
+def _usar_fila(projeto: Projeto) -> None:
+    _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "agenda": {**CONFIG["agenda"], "modo": "fila"}})
+    sagas = (
+        ("solucoes", "beatriz", [("sl-001", True), ("sl-002", False)]),
+        ("seguranca", "yasmin", [("se-001", False)]),
+    )
+    for saga_id, expert, episodios in sagas:
+        _gravar(projeto.raiz / "curriculum" / "sagas" / f"{saga_id}.yaml", {
+            "id": saga_id, "nome": saga_id, "pergunta_central": "?", "expert": expert,
+            "referencias_base": [{"id": "livro", "titulo": "Livro", "tipo": "livro"}],
+            "episodios": [
+                {"id": id_, "titulo": id_, "pre_requisitos": [], "referencias": [{"fonte": "livro"}],
+                 "referencias_verificadas": verificado}
+                for id_, verificado in episodios
+            ],
+        })
+        persona = {"id": expert, "nome": expert.title(), "papel": "expert", "sagas": [saga_id], "voz": VOZ}
+        _gravar(projeto.raiz / "curriculum" / "personas" / f"{expert}.yaml", persona)
 
 
 def _problemas(projeto: Projeto, episodio: str) -> list[str]:
@@ -170,6 +192,51 @@ def test_nao_escreve_novo_roteiro_enquanto_outro_aguarda_publicacao(projeto):
     assert estado_do_episodio(projeto, projeto.sagas()["software"], "sw-001") == AGUARDANDO_PUBLICACAO
     with pytest.raises(SemEpisodio, match="sw-001 já tem roteiro aprovado"):
         montar_contexto(projeto, date(2026, 11, 8))
+
+
+def test_ordem_da_fila_poe_saga_nunca_publicada_antes_e_respeita_a_fila_nos_empates():
+    ultimas = {"software": "2026-11-09T22:00:00+00:00", "solucoes": "2026-11-07T15:00:00+00:00"}
+    assert ordem_da_fila(["software", "solucoes", "dados", "seguranca"], ultimas) == [
+        "dados", "seguranca", "solucoes", "software",
+    ]
+
+
+def test_fila_comeca_pela_saga_que_nunca_foi_publicada(projeto):
+    _usar_fila(projeto)
+    _publicar(projeto, "sw-001")
+
+    contexto = montar_contexto(projeto, date(2026, 11, 8))
+
+    assert contexto["episodio"]["id"] == "sl-001"
+    assert contexto["personas"]["expert"]["id"] == "beatriz"
+
+
+def test_fila_pula_saga_sem_episodio_verificado_e_volta_a_publicada_ha_mais_tempo(projeto):
+    _usar_fila(projeto)
+    _publicar(projeto, "sw-001", publicado_em="2026-11-07T15:00:00+00:00")
+    _publicar(projeto, "sl-001", publicado_em="2026-11-09T15:00:00+00:00")
+
+    assert montar_contexto(projeto, date(2026, 11, 10))["episodio"]["id"] == "sw-002"
+
+
+def test_fila_nao_escreve_novo_roteiro_enquanto_qualquer_saga_aguarda_publicacao(projeto):
+    _usar_fila(projeto)
+    _escrever_episodio(projeto, "sw-001")
+    with pytest.raises(SemEpisodio, match="sw-001 já tem roteiro aprovado"):
+        montar_contexto(projeto, date(2026, 11, 8))
+
+
+def test_fila_sem_episodio_explica_o_motivo_de_cada_saga(projeto):
+    _usar_fila(projeto)
+    for episodio in ("sw-001", "sw-002", "sl-001"):
+        _publicar(projeto, episodio)
+
+    with pytest.raises(SemEpisodio) as erro:
+        montar_contexto(projeto, date(2026, 11, 8))
+
+    for trecho in ("sw-003: referências não verificadas", "sl-002: referências não verificadas",
+                   "se-001: referências não verificadas"):
+        assert trecho in str(erro.value)
 
 
 def test_tentativa_reprovada_volta_para_a_fila(projeto):

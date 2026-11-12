@@ -20,7 +20,15 @@ Arquivos de cada episódio:
 
 ## 1. Seleção do episódio
 
-`python -m podcast.roteiro contexto` escolhe, na ordem do currículo, o próximo episódio não publicado da saga do dia (definida em `config/pipeline.yaml`), cujos pré-requisitos já foram publicados e cujas referências estão verificadas. Se algum episódio já tem roteiro aprovado e ainda não foi publicado, nada novo é escrito.
+`python -m podcast.roteiro contexto` escolhe, na ordem do currículo, o próximo episódio não publicado cujos pré-requisitos já foram publicados e cujas referências estão verificadas. Se algum episódio já tem roteiro aprovado e ainda não foi publicado, nada novo é escrito.
+
+As sagas consideradas dependem de `agenda.modo` em `config/pipeline.yaml`:
+
+| Modo | Sagas consideradas |
+|---|---|
+| `fila` | Todas as da lista `agenda.fila`. Primeiro as que nunca foram publicadas, depois a publicada há mais tempo; empates seguem a ordem da lista. Verificar as referências de um episódio basta para ele entrar na produção. |
+| `saga_unica` | Só `agenda.saga_unica`. |
+| `rotacao_semanal` | Só a saga do dia da semana da publicação. |
 
 Saída: o spec do episódio, as referências, as personas envolvidas, as regras e os feedbacks recentes da saga.
 
