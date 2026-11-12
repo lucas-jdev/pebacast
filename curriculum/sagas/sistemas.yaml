@@ -32,7 +32,13 @@ episodios:
       - fonte: ddia
         capitulos: [8]
       - fonte: falacias
-    referencias_verificadas: false
+    # Conferido em 2026-11-12. Falácias: lido no original (PDF do whitepaper, que reúne os posts do
+    # Dr. Dobb's), com as oito falácias e a consequência de cada uma para o arquiteto, base do
+    # primeiro objetivo. DDIA cap. 8 (1ª ed.): conferido pelo sumário do livro e por duas leituras
+    # independentes (blog do Murat Demirbas e notas de estudo de terceiros), e não no livro. As seções
+    # "Faults and Partial Failures", "Unreliable Networks", "Unreliable Clocks" e "Process Pauses"
+    # sustentam os objetivos sobre falha parcial versus total e rede, relógio e processo.
+    referencias_verificadas: true
     desafio: >-
       Escolha uma chamada de rede de um sistema que você mantém e escreva o
       que acontece se ela demorar trinta segundos, falhar no meio ou for
