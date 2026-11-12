@@ -13,7 +13,7 @@
       <feComposite in2="SourceGraphic" operator="in"/>
     </filter>
     <pattern id="hachura" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
-      <rect width="40" height="40" fill="#f2a7bf"/>
+      <rect width="40" height="40" fill="#d8b98a"/>
       <rect width="5" height="40" fill="#15110c" opacity="0.13"/>
     </pattern>
     <!-- O mesmo tatu-peba do site (src/podcast/site.py), com os cortes na cor da capa. -->
@@ -23,12 +23,12 @@
       <path fill="#15110c" d="M28 60c0-27 19-44 42-44s40 17 40 44z"/>
       <path fill="#15110c" d="M36 44c-9-2-18 2-25 8L3 59c-1 1-1 4 2 4h30z"/>
       <path fill="#15110c" d="M33 47c-3-6-2-13 2-15 3 3 3 10 0 15z"/>
-      <g fill="none" stroke="#f2a7bf" stroke-linecap="round">
+      <g fill="none" stroke="#d8b98a" stroke-linecap="round">
         <path stroke-width="2.4" d="M50 23c-3 11-4 24-4 34M61 18c-2 12-2 26-2 39M72 17c0 13 0 27 0 40M83 19c2 12 2 25 2 38M94 25c3 10 4 21 4 32"/>
         <path stroke-width="1.6" d="M32 56c24-3 50-3 76 0"/>
         <path stroke-width="1.4" d="M38 30l4 3m-6 4 4 2m62-9-4 3m6 4-4 2"/>
       </g>
-      <circle cx="16" cy="54" r="1.8" fill="#f2a7bf"/>
+      <circle cx="16" cy="54" r="1.8" fill="#d8b98a"/>
     </symbol>
   </defs>
 

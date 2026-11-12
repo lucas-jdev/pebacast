@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Gera as imagens publicadas do site a partir das artes em assets/:
-#   site/capa-cordel.jpg (3000x3000), capa do podcast no feed, de assets/capa.svg
+#   site/capa-kraft.jpg (3000x3000), capa do podcast no feed, de assets/capa.svg
 #   site/og.jpg (1200x630), prévia de compartilhamento (Open Graph), de assets/og.svg
 # Precisa do Chrome (ou de outro Chromium em $CHROME) e do ffmpeg.
 set -euo pipefail
@@ -22,5 +22,5 @@ renderizar() {
   echo "site/$destino: $(wc -c < "$raiz/site/$destino") bytes"
 }
 
-renderizar capa.svg 3000 3000 capa-cordel.jpg
+renderizar capa.svg 3000 3000 capa-kraft.jpg
 renderizar og.svg 1200 630 og.jpg
