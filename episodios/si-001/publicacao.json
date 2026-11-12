@@ -1,0 +1,12 @@
+{
+  "guid": "pebacast-si-001",
+  "url_audio": "https://github.com/lucas-jdev/pebacast/releases/download/episodio-si-001/pebacast-si-001.mp3",
+  "tamanho_bytes": 8117228,
+  "duracao_segundos": 1015,
+  "publicado_em": "2026-11-12T22:33:31+00:00",
+  "tts": {
+    "provedor": "kokoro",
+    "fallback": true
+  },
+  "vinheta": true
+}
