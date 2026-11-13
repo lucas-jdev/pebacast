@@ -108,6 +108,50 @@
     opcoes.forEach((opcao) => opcao.addEventListener("click", () => aplicar(opcao.dataset.saga)));
   }
 
+  // Curti / não curti. O voto vale por navegador: fica no localStorage para o botão lembrar, e o servidor guarda um por visitante.
+  // O corpo vai como texto puro de propósito: é um pedido "simples" de CORS, sem a ida e volta do preflight.
+  const guardado = {
+    ler: (id) => { try { return localStorage.getItem(`pebacast:voto:${id}`); } catch { return null; } },
+    gravar: (id, voto) => {
+      try { voto ? localStorage.setItem(`pebacast:voto:${id}`, voto) : localStorage.removeItem(`pebacast:voto:${id}`); } catch { /* modo privado */ }
+    },
+  };
+
+  document.querySelectorAll(".votos").forEach((bloco) => {
+    const { episodio, api } = bloco.dataset;
+    const opcoes = [...bloco.querySelectorAll(".votos__opcao")];
+    const pergunta = bloco.querySelector(".votos__pergunta");
+    const status = bloco.querySelector("[data-votos-status]");
+    const textoDaPergunta = pergunta.textContent;
+    let atual = guardado.ler(episodio);
+    let fila = Promise.resolve();
+
+    const marcar = (voto) => opcoes.forEach((opcao) => opcao.setAttribute("aria-pressed", String(opcao.dataset.voto === voto)));
+    marcar(atual);
+
+    const enviar = (voto) => fetch(`${api}/votos`, { method: "POST", body: JSON.stringify({ episodio, voto }), keepalive: true })
+      .then((resposta) => { if (!resposta.ok) throw new Error(String(resposta.status)); });
+
+    opcoes.forEach((opcao) => opcao.addEventListener("click", () => {
+      const anterior = atual;
+      const voto = opcao.dataset.voto === atual ? null : opcao.dataset.voto;
+      atual = voto;
+      marcar(voto);
+      pergunta.textContent = textoDaPergunta;
+      // Cada pedido grava o estado inteiro; em fila, o último clique é o que fica no servidor.
+      fila = fila.then(() => enviar(voto)).then(() => {
+        guardado.gravar(episodio, voto);
+        status.textContent = voto ? "Voto registrado. Valeu!" : "Voto removido.";
+      }).catch(() => {
+        if (atual !== voto) return;
+        atual = anterior;
+        marcar(anterior);
+        pergunta.textContent = "Não deu pra registrar. Tenta de novo?";
+        status.textContent = "Não deu pra registrar o voto.";
+      });
+    }));
+  });
+
   document.querySelectorAll("[data-copiar]").forEach((botao) => {
     const aviso = document.createElement("span");
     aviso.className = "so-leitor";

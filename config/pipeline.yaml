@@ -104,3 +104,5 @@ site:
   # Código do site no GoatCounter (o "xxx" de xxx.goatcounter.com): analytics sem cookie.
   # Vazio, nenhum script de analytics é carregado.
   goatcounter: ""
+  # URL do Worker de votos (votos/, docs/votos.md). Vazio: o site não mostra o curti / não curti.
+  votos_api: ""

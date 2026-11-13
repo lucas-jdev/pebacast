@@ -1,0 +1,15 @@
+# API dos votos do site (docs/votos.md). O deploy roda pelo workflow votos.yml.
+name = "pebacast-votos"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[vars]
+ORIGEM = "https://lucas-jdev.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pebacast-votos"
+# O workflow troca pelo id real; assim o repositório não depende de uma conta específica.
+database_id = "__D1_ID__"
+migrations_dir = "migrations"

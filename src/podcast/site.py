@@ -72,7 +72,7 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
     secoes = [
         _hero(ultimo),
         _faixa(),
-        _secao_ultimo(ultimo, personas, total_publicados=len(publicados)),
+        _secao_ultimo(ultimo, personas, total_publicados=len(publicados), votos=_config_do_site(config)["votos"]),
         _secao_proximo(proximo),
         _secao_vozes(personas, sagas),
         _secao_sagas(sagas, publicados),
@@ -107,7 +107,7 @@ def gerar_pagina_episodios(projeto: Projeto, arquivo_feed: str) -> str:
         dados_estruturados=serie,
         pular_para="arquivo",
         cabecalho=_cabecalho(meta, na_inicial=False),
-        conteudo=_secao_arquivo(publicados, projeto.personas()),
+        conteudo=_secao_arquivo(publicados, projeto.personas(), votos=_config_do_site(config)["votos"]),
     )
 
 
@@ -127,7 +127,14 @@ def _config_do_site(config: Mapping[str, Any]) -> dict[str, str]:
         "descricao": " ".join(descricao.split()),
         "imagem": site.get("imagem_compartilhamento") or IMAGEM_COMPARTILHAMENTO,
         "goatcounter": site.get("goatcounter") or "",
+        "votos": _api_de_votos(site.get("votos_api") or ""),
     }
+
+
+def _api_de_votos(url: str) -> str:
+    """Só aceita https num host simples: o endereço vai parar num atributo do HTML e no fetch do navegador."""
+    url = url.rstrip("/")
+    return url if re.fullmatch(r"https://[a-z0-9.-]+(?:/[a-z0-9._-]+)*", url) else ""
 
 
 def _serie(config: Mapping[str, Any], arquivo_feed: str) -> dict[str, Any]:
@@ -320,7 +327,7 @@ def _faixa() -> str:
     return '<div class="faixa" role="presentation"></div>'
 
 
-def _secao_ultimo(item: Mapping[str, Any] | None, personas: Mapping[str, Any], total_publicados: int) -> str:
+def _secao_ultimo(item: Mapping[str, Any] | None, personas: Mapping[str, Any], total_publicados: int, votos: str = "") -> str:
     if item is None:
         return """<section class="secao" id="episodios">
   <div class="largura"><h2 class="secao__titulo">Episódios</h2>
@@ -336,13 +343,13 @@ def _secao_ultimo(item: Mapping[str, Any] | None, personas: Mapping[str, Any], t
       <p class="sobretitulo">Episódio mais recente</p>
       <h2 class="secao__titulo">Pra ouvir agora</h2>
     </div>
-    {_episodio_destaque(item, personas)}
+    {_episodio_destaque(item, personas, votos)}
     {arquivo}
   </div>
 </section>"""
 
 
-def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any]) -> str:
+def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], votos: str = "") -> str:
     episodio, roteiro, saga = item["episodio"], item["roteiro"], item["saga"]
     eid = escape(episodio["id"])
     return f"""<article class="episodio episodio--destaque" id="{eid}" data-saga="{escape(saga.id)}">
@@ -355,7 +362,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any]) -> 
     {_meta(item)}
     <h3 class="episodio__titulo">{escape(episodio['titulo'])}</h3>
     {_caso(item["noticia"])}
-    {_player(item["publicacao"], episodio["id"])}
+    {_player(item["publicacao"], episodio["id"])}{_votos(episodio["id"], votos)}
     {_objetivos_e_desafio(episodio, roteiro)}
     {_selo(item["revisoes"])}
     {_dobra_transcricao(roteiro, personas)}
@@ -368,7 +375,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any]) -> 
 </article>"""
 
 
-def _secao_arquivo(publicados: Sequence[Mapping[str, Any]], personas: Mapping[str, Any]) -> str:
+def _secao_arquivo(publicados: Sequence[Mapping[str, Any]], personas: Mapping[str, Any], votos: str = "") -> str:
     total = len(publicados)
     if not publicados:
         lead = "Nenhum episódio publicado ainda. O primeiro está sendo cavado."
@@ -380,7 +387,7 @@ def _secao_arquivo(publicados: Sequence[Mapping[str, Any]], personas: Mapping[st
     grupos = "\n".join(
         f"""<section class="mes" aria-labelledby="mes-{indice}">
   <h2 class="mes__titulo" id="mes-{indice}">{escape(mes)}</h2>
-  <ol class="mes__lista">{''.join(_episodio_compacto(item, personas) for item in itens)}</ol>
+  <ol class="mes__lista">{''.join(_episodio_compacto(item, personas, votos) for item in itens)}</ol>
 </section>"""
         for indice, (mes, itens) in enumerate(meses, start=1)
     )
@@ -417,7 +424,7 @@ def _filtro_por_saga(publicados: Sequence[Mapping[str, Any]]) -> str:
 </div>"""
 
 
-def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any]) -> str:
+def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any], votos: str = "") -> str:
     episodio, roteiro, saga = item["episodio"], item["roteiro"], item["saga"]
     eid = escape(episodio["id"])
     return f"""<li class="item" id="{eid}" data-saga="{escape(saga.id)}">
@@ -429,7 +436,7 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any]) -> 
     {_meta(item)}
     <h3 class="item__titulo" id="titulo-{eid}">{escape(episodio['titulo'])}</h3>
     {_caso(item["noticia"])}
-    {_player(item["publicacao"], episodio["id"])}
+    {_player(item["publicacao"], episodio["id"])}{_votos(episodio["id"], votos)}
     <details class="dobra">
       <summary>Objetivos e desafio</summary>
       {_objetivos_e_desafio(episodio, roteiro)}
@@ -485,6 +492,23 @@ def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
         <div class="player__tempos"><span class="player__atual">0:00</span><span><span class="so-leitor">de </span>{escape(_duracao(duracao))}</span></div>
       </div>
       <button class="player__velocidade" type="button"><span class="so-leitor">Velocidade de reprodução: </span><span class="player__velocidade-valor">1×</span></button>
+    </div>"""
+
+
+def _votos(episodio_id: str, api: str) -> str:
+    """Curti / não curti. Sem API configurada, nada aparece; sem JS, o CSS esconde (o voto depende do fetch)."""
+    if not api:
+        return ""
+    eid = escape(episodio_id)
+    opcoes = "".join(
+        f'''<button class="votos__opcao" type="button" data-voto="{voto}" aria-pressed="false">'''
+        f'''<svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-{voto}"/></svg>{rotulo}</button>'''
+        for voto, rotulo in (("curti", "Curti"), ("nao_curti", "Não curti"))
+    )
+    return f"""
+    <div class="votos" role="group" aria-labelledby="votos-{eid}" data-episodio="{eid}" data-api="{escape(api)}">
+      <p class="votos__pergunta" id="votos-{eid}">Curtiu o episódio?</p>{opcoes}
+      <p class="so-leitor" role="status" data-votos-status></p>
     </div>"""
 
 
@@ -736,6 +760,8 @@ _SIMBOLOS = """<svg width="0" height="0" style="position:absolute" aria-hidden="
   </symbol>
   <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></symbol>
   <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M6 4h4v16H6zm8 0h4v16h-4z"/></symbol>
+  <symbol id="i-curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
+  <symbol id="i-nao_curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" transform="rotate(180 12 12)" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
 </svg>"""
 

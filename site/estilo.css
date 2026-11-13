@@ -464,6 +464,16 @@ body { line-height: 1.7; }
 .filtro__opcao { border: 3px solid var(--texto); border-radius: 2px; background: #fffaf0; }
 .filtro__opcao:hover { background: var(--fundo-2); }
 .filtro__opcao[aria-pressed="true"] { background: var(--destaque); color: var(--texto); border-color: var(--texto); box-shadow: 3px 3px 0 var(--texto); }
+
+/* Curti / não curti: dois carimbos pequenos logo abaixo do player. Dependem do fetch, então só aparecem com JS. */
+.votos { display: none; align-items: center; flex-wrap: wrap; gap: 0.5rem 0.6rem; margin-top: 0.9rem; }
+.js .votos { display: flex; }
+.votos__pergunta { margin: 0 0.3rem 0 0; font-weight: 700; font-size: 0.95rem; }
+@media (max-width: 760px) { .votos__pergunta { flex-basis: 100%; } }
+.votos__opcao { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; padding: 0 0.85rem; border: 3px solid var(--texto); border-radius: 2px; background: #fffaf0; color: var(--texto); font: inherit; font-weight: 650; font-size: 0.95rem; cursor: pointer; }
+.votos__opcao svg { width: 18px; height: 18px; flex: none; }
+.votos__opcao:hover { background: var(--fundo-2); }
+.votos__opcao[aria-pressed="true"] { background: var(--destaque); box-shadow: 3px 3px 0 var(--texto); }
 .filtro__total { opacity: 1; font-family: var(--fonte-titulo); }
 .mes__titulo { display: flex; align-items: center; gap: 1rem; }
 .mes__titulo::after { content: ""; flex: 1; height: 14px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='14' viewBox='0 0 20 14'%3E%3Cpath d='M0 11L10 3l10 8' fill='none' stroke='%2315110c' stroke-width='2.6' stroke-linejoin='round'/%3E%3C/svg%3E") left center / auto 14px repeat-x; }
