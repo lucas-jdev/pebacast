@@ -259,6 +259,7 @@ def _episodios_publicados(projeto: Projeto) -> list[dict[str, Any]]:
             revisoes = sorted((pasta / PASTA_REVISOES).glob("*.json"), key=lambda a: int(a.stem))
             itens.append({
                 "episodio": episodio.dados,
+                "rotulo": saga.rotulo_do(episodio.id),
                 "publicacao": publicacao,
                 "notas": show_notes(
                     episodio.dados,
@@ -274,7 +275,7 @@ def _episodios_publicados(projeto: Projeto) -> list[dict[str, Any]]:
 def _adicionar_item(canal: ET.Element, item: Mapping[str, Any]) -> None:
     episodio, publicacao = item["episodio"], item["publicacao"]
     no = ET.SubElement(canal, "item")
-    _sub(no, "title", episodio["titulo"])
+    _sub(no, "title", f"{item['rotulo']} — {episodio['titulo']}")
     _sub(no, "description", item["notas"])
     ET.SubElement(no, "guid", {"isPermaLink": "false"}).text = publicacao["guid"]
     _sub(no, "pubDate", format_datetime(datetime.fromisoformat(publicacao["publicado_em"])))

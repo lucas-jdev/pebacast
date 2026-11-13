@@ -18,6 +18,7 @@ from itertools import groupby
 from pathlib import Path
 from typing import Any
 
+from podcast.curriculo import SAGAS
 from podcast.roteiro import (
     AGUARDANDO_PUBLICACAO,
     FUSO_BRASILIA,
@@ -39,16 +40,6 @@ DESCRICAO_DA_IMAGEM = "Capa de cordel do Pebacast com o tatu-peba e a frase: cav
 MESES = ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
          "agosto", "setembro", "outubro", "novembro", "dezembro")
 
-# As sete sagas e suas perguntas centrais (docs/fronteiras-das-sagas.md).
-SAGAS = (
-    ("software", "Software", "Como um sistema é organizado por dentro e por quê?"),
-    ("solucoes", "Soluções", "Quais peças resolvem este problema de negócio e como elas se conectam?"),
-    ("sistemas", "Sistemas", "Como as partes se comportam juntas, principalmente quando algo falha?"),
-    ("dados", "Dados e Informação", "Como a informação é modelada, governada e flui pela organização?"),
-    ("infraestrutura", "Infraestrutura", "Onde e como tudo isso roda, com qual custo e confiabilidade?"),
-    ("seguranca", "Segurança", "Quem pode fazer o quê, e o que acontece quando alguém tenta o que não deveria?"),
-    ("corporativa", "Corporativa", "Como a tecnologia sustenta a estratégia da organização?"),
-)
 
 
 def escrever_pagina(projeto: Projeto, site: Path, arquivo_feed: str) -> None:
@@ -261,10 +252,6 @@ def _mes_por_extenso(iso: str) -> str:
     return f"{MESES[data.month - 1].capitalize()} de {data.year}"
 
 
-def _nome_curto(saga: Any) -> str:
-    return next((nome for sid, nome, _ in SAGAS if sid == saga.id), saga.nome)
-
-
 def _duracao(segundos: int) -> str:
     return f"{segundos // 60}:{segundos % 60:02d}"
 
@@ -462,9 +449,8 @@ def _meta(item: Mapping[str, Any]) -> str:
 
 def _etiqueta(saga: Any, episodio_id: str) -> str:
     """Etiqueta da saga amarrada ao card. O cordão é o mesmo em todo card e vem dos SVGs de site/."""
-    ids = [episodio.id for episodio in saga.episodios]
-    posicao = f"{ids.index(episodio_id) + 1} de {len(ids)}"
-    return (f'<p class="etiqueta"><span class="etiqueta__papel">Saga {escape(_nome_curto(saga))}'
+    posicao = f"{saga.posicao_do(episodio_id)} de {len(saga.episodios)}"
+    return (f'<p class="etiqueta"><span class="etiqueta__papel">Saga {escape(saga.nome_curto)}'
             f'<span class="etiqueta__posicao">· <span class="etiqueta__longo">episódio</span>'
             f'<span class="etiqueta__curto">ep.</span> {posicao}</span></span></p>'
             '<span class="amarracao" aria-hidden="true"></span>'
