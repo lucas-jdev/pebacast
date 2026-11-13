@@ -273,10 +273,6 @@ def _minutos(segundos: int) -> str:
     return f"{round(segundos / 60)} min"
 
 
-def _numero(episodio_id: str) -> str:
-    return episodio_id.rsplit("-", 1)[-1]
-
-
 # ---------------------------------------------------------------- seções
 
 
@@ -355,7 +351,6 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     return f"""<article class="episodio episodio--destaque" id="{eid}" data-saga="{escape(saga.id)}">
   {_etiqueta(saga, episodio["id"])}
   <div class="episodio__capa" aria-hidden="true">
-    <span class="episodio__numero">{escape(_numero(episodio['id']))}</span>
     <svg class="episodio__peba" viewBox="0 0 128 80"><use href="#peba"/></svg>
   </div>
   <div class="episodio__corpo">
@@ -430,7 +425,7 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     return f"""<li class="item" id="{eid}" data-saga="{escape(saga.id)}">
   {_etiqueta(saga, episodio["id"])}
   <div class="item__capa" aria-hidden="true">
-    <span class="item__numero">{escape(_numero(episodio['id']))}</span>
+    <svg class="item__peba" viewBox="0 0 128 80"><use href="#peba"/></svg>
   </div>
   <article class="item__corpo" aria-labelledby="titulo-{eid}">
     {_meta(item)}
@@ -573,7 +568,6 @@ _ESTADO_PADRAO = "Fontes conferidas. O roteiro é o próximo a ser escrito."
 def _secao_proximo(proximo: Proximo | None) -> str:
     if proximo is None:
         return _secao_proximo_vazio()
-    numero = escape(_numero(proximo.episodio.id))
     objetivos = "".join(f"<li>{escape(o)}</li>" for o in proximo.episodio.dados.get("objetivos", []))
     aprendizado = f"""
       <h3 class="proximo__rotulo">Ao final, você deve conseguir</h3>
@@ -583,7 +577,7 @@ def _secao_proximo(proximo: Proximo | None) -> str:
   <div class="largura">
     <article class="proximo" data-saga="{escape(proximo.saga.id)}">
       {_etiqueta(proximo.saga, proximo.episodio.id)}
-      <div class="proximo__capa" aria-hidden="true"><span class="proximo__numero">{numero}</span></div>
+      <div class="proximo__capa" aria-hidden="true"><svg class="proximo__peba" viewBox="0 0 128 80"><use href="#peba"/></svg></div>
       <div class="proximo__corpo">
         <p class="sobretitulo">Próximo episódio</p>
         <h2 class="proximo__titulo">{escape(proximo.episodio.titulo)}</h2>{aprendizado}

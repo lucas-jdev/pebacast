@@ -169,9 +169,8 @@ button { font: inherit; }
 /* episódio */
 .episodio { display: grid; grid-template-columns: 280px 1fr; background: var(--fundo-2); border: var(--borda) solid var(--linha); border-radius: var(--raio-cartao); box-shadow: var(--sombra); }
 .episodio + .episodio { margin-top: 1.5rem; }
-.episodio__capa { position: relative; display: flex; flex-direction: column; justify-content: space-between; padding: 1.6rem; min-height: 280px; background: var(--capa-fundo); color: var(--capa-texto); isolation: isolate; overflow: hidden; }
-.episodio__numero { font-family: var(--fonte-titulo); font-size: 6.5rem; font-weight: 800; line-height: 0.85; letter-spacing: -0.04em; }
-.episodio__peba { width: 112px; height: 70px; align-self: flex-end; color: var(--capa-peba); --corte: var(--capa-fundo); }
+.episodio__capa { position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.6rem; min-height: 280px; background: var(--capa-fundo); color: var(--capa-texto); isolation: isolate; overflow: hidden; }
+.episodio__peba { width: 168px; height: 105px; color: var(--capa-peba); --corte: var(--capa-fundo); }
 .episodio__corpo { padding: clamp(1.4rem, 3vw, 2.2rem); min-width: 0; }
 .episodio__meta { font-size: 0.95rem; color: var(--texto-suave); display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; }
 .episodio__titulo { font-size: clamp(1.6rem, 3.2vw, 2.3rem); margin-top: 0.5rem; }
@@ -182,8 +181,7 @@ button { font: inherit; }
 .caso__fonte::before { content: "· "; }
 @media (max-width: 760px) {
   .episodio { grid-template-columns: 1fr; }
-  .episodio__capa { min-height: 0; flex-direction: row; align-items: flex-end; padding: 1.2rem 1.4rem; gap: 1rem; }
-  .episodio__numero { font-size: 4.2rem; margin-top: 1.6rem; }
+  .episodio__capa { min-height: 0; padding: 1.2rem 1.4rem; }
   .episodio__peba { width: 92px; height: 58px; }
 }
 
@@ -242,7 +240,6 @@ button { font: inherit; }
 /* próximo episódio */
 .proximo { display: grid; grid-template-columns: 220px 1fr; border: var(--borda) dashed var(--linha); border-radius: var(--raio-cartao); background: var(--fundo-2); }
 .proximo__capa { display: grid; place-items: center; padding: 1.4rem; border-right: var(--borda) dashed var(--linha); }
-.proximo__numero { font-family: var(--fonte-titulo); font-size: 5.5rem; font-weight: 800; line-height: 0.85; letter-spacing: -0.04em; color: var(--texto-suave); }
 .proximo__corpo { padding: clamp(1.4rem, 3vw, 2.2rem); min-width: 0; }
 .proximo__titulo { font-size: clamp(1.6rem, 3.2vw, 2.3rem); }
 .proximo__rotulo { font-family: var(--fonte-texto); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--texto-suave); margin: 1.4rem 0 0.7rem; text-transform: none; }
@@ -250,13 +247,12 @@ button { font: inherit; }
 @media (max-width: 760px) {
   .proximo { grid-template-columns: 1fr; }
   .proximo__capa { justify-items: start; padding: 1rem 1.4rem; border-right: 0; border-bottom: var(--borda) dashed var(--linha); }
-  .proximo__numero { font-size: 3.6rem; }
 }
 
 /* chamada para o arquivo, logo abaixo do episódio mais recente */
 .chamada-arquivo { display: flex; justify-content: center; margin-top: 2.4rem; }
 
-/* próximo episódio quando nenhum está elegível */
+/* peba na capa do próximo, com ou sem episódio elegível */
 .proximo__peba { width: 120px; height: 75px; color: var(--texto-suave); }
 .proximo__texto { margin-top: 0.9rem; color: var(--texto-suave); max-width: 38rem; }
 .proximo__acao { margin-top: 1.4rem; }
@@ -277,7 +273,7 @@ button { font: inherit; }
 .mes__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 4rem; }
 .item { display: grid; grid-template-columns: 150px 1fr; background: var(--fundo-2); border: var(--borda) solid var(--linha); border-radius: var(--raio-cartao); scroll-margin-top: 96px; }
 .item__capa { display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; padding: 1.2rem; background: var(--capa-fundo); color: var(--capa-texto); }
-.item__numero { font-family: var(--fonte-titulo); font-size: 3.4rem; line-height: 0.85; letter-spacing: -0.02em; }
+.item__peba { width: 96px; height: 60px; color: var(--capa-peba); --corte: var(--capa-fundo); }
 .item__corpo { padding: clamp(1.2rem, 2.6vw, 1.8rem); min-width: 0; }
 .item__titulo { font-size: clamp(1.35rem, 2.6vw, 1.75rem); margin-top: 0.4rem; }
 .item .player { margin-top: 1.2rem; }
@@ -286,8 +282,8 @@ button { font: inherit; }
 .item .dobra .selo { margin: 0.2rem 0 0.9rem; }
 @media (max-width: 760px) {
   .item { grid-template-columns: 1fr; }
-  .item__capa { flex-direction: row; align-items: center; padding: 0.75rem 1.2rem; }
-  .item__numero { font-size: 2.2rem; }
+  .item__capa { padding: 0.75rem 1.2rem; }
+  .item__peba { width: 72px; height: 45px; }
 }
 
 /* Etiqueta da saga, amarrada ao card com cordão de sisal (scripts/gerar_amarracao.py).
@@ -301,8 +297,7 @@ button { font: inherit; }
 .amarracao { position: absolute; z-index: 3; top: -130px; left: -90px; width: 320px; height: 260px; background: url("amarracao-frente.svg") no-repeat; pointer-events: none; }
 .amarracao--verso { z-index: -1; background-image: url("amarracao-verso.svg"); }
 .episodio--destaque { margin-top: 4rem; }
-.episodio__capa .episodio__numero { margin-block: auto; }
-.item__capa { justify-content: flex-end; }
+.item__capa { justify-content: center; align-items: center; }
 #proximo .largura { padding-top: 4.6rem; }
 @media (max-width: 760px) {
   .etiqueta__papel { font-size: 0.9rem; padding-right: 0.8rem; }
@@ -310,8 +305,6 @@ button { font: inherit; }
   .etiqueta__longo { display: none; }
   .etiqueta__curto { display: inline; }
   .episodio__capa, .item__capa, .proximo__capa { padding-top: 3.6rem; }
-  .episodio__capa .episodio__numero { margin-block: 0; }
-  .item__capa { justify-content: flex-start; }
 }
 
 /* vozes */
@@ -426,7 +419,6 @@ body { line-height: 1.7; }
 .episodio { box-shadow: 9px 9px 0 var(--destaque), 9px 9px 0 3px var(--texto); border: 4px solid var(--texto); background: #fffaf0; }
 .episodio__capa { border-right: 4px solid var(--texto); outline: 2px solid var(--texto); outline-offset: -12px; background-image: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(21, 17, 12, 0.15) 7px 8px); }
 @media (max-width: 760px) { .episodio__capa { border-right: 0; border-bottom: 4px solid var(--texto); } }
-.episodio__numero { font-weight: 400; }
 .episodio__peba { --corte: var(--capa-fundo); }
 
 /* Cada saga imprime numa cor de papel, como os folhetos pendurados no barbante da feira. */
@@ -449,14 +441,12 @@ body { line-height: 1.7; }
 .fala__quem { color: var(--acento-2); }
 .fala__quem--davi { color: #b0154f; }
 
-/* Próximo episódio: um folheto ainda no prelo, de moldura tracejada e número vazado. */
+/* Próximo episódio: um folheto ainda no prelo, de moldura tracejada. */
 .proximo { border: 4px dashed var(--texto); background: #fffaf0; }
 .proximo__capa { border-right: 4px dashed var(--texto); background: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(21, 17, 12, 0.1) 7px 8px); }
-.proximo__numero { font-size: 4.2rem; font-weight: 400; letter-spacing: 0.02em; color: transparent; -webkit-text-stroke: 3px var(--texto); paint-order: stroke fill; }
-@media (max-width: 760px) { .proximo__numero { font-size: 3.2rem; } }
 .proximo .sobretitulo { display: inline-block; background: var(--destaque); border: 2px solid var(--texto); padding: 0.1rem 0.6rem; margin-bottom: 0.9rem; }
 .proximo__estado { border-top: 2px dashed var(--texto); font-weight: 600; color: var(--texto); }
-.proximo--vazio .proximo__peba { color: var(--texto); --corte: #fffaf0; }
+.proximo__peba { color: var(--texto); --corte: #fffaf0; }
 .proximo--vazio .proximo__texto { color: var(--texto); }
 
 /* Arquivo: folhetos menores empilhados, separados por mês como a banca organiza a corda. */
@@ -487,7 +477,6 @@ body { line-height: 1.7; }
 .mes__titulo::after { content: ""; flex: 1; height: 14px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='14' viewBox='0 0 20 14'%3E%3Cpath d='M0 11L10 3l10 8' fill='none' stroke='%2315110c' stroke-width='2.6' stroke-linejoin='round'/%3E%3C/svg%3E") left center / auto 14px repeat-x; }
 .item { border: 4px solid var(--texto); border-radius: 2px; background: #fffaf0; box-shadow: 6px 6px 0 var(--texto); }
 .item__capa { border-right: 4px solid var(--texto); background-image: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(21, 17, 12, 0.15) 7px 8px); }
-.item__numero { font-weight: 400; }
 .item:target { box-shadow: 6px 6px 0 var(--destaque), 6px 6px 0 3px var(--texto); }
 @media (max-width: 760px) { .item__capa { border-right: 0; border-bottom: 4px solid var(--texto); } }
 @media (max-width: 760px) { .proximo__capa { border-right: 0; border-bottom: 4px dashed var(--texto); } }
@@ -595,7 +584,6 @@ body { line-height: 1.7; }
 
 /* Papel-jornal e tinta falhada: o grão cobre a página inteira; a máscara tira pontinhos de tinta só das letras grandes. */
 body::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E %3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.06 0 0 0 0 0.04 0 0 0 1.4 -0.62'/%3E%3C/filter%3E %3Crect width='220' height='220' filter='url%28%23g%29'/%3E %3C/svg%3E"); mix-blend-mode: multiply; opacity: 0.28; }
-.hero h1, .episodio__numero, .proximo__numero, .item__numero { -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E %3Cfilter id='t' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.38' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -18 14.2'/%3E%3C/filter%3E %3Crect width='260' height='260' filter='url%28%23t%29'/%3E %3C/svg%3E") 0 0 / 260px; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E %3Cfilter id='t' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.38' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -18 14.2'/%3E%3C/filter%3E %3Crect width='260' height='260' filter='url%28%23t%29'/%3E %3C/svg%3E") 0 0 / 260px; }
-/* A máscara recorta pela caixa do elemento: com line-height baixo e letter-spacing negativo, as bordas dos dígitos e as pernas do p e do q ficavam de fora. */
-.episodio__numero, .proximo__numero, .item__numero { padding: 0.14em 0.1em; margin-inline: -0.1em; }
+.hero h1 { -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E %3Cfilter id='t' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.38' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -18 14.2'/%3E%3C/filter%3E %3Crect width='260' height='260' filter='url%28%23t%29'/%3E %3C/svg%3E") 0 0 / 260px; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E %3Cfilter id='t' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.38' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -18 14.2'/%3E%3C/filter%3E %3Crect width='260' height='260' filter='url%28%23t%29'/%3E %3C/svg%3E") 0 0 / 260px; }
+/* A máscara recorta pela caixa do elemento: com line-height baixo, as pernas do p e do q ficavam de fora. */
 .hero h1 { padding-bottom: 0.2em; margin-bottom: -0.2em; }
