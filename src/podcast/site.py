@@ -508,6 +508,13 @@ def _votos(episodio_id: str, api: str) -> str:
     return f"""
     <div class="votos" role="group" aria-labelledby="votos-{eid}" data-episodio="{eid}" data-api="{escape(api)}">
       <p class="votos__pergunta" id="votos-{eid}">Curtiu o episódio?</p>{opcoes}
+      <form class="recado" data-recado hidden>
+        <label class="recado__rotulo" for="recado-{eid}">Quer contar o porquê? <span>Opcional, vai só pra quem faz o podcast.</span></label>
+        <textarea class="recado__texto" id="recado-{eid}" name="texto" rows="3" minlength="3" maxlength="1000" required></textarea>
+        <div class="recado__isca"><label>Site <input name="site" tabindex="-1" autocomplete="off"></label></div>
+        <button class="votos__opcao" type="submit">Enviar recado</button>
+        <p class="recado__aviso" data-recado-aviso></p>
+      </form>
       <p class="so-leitor" role="status" data-votos-status></p>
     </div>"""
 

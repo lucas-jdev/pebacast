@@ -19,6 +19,19 @@ curl https://pebacast-votos.<subdominio>.workers.dev/votos
 {"si-001": {"curti": 3, "nao_curti": 1}}
 ```
 
+## Ler os recados
+
+Os recados são privados, sem rota pública. Para ler, use o painel da Cloudflare (**Storage & Databases → D1 → pebacast-votos → Console**) ou o wrangler, com a mesma consulta:
+
+```sql
+SELECT r.criado_em, r.episodio,
+       CASE v.voto WHEN 1 THEN 'curti' WHEN -1 THEN 'não curti' END AS voto,
+       r.texto
+FROM recados r
+LEFT JOIN votos v ON v.episodio = r.episodio AND v.visitante = r.visitante
+ORDER BY r.criado_em DESC;
+```
+
 ## Testes
 
 ```

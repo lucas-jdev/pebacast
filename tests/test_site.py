@@ -218,8 +218,10 @@ def test_votos_so_aparecem_com_api_https_configurada(projeto):
     _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "site": {"votos_api": "https://votos.exemplo.dev/"}})
     for pagina in (gerar_index(projeto, "feed.xml"), gerar_pagina_episodios(projeto, "feed.xml")):
         assert 'data-episodio="sw-001" data-api="https://votos.exemplo.dev"' in pagina
-        assert pagina.count('class="votos__opcao"') == 2
+        assert pagina.count('class="votos__opcao" type="button" data-voto=') == 2
         assert 'aria-labelledby="votos-sw-001"' in pagina and 'id="votos-sw-001"' in pagina
+        assert '<label class="recado__rotulo" for="recado-sw-001">' in pagina and 'id="recado-sw-001"' in pagina
+        assert '<form class="recado" data-recado hidden>' in pagina
 
     for invalida in ("http://votos.exemplo.dev", 'https://x" onload="alert(1)', "javascript:alert(1)"):
         _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "site": {"votos_api": invalida}})

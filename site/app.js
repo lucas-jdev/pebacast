@@ -119,10 +119,11 @@
 
   document.querySelectorAll(".votos").forEach((bloco) => {
     const { episodio, api } = bloco.dataset;
-    const opcoes = [...bloco.querySelectorAll(".votos__opcao")];
+    const opcoes = [...bloco.querySelectorAll(".votos__opcao[data-voto]")];
     const pergunta = bloco.querySelector(".votos__pergunta");
     const status = bloco.querySelector("[data-votos-status]");
     const textoDaPergunta = pergunta.textContent;
+    const formulario = bloco.querySelector("[data-recado]");
     let atual = guardado.ler(episodio);
     let fila = Promise.resolve();
 
@@ -141,7 +142,8 @@
       // Cada pedido grava o estado inteiro; em fila, o último clique é o que fica no servidor.
       fila = fila.then(() => enviar(voto)).then(() => {
         guardado.gravar(episodio, voto);
-        status.textContent = voto ? "Voto registrado. Valeu!" : "Voto removido.";
+        status.textContent = voto ? "Voto registrado. Valeu! Se quiser, conte o porquê no campo abaixo." : "Voto removido.";
+        if (voto && formulario.dataset.enviado !== "sim") formulario.hidden = false;
       }).catch(() => {
         if (atual !== voto) return;
         atual = anterior;
@@ -150,6 +152,47 @@
         status.textContent = "Não deu pra registrar o voto.";
       });
     }));
+  });
+
+  // O recado aparece depois do voto: quem não vota não vê formulário, e o card continua limpo.
+  const AVISOS_DO_RECADO = {
+    400: "O recado precisa ter entre 3 e 1000 caracteres.",
+    429: "Você já mandou recados demais hoje. Tenta amanhã?",
+  };
+
+  document.querySelectorAll("[data-recado]").forEach((formulario) => {
+    const { episodio, api } = formulario.closest(".votos").dataset;
+    const aviso = formulario.querySelector("[data-recado-aviso]");
+    const enviar = formulario.querySelector('button[type="submit"]');
+
+    formulario.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+      const texto = formulario.elements.texto.value.trim();
+      if (texto.length < 3) {
+        aviso.textContent = AVISOS_DO_RECADO[400];
+        formulario.elements.texto.focus();
+        return;
+      }
+      enviar.disabled = true;
+      aviso.textContent = "Enviando…";
+      try {
+        const resposta = await fetch(`${api}/recados`, {
+          method: "POST",
+          body: JSON.stringify({ episodio, texto, site: formulario.elements.site.value }),
+        });
+        if (!resposta.ok) throw resposta.status;
+        formulario.dataset.enviado = "sim";
+        formulario.hidden = true;
+        formulario.reset();
+        const status = formulario.closest(".votos").querySelector(".votos__pergunta");
+        status.textContent = "Recado enviado. Valeu!";
+        formulario.closest(".votos").querySelector("[data-votos-status]").textContent = "Recado enviado. Valeu!";
+      } catch (status) {
+        aviso.textContent = AVISOS_DO_RECADO[status] ?? "Não deu pra enviar agora. Tenta de novo?";
+      } finally {
+        enviar.disabled = false;
+      }
+    });
   });
 
   document.querySelectorAll("[data-copiar]").forEach((botao) => {

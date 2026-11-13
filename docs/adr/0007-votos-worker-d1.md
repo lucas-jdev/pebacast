@@ -1,4 +1,4 @@
-# 0007. Curti / não curti com Cloudflare Worker e D1
+# 0007. Curti / não curti e recados com Cloudflare Worker e D1
 
 - Status: Aceito
 - Data: 2026-11-12
@@ -25,14 +25,20 @@ Worker `pebacast-votos` (pasta `votos/`) com uma tabela no D1:
 - **Visitante = HMAC-SHA256 do IP com um sal que só existe na Cloudflare.** O IP nunca é gravado. Sem cookie, coerente com o GoatCounter.
 - **Corpo em `text/plain`:** é um pedido simples de CORS, sem preflight. O POST só é aceito com `Origin` do site.
 
+- `POST /recados` com `{"episodio", "texto"}` (3 a 1000 caracteres). **O recado é privado**: não existe rota de leitura, e ele só é lido pelo console do D1 ou com o wrangler. Comentário público exigiria moderação, proteção contra spam e tratamento de dado pessoal exposto, e ainda pesaria no card. Para um podcast novo, o valor está no retorno que chega a quem faz, não na conversa pública.
+  - Até 5 recados por visitante por dia (429 depois disso).
+  - Campo invisível `site` como isca: quem preenche recebe 204 e nada é guardado.
+
 No site:
 
 - Os botões só são renderizados com `site.votos_api` configurado. Sem JS, o CSS os esconde, como faz com o player customizado. A classe `.js` é aplicada antes da pintura, então não há layout shift.
 - **Nenhuma requisição no carregamento.** O estado do botão vem do `localStorage`, e a rede só é usada no clique. O placar não aparece no site: com pouca audiência, "0 curtidas" seria ruído.
+- O formulário de recado só aparece depois de um voto bem-sucedido, então quem não vota não vê formulário.
 - Os botões usam `aria-pressed`, alvo de 44 px e status anunciado em região `role="status"`. A atualização é otimista: em caso de erro, o botão volta ao estado anterior e a mensagem aparece na tela.
 
 ## Consequências
 
 - Um provedor a mais (Cloudflare). O deploy é pelo workflow `votos.yml`, e o id do banco é resolvido na conta a cada deploy, sem ficar no repositório.
 - Um voto por IP: quem divide rede (casa, empresa) divide o voto, e quem troca de rede vota de novo. Para sinal de qualidade de um podcast pequeno, isso basta. Não é uma enquete.
-- Próximo passo natural: a rotina do roteirista lê o `GET /votos` antes de escrever.
+- Próximo passo natural: a rotina do roteirista lê o `GET /votos` antes de escrever. Para os recados entrarem na rotina, falta uma rota de leitura protegida por token.
+- Recados públicos são uma evolução possível, mas pedem uma fila de moderação antes.
