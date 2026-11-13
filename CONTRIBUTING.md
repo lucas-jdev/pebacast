@@ -17,7 +17,8 @@ Abra uma issue pelos formulários *Ideia* ou *Bug*. Não precisa vir pronta: lap
    python -m pytest -q
    cd votos && node --test
    ```
-6. Abra o PR com `Closes #<número>` na descrição.
+6. Se o PR muda algo visível no site, ponha prints de antes e depois na descrição, no desktop e no celular. `scripts/prints.sh <pasta>` gera as imagens (rode no `main` e no seu branch); arraste-as para a descrição do PR.
+7. Abra o PR com `Closes #<número>` na descrição.
 
 ## Estilo
 
