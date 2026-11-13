@@ -56,7 +56,7 @@ flowchart TD
         registro["Grava <code>publicacao.json</code><br/>e commita"]
         feed[Gera feed.xml e o site]
         pages[Publica no GitHub Pages]
-        issue([Issue aberta no repositório]):::falha
+        issue(["Issue do episódio<br/>(Roteiro reprovado: &lt;id&gt;)<br/>reprovar de novo só comenta"]):::falha
     end
     app([App de podcast baixa o episódio]):::saida
     site([Site mostra o episódio,<br/>com voto e recado]):::saida
@@ -94,6 +94,7 @@ flowchart TD
     mix --> release --> registro --> feed --> pages
     pages --> app
     pages --> site
+    pages -. "fecha a issue de<br/>reprovação do episódio" .-> issue
     issue --> triagem
     site --> retorno
 

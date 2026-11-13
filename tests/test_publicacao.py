@@ -9,9 +9,11 @@ import pytest
 
 from podcast.publicacao import (
     GitHubReleases,
+    Resultado,
     episodios_pendentes,
     gerar_feed,
     publicar_pendentes,
+    relatorio,
     sintetizar_com_fallback,
 )
 from podcast.tts.provedor import RequisicaoRecusada
@@ -249,3 +251,19 @@ def test_sem_o_arquivo_decifrado_publica_sem_vinheta_e_avisa(projeto, tmp_path):
     assert resultado.publicados == ["sw-001"]
     assert "publicado sem vinheta" in resultado.avisos[0] and "VINHETA_SENHA" in resultado.avisos[0]
     assert "Vinheta de Fulano" not in gerar_feed(projeto)  # sem vinheta no áudio, sem crédito
+
+
+def test_relatorio_tem_uma_entrada_por_episodio_para_as_issues():
+    resultado = Resultado(
+        publicados=["si-001"],
+        reprovados={"sl-001": ["revisoes/3.json: a última revisão não aprovou o roteiro"], "da-001": ["sem falas"]},
+        avisos=[],
+    )
+
+    dados = relatorio(resultado)
+
+    assert dados["publicados"] == ["si-001"]
+    assert set(dados["reprovados"]) == {"sl-001", "da-001"}
+    assert "- revisoes/3.json" in dados["reprovados"]["sl-001"]
+    assert "episodios/sl-001/revisoes/" in dados["reprovados"]["sl-001"]
+    assert "sem falas" not in dados["reprovados"]["sl-001"]

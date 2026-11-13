@@ -1,5 +1,6 @@
 # Voz, montagem e publicação (ADR 0006). Disparado pelo push da rotina do roteirista.
-# Valida o roteiro de novo antes de gastar TTS; reprovação, fallback ou erro viram issue.
+# Valida o roteiro de novo antes de gastar TTS; reprovação, fallback ou erro viram issue,
+# e a issue de reprovação de um episódio é fechada quando ele é publicado.
 name: Publicar episódio
 
 on:
@@ -90,12 +91,30 @@ jobs:
         if: ${{ hashFiles('_site/feed.xml') != '' }}
         uses: actions/deploy-pages@v5
 
-      - name: Abrir issues
+      # Uma issue por episódio, com o id no título: reprovar de novo comenta na mesma,
+      # e publicar fecha, porque o problema que ela apontava deixou de existir.
+      - name: Atualizar issues
         if: ${{ always() }}
         run: |
-          if [ -f falhas.md ]; then
-            printf '%s\n\nExecução: %s\n' "$(cat falhas.md)" "$RUN_URL" > corpo.md
-            gh issue create --title "Roteiro reprovado na validação ($(date -u +%F))" --body-file corpo.md
+          issues_abertas_de() {
+            gh issue list --state open --search "\"$1\" in:title" --json number,title \
+              --jq ".[] | select(.title | endswith(\": $1\")) | .number"
+          }
+          if [ -f relatorio.json ]; then
+            for id in $(jq -r '.publicados[]' relatorio.json); do
+              for numero in $(issues_abertas_de "$id"); do
+                gh issue close "$numero" --reason completed --comment "Episódio $id publicado: $RUN_URL"
+              done
+            done
+            for id in $(jq -r '.reprovados | keys[]' relatorio.json); do
+              { jq -r --arg id "$id" '.reprovados[$id]' relatorio.json; printf '\nExecução: %s\n' "$RUN_URL"; } > corpo.md
+              aberta="$(issues_abertas_de "$id" | head -1)"
+              if [ -n "$aberta" ]; then
+                gh issue comment "$aberta" --body-file corpo.md
+              else
+                gh issue create --title "Roteiro reprovado: $id" --body-file corpo.md
+              fi
+            done
           elif [ "${{ steps.publicar.outcome }}" = "failure" ] || [ "${{ job.status }}" = "failure" ]; then
             gh issue create --title "Falha na publicação ($(date -u +%F))" \
               --body "A publicação quebrou antes de terminar. Veja o log: $RUN_URL"

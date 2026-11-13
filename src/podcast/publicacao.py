@@ -297,12 +297,21 @@ def _ler_json(arquivo: Path) -> Any:
     return json.loads(arquivo.read_text(encoding="utf-8"))
 
 
-def _relatorio_de_falhas(resultado: Resultado) -> str:
-    partes = ["O roteiro não passou na validação e o episódio não foi publicado.", ""]
-    for episodio_id, problemas in resultado.reprovados.items():
-        partes += [f"## {episodio_id}", "", *[f"- {p}" for p in problemas], ""]
-    partes.append("A rotina tenta de novo na próxima execução. Veja os relatórios em `episodios/<id>/revisoes/`.")
-    return "\n".join(partes)
+def relatorio(resultado: Resultado) -> dict[str, Any]:
+    """Uma entrada por episódio: o workflow abre (ou comenta) uma issue por reprovado e fecha as dos publicados."""
+    return {
+        "publicados": resultado.publicados,
+        "reprovados": {
+            episodio_id: "\n".join([
+                "O roteiro não passou na validação e o episódio não foi publicado.",
+                "",
+                *[f"- {p}" for p in problemas],
+                "",
+                f"A rotina tenta de novo na próxima execução. Veja `episodios/{episodio_id}/revisoes/`.",
+            ])
+            for episodio_id, problemas in resultado.reprovados.items()
+        },
+    }
 
 
 def _criar_parser() -> argparse.ArgumentParser:
@@ -314,7 +323,7 @@ def _criar_parser() -> argparse.ArgumentParser:
     publicar = comandos.add_parser("publicar", help="Valida, sintetiza e publica os episódios pendentes.")
     publicar.add_argument("--repo", required=True, help="dono/repositorio do GitHub Releases.")
     publicar.add_argument("--trabalho", type=Path, default=Path("_trabalho"), help="Pasta temporária dos MP3.")
-    publicar.add_argument("--falhas", type=Path, default=Path("falhas.md"), help="Relatório gravado se algo reprovar.")
+    publicar.add_argument("--relatorio", type=Path, default=Path("relatorio.json"), help="Publicados e reprovados, para as issues.")
     publicar.add_argument("--avisos", type=Path, default=Path("avisos.md"), help="Relatório gravado se houver fallback.")
 
     comandos.add_parser("feed", help="Só regenera o feed.")
@@ -338,10 +347,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     escrever_site(projeto, args.site)
 
     print(f"Publicados: {', '.join(resultado.publicados) or 'nenhum'}")
+    args.relatorio.write_text(json.dumps(relatorio(resultado), ensure_ascii=False, indent=2), encoding="utf-8")
     if resultado.avisos:
         args.avisos.write_text("\n".join(f"- {aviso}" for aviso in resultado.avisos) + "\n", encoding="utf-8")
     if resultado.reprovados:
-        args.falhas.write_text(_relatorio_de_falhas(resultado), encoding="utf-8")
         print(f"Reprovados: {', '.join(resultado.reprovados)}")
         return 1
     return 0
