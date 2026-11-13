@@ -105,4 +105,4 @@ site:
   # Vazio, nenhum script de analytics é carregado.
   goatcounter: ""
   # URL do Worker de votos (votos/, docs/votos.md). Vazio: o site não mostra o curti / não curti.
-  votos_api: ""
+  votos_api: "https://pebacast-votos.lucas-jdev1.workers.dev"

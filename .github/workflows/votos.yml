@@ -69,3 +69,18 @@ jobs:
           if ! $WRANGLER secret list --format json | jq -e '.[] | select(.name == "VOTOS_SAL")' >/dev/null; then
             openssl rand -hex 32 | $WRANGLER secret put VOTOS_SAL
           fi
+
+      # Fumaça sem gravar nada: o GET responde e um POST inválido chega até a validação
+      # (400 prova rota, origem e sal configurados; 403/503 seriam configuração errada).
+      - name: Testar a API publicada
+        if: steps.credenciais.outputs.ok == 'true'
+        run: |
+          api=$(grep -oE 'votos_api: "[^"]*"' ../config/pipeline.yaml | cut -d'"' -f2)
+          [ -n "$api" ] || { echo "::notice::site.votos_api vazio; fumaça pulada."; exit 0; }
+          sleep 5
+          test "$(curl -s -o /dev/null -w '%{http_code}' "$api/votos")" = 200
+          for rota in votos recados; do
+            status=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "Origin: https://lucas-jdev.github.io" --data '{"episodio":"x"}' "$api/$rota")
+            echo "POST /$rota inválido → $status"
+            test "$status" = 400
+          done
