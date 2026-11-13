@@ -164,6 +164,22 @@ def test_etiqueta_mostra_a_saga_e_a_posicao_do_episodio(projeto):
     assert 'class="proximo" data-saga="software"' in inicial
 
 
+def test_capa_nao_repete_o_numero_local_de_sagas_diferentes(projeto):
+    _usar_fila(projeto)
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+    _ja_publicado(projeto, "sl-001", "2026-11-08T15:00:00+00:00")
+
+    capas = [
+        capa
+        for pagina in (gerar_index(projeto, "feed.xml"), gerar_pagina_episodios(projeto, "feed.xml"))
+        for capa in re.findall(r'<div class="(?:episodio|item|proximo)__capa" aria-hidden="true">(.*?)</div>',
+                               pagina, re.DOTALL)
+    ]
+
+    assert len(capas) == 4
+    assert all("001" not in capa and '<use href="#peba"/>' in capa for capa in capas)
+
+
 def _dados_estruturados(pagina):
     return json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', pagina, re.DOTALL).group(1))
 
