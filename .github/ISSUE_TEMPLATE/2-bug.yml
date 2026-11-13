@@ -1,0 +1,23 @@
+name: Bug
+description: Algo que funcionava, ou deveria funcionar, e não funciona.
+labels: [bug]
+body:
+  - type: textarea
+    id: aconteceu
+    attributes:
+      label: O que aconteceu?
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: O que era esperado?
+    validations:
+      required: true
+  - type: input
+    id: onde
+    attributes:
+      label: Onde?
+      description: Link da página, id do episódio (ex. si-001) ou da execução do Actions.
+    validations:
+      required: false

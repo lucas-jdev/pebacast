@@ -112,17 +112,17 @@ jobs:
               if [ -n "$aberta" ]; then
                 gh issue comment "$aberta" --body-file corpo.md
               else
-                gh issue create --title "Roteiro reprovado: $id" --body-file corpo.md
+                gh issue create --title "Roteiro reprovado: $id" --label incidente --body-file corpo.md
               fi
             done
           elif [ "${{ steps.publicar.outcome }}" = "failure" ] || [ "${{ job.status }}" = "failure" ]; then
-            gh issue create --title "Falha na publicação ($(date -u +%F))" \
+            gh issue create --title "Falha na publicação ($(date -u +%F))" --label incidente \
               --body "A publicação quebrou antes de terminar. Veja o log: $RUN_URL"
           fi
           if [ -f avisos.md ]; then
             printf 'O episódio saiu com o TTS de fallback, sem emoção e com menos vozes.\n\n%s\n\nExecução: %s\n' \
               "$(cat avisos.md)" "$RUN_URL" > corpo.md
-            gh issue create --title "Episódio publicado com fallback de voz ($(date -u +%F))" --body-file corpo.md
+            gh issue create --title "Episódio publicado com fallback de voz ($(date -u +%F))" --label incidente --body-file corpo.md
           fi
 
       - name: Marcar a execução como falha

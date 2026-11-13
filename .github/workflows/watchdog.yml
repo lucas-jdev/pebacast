@@ -32,7 +32,7 @@ jobs:
 
           if [ "$estado" = parada ] && [ -z "$aberta" ]; then
             tail -n +2 resultado.txt > corpo.md
-            gh issue create --title "$TITULO" --body-file corpo.md
+            gh issue create --title "$TITULO" --label incidente --body-file corpo.md
           elif [ "$estado" = ok ] && [ -n "$aberta" ]; then
             gh issue close "$aberta" --comment "A rotina voltou a commitar roteiros."
           fi

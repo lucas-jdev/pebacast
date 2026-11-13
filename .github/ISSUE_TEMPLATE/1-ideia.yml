@@ -1,0 +1,24 @@
+name: Ideia
+description: Registre em segundos. A lapidação vem depois (docs/backlog.md).
+labels: [ideia]
+body:
+  - type: textarea
+    id: ideia
+    attributes:
+      label: Qual é a ideia?
+      description: Do jeito que vier. Problema, proposta ou só a intuição; os detalhes ficam para a lapidação.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área
+      options:
+        - Site
+        - Pipeline (voz, montagem, publicação)
+        - Rotina (roteiro e revisão)
+        - Votos e recados
+        - Conteúdo (ideia de episódio)
+        - Não sei
+    validations:
+      required: false
