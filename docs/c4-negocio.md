@@ -73,6 +73,7 @@ flowchart TB
     rotina -- "lê o contexto e<br/>commita o episódio" --> repo
     watchdog -. "observa commits" .-> repo
     repo -- "push dispara" --> pipeline
+    lucas -. "dispara a regravação<br/>de um áudio" .-> pipeline
     pipeline -- "narra" --> gemini
     pipeline -- "sobe o MP3" --> audio
     pipeline -- "gera e publica" --> site
@@ -84,7 +85,7 @@ flowchart TB
     ouvinte -- "navega" --> site
 ```
 
-Lilás é IA (Claude), azul é código (GitHub Actions e site estático), verde é onde os dados ficam e bege são serviços de terceiros. O único humano no desenho é o Lucas, que entra pelo repositório (currículo e referências) e pelo retorno. O Lucas lê os recados pelo console do D1 ([votos.md](votos.md)), e o Pipeline registra o `publicacao.json` de volta no repositório.
+Lilás é IA (Claude), azul é código (GitHub Actions e site estático), verde é onde os dados ficam e bege são serviços de terceiros. O único humano no desenho é o Lucas, que entra pelo repositório (currículo e referências), pelo retorno e, quando um áudio sai ruim, disparando a regravação no Actions ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). O Lucas lê os recados pelo console do D1 ([votos.md](votos.md)), e o Pipeline registra o `publicacao.json` de volta no repositório.
 
 ### Decisões que este desenho carrega
 

@@ -16,7 +16,7 @@ Arquivos de cada episódio:
 | `noticia.json` | rotina | notícia usada ou cenário hipotético |
 | `roteiro.json` | rotina | diálogo final |
 | `revisoes/1.json`, `2.json`, ... | subagente revisor | relatório de cada revisão |
-| `publicacao.json` | Actions | GUID, URL do MP3 e data. Marca o episódio como publicado |
+| `publicacao.json` | Actions | GUID, URL do MP3 e data. Marca o episódio como publicado. `regravado_em` aparece se o áudio foi regravado |
 
 ## 1. Seleção do episódio
 
@@ -121,6 +121,15 @@ O MP3 vai para o `AudioStorage` (um release `episodio-<id>` por episódio) e o A
 Mudanças que só afetam o site ou o feed (`site/`, `src/podcast/site.py`, `src/podcast/publicacao.py`, `curriculum/`, `config/`) são publicadas por `.github/workflows/site.yml`, sem esperar episódio novo. Ele também pode ser disparado à mão.
 
 Decisão de hospedagem em [ADR 0002](adr/0002-hospedagem-pages-releases.md).
+
+## Regravação do áudio
+
+Quando um áudio publicado sai ruim, `.github/workflows/regravar.yml` narra o mesmo roteiro de novo, disparado à mão no Actions com o id do episódio:
+
+1. **regravar** (`python -m podcast.regravacao regravar <id>`): valida o roteiro, narra só com o TTS principal, sem fallback, e anexa `pebacast-<id>-candidata.mp3` ao release. O link aparece no resumo da execução. O feed não muda.
+2. **substituir** (`python -m podcast.regravacao substituir <id>`): põe a candidata no lugar do áudio publicado, atualiza tamanho, duração e `regravado_em` no `publicacao.json` e publica o feed. URL, GUID e data de publicação continuam os mesmos.
+
+Decisão em [ADR 0008](adr/0008-regravacao-em-dois-passos.md).
 
 ## Falhas
 
