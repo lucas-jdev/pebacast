@@ -1,0 +1,384 @@
+{
+  "episodio": "se-001",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura de verdade. Aviso de sempre: este episódio foi gerado por inteligência artificial e revisado contra as fontes citadas. E hoje começa uma saga nova, sobre arquitetura de segurança, com um tema só: como pensar feito atacante antes de escrever a primeira linha de código, que é o que chamam de modelagem de ameaças."
+    },
+    {
+      "persona": "davi",
+      "texto": "E pra essa saga eu trouxe uma convidada nova, a Yasmin. A Yasmin trabalha com segurança há dez anos, começou em competições de CTF na faculdade, passou por testes de intrusão numa consultoria e hoje lidera segurança de aplicações num banco digital. Yasmin, seja muito bem-vinda!"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Valeu, Davi! Oi, você que está ouvindo, aqui é a Yasmin. Prometo que hoje ninguém sai daqui com medo de abrir o celular. Talvez só um pouquinho.",
+      "estilo": "sorrindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Yasmin, eu quero começar com um caso. E já aviso quem está ouvindo: o caso de hoje é hipotético. Imagine uma rede de farmácias aqui do Brasil lançando um app de fidelidade."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Já gostei. Farmácia, dado pessoal, pressa de lançamento. Pode continuar.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Então. O time tem prazo apertado e cria uma API só pro app. Pra mostrar os pontos, o app manda o CPF do cliente, e a API devolve nome, telefone e o histórico de compras. Funciona lindamente na demo."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Na demo tudo funciona."
+    },
+    {
+      "persona": "davi",
+      "texto": "Pois é. E aí aparece uma empresa parceira de entregas. Pra não fazer outra API, o time reaproveita a mesma, e a parceira autentica com uma chave fixa, compartilhada. Só que essa chave acaba indo parar dentro do próprio app. A URL da API não está documentada em lugar nenhum, e o plano é contratar um teste de intrusão na semana do lançamento."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "E o teste achou o quê?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Achou os dois problemas. Primeiro, a API não conferia se o CPF pedido era de quem estava logado. Segundo, a chave da parceira dava pra ser tirada de dentro do app. Pra corrigir, tiveram que mudar o contrato da API, combinar uma integração nova com a parceira e publicar outra versão do app. O lançamento atrasou um mês."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "E olha que esse é o final feliz. O teste pegou antes de um criminoso pegar. Agora pensa no que tem nesse histórico. Compra de farmácia diz se a pessoa tem diabetes, se faz tratamento psiquiátrico, se está tentando engravidar. Isso não é um número num relatório, é a vida de alguém exposta.",
+      "estilo": "séria, mais devagar"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas deixa eu defender o time um pouco, porque eu me vejo nele. Eu acho que a lição aqui é simples. Faz o pentest mais cedo, coloca um WAF na frente da API, e mantém a URL escondida, que já dificulta muito. Eu teria feito exatamente isso. Não resolve?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Beleza. Agora finge que eu sou o atacante.",
+      "estilo": "animada"
+    },
+    {
+      "persona": "davi",
+      "texto": "Lá vem.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Primeira pergunta pra você. A URL está escondida de quem?"
+    },
+    {
+      "persona": "davi",
+      "texto": "De quem não tem o app, ué."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "E quem tem o app?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Ah. Todo mundo que baixou da loja. Que é justamente o público."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Exato. O app é um pacote que você entrega na mão do atacante. Tudo que está dentro dele, endereço, chave, regra, é público, só dá um pouco mais de trabalho de ler. Isso é segurança por obscuridade. Ela pode até atrasar alguém curioso, mas não pode ser a defesa principal. Segunda pergunta. O que o WAF sabe sobre quem é o dono de cada CPF?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Nada, né. Ele olha a requisição, procura padrão de ataque conhecido."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "E uma requisição pedindo os dados de outro CPF tem cara de ataque?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Não. Tem cara de requisição normal. É o mesmo formato que o app manda sempre."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Pronto. O problema não está no tráfego, está numa decisão de desenho. A API aceitou do cliente uma informação que deveria ter vindo da identidade autenticada. Nenhum filtro na frente conserta isso, porque o filtro não conhece a regra de negócio. Terceira pergunta, e essa é a que mais importa. Se o pentest tivesse sido feito três semanas antes, o que mudaria na correção?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Mudaria o prazo, eu acho. Mais tempo pra corrigir."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Mais tempo, sim. Mas o trabalho seria o mesmo. Mudar o contrato da API, renegociar com a parceira, publicar versão nova. O pentest mais cedo só antecipa a descoberta de algo que já foi construído errado. O que eu quero é que a pergunta seja feita quando aquilo ainda era um desenho no quadro."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. Você não é contra o pentest. Você está dizendo que ele chega tarde demais pra mudar o desenho."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Isso. Eu adoro pentest, vivi disso. Mas ele verifica o que foi construído. Ele é ótimo pra achar o que escapou. Péssimo como o único momento em que alguém pensa em segurança."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, e como é que se pensa em segurança no desenho? Porque pra mim isso soa meio abstrato. Pensa no pior, sei lá?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "É aí que entra a modelagem de ameaças. A referência que eu mais uso é o livro Threat Modeling: Designing for Security, do Adam Shostack. Ele organiza tudo em quatro perguntas. Traduzindo do jeito que estão no livro, são assim. O que você está construindo? O que pode dar errado? O que você deve fazer a respeito dessas coisas que podem dar errado? E você fez uma análise decente? Eu costumo resumir a última como, fizemos um bom trabalho?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Só isso? Quatro perguntas?",
+      "estilo": "surpreso"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Só isso, e é por isso que funciona. Qualquer time consegue começar. Vamos fazer com o app da farmácia. Primeira pergunta, o que estamos construindo. Como você responderia?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Eu diria, um app de fidelidade, com uma API em Java, um banco Postgres, e uma integração com a parceira."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Isso é a lista de tecnologias. Pra segurança, eu quero saber por onde o dado anda. E pra isso o Shostack recomenda um tipo de desenho bem antigo, o diagrama de fluxo de dados, que todo mundo chama de DFD."
+    },
+    {
+      "persona": "davi",
+      "texto": "DFD. Eu lembro disso da faculdade, achei que tinha morrido.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Voltou com tudo. E ele é simples. Tem quatro tipos de elemento. Entidade externa, que é quem está fora do seu controle, tipo o cliente ou a parceira. Processo, que é código rodando, tipo a sua API. Armazenamento de dados, tipo o banco ou um arquivo. E fluxo de dados, que são as setas ligando tudo isso."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então no nosso caso, entidades externas são o cliente com o celular e a parceira de entregas. Processo é a API de fidelidade. Armazenamento é o banco com cadastro e histórico de compras."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Perfeito. E agora vem o quinto elemento, que é o coração da coisa. A fronteira de confiança. É uma linha tracejada que você desenha onde o nível de confiança muda. De um lado está o que você controla. Do outro, quem pode mandar qualquer coisa."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tipo a fronteira entre o celular e a API."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Essa é a mais óbvia. O celular é do cliente, então o app roda num ambiente que você não controla. Tudo que atravessa essa linha vindo de lá precisa ser tratado como suspeito. Qual é a outra?"
+    },
+    {
+      "persona": "davi",
+      "texto": "A da parceira, imagino. Ela está fora da empresa."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Isso. E tem uma terceira que quase ninguém desenha, entre a API e o banco. Porque o banco pode guardar dado de saúde, e se a API for comprometida, a pergunta é o que ela consegue ler. Tudo? Ou só o que precisa?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum, isso eu nunca tinha pensado. Pra mim o banco era do lado de dentro, então era tudo seguro."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "E é por isso que o desenho ajuda. Ele te força a dizer em voz alta onde estão as linhas. Muita falha nasce de uma fronteira que ninguém percebeu que existia."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá. Desenhei. E agora, segunda pergunta, o que pode dar errado?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Agora você anda pelo desenho e para em cada seta que cruza uma fronteira. E pergunta, o que um atacante faria aqui. Pra não depender só de inspiração, o livro usa bastante um mnemônico criado na Microsoft, o STRIDE. Cada letra é uma categoria de ameaça, em inglês. Spoofing, que é se passar por outra pessoa. Tampering, que é adulterar dados. Repudiation, que é negar ter feito algo. Information disclosure, vazamento de informação. Denial of service, negação de serviço. E Elevation of privilege, conseguir mais permissão do que deveria."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o caso da farmácia cai em qual?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Na seta do celular pra API, o cliente está logado com a própria conta, então ele não está se passando por ninguém. O problema é de autorização. A API confiou no CPF que veio do lado de lá da fronteira e entregou dados que aquele usuário não tinha direito de ver. No STRIDE, isso cai em vazamento de informação, e também em elevação de privilégio, porque um cliente comum ganhou acesso aos dados de todos. Já na seta da parceira, a chave fixa foi parar no app, então qualquer um consegue se passar pela parceira. Esse sim é spoofing, e com um privilégio bem maior."
+    },
+    {
+      "persona": "davi",
+      "texto": "E isso tudo aparece só olhando pro desenho, sem nenhuma linha de código."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Sem nenhuma. Numa reunião de uma hora com o time na frente de um quadro branco. E sabe o que é divertido? Dá pra transformar em jogo. O próprio Shostack criou um baralho chamado Elevation of Privilege, em que cada carta é uma ameaça e o time vai jogando as cartas em cima do diagrama.",
+      "estilo": "animada"
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso eu quero levar pro meu time. Joguinho de cartas eles topam.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Topam mesmo. Terceira pergunta, o que vamos fazer a respeito. Pra cada ameaça você decide. Dá pra mitigar, mudando o desenho. Dá pra eliminar, tirando a funcionalidade. Dá pra transferir, por exemplo pra outro sistema que já resolve aquilo. Ou dá pra aceitar o risco, desde que alguém com autoridade aceite conscientemente e isso fique registrado."
+    },
+    {
+      "persona": "davi",
+      "texto": "E no caso da farmácia, mitigar seria o quê?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "A identidade vem do token de quem fez login, e não de um parâmetro que o cliente manda. A API nem recebe CPF. Ela pergunta pro token, quem é você, e devolve só os dados dessa pessoa. E a parceira ganha uma integração própria, com credencial própria, guardada no servidor dela, nunca dentro de um app que vai pra loja."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a terceira fronteira, a do banco?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Menor privilégio. A API de fidelidade precisa mesmo do histórico completo de compras pra mostrar pontos? Provavelmente não. Talvez ela só precise do saldo. Se ela não lê o que não precisa, um invasor nela também não lê."
+    },
+    {
+      "persona": "davi",
+      "texto": "Faz sentido. E a quarta pergunta? Fizemos um bom trabalho? Isso não é meio subjetivo?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Um pouco, mas dá pra tornar concreto. O diagrama bate com o sistema de verdade? Toda ameaça que a gente listou virou uma decisão, um ticket ou um risco aceito por escrito? E quando aparecer uma funcionalidade nova, alguém vai atualizar o desenho? Se a resposta for não, o modelo vira um documento bonito que ninguém lê."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tipo aquela documentação de arquitetura de três anos atrás que ninguém sabe se ainda vale."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Exatamente esse fantasma.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Yasmin, agora deixa eu fazer a pergunta que o ouvinte deve estar fazendo. Meu time já tem prazo apertado. Se eu chegar e falar, antes de codar, vamos fazer modelagem de ameaças, vão me olhar torto. Por que isso tem que ser no desenho e não no fim, como o pentest?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Porque o custo de mudar uma decisão cresce com o tanto de coisa que foi construída em cima dela. Volta pro caso. No quadro branco, trocar CPF no parâmetro por identidade do token é apagar uma seta e desenhar outra. Depois do lançamento, é mudar contrato, coordenar com a parceira, esperar o cliente atualizar o app. E enquanto o cliente não atualiza, a versão antiga continua lá, falando com a sua API."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ah, isso é cruel. Você não controla quando o cliente atualiza."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Não controla. E tem um segundo motivo, que é menos técnico. Problema de segurança achado no fim vira briga. O time já entregou, o negócio já anunciou a data, e aí a segurança aparece como quem trava o lançamento. Achado no desenho, é só mais um requisito. Ninguém fica de vilão."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. Fazer no começo é mais barato e ainda evita que a segurança vire a chata do projeto."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Essa é a versão curta, sim. E na minha experiência, a primeira modelagem é a mais cara, porque o time está aprendendo. Depois vira hábito. A cada funcionalidade nova, alguém abre o diagrama e pergunta, mudou alguma seta? Cruzou alguma fronteira nova?"
+    },
+    {
+      "persona": "davi",
+      "texto": "E dá pra exagerar? Porque eu me conheço. Vou querer modelar até o botão de logout.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Dá, e esse é um trade-off real. Modelagem demais vira paralisia. Você passa duas semanas desenhando ameaça improvável e não entrega nada. A minha regra prática é começar pelas fronteiras de confiança e pelos dados que machucam pessoas se vazarem. No app da farmácia, histórico de compras vem antes de tudo. A cor do botão não precisa de modelo de ameaças."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o outro lado? O que se perde se a gente pular?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Você ganha uns dias no começo e troca por um risco que você nem sabe que assumiu. E aí a primeira pessoa a modelar as ameaças do seu sistema vai ser o atacante. Ele faz esse exercício de graça, com muita paciência, e não te manda o relatório.",
+      "estilo": "séria"
+    },
+    {
+      "persona": "davi",
+      "texto": "Caramba. E o pentest e o WAF, ficam onde nisso tudo?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Continuam úteis, só que no lugar certo. O WAF é uma camada a mais contra ataque genérico, conhecido. O pentest confere se o que foi construído bate com o que foi pensado, e acha o que a modelagem deixou passar. São complementares. O erro é tratar qualquer um deles como substituto de pensar no desenho."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a conformidade? Lá na empresa tem um checklist que todo projeto preenche antes de subir."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Checklist é bom pra não esquecer o básico. Mas checklist é genérico, e o seu sistema não é. Nenhum checklist sabe que o seu app manda CPF num parâmetro. Já vi projeto com todas as caixinhas marcadas e uma fronteira de confiança aberta no meio. Conformidade em dia não é a mesma coisa que sistema seguro."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, isso me pegou. A gente marca caixinha toda sexta.",
+      "estilo": "rindo sem graça"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Todo mundo marca. Só não deixa a caixinha pensar por você."
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu tentar resumir, pra ver se eu entendi mesmo. A modelagem de ameaças é responder quatro perguntas. O que estamos construindo, o que pode dar errado, o que vamos fazer a respeito e se fizemos um bom trabalho."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Até aqui, perfeito."
+    },
+    {
+      "persona": "davi",
+      "texto": "Pra responder a primeira, eu não listo tecnologia. Eu desenho um diagrama de fluxo de dados, com entidades externas, processos, armazenamentos e as setas. E o mais importante, eu desenho as fronteiras de confiança, que são as linhas onde a confiança muda. No caso da farmácia, celular e API, parceira e API, e API e banco."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Isso."
+    },
+    {
+      "persona": "davi",
+      "texto": "Aí eu ando por cada seta que cruza uma fronteira e pergunto o que um atacante faria ali, e o STRIDE ajuda a não esquecer categoria. Pra cada ameaça, eu decido mitigar, eliminar, transferir ou aceitar, e aceitar só com alguém assinando embaixo. E no fim confiro se o desenho bate com o sistema e se toda ameaça virou decisão."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Muito bem."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o porquê de fazer no desenho é que lá mudar custa uma seta no quadro. Depois custa contrato, parceiro, app na loja e versão velha rodando no celular dos outros. Pentest, WAF e checklist continuam valendo, mas como complemento, nunca como o único momento em que alguém pensou em segurança. E dá pra exagerar, então eu começo pelas fronteiras e pelos dados que mais machucam."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Davi, eu assinaria esse resumo. Você só esqueceu de um detalhe.",
+      "estilo": "sorrindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Qual?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Que o time da farmácia não era incompetente. Eram pessoas boas, com prazo, que nunca tinham parado pra desenhar as setas. Isso pode acontecer com qualquer um de nós. A diferença é ter o hábito de perguntar antes."
+    },
+    {
+      "persona": "davi",
+      "texto": "Justo. E é por isso que o desafio de hoje é bem prático. Desenhe o fluxo de dados de uma funcionalidade que você mantém, marque as fronteiras de confiança e anote o que poderia dar errado em cada uma delas. Pode ser no papel, pode ser no quadro, pode ser num guardanapo."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "E se achar alguma coisa feia, conserta antes que alguém ache por você.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Yasmin, muito obrigado por abrir essa saga com a gente. Eu nunca mais vou olhar pra um parâmetro de CPF do mesmo jeito."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Eu que agradeço, Davi. Foi um prazer. E você que ouviu até aqui, desenha as setas."
+    },
+    {
+      "persona": "davi",
+      "texto": "Esse foi o Pebacast. Obrigado por ouvir, e até o próximo episódio!"
+    }
+  ],
+  "desafio": "Desenhe o fluxo de dados de uma funcionalidade que você mantém, marque as fronteiras de confiança e anote o que poderia dar errado em cada uma delas.",
+  "fontes": [
+    "Threat Modeling: Designing for Security, Adam Shostack, 1ª edição, caps. 1, 2 e 7"
+  ]
+}
