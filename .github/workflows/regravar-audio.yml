@@ -1,0 +1,70 @@
+# Temporário: regrava só o áudio do sw-002 com o Gemini, sem tocar no feed nem no publicacao.json.
+name: Regravar áudio sw-002
+
+on:
+  push:
+    branches: [regravar/sw-002]
+
+permissions:
+  contents: write
+
+jobs:
+  regravar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EPISODIO: sw-002
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Instalar ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Instalar a pipeline
+        run: pip install -e ".[gemini]"
+
+      - name: Decifrar a vinheta
+        env:
+          VINHETA_SENHA: ${{ secrets.VINHETA_SENHA }}
+        run: |
+          printf '%s' "$VINHETA_SENHA" | gpg --batch --yes --quiet --pinentry-mode loopback --passphrase-fd 0 \
+            -o assets/vinheta.mp3 -d assets/vinheta.mp3.gpg
+
+      - name: Sintetizar com o Gemini, sem fallback
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from podcast.audio import exportar_mp3, duracao_mp3
+          from podcast.personas import carregar_personas
+          from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
+          from podcast.publicacao import carregar_falas, carregar_vinheta
+          from podcast.roteiro import Projeto
+          from podcast.tts.fabrica import criar_provedor
+
+          episodio = os.environ["EPISODIO"]
+          projeto = Projeto(Path.cwd())
+          config = projeto.config()
+          personas = carregar_personas(projeto.raiz / "curriculum" / "personas")
+          roteiro = json.loads((projeto.episodios / episodio / "roteiro.json").read_text(encoding="utf-8"))
+          falas = aplicar_pronuncias(carregar_falas(roteiro, personas), carregar_pronuncias(config["tts"]))
+          audio = criar_provedor(config["tts"]["principal"]).sintetizar(falas)
+          vinheta, aviso = carregar_vinheta(projeto, config["audio"])
+          if aviso:
+              raise SystemExit(aviso)
+          destino = Path(f"_trabalho/pebacast-{episodio}-v2.mp3")
+          exportar_mp3(audio, destino, config["audio"]["bitrate_kbps"], vinheta=vinheta)
+          print(f"{destino}: {round(duracao_mp3(destino))} s, {destino.stat().st_size} bytes")
+          PY
+
+      - name: Anexar ao release do episódio
+        run: gh release upload "episodio-$EPISODIO" "_trabalho/pebacast-$EPISODIO-v2.mp3" --clobber --repo "$GITHUB_REPOSITORY"
