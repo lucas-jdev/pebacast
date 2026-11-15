@@ -260,6 +260,12 @@ def _minutos(segundos: int) -> str:
     return f"{round(segundos / 60)} min"
 
 
+def _codigo(episodio_id: str) -> str:
+    """O id do episódio na capa: a sigla da saga sobre o número, para "001" nunca aparecer sozinho."""
+    sigla, numero = episodio_id.upper().rsplit("-", 1)
+    return f'<span class="codigo__sigla">{escape(sigla)}</span>{escape(numero)}'
+
+
 # ---------------------------------------------------------------- seções
 
 
@@ -338,6 +344,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     return f"""<article class="episodio episodio--destaque" id="{eid}" data-saga="{escape(saga.id)}">
   {_etiqueta(saga, episodio["id"])}
   <div class="episodio__capa" aria-hidden="true">
+    <span class="episodio__codigo">{_codigo(episodio['id'])}</span>
     <svg class="episodio__peba" viewBox="0 0 128 80"><use href="#peba"/></svg>
   </div>
   <div class="episodio__corpo">
@@ -412,7 +419,7 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     return f"""<li class="item" id="{eid}" data-saga="{escape(saga.id)}">
   {_etiqueta(saga, episodio["id"])}
   <div class="item__capa" aria-hidden="true">
-    <svg class="item__peba" viewBox="0 0 128 80"><use href="#peba"/></svg>
+    <span class="item__codigo">{_codigo(episodio['id'])}</span>
   </div>
   <article class="item__corpo" aria-labelledby="titulo-{eid}">
     {_meta(item)}
@@ -563,7 +570,7 @@ def _secao_proximo(proximo: Proximo | None) -> str:
   <div class="largura">
     <article class="proximo" data-saga="{escape(proximo.saga.id)}">
       {_etiqueta(proximo.saga, proximo.episodio.id)}
-      <div class="proximo__capa" aria-hidden="true"><svg class="proximo__peba" viewBox="0 0 128 80"><use href="#peba"/></svg></div>
+      <div class="proximo__capa" aria-hidden="true"><span class="proximo__codigo">{_codigo(proximo.episodio.id)}</span></div>
       <div class="proximo__corpo">
         <p class="sobretitulo">Próximo episódio</p>
         <h2 class="proximo__titulo">{escape(proximo.episodio.titulo)}</h2>{aprendizado}

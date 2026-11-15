@@ -164,7 +164,7 @@ def test_etiqueta_mostra_a_saga_e_a_posicao_do_episodio(projeto):
     assert 'class="proximo" data-saga="software"' in inicial
 
 
-def test_capa_nao_repete_o_numero_local_de_sagas_diferentes(projeto):
+def test_capa_mostra_o_codigo_com_a_sigla_da_saga(projeto):
     _usar_fila(projeto)
     _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
     _ja_publicado(projeto, "sl-001", "2026-11-08T15:00:00+00:00")
@@ -176,8 +176,10 @@ def test_capa_nao_repete_o_numero_local_de_sagas_diferentes(projeto):
                                pagina, re.DOTALL)
     ]
 
+    codigos = [re.search(r'<span class="codigo__sigla">(\w+)</span>(\d+)', capa).groups() for capa in capas]
+
     assert len(capas) == 4
-    assert all("001" not in capa and '<use href="#peba"/>' in capa for capa in capas)
+    assert {("SW", "001"), ("SL", "001")} <= set(codigos)
 
 
 def _dados_estruturados(pagina):
