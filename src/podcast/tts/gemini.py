@@ -47,7 +47,7 @@ class GeminiTts:
 
     def sintetizar(self, falas: Sequence[Fala]) -> Audio:
         blocos = agrupar_em_blocos(falas, self._max_caracteres)
-        return concatenar([self._sintetizar_bloco(bloco) for bloco in blocos], self._pausa_ms)
+        return concatenar([self._sintetizar_bloco(bloco) for bloco in blocos], self._pausa_ms, aparar=True)
 
     def _sintetizar_bloco(self, bloco: Sequence[Fala]) -> Audio:
         requisicao = montar_requisicao(bloco, self._modelo, self._idioma)

@@ -23,4 +23,4 @@ def sintetizar_fala_a_fala(
     sintetizar_fala: Callable[[Fala], Audio],
     pausa_ms: int,
 ) -> Audio:
-    return concatenar([sintetizar_fala(fala) for fala in falas], pausa_ms)
+    return concatenar([sintetizar_fala(fala) for fala in falas], pausa_ms, aparar=True)

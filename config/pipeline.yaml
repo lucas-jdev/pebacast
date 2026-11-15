@@ -49,13 +49,23 @@ audio:
   formato: mp3
   canais: 1
   bitrate_kbps: 64
-  normalizacao: loudnorm
+  # Ganho único até -16 LUFS e limitador de pico real em -1,5 dBTP (src/podcast/audio.py).
+  normalizacao: ganho_unico_com_limitador
+  # QA do MP3 montado (src/podcast/qualidade_audio.py). Reprovar não segura a publicação:
+  # abre uma issue `incidente`, que fecha quando o áudio do episódio passar.
+  qualidade:
+    loudness_lufs: -16           # o alvo da montagem
+    tolerancia_lu: 1
+    pico_maximo_dbtp: -1.0       # o alvo da montagem é -1,5; a folga cobre o codificador MP3
+    musica_acima_da_fala_lu: 0   # abertura e encerramento não passam da loudness da fala
+    pausa_maxima_s: 0.6          # na troca de blocos do TTS
+    silencio_dbfs: -50           # abaixo disso conta como pausa
   # Faixa de terceiros: fica cifrada no repositório (assets/vinheta.mp3.gpg) e é
   # decifrada no Actions com o secret VINHETA_SENHA. Ver docs/vinheta.md.
   vinheta:
     arquivo: assets/vinheta.mp3
     credito: Vinheta "Indie Rock", de AtlasAudio, via Pixabay (https://pixabay.com/pt/users/atlasaudio-54514918/)
-    volume: 0.7
+    abaixo_da_fala_lu: 2   # a música fica 2 LU abaixo da loudness da fala, seja qual for o volume da faixa
     sobreposicao_s: 1.5    # a primeira fala entra 1,5 s antes do fim da abertura
     abertura:              # introdução da faixa, antes de a banda entrar
       inicio_s: 1.0
