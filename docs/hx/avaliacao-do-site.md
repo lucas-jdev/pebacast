@@ -9,6 +9,8 @@ Investigação da issue #5. O ponto de partida é uma confusão recorrente: quem
 
 **Versão avaliada:** o site gerado com os episódios reais (sw-001, sw-002, sl-001, si-001) e com as mudanças da #6 (capa sem número) e da #7 (saga no título do feed) aplicadas, a 1280 px e a 390 px de largura.
 
+**O que foi ao ar depois:** a #6 saiu de outro jeito (PR #8). Em vez do peba sozinho, a capa mostra o código do episódio, com a sigla da saga sobre o número (`SE` / `001`). A parte 2 testa essa versão. Os achados da parte 1 não dependem da capa e continuam valendo.
+
 ## Parte 1: avaliação heurística
 
 Uma passada pelas 10 heurísticas de Nielsen na página inicial e na página de episódios. Severidade: **alta** atrapalha a tarefa principal (saber o que ouvir e onde está); **média** atrapalha uma tarefa secundária ou quebra uma expectativa; **baixa** é atrito que não impede nada.
@@ -61,7 +63,7 @@ Abertura: "Vou te mostrar o site de um podcast. Não é teste de você, é do si
 
 | # | Tarefa | Sucesso quando | Mede |
 |---|---|---|---|
-| T1 | Mostre a página inicial por 5 segundos e esconda. "De que saga é o episódio mais recente e em que ponto dela ele está?" | Diz a saga e a posição certas | A etiqueta e a capa (#6) |
+| T1 | Mostre a página inicial por 5 segundos e esconda. "De que saga é o episódio mais recente e em que ponto dela ele está?" | Diz a saga e a posição certas | A etiqueta e a capa com a sigla (#8) |
 | T2 | Toque os 30 primeiros segundos de um episódio sem mostrar a tela. "De que saga é esse episódio?" | Diz a saga certa | A ligação entre áudio e site |
 | T3 | "Você ouviu este episódio ontem" (mostre o título de um episódio que não é o mais recente). "Ache o próximo da mesma saga." | Chega ao episódio certo | A2, M2 |
 | T4 | "Ache todos os episódios da saga Software." | Chega à lista filtrada | M2 |
@@ -100,9 +102,11 @@ A pergunta que a investigação precisa responder: que identificador funciona es
 | Opção | No site | No áudio | Já existe hoje |
 |---|---|---|---|
 | Nome da saga + posição | "Saga Software · ep. 2" | "segundo episódio da saga Software" | Na etiqueta e no título do feed (#7) |
-| Sigla + número | "SW·02" | "esse-dáblio zero dois" | Não |
+| Sigla + número | "SW 001" | "esse-dáblio zero zero um" | Na capa dos cards (#8) |
 | Número global | "#4" | "episódio quatro" | Não, e brigaria com a ordem por saga |
 | Nenhum | Só o título | Só o tema | É o que o áudio faz hoje |
+
+A sigla entrou na capa (#8) antes do teste, de propósito: subir e medir. O risco a observar na T1 é que quatro sagas começam com S (`SW`, `SL`, `SI`, `SE`), então quem não conhece o podcast pode não ligar `SI` a Sistemas nem `SE` a Segurança.
 
 Hipótese de partida: **nome da saga + posição**. É o único que já se lê e se fala do mesmo jeito, e já está no site e no feed. A sigla não se fala. O número global não diz a saga. As respostas de T1, T2 e a pergunta de fechamento confirmam ou derrubam a hipótese.
 
