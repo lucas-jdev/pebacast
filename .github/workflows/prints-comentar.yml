@@ -1,0 +1,116 @@
+# Prints de antes e depois por seção (ADR 0009), passo 2 de 2.
+# Roda com o código do main e permissão de escrita, então nunca faz checkout nem executa código do PR:
+# o artefato do Capturar é a fronteira de confiança e é validado inteiro antes de qualquer escrita.
+# Como workflow_run usa a versão do main, este workflow só vale depois de mergeado.
+name: Comentar prints
+
+on:
+  workflow_run:
+    workflows: [Capturar prints]
+    types: [completed]
+
+# Um por vez: todos escrevem no branch prints.
+concurrency:
+  group: comentar-prints
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  comentar:
+    if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RUN_ID: ${{ github.event.workflow_run.id }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+
+    steps:
+      # Só o script de validação e do comentário, sempre do main.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: main
+          persist-credentials: false
+          sparse-checkout: scripts/prints.py
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: prints
+          path: artefato
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      # Recusa o artefato inteiro se houver arquivo que não seja PNG (pela assinatura) ou o manifesto,
+      # se passar dos limites ou se o manifesto não bater com as imagens.
+      - name: Validar o artefato
+        id: validar
+        run: |
+          pr="$(python main/scripts/prints.py validar artefato)"
+          [[ "$pr" =~ ^[1-9][0-9]*$ ]] || { echo "::error::Número do PR inválido."; exit 1; }
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
+
+      # O número vem do artefato (workflow_run não informa o PR de fork); só vale se o PR existir
+      # neste repositório e a cabeça dele ainda for o commit capturado.
+      - name: Conferir o PR
+        id: pr
+        env:
+          PR: ${{ steps.validar.outputs.pr }}
+        run: |
+          cabeca="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .head.sha)"
+          if [ "$cabeca" = "$HEAD_SHA" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::O PR #$PR não está mais no commit capturado; a captura mais nova comenta."
+          fi
+
+      - uses: actions/checkout@v7
+        if: ${{ steps.pr.outputs.ok == 'true' }}
+        with:
+          ref: prints
+          path: ramo-prints
+
+      - name: Publicar as imagens no branch prints
+        if: ${{ steps.pr.outputs.ok == 'true' }}
+        working-directory: ramo-prints
+        env:
+          PR: ${{ steps.validar.outputs.pr }}
+        run: |
+          rm -rf "pr-$PR"
+          mkdir "pr-$PR"
+          find ../artefato -maxdepth 1 -type f -name '*.png' -exec cp {} "pr-$PR/" \;
+          git add -A "pr-$PR"
+          if git diff --cached --quiet; then
+            echo "Imagens iguais às já publicadas."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Prints do PR #$PR (${HEAD_SHA:0:7})"
+          for tentativa in 1 2 3; do
+            git push origin HEAD:prints && exit 0
+            git pull --rebase origin prints
+          done
+          exit 1
+
+      - name: Criar ou atualizar o comentário
+        if: ${{ steps.pr.outputs.ok == 'true' }}
+        env:
+          PR: ${{ steps.validar.outputs.pr }}
+        run: |
+          python main/scripts/prints.py comentario artefato --repo "$GITHUB_REPOSITORY" --sha "$HEAD_SHA" > corpo.md
+          id="$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- pebacast-prints -->"))) | .id' | head -n 1)"
+          if [ -n "$id" ]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@corpo.md >/dev/null
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F body=@corpo.md >/dev/null
+          fi

@@ -17,7 +17,7 @@ Abra uma issue pelos formulários *Ideia* ou *Bug*. Não precisa vir pronta: lap
    python -m pytest -q
    cd votos && node --test
    ```
-6. Se o PR muda algo visível no site, ponha prints de antes e depois na descrição, no desktop e no celular. `scripts/prints.sh <pasta>` gera as imagens (rode no `main` e no seu branch); arraste-as para a descrição do PR.
+6. Se o PR muda algo visível no site (`site/**` ou `src/podcast/site.py`), os prints de antes e depois chegam sozinhos: um workflow fotografa cada seção no `main` e no seu branch, no desktop e no celular, e comenta no PR uma tabela Antes | Depois das seções que mudaram. Esse comentário cumpre a regra dos prints, inclusive em PR de fork. Para ver localmente, `scripts/prints.sh <pasta>` gera um print por seção (precisa de `pip install -e ".[prints]"` e `python -m playwright install chromium`).
 7. Abra o PR com `Closes #<número>` na descrição.
 
 ## Estilo

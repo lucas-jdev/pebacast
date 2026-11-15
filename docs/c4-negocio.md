@@ -55,6 +55,8 @@ flowchart TB
     revisor["<b>Revisor</b><br/>[subagente Claude]<br/>checa afirmações,<br/>sem o contexto do roteirista"]:::ia
     rotina["<b>Rotina do roteirista</b><br/>[Claude Code agendado]<br/>seleciona, busca notícia,<br/>escreve e corrige"]:::ia
     watchdog["<b>Watchdog</b><br/>[GitHub Actions, a cada 6 h]<br/>avisa se a rotina parar"]:::conteiner
+    capturar["<b>Capturar prints</b><br/>[GitHub Actions, PR que muda o site]<br/>fotografa as seções do main e do PR,<br/>só com leitura"]:::conteiner
+    comentar["<b>Comentar prints</b><br/>[GitHub Actions, código do main]<br/>valida o artefato e comenta<br/>antes e depois no PR"]:::conteiner
 
     repo[("<b>Repositório</b><br/>[GitHub]<br/>currículo, personas, roteiros,<br/>revisões e publicações")]:::dados
 
@@ -72,6 +74,9 @@ flowchart TB
     rotina <-- "pede revisão" --> revisor
     rotina -- "lê o contexto e<br/>commita o episódio" --> repo
     watchdog -. "observa commits" .-> repo
+    repo -- "PR que muda o site dispara" --> capturar
+    capturar -- "artefato com as seções<br/>que mudaram" --> comentar
+    comentar -- "imagens no branch prints<br/>e comentário no PR" --> repo
     repo -- "push dispara" --> pipeline
     lucas -. "dispara a regravação<br/>de um áudio" .-> pipeline
     pipeline -- "narra" --> gemini
@@ -87,9 +92,12 @@ flowchart TB
 
 Lilás é IA (Claude), azul é código (GitHub Actions e site estático), verde é onde os dados ficam e bege são serviços de terceiros. O único humano no desenho é o Lucas, que entra pelo repositório (currículo e referências), pelo retorno e, quando um áudio sai ruim, disparando a regravação no Actions ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). O Lucas lê os recados pelo console do D1 ([votos.md](votos.md)), e o Pipeline registra o `publicacao.json` de volta no repositório.
 
+Nos PRs que mudam o visual do site, o **Capturar prints** roda o código do PR, inclusive de fork, só com leitura, e entrega um artefato; o **Comentar prints** roda com o código do `main`, valida esse artefato e só então escreve no branch `prints` e no PR ([ADR 0009](adr/0009-prints-automaticos-nos-prs.md)).
+
 ### Decisões que este desenho carrega
 
 - **O repositório é a fonte da verdade.** O estado de cada episódio vem dos arquivos (`roteiro.json`, `revisoes/`, `publicacao.json`), não de um banco, e todo passo fica auditável no histórico ([ADR 0006](adr/0006-roteiro-por-rotina-claude.md)).
 - **Julgamento separado de execução mecânica.** A IA escreve; o Actions não confia nela e valida de novo antes de gastar voz.
+- **Código de terceiros nunca roda com escrita.** Nos prints automáticos, o artefato é a fronteira de confiança entre o job que executa o PR e o job que escreve no repositório ([ADR 0009](adr/0009-prints-automaticos-nos-prs.md)).
 - **Custo zero de hospedagem.** Pages, Releases, Actions e o plano gratuito da Cloudflare ([ADR 0002](adr/0002-hospedagem-pages-releases.md), [ADR 0007](adr/0007-votos-worker-d1.md)).
 - **Único dado dinâmico fora do GitHub:** votos e recados. O site estático continua sem servidor.
