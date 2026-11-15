@@ -6,7 +6,7 @@ A pipeline tem duas partes, ligadas por um commit ([ADR 0006](adr/0006-roteiro-p
 
 ```
 Rotina do Claude (rotina/roteirista.md)                     GitHub Actions
-seleção → notícias → roteiro → revisão ⇄ correção  ──push──▶  validar → voz → montagem → publicação
+seleção → notícias → roteiro → revisão ⇄ correção  ──push──▶  validar → voz → montagem → publicação → QA do áudio
 ```
 
 Arquivos de cada episódio:
@@ -104,11 +104,15 @@ A rotina commita a pasta do episódio, aprovada ou não. O Actions roda `python 
 
 Roda no GitHub Actions (`.github/workflows/publicar.yml`), com `python -m podcast.publicacao publicar`, só depois de o `validar` aprovar o roteiro de novo.
 
-Cada fala é sintetizada pelo `TtsProvider` configurado, com no máximo dois falantes por requisição. Cada bloco do Gemini tem até 4 tentativas, com espera exponencial a partir de 15 s, porque o free tier devolve 429 com frequência. Se o provedor principal ainda assim falhar, a pipeline usa o fallback e abre uma issue avisando. A decisão está em [ADR 0001](adr/0001-tts-gemini-com-fallback-kokoro.md).
+Cada fala é sintetizada pelo `TtsProvider` configurado, com no máximo dois falantes por requisição. O silêncio que o TTS deixa nas bordas de cada bloco é aparado (abaixo de −50 dBFS, com 30 ms de folga) antes de os blocos serem emendados com a pausa fixa de 300 ms; sem isso, a troca de bloco chegava a 1,1 s de silêncio. A montagem guarda onde fica cada troca, para o QA medir. Cada bloco do Gemini tem até 4 tentativas, com espera exponencial a partir de 15 s, porque o free tier devolve 429 com frequência. Se o provedor principal ainda assim falhar, a pipeline usa o fallback e abre uma issue avisando. A decisão está em [ADR 0001](adr/0001-tts-gemini-com-fallback-kokoro.md).
 
 ## 7. Montagem
 
-O ffmpeg concatena as falas, normaliza o volume com loudnorm e exporta em MP3 mono a 64 kbps, com cerca de 10 MB por episódio. Com a vinheta configurada, o recorte toca na abertura, por baixo da primeira fala, e no encerramento ([docs/vinheta.md](vinheta.md)).
+O ffmpeg mistura a fala com a vinheta e exporta em MP3 mono a 64 kbps, com cerca de 10 MB por episódio. Com a vinheta configurada, o recorte toca na abertura, por baixo da primeira fala, e no encerramento ([docs/vinheta.md](vinheta.md)).
+
+- **Música nivelada pela fala.** A loudness de cada recorte da vinheta é medida e ajustada para ficar `audio.vinheta.abaixo_da_fala_lu` (2 LU) abaixo da loudness da fala do episódio, seja qual for o volume da faixa.
+- **Ganho único até −16 LUFS.** O episódio inteiro recebe um só ganho, calculado pela loudness medida. O loudnorm, usado antes, é dinâmico: puxava a música do encerramento, mais baixa que a fala, para o alvo.
+- **Pico real limitado.** Depois do ganho, um limitador com a taxa quadruplicada (para enxergar o pico entre amostras) segura o pico real em −1,5 dBTP. O codificador MP3 ainda sobe o pico e tira alguns décimos de LU, então a montagem mede o MP3 e, se precisar, codifica de novo com o teto mais baixo e o ganho corrigido (até 3 passadas).
 
 ## 8. Publicação
 
@@ -138,18 +142,33 @@ Configuração, feita uma vez pelo Lucas:
 4. **Primeiro aviso.** Rode o `site.yml` à mão (*Actions → Publicar site → Run workflow*) com **todas** marcado. Isso avisa todas as URLs do sitemap de uma vez, inclusive as que não têm `lastmod`, como a `sobre/`. Daí em diante, cada publicação avisa só o que mudou.
 5. **Conferir.** Na inspeção de URL do Search Console e do Bing, `sobre/` deve aparecer como indexada. Isso leva de dias a semanas.
 
+## QA do áudio
+
+Depois de publicar, `src/podcast/qualidade_audio.py` mede o MP3 final com o ffmpeg (`ebur128` e `silencedetect`), sem ouvir:
+
+| Medida | Como mede | Limite |
+|---|---|---|
+| Pico real | pico real (true peak) do episódio inteiro | ≤ −1,0 dBTP |
+| Loudness integrada | EBU R128 do episódio inteiro | −16 LUFS ± 1 |
+| Música (abertura e encerramento) | loudness do trecho só de música, na abertura e no encerramento, contra a da fala | não passa a da fala |
+| Pausa na troca de blocos | silêncio (abaixo de −50 dBFS) que contém cada troca de bloco marcada pela montagem | ≤ 0,6 s |
+
+As pausas no meio de um bloco são do TTS e não entram na conta. Os limites partem do alvo da montagem e ficam em `audio.qualidade`, em `config/pipeline.yaml`.
+
+O resultado vai para o resumo da execução no Actions (`qualidade.md`). **O QA não segura a publicação.** Se alguma medida reprovar, o episódio sai assim mesmo e o Python abre uma issue `incidente` com as medidas, com o título `Áudio do <id> fora do padrão`. Se já houver uma aberta para o episódio, comenta nela. Quando o áudio daquele episódio passar, a issue fecha sozinha. Uma falha do próprio QA também não segura a publicação: vira aviso.
+
 ## Regravação do áudio
 
 Quando um áudio publicado sai ruim, `.github/workflows/regravar.yml` narra o mesmo roteiro de novo, disparado à mão no Actions com o id do episódio:
 
-1. **regravar** (`python -m podcast.regravacao regravar <id>`): valida o roteiro, narra só com o TTS principal, sem fallback, e anexa `pebacast-<id>-candidata.mp3` ao release. O link aparece no resumo da execução. O feed não muda.
-2. **substituir** (`python -m podcast.regravacao substituir <id>`): põe a candidata no lugar do áudio publicado, atualiza tamanho, duração e `regravado_em` no `publicacao.json` e publica o feed. URL, GUID e data de publicação continuam os mesmos.
+1. **regravar** (`python -m podcast.regravacao regravar <id>`): valida o roteiro, narra só com o TTS principal, sem fallback, e anexa `pebacast-<id>-candidata.mp3` ao release, com as medidas do QA ao lado (`pebacast-<id>-candidata.qualidade.json`). O link e as quatro medidas aparecem no resumo da execução. O feed não muda, e a issue de incidente também não: a candidata ainda não está no ar.
+2. **substituir** (`python -m podcast.regravacao substituir <id>`): põe a candidata no lugar do áudio publicado, atualiza tamanho, duração e `regravado_em` no `publicacao.json` e publica o feed. URL, GUID e data de publicação continuam os mesmos. Com as medidas da candidata, mostra o QA no resumo e atualiza a issue de incidente do episódio: fecha se passou, comenta se não.
 
 Decisão em [ADR 0008](adr/0008-regravacao-em-dois-passos.md).
 
 ## Falhas
 
-Qualquer falha abre uma issue no repositório, o que gera notificação por e-mail. Isso também evita que o agendamento morra em silêncio. Ver [ADR 0003](adr/0003-agendamento-github-actions.md).
+Qualquer falha abre uma issue no repositório, o que gera notificação por e-mail. Áudio fora do padrão também, mas sem segurar a publicação ([QA do áudio](#qa-do-áudio)). Isso também evita que o agendamento morra em silêncio. Ver [ADR 0003](adr/0003-agendamento-github-actions.md).
 
 ## Ciclo de feedback
 

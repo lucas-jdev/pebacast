@@ -51,9 +51,11 @@ flowchart TD
         erro_tts{Erro do Gemini?}
         retry[429 / 5xx: espera e tenta de novo]
         kokoro[Kokoro local, só se a API<br/>estiver fora ou sem acesso;<br/>publica e abre issue de aviso]
-        mix["Vinheta + mixagem + loudnorm<br/>→ MP3"]
+        mix["Apara o silêncio nas bordas dos blocos,<br/>nivela a vinheta pela fala, mixa,<br/>ganho único e limitador de pico → MP3"]
         release[Sobe o MP3 no GitHub Releases]
         registro["Grava <code>publicacao.json</code><br/>e commita"]
+        qa{"QA do áudio: pico real, loudness,<br/>música × fala, pausa entre blocos.<br/>Passou?"}
+        incidente(["Issue incidente do episódio<br/>(Áudio do &lt;id&gt; fora do padrão)<br/>reprovar de novo só comenta"]):::falha
         feed["Gera feed.xml e o site,<br/>com uma página por episódio"]
         pages[Publica no GitHub Pages]
         indexnow["Avisa o IndexNow das URLs<br/>que mudaram; falha só vira aviso"]
@@ -93,23 +95,41 @@ flowchart TD
     erro_tts -- "429 / 5xx" --> retry --> tts
     erro_tts -- "4xx do pedido" --> issue
     erro_tts -- "401 / 403 ou<br/>tentativas esgotadas" --> kokoro --> mix
-    mix --> release --> registro --> feed --> pages
+    mix --> release --> registro --> qa
+    qa -- "passando ou não,<br/>publica" --> feed
+    qa -. "não" .-> incidente
+    qa -. "sim: fecha a issue<br/>de áudio do episódio" .-> incidente
+    feed --> pages
     pages --> app
     pages -.-> indexnow
     pages --> site
     pages -. "fecha a issue de<br/>reprovação do episódio" .-> issue
     issue --> triagem
+    incidente --> ouvir
     site --> retorno
     app --> ouvir
     ouvir -. "regravar.yml: candidata,<br/>depois substituir" .-> release
 
     class aguardando,selecao,elegivel,noticia,relevante,hipotetico,roteiro,revisao,aprovado,limite,correcao,validar_local,commit rotina
-    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,mix,release,registro,feed,pages,indexnow actions
+    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,mix,release,registro,qa,feed,pages,indexnow actions
 ```
+
+## QA do áudio
+
+Depois de subir o MP3, o código mede o áudio montado, sem ouvir ([pipeline.md](pipeline.md#qa-do-áudio)):
+
+| Medida | Limite |
+|---|---|
+| Pico real | ≤ −1,0 dBTP |
+| Loudness integrada | −16 LUFS ± 1 |
+| Música (abertura e encerramento) | loudness não passa a da fala |
+| Pausa na troca de blocos | ≤ 0,6 s |
+
+As quatro medidas, com aprovado ou reprovado, vão para o resumo da execução no Actions. **O QA não segura a publicação**: o ritmo diário pesa mais. Se alguma medida reprovar, o episódio sai assim mesmo e abre uma issue `incidente` com as medidas, uma por episódio (reprovar de novo só comenta). Ela fecha sozinha quando o áudio daquele episódio passar no QA, por exemplo depois de uma regravação substituída. Os limites ficam em `audio.qualidade`, em `config/pipeline.yaml`.
 
 ## Fora do caminho principal
 
 - **Watchdog** (`watchdog.yml`, a cada 6 h): abre uma issue se a rotina passar 36 h sem commitar roteiro, e fecha quando ela volta.
-- **Regravação** (`regravar.yml`, manual): quando o Lucas ouve e o áudio saiu ruim, narra o mesmo roteiro de novo como candidata; se ficar melhor, ele manda substituir e o episódio troca de áudio sem mudar URL, GUID nem data ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)).
+- **Regravação** (`regravar.yml`, manual): quando o Lucas ouve e o áudio saiu ruim, narra o mesmo roteiro de novo como candidata, com o QA do áudio no resumo da execução; se ficar melhor, ele manda substituir e o episódio troca de áudio sem mudar URL, GUID nem data ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). Se a candidata substituída passou no QA, a issue de incidente de áudio do episódio fecha sozinha.
 - **Site e feed** também são regenerados quando muda o site, o currículo ou a configuração (`site.yml`), sem gerar áudio. Os três workflows que publicam no Pages (`publicar.yml`, `site.yml` e `regravar.yml`) dividem uma fila e geram o site a partir do `main` de quando rodam, nunca de um commit anterior: o `site.yml` faz checkout da ponta do branch, e os outros dois regeneram o site depois do `git pull --rebase`. Assim, um deploy que esperou na fila não apaga um episódio publicado enquanto ele esperava, e um episódio publicado não desfaz o que mudou no site durante a síntese. Depois do deploy, os dois workflows avisam o IndexNow das URLs que mudaram, para o Bing indexar logo. Isso nunca bloqueia a publicação ([pipeline.md](pipeline.md#entrar-no-índice-dos-buscadores)).
 - **Votos e recados** vivem fora do GitHub, num Worker da Cloudflare com D1 ([votos.md](votos.md)).

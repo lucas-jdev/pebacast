@@ -1,6 +1,7 @@
 # Regrava o áudio de um episódio já publicado, em dois passos (ADR 0008).
 # "regravar" anexa uma candidata ao release para ouvir; "substituir" troca o áudio no ar por ela,
-# mantendo URL, GUID e data de publicação.
+# mantendo URL, GUID e data de publicação. Os dois passos mostram o QA do áudio no resumo,
+# e "substituir" fecha a issue de incidente do episódio se a candidata passou.
 name: Regravar áudio
 
 on:
@@ -24,6 +25,7 @@ concurrency:
 
 permissions:
   contents: write
+  issues: write
   pages: write
   id-token: write
 
@@ -31,6 +33,7 @@ env:
   # O input entra por variável de ambiente, nunca interpolado no shell.
   EPISODIO: ${{ inputs.episodio }}
   GH_TOKEN: ${{ github.token }}
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
 jobs:
   regravar:
@@ -66,7 +69,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python -m podcast.regravacao regravar "$EPISODIO" --repo "$GITHUB_REPOSITORY" | tee saida.txt
-          { echo "## Candidata do $EPISODIO"; echo; cat saida.txt; echo
+          { echo "## Candidata do $EPISODIO"; echo; cat saida.txt; echo; cat qualidade.md; echo
             echo "Se ficou melhor, rode este workflow de novo com **substituir**."; } >> "$GITHUB_STEP_SUMMARY"
 
   substituir:
@@ -92,7 +95,9 @@ jobs:
         run: pip install -e .
 
       - name: Substituir o áudio publicado
-        run: python -m podcast.regravacao --site _site substituir "$EPISODIO" --repo "$GITHUB_REPOSITORY"
+        run: |
+          python -m podcast.regravacao --site _site --execucao "$RUN_URL" substituir "$EPISODIO" --repo "$GITHUB_REPOSITORY"
+          if [ -f qualidade.md ]; then cat qualidade.md >> "$GITHUB_STEP_SUMMARY"; fi
 
       - name: Registrar no repositório
         run: |
