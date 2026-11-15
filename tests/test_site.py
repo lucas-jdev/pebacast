@@ -338,3 +338,48 @@ def test_texto_sobre_as_cores_de_saga_tem_contraste_aa():
         for tinta in (texto, texto_suave):
             claro, escuro = sorted((_luminancia(cor), _luminancia(tinta)), reverse=True)
             assert (claro + 0.05) / (escuro + 0.05) >= 4.5, (cor, tinta)
+
+
+# ---------------------------------------------------------------- saga com endereço (#13)
+
+
+def test_card_de_saga_no_ar_leva_a_lista_filtrada(projeto):
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    card = pagina[pagina.index('<li class="saga saga--ativa" data-saga="software">'):]
+    card = card[:card.index("</li>")]
+    assert '<a class="saga__link" href="episodios.html?saga=software">Software' in card
+    assert "Ver episódios" in card
+
+
+def test_card_de_saga_em_breve_nao_e_link(projeto):
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert pagina.count('class="saga__link"') == 1
+    card = pagina[pagina.index('<li class="saga" data-saga="corporativa">'):]
+    card = card[:card.index("</li>")]
+    assert "Em breve" in card
+    assert "<a " not in card
+
+
+def test_filtro_tem_um_botao_por_saga_com_o_id_usado_na_url(projeto):
+    _usar_fila(projeto)
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+    _ja_publicado(projeto, "sl-001", "2026-11-08T15:00:00+00:00")
+
+    pagina = gerar_pagina_episodios(projeto, "feed.xml")
+
+    assert 'class="filtro__opcao" type="button" data-saga="software" aria-pressed="false"' in pagina
+    assert 'class="filtro__opcao" type="button" data-saga="solucoes" aria-pressed="false"' in pagina
+
+
+def test_filtro_le_e_grava_a_saga_na_url_sem_criar_historico():
+    js = (Path(__file__).resolve().parents[1] / "site" / "app.js").read_text(encoding="utf-8")
+
+    assert 'new URLSearchParams(location.search).get("saga")' in js
+    assert "history.replaceState" in js
+    assert "history.pushState" not in js

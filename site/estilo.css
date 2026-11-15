@@ -511,6 +511,15 @@ body { line-height: 1.7; }
 .saga__estado--ativa { color: var(--texto); }
 .saga__progresso { border: 2px solid var(--texto); height: 12px; border-radius: 0; background: #fff; }
 .saga__progresso::before { background: var(--texto); border-radius: 0; }
+/* O link do título cobre o card inteiro; ::before e ::after do card já são o varal e os prendedores. */
+.saga__link { color: inherit; text-decoration: underline 3px; text-underline-offset: 0.15em; }
+.saga__link::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.saga__link:focus-visible { outline: none; }
+.saga__link:focus-visible::after { outline: 3px solid var(--foco); outline-offset: 10px; }
+.saga__ver { align-self: flex-start; font-weight: 700; font-size: 0.95rem; text-decoration: underline 2px; text-underline-offset: 0.2em; }
+.saga--ativa { transition: translate 0.15s ease, box-shadow 0.15s ease; }
+.saga--ativa:hover { translate: 0 -3px; box-shadow: 4px 6px 0 var(--texto); }
+@media (prefers-reduced-motion: reduce) { .saga--ativa { transition: none; } .saga--ativa:hover { translate: none; } }
 .passos li { border-top: 3px solid var(--escura-texto); }
 .passo__num { border-radius: 2px; font-weight: 400; }
 .feed { border: 4px solid var(--texto); background: #fffaf0; box-shadow: 8px 8px 0 var(--destaque), 8px 8px 0 3px var(--texto); }
