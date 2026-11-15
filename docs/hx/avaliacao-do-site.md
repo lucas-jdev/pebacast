@@ -23,7 +23,7 @@ Uma passada pelas 10 heurísticas de Nielsen na página inicial e na página de 
 | A2 | Nada explica por que o próximo episódio é de outra saga | Visibilidade do estado do sistema | Alta | #11 |
 | M1 | O site promete um episódio por dia, mas o ritmo depende da validação | Correspondência com o mundo real | Média | #12 |
 | M2 | O card da saga não leva aos episódios dela, e o filtro não fica na URL | Controle e liberdade | Média | #13 |
-| B1 | A mesma saga tem dois nomes | Consistência e padrões | Baixa | |
+| B1 | A mesma saga tem dois nomes | Consistência e padrões | Baixa | #10 |
 | B2 | O estado do próximo episódio usa o vocabulário da pipeline | Correspondência com o mundo real | Baixa | |
 | B3 | No celular, o episódio só aparece depois de uns 1.300 px de rolagem | Estética e design minimalista | Baixa | |
 | B4 | Só dá para assinar por RSS, e o endereço aparece cortado | Correspondência com o mundo real | Baixa | |

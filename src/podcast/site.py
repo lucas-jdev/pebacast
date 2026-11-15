@@ -65,7 +65,7 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
         _faixa(),
         _secao_ultimo(ultimo, personas, total_publicados=len(publicados), votos=_config_do_site(config)["votos"]),
         _secao_proximo(proximo),
-        _secao_vozes(personas, sagas),
+        _secao_vozes(personas),
         _secao_sagas(sagas, publicados),
         _secao_como(config),
         _secao_assinar(_url_feed(meta, arquivo_feed), meta),
@@ -598,18 +598,22 @@ def _secao_proximo_vazio() -> str:
 </section>"""
 
 
-def _secao_vozes(personas: Mapping[str, Any], sagas: Mapping[str, Any]) -> str:
-    nomes_saga = {saga.id: saga.nome for saga in sagas.values()}
+def _secao_vozes(personas: Mapping[str, Any]) -> str:
+    nomes_saga = {sid: nome for sid, nome, _ in SAGAS}
     cartoes = []
     ordem = sorted(personas.values(), key=lambda p: (p.get("papel") != "apresentador", p["nome"]))
     for persona in ordem:
+        cor = ""
         if persona.get("papel") == "apresentador":
             papel = "Apresentador, em todas as sagas"
         else:
-            nomes = [nomes_saga.get(s, s) for s in persona.get("sagas", [])]
+            sagas_da_voz = [s for s in persona.get("sagas", []) if s in nomes_saga]
+            nomes = [nomes_saga[s] for s in sagas_da_voz]
             papel = f"Voz convidada da saga {', '.join(nomes)}" if nomes else "Voz convidada"
+            # A voz convidada veste a cor da saga dela; o apresentador fica sem, porque está em todas.
+            cor = f' data-saga="{escape(sagas_da_voz[0])}"' if sagas_da_voz else ""
         bordao = (persona.get("bordoes") or [""])[0]
-        cartoes.append(f"""<article class="voz voz--{escape(persona['id'])}">
+        cartoes.append(f"""<article class="voz voz--{escape(persona['id'])}"{cor}>
   <div class="voz__inicial" aria-hidden="true">{escape(persona['nome'][0])}</div>
   <h3>{escape(persona['nome'])}</h3>
   <p class="voz__papel">{escape(papel)}</p>
@@ -646,7 +650,7 @@ def _secao_sagas(sagas: Mapping[str, Any], publicados: Sequence[Mapping[str, Any
             estado = '<span class="saga__estado">Em breve</span>'
             progresso = ""
             classe = "saga"
-        cartoes.append(f"""<li class="{classe}" style="--motivo:{indice}">
+        cartoes.append(f"""<li class="{classe}" data-saga="{escape(sid)}">
   <span class="saga__numero">{indice:02d}</span>
   <h3>{escape(nome)}</h3>
   <p>{escape(pergunta)}</p>
