@@ -1,0 +1,162 @@
+{
+  "aprovado": true,
+  "roteiro_sha256": "387ec543ee13322c42434e3c603d7dd5c557bff4b0e0838ee041188b77250f50",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "o caso de hoje é hipotético",
+      "veredito": "correta",
+      "fonte": "noticia.json: tipo hipotetico; o roteiro apresenta o caso como hipotético"
+    },
+    {
+      "fala": 3,
+      "afirmacao": "Os servidores, o balanceador de carga, as regras de rede, tudo isso foi montado à mão, clicando no console do provedor de nuvem, ao longo de três anos.",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético)"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "E quase sempre pela mesma pessoa. Num belo dia, de madrugada, deu um incidente. Essa pessoa entrou no console, aumentou um timeout no balanceador, liberou uma regra de firewall",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético)"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "alguns meses depois essa pessoa sai da empresa. E aí chega a campanha de vacinação, o pico de acesso do ano. O time decide subir uma cópia do ambiente de produção pra aguentar a carga. Só que a cópia não se comporta igual à produção.",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético); os sintomas citados em seguida são compatíveis com o cenário"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "o homologado também já não era igual à produção. Resultado: três dias pra descobrir as diferenças, e nesse tempo paciente sem conseguir marcar horário.",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético)"
+    },
+    {
+      "fala": 13,
+      "afirmacao": "A regra de firewall fica na rede, não no disco do servidor.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: regras de firewall do provedor (security groups, ACLs) são recursos de rede, fora da imagem de disco"
+    },
+    {
+      "fala": 15,
+      "afirmacao": "O balanceador é outro recurso. Tá, então a imagem resolve só o pedaço que está dentro da máquina.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: balanceador gerenciado é recurso separado da VM; snapshot de disco não o inclui"
+    },
+    {
+      "fala": 22,
+      "afirmacao": "Imagem gerada a partir de uma definição conhecida é uma ótima ferramenta. O problema é a imagem tirada de uma máquina que ninguém sabe como chegou naquele estado.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: imagens de servidor construídas por código (ex.: Packer) versus snapshot de máquina configurada à mão; Morris, 2ª ed., cap. 2 (snowflake systems)"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "O ambiente real vai se afastando do que deveria ser, e os ambientes que deveriam ser iguais vão ficando diferentes entre si. Isso é o desvio de configuração, configuration drift.",
+      "veredito": "correta",
+      "fonte": "Morris, Infrastructure as Code, 2ª ed., cap. 2, \"Pitfall: Configuration Drift\" (variação que surge com o tempo entre sistemas que já foram idênticos); uso consolidado do termo em ferramentas de IaC para divergência entre definido e real"
+    },
+    {
+      "fala": 30,
+      "afirmacao": "a definição da infraestrutura, os servidores, a rede, o balanceador, as regras de firewall, tudo vive em arquivos de texto, num repositório versionado. E uma ferramenta lê esses arquivos e cria ou ajusta os recursos reais pra ficarem iguais ao que está escrito.",
+      "veredito": "correta",
+      "fonte": "Morris, Infrastructure as Code, 2ª ed., cap. 1; conhecimento consolidado"
+    },
+    {
+      "fala": 32,
+      "afirmacao": "A referência deste episódio é o livro Infrastructure as Code, do Kief Morris, na segunda edição. No primeiro capítulo, ele descreve três práticas centrais. A primeira é definir tudo como código. A segunda é testar e entregar continuamente todo o trabalho em andamento. A terceira é construir peças pequenas e simples, que dá pra mudar de forma independente.",
+      "veredito": "correta",
+      "fonte": "Morris, 2ª ed., cap. 1: \"Core Practice: Define Everything as Code\", \"Continuously Test and Deliver All Work in Progress\", \"Build Small, Simple Pieces That You Can Change Independently\"; curriculum/sagas/infraestrutura.yaml"
+    },
+    {
+      "fala": 34,
+      "afirmacao": "a definição vira a documentação, e uma documentação que envelhece muito menos, porque é ela que cria o ambiente, desde que ninguém mude nada por fora dela.",
+      "veredito": "correta",
+      "fonte": "Morris, 2ª ed., cap. 2 (\"Configuration Drift\" e \"Automation Fear\"); a ressalva agora é coerente com a fala 42. Corrige o apontamento da revisão 2"
+    },
+    {
+      "fala": 34,
+      "afirmacao": "Segundo, toda mudança tem histórico: quem mudou, quando, e por quê, se a mensagem de commit for decente. Terceiro, dá pra revisar antes de aplicar. E quarto, a que mais importa pro caso das clínicas: dá pra recriar o ambiente do zero.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado sobre IaC com controle de versão; Morris, 2ª ed., cap. 1 (\"Benefits of Infrastructure as Code\") e cap. 2 (\"Make Everything Reproducible\")"
+    },
+    {
+      "fala": 36,
+      "afirmacao": "No segundo capítulo, o Morris lista princípios pra infraestrutura na era da nuvem, e um deles é justamente tornar tudo reproduzível. Você tem que conseguir reconstruir qualquer parte do sistema de forma confiável",
+      "veredito": "correta",
+      "fonte": "Morris, 2ª ed., cap. 2 \"Principles of Cloud Age Infrastructure\", \"Principle: Make Everything Reproducible\""
+    },
+    {
+      "fala": 38,
+      "afirmacao": "partir do pressuposto de que os sistemas não são confiáveis. [...] Tem o de criar coisas descartáveis, que você pode destruir e recriar sem drama. E tem o de minimizar a variação",
+      "veredito": "correta",
+      "fonte": "Morris, 2ª ed., cap. 2: \"Assume Systems Are Unreliable\", \"Create Disposable Things\", \"Minimize Variation\""
+    },
+    {
+      "fala": 40,
+      "afirmacao": "O livro chama esse servidor de museu de sistema floco de neve, snowflake system. Cada floco de neve é único, e por isso ninguém consegue reproduzir. E ele aparece no livro como uma armadilha, junto com o desvio de configuração.",
+      "veredito": "correta",
+      "fonte": "Morris, 2ª ed., cap. 2: \"Pitfall: Snowflake Systems\" (instância difícil de reconstruir) e \"Pitfall: Configuration Drift\""
+    },
+    {
+      "fala": 42,
+      "afirmacao": "Código não impede ninguém de abrir o console e mudar uma coisa na mão. [...] na próxima vez que a ferramenta aplicar o código, das duas uma: ou ela desfaz a mudança manual sem ninguém perceber, ou alguém fica com medo de aplicar.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado sobre ferramentas declarativas (reconciliam o recurso ao estado definido); Morris, 2ª ed., cap. 2"
+    },
+    {
+      "fala": 44,
+      "afirmacao": "O Morris descreve uma espiral do medo da automação.",
+      "veredito": "correta",
+      "fonte": "Morris, 2ª ed., cap. 2, quadro \"Automation Fear\" (automation fear spiral); a descrição a seguir é marcada como paráfrase da persona e preserva o ciclo do livro"
+    },
+    {
+      "fala": 48,
+      "afirmacao": "as ferramentas de infraestrutura como código conseguem comparar o que está definido com o que está rodando e mostrar a diferença.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: terraform plan, detecção de drift do CloudFormation, pulumi preview/refresh"
+    },
+    {
+      "fala": 52,
+      "afirmacao": "o homologado seria criado da mesma definição que a produção, só com parâmetros diferentes, tipo tamanho de máquina.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado; Morris, 2ª ed., cap. 2 (\"Minimize Variation\", \"Ensure That You Can Repeat Any Process\")"
+    },
+    {
+      "fala": 54,
+      "afirmacao": "o time precisa aprender a ferramenta, a linguagem de definição, como ela guarda o estado do que já criou.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: ferramentas como Terraform e Pulumi mantêm um arquivo de estado dos recursos criados"
+    },
+    {
+      "fala": 56,
+      "afirmacao": "O livro, inclusive, discute a objeção de que a gente não muda a infraestrutura com frequência suficiente pra valer a pena automatizar. E a resposta do Morris, resumindo do meu jeito, é que na nuvem a infraestrutura muda mais do que você imagina.",
+      "veredito": "correta",
+      "fonte": "Morris, 2ª ed., cap. 1, \"Objection: 'We don't make changes often enough to justify automating them'\" (o sistema muda continuamente: correções, atualizações, novas aplicações). A parte sobre o risco de mudar pouco é apresentada como experiência do Jorge"
+    },
+    {
+      "fala": 58,
+      "afirmacao": "Código propaga erro muito bem. Se você escreve uma regra errada, ela vai pra todos os ambientes, rapidinho, de forma consistente.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado"
+    },
+    {
+      "fala": 60,
+      "afirmacao": "a segunda prática do livro fala em testar e entregar continuamente.",
+      "veredito": "correta",
+      "fonte": "Morris, 2ª ed., cap. 1: \"Core Practice: Continuously Test and Deliver All Work in Progress\""
+    },
+    {
+      "fala": 60,
+      "afirmacao": "quando erra, você sabe exatamente o que mudou e consegue voltar pra versão anterior.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: o histórico do controle de versão mostra a mudança e permite reaplicar a definição anterior; Morris, 2ª ed., cap. 1 (\"Benefits of Infrastructure as Code\")"
+    },
+    {
+      "fala": 66,
+      "afirmacao": "Peças pequenas, como diz a terceira prática.",
+      "veredito": "correta",
+      "fonte": "Morris, 2ª ed., cap. 1: \"Core Practice: Build Small, Simple Pieces That You Can Change Independently\""
+    }
+  ]
+}

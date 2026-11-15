@@ -4,6 +4,17 @@ from typing import Any
 
 import yaml
 
+# As sete sagas, na ordem do site, com nome curto e pergunta central (docs/fronteiras-das-sagas.md).
+SAGAS = (
+    ("software", "Software", "Como um sistema é organizado por dentro e por quê?"),
+    ("solucoes", "Soluções", "Quais peças resolvem este problema de negócio e como elas se conectam?"),
+    ("sistemas", "Sistemas", "Como as partes se comportam juntas, principalmente quando algo falha?"),
+    ("dados", "Dados e Informação", "Como a informação é modelada, governada e flui pela organização?"),
+    ("infraestrutura", "Infraestrutura", "Onde e como tudo isso roda, com qual custo e confiabilidade?"),
+    ("seguranca", "Segurança", "Quem pode fazer o quê, e o que acontece quando alguém tenta o que não deveria?"),
+    ("corporativa", "Corporativa", "Como a tecnologia sustenta a estratégia da organização?"),
+)
+
 
 @dataclass(frozen=True)
 class Episodio:
@@ -27,6 +38,17 @@ class Saga:
             if episodio.id == id_:
                 return episodio
         raise KeyError(f"Episódio {id_} não existe na saga {self.id}.")
+
+    @property
+    def nome_curto(self) -> str:
+        return next((nome for sid, nome, _ in SAGAS if sid == self.id), self.nome)
+
+    def posicao_do(self, id_: str) -> int:
+        return self.episodios.index(self.episodio(id_)) + 1
+
+    def rotulo_do(self, id_: str) -> str:
+        """Como o episódio é identificado fora do site, no mesmo vocabulário da etiqueta: "Saga Software · ep. 2"."""
+        return f"Saga {self.nome_curto} · ep. {self.posicao_do(id_)}"
 
     def referencias_do(self, episodio: Episodio) -> list[dict[str, Any]]:
         """Junta os dados de cada fonte em referencias_base com os capítulos pedidos pelo episódio."""

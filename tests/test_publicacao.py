@@ -20,8 +20,10 @@ from podcast.tts.provedor import RequisicaoRecusada
 from tests.conftest import ProvedorFalso, ProvedorQuebrado
 from tests.test_roteiro import (  # noqa: F401 (fixture)
     _escrever_episodio,
+    _gravar,
     _revisao,
     _roteiro,
+    _usar_fila,
     projeto,
 )
 
@@ -153,7 +155,7 @@ def test_feed_lista_episodios_publicados_com_enclosure_e_guid(projeto, tmp_path)
     assert canal.find("title").text == "Pebacast"
     assert len(itens) == 1
     item = itens[0]
-    assert item.find("title").text == "Um"
+    assert item.find("title").text == "Saga Software · ep. 1 — Um"
     assert item.find("guid").text == "pebacast-sw-001"
     assert item.find("guid").get("isPermaLink") == "false"
     assert item.find("enclosure").get("type") == "audio/mpeg"
@@ -162,6 +164,23 @@ def test_feed_lista_episodios_publicados_com_enclosure_e_guid(projeto, tmp_path)
     assert "gerado por inteligência artificial" in notas
     assert "Apagão (Jornal, 2026-11-01) https://n/1" in notas
     assert "Desafio: Liste dois trade-offs." in notas
+
+
+def test_titulo_no_feed_diz_a_saga_e_a_posicao_sem_mudar_o_guid(projeto):
+    _usar_fila(projeto)
+    for episodio, publicado_em in (("sw-002", "2026-11-09T15:00:00+00:00"), ("sl-001", "2026-11-11T15:00:00+00:00")):
+        _escrever_episodio(projeto, episodio)
+        _gravar(projeto.episodios / episodio / "publicacao.json", {
+            "guid": f"pebacast-{episodio}", "url_audio": f"https://cdn/{episodio}.mp3", "tamanho_bytes": 1,
+            "duracao_segundos": 960, "publicado_em": publicado_em,
+        })
+
+    itens = ET.fromstring(gerar_feed(projeto)).find("channel").findall("item")
+
+    assert [(item.find("title").text, item.find("guid").text) for item in itens] == [
+        ("Saga Soluções · ep. 1 — sl-001", "pebacast-sl-001"),
+        ("Saga Software · ep. 2 — Dois", "pebacast-sw-002"),
+    ]
 
 
 def test_feed_vazio_e_valido(projeto):

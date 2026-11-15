@@ -1,0 +1,4 @@
+{
+  "tipo": "hipotetico",
+  "cenario": "Uma rede de clínicas mantém o sistema de agendamento online num conjunto de servidores e regras de rede montados à mão pelo console do provedor de nuvem ao longo de três anos, quase sempre pela mesma pessoa. Durante uma madrugada de incidente, alguém aumentou um timeout no balanceador de carga e liberou uma regra de firewall direto no console, e nada disso foi registrado. Essa pessoa sai da empresa. Meses depois, às vésperas de uma campanha de vacinação, o time tenta subir uma cópia do ambiente para aguentar o pico de acessos. A cópia não se comporta como a produção, o homologado também já não é igual a ela, e o time leva três dias para descobrir as diferenças, enquanto pacientes não conseguem marcar horário."
+}

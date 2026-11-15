@@ -1,0 +1,182 @@
+{
+  "aprovado": false,
+  "roteiro_sha256": "b604ffde8d4da7e239e3aa3a7ea8aa47f761e10975ed199696d6a9782404141a",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "o caso de hoje é hipotético",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético): tipo hipotetico"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "o app manda o CPF do cliente, e a API devolve nome, telefone e o histórico de compras",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético)"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "a parceira autentica com uma chave fixa, compartilhada. Só que essa chave acaba indo parar dentro do próprio app",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético)"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "A URL da API não está documentada em lugar nenhum, e o plano é contratar um teste de intrusão na semana do lançamento",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético): URL não divulgada e teste contratado para a semana do lançamento"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "a API não conferia se o CPF pedido era de quem estava logado. Segundo, a chave da parceira dava pra ser tirada de dentro do app",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético)"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "tiveram que mudar o contrato da API, combinar uma integração nova com a parceira e publicar outra versão do app. O lançamento atrasou um mês",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético)"
+    },
+    {
+      "fala": 10,
+      "afirmacao": "Compra de farmácia diz se a pessoa tem diabetes, se faz tratamento psiquiátrico, se está tentando engravidar",
+      "veredito": "correta",
+      "fonte": "conhecimento consolidado: histórico de compras de medicamentos revela dados de saúde (dado sensível na LGPD, art. 5º, II)"
+    },
+    {
+      "fala": 18,
+      "afirmacao": "Isso é segurança por obscuridade. Ela pode até atrasar alguém curioso, mas não pode ser a defesa principal",
+      "veredito": "correta",
+      "fonte": "conhecimento consolidado (princípio de Kerckhoffs; OWASP)"
+    },
+    {
+      "fala": 19,
+      "afirmacao": "Ele olha a requisição, procura padrão de ataque conhecido",
+      "veredito": "correta",
+      "fonte": "conhecimento consolidado: WAF filtra tráfego HTTP por assinaturas e regras genéricas"
+    },
+    {
+      "fala": 22,
+      "afirmacao": "Nenhum filtro na frente conserta isso, porque o filtro não conhece a regra de negócio",
+      "veredito": "correta",
+      "fonte": "conhecimento consolidado: falhas de autorização por objeto (OWASP API1:2023 BOLA) não são detectáveis por WAF"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "A referência que eu mais uso é o livro Threat Modeling: Designing for Security, do Adam Shostack",
+      "veredito": "correta",
+      "fonte": "referencias_base: shostack"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "Ele organiza tudo em quatro perguntas. O que estamos construindo? O que pode dar errado? O que vamos fazer a respeito? E fizemos um bom trabalho?",
+      "veredito": "imprecisa",
+      "correcao": "A redação do livro de 2014 é \"O que você está construindo? O que pode dar errado? O que você deve fazer a respeito? Você fez um bom trabalho de análise?\" (\"What are you building? [...] Did you do a decent job of analysis?\"). \"Fizemos um bom trabalho?\" (\"Did we do a good job?\") é da formulação posterior do Shostack e não pode ser atribuída ao livro. Corrigir para a redação do livro ou tirar a atribuição ao livro e apresentar como a formulação atual das quatro perguntas.",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 1; nota de verificação em curriculum/sagas/seguranca.yaml (se-001)"
+    },
+    {
+      "fala": 32,
+      "afirmacao": "o Shostack recomenda um tipo de desenho bem antigo, o diagrama de fluxo de dados, que todo mundo chama de DFD",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 2 (Types of Diagrams); DFDs vêm da análise estruturada dos anos 1970"
+    },
+    {
+      "fala": 34,
+      "afirmacao": "Tem quatro tipos de elemento. Entidade externa, [...] Processo, [...] Armazenamento de dados, [...] E fluxo de dados",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 2"
+    },
+    {
+      "fala": 36,
+      "afirmacao": "A fronteira de confiança. É uma linha tracejada que você desenha onde o nível de confiança muda",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 2 (Trust Boundaries)"
+    },
+    {
+      "fala": 44,
+      "afirmacao": "o livro usa bastante um mnemônico criado na Microsoft, o STRIDE",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014) (cap. 3 dedicado ao STRIDE); STRIDE foi criado por Kohnfelder e Garg na Microsoft em 1999"
+    },
+    {
+      "fala": 44,
+      "afirmacao": "Spoofing, que é se passar por outra pessoa. Tampering, que é adulterar dados. Repudiation, que é negar ter feito algo. Information disclosure, vazamento de informação. Denial of service, negação de serviço. E Elevation of privilege, conseguir mais permissão do que deveria",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 3"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "alguém consegue se passar por outro cliente? Sim, porque a API confiou no CPF que veio do lado de lá da fronteira",
+      "veredito": "imprecisa",
+      "correcao": "O cliente do cenário está logado com a própria identidade; a falha é de autorização (a API não confere se o CPF pedido pertence a quem está logado), não de autenticação. No STRIDE isso se classifica melhor como Information disclosure e Elevation of privilege (acesso a dados de outro usuário), e não como Spoofing. Corrigir a fala, e o \"É spoofing de novo\" seguinte, para não ensinar que uma falha de controle de acesso por objeto é spoofing; o spoofing do episódio é o da chave da parceira.",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 3 (Spoofing viola autenticação; Elevation of privilege viola autorização); OWASP API Security Top 10 2023, API1 Broken Object Level Authorization"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "a chave fixa foi parar no app, então qualquer um consegue se passar pela parceira",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 3 (Spoofing); noticia.json (cenário hipotético)"
+    },
+    {
+      "fala": 48,
+      "afirmacao": "O próprio Shostack criou um baralho chamado Elevation of Privilege, em que cada carta é uma ameaça",
+      "veredito": "correta",
+      "fonte": "Microsoft, Elevation of Privilege card game (2010), criado por Adam Shostack"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "Dá pra mitigar, mudando o desenho. Dá pra eliminar, tirando a funcionalidade. Dá pra transferir, [...] Ou dá pra aceitar o risco",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 1 (mitigate, eliminate, transfer, accept)"
+    },
+    {
+      "fala": 52,
+      "afirmacao": "A identidade vem do token de quem fez login, e não de um parâmetro que o cliente manda",
+      "veredito": "correta",
+      "fonte": "conhecimento consolidado; OWASP API1:2023 (BOLA), prevenção"
+    },
+    {
+      "fala": 54,
+      "afirmacao": "Menor privilégio. [...] Se ela não lê o que não precisa, um invasor nela também não lê",
+      "veredito": "correta",
+      "fonte": "conhecimento consolidado: princípio do menor privilégio (Saltzer e Schroeder, 1975)"
+    },
+    {
+      "fala": 60,
+      "afirmacao": "o custo de mudar uma decisão cresce com o tanto de coisa que foi construída em cima dela",
+      "veredito": "correta",
+      "fonte": "conhecimento consolidado; Shostack, Threat Modeling: Designing for Security (2014), cap. 7 (quando começar a modelagem)"
+    },
+    {
+      "fala": 70,
+      "afirmacao": "O WAF é uma camada a mais contra ataque genérico, conhecido. O pentest confere se o que foi construído bate com o que foi pensado",
+      "veredito": "correta",
+      "fonte": "conhecimento consolidado"
+    },
+    {
+      "fala": 72,
+      "afirmacao": "Conformidade em dia não é a mesma coisa que sistema seguro",
+      "veredito": "correta",
+      "fonte": "conhecimento consolidado"
+    },
+    {
+      "fala": 75,
+      "afirmacao": "A modelagem de ameaças é responder quatro perguntas. O que estamos construindo, o que pode dar errado, o que vamos fazer a respeito e se fizemos um bom trabalho",
+      "veredito": "correta",
+      "fonte": "Shostack, formulação atual das quatro perguntas (Threat Modeling Manifesto); aqui sem atribuição ao livro de 2014"
+    },
+    {
+      "fala": 77,
+      "afirmacao": "eu desenho as fronteiras de confiança, que são as linhas onde a confiança muda",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 2"
+    },
+    {
+      "fala": 79,
+      "afirmacao": "Pra cada ameaça, eu decido mitigar, eliminar, transferir ou aceitar",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 1"
+    }
+  ]
+}
