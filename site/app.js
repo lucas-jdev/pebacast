@@ -105,7 +105,25 @@
       status.textContent = `${visiveis} ${visiveis === 1 ? "episódio" : "episódios"}`;
     };
 
-    opcoes.forEach((opcao) => opcao.addEventListener("click", () => aplicar(opcao.dataset.saga)));
+    // O filtro mora em ?saga= porque o # já é do episódio. replaceState para "voltar" sair da página em vez de desfazer filtro.
+    const comSaga = (saga) => {
+      const url = new URL(location.href);
+      if (saga) url.searchParams.set("saga", saga); else url.searchParams.delete("saga");
+      return url;
+    };
+
+    opcoes.forEach((opcao) => opcao.addEventListener("click", () => {
+      aplicar(opcao.dataset.saga);
+      history.replaceState(history.state, "", comSaga(opcao.dataset.saga));
+    }));
+
+    const pedida = new URLSearchParams(location.search).get("saga");
+    if (pedida && opcoes.some((opcao) => opcao.dataset.saga === pedida)) {
+      aplicar(pedida);
+      // A lista encolheu depois que o navegador rolou até a âncora: rola de novo para o episódio pedido.
+      const alvo = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (alvo && !alvo.hidden) alvo.scrollIntoView();
+    }
   }
 
   // Curti / não curti. O voto vale por navegador: fica no localStorage para o botão lembrar, e o servidor guarda um por visitante.
