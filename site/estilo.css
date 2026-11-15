@@ -318,7 +318,6 @@ button { font: inherit; }
 .vozes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 1.5rem; }
 .voz { position: relative; background: var(--fundo); border: var(--borda) solid var(--linha); border-radius: var(--raio); padding: 1.8rem; box-shadow: var(--sombra); }
 .voz__inicial { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; font-family: var(--fonte-titulo); font-size: 2rem; font-weight: 800; background: var(--destaque); color: var(--texto-sobre-destaque, #1d1814); margin-bottom: 1.1rem; }
-.voz--helena .voz__inicial { background: var(--acento-2); color: var(--texto-sobre-acento-2, #fff); }
 .voz h3 { font-size: 1.7rem; }
 .voz__papel { font-size: 0.95rem; font-weight: 600; color: var(--acento); margin: 0.2rem 0 0.9rem; }
 .voz > p:not(.voz__papel) { color: var(--texto-suave); }
@@ -494,18 +493,19 @@ body { line-height: 1.7; }
 
 .voz { border: 0; box-shadow: none; border-radius: 2px; background: var(--chapa, var(--fundo)); isolation: isolate; }
 .voz::before { content: ""; position: absolute; inset: 0; z-index: -1; border: 4px solid var(--texto); translate: -7px -7px; pointer-events: none; }
-.voz--helena { --chapa: #cfe0f5; }
-.voz--davi { --chapa: #fbe3a0; }
+/* A voz convidada veste a cor da saga dela ([data-saga] mais abaixo); o apresentador, que está em todas, fica no papel cru. */
+.voz { --chapa: #fffaf0; }
+.voz[data-saga] { --chapa: var(--capa-fundo); }
+.voz[data-saga] .voz__inicial { background: var(--texto); color: var(--capa-fundo); }
 .voz__inicial { border-radius: 2px; border: 3px solid var(--texto); font-weight: 400; }
 .voz__papel { color: var(--texto); font-style: italic; }
 
 .sagas { row-gap: 3rem; padding-top: 30px; }
-.saga { border: 3px solid var(--texto); border-radius: 2px; background: #fffaf0; overflow: visible; transform-origin: top center; }
+.saga { border: 3px solid var(--texto); border-radius: 2px; background: var(--capa-fundo); overflow: visible; transform-origin: top center; }
 .saga:nth-child(odd) { rotate: -0.7deg; }
 .saga:nth-child(even) { rotate: 0.6deg; }
 .saga::before { content: ""; position: absolute; top: -21px; left: calc(-0.5rem - 3px); right: calc(-0.5rem - 3px); height: 3px; background: var(--texto); }
 .saga::after { content: ""; position: absolute; top: -33px; left: 0; right: 0; height: 40px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='40' viewBox='0 0 16 40'%3E %3Cpath d='M3 2h10v34l-5 2-5-2z' fill='%23b9a67d' stroke='%2315110c' stroke-width='2.5' stroke-linejoin='round'/%3E %3Cpath d='M3 15h10' stroke='%2315110c' stroke-width='3'/%3E %3Cpath d='M8 22v12' stroke='%2315110c' stroke-width='1.5'/%3E %3C/svg%3E") 18% 0 / 16px 40px no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='40' viewBox='0 0 16 40'%3E %3Cpath d='M3 2h10v34l-5 2-5-2z' fill='%23b9a67d' stroke='%2315110c' stroke-width='2.5' stroke-linejoin='round'/%3E %3Cpath d='M3 15h10' stroke='%2315110c' stroke-width='3'/%3E %3Cpath d='M8 22v12' stroke='%2315110c' stroke-width='1.5'/%3E %3C/svg%3E") 82% 0 / 16px 40px no-repeat; }
-.saga:nth-child(4n+1) { background: #f8d6df; } .saga:nth-child(4n+2) { background: #fbe3a0; } .saga:nth-child(4n+3) { background: #cfe0f5; } .saga:nth-child(4n) { background: #d6e8c4; }
 .saga--ativa { outline: 3px solid var(--texto); outline-offset: 4px; }
 .saga__numero { font-weight: 400; color: var(--texto); }
 .saga__estado--ativa { color: var(--texto); }

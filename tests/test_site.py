@@ -271,3 +271,70 @@ def test_descricao_do_site_cabe_na_previa_das_redes_sociais():
     config = yaml.safe_load((Path(__file__).parent.parent / "config" / "pipeline.yaml").read_text(encoding="utf-8"))
 
     assert len(" ".join(config["site"]["descricao"].split())) <= 125
+
+
+# ---------------------------------------------------------------- cor e nome da saga (#10)
+
+CSS = (Path(__file__).resolve().parents[1] / "site" / "estilo.css").read_text(encoding="utf-8")
+
+
+def test_card_da_secao_sagas_usa_a_cor_da_saga_e_nao_a_posicao(projeto):
+    pagina = gerar_index(projeto, "feed.xml")
+
+    for sid in ("software", "solucoes", "sistemas", "dados", "infraestrutura", "seguranca", "corporativa"):
+        assert re.search(rf'<li class="saga[^"]*" data-saga="{sid}">', pagina)
+    secao_sagas = CSS[CSS.index(".sagas {"):]
+    assert not re.search(r"\.saga:nth-child\([^)]*\)\s*\{[^}]*background", secao_sagas)
+    assert re.search(r"\.saga \{[^}]*background: var\(--capa-fundo\)", CSS)
+
+
+def test_voz_convidada_veste_a_cor_da_saga_e_o_apresentador_fica_neutro(projeto):
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert 'class="voz voz--helena" data-saga="software"' in pagina
+    assert 'class="voz voz--davi">' in pagina
+    assert re.search(r"\.voz\[data-saga\] \{ --chapa: var\(--capa-fundo\); \}", CSS)
+    assert not re.search(r"\.voz--[a-z]+\b[^{]*\{", CSS), "nenhuma cor por pessoa no CSS"
+
+
+def test_voz_convidada_nova_ganha_a_cor_da_saga_sem_css_novo(projeto):
+    persona = {"id": "rafael", "nome": "Rafael", "papel": "expert", "sagas": ["sistemas"], "historico": "h"}
+    _gravar(projeto.raiz / "curriculum" / "personas" / "rafael.yaml", persona)
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert 'class="voz voz--rafael" data-saga="sistemas"' in pagina
+    assert "Voz convidada da saga Sistemas" in pagina
+
+
+def test_cor_do_apresentador_nao_e_de_nenhuma_saga():
+    cores_de_saga = set(re.findall(r'\[data-saga="[a-z]+"\] \{ --capa-fundo: (#[0-9a-f]{6}); \}', CSS))
+    neutra = re.search(r"\.voz \{ --chapa: (#[0-9a-f]{6}); \}", CSS).group(1)
+
+    assert len(cores_de_saga) == 7
+    assert neutra not in cores_de_saga
+
+
+def test_site_usa_o_nome_curto_da_saga_em_todo_texto(projeto):
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    paginas = gerar_index(projeto, "feed.xml") + gerar_pagina_episodios(projeto, "feed.xml")
+
+    assert "Voz convidada da saga Software" in paginas
+    assert "Arquitetura de Software" not in paginas
+
+
+def _luminancia(cor):
+    canais = [int(cor[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+    r, g, b = (c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in canais)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def test_texto_sobre_as_cores_de_saga_tem_contraste_aa():
+    tema = CSS[CSS.index("/* Folheto de cordel"):]
+    texto = re.search(r"--texto: (#[0-9a-f]{6})", tema).group(1)
+    texto_suave = re.search(r"--texto-suave: (#[0-9a-f]{6})", tema).group(1)
+    for cor in re.findall(r'\[data-saga="[a-z]+"\] \{ --capa-fundo: (#[0-9a-f]{6}); \}', CSS):
+        for tinta in (texto, texto_suave):
+            claro, escuro = sorted((_luminancia(cor), _luminancia(tinta)), reverse=True)
+            assert (claro + 0.05) / (escuro + 0.05) >= 4.5, (cor, tinta)
