@@ -245,6 +245,7 @@ button { font: inherit; }
 .proximo__codigo { font-family: var(--fonte-titulo); font-size: 5.5rem; font-weight: 800; line-height: 0.85; letter-spacing: -0.04em; color: var(--texto-suave); }
 .proximo__corpo { padding: clamp(1.4rem, 3vw, 2.2rem); min-width: 0; }
 .proximo__titulo { font-size: clamp(1.6rem, 3.2vw, 2.3rem); }
+.proximo__vez { margin-top: 0.7rem; max-width: 40rem; font-weight: 600; }
 .proximo__rotulo { font-family: var(--fonte-texto); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--texto-suave); margin: 1.4rem 0 0.7rem; text-transform: none; }
 .proximo__estado { margin-top: 1.4rem; padding-top: 1rem; border-top: var(--borda) solid var(--linha); font-size: 0.95rem; color: var(--texto-suave); }
 @media (max-width: 760px) {
@@ -339,7 +340,7 @@ button { font: inherit; }
 @media (max-width: 560px) { .saga { min-height: 0; } }
 
 /* como funciona */
-.passos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5rem; }
+.passos { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; row-gap: 3rem; }
 .passos li { position: relative; padding-top: 1rem; border-top: 2px solid var(--linha); }
 .passo__num { display: grid; place-items: center; width: 40px; height: 40px; margin: -2.3rem 0 1rem; border-radius: 50%; background: var(--destaque); color: var(--texto-sobre-destaque, #1d1814); font-family: var(--fonte-titulo); font-weight: 800; font-size: 1.1rem; }
 .passos h3 { font-size: 1.3rem; margin-bottom: 0.5rem; }

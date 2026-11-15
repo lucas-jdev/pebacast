@@ -21,6 +21,7 @@ from typing import Any
 from podcast.curriculo import SAGAS
 from podcast.roteiro import (
     AGUARDANDO_PUBLICACAO,
+    DIAS_DA_SEMANA,
     FUSO_BRASILIA,
     Projeto,
     Proximo,
@@ -64,7 +65,7 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
         _hero(ultimo),
         _faixa(),
         _secao_ultimo(ultimo, personas, total_publicados=len(publicados), votos=_config_do_site(config)["votos"]),
-        _secao_proximo(proximo),
+        _secao_proximo(proximo, config),
         _secao_vozes(personas),
         _secao_sagas(sagas, publicados),
         _secao_como(config),
@@ -558,7 +559,44 @@ _ESTADO_DO_PROXIMO = {
 _ESTADO_PADRAO = "Fontes conferidas. O roteiro é o próximo a ser escrito."
 
 
-def _secao_proximo(proximo: Proximo | None) -> str:
+_DIAS_POR_EXTENSO = {"segunda": "segunda", "terca": "terça", "quarta": "quarta", "quinta": "quinta",
+                     "sexta": "sexta", "sabado": "sábado", "domingo": "domingo"}
+
+
+def _nome_da_saga(sid: str) -> str:
+    return next((nome for id_, nome, _ in SAGAS if id_ == sid), sid)
+
+
+def _vez_da_saga(config: Mapping[str, Any], saga_id: str) -> str:
+    """Por que o próximo é desta saga, lido de agenda.modo para o texto não mentir quando o modo mudar."""
+    agenda = config["agenda"]
+    vez = f"Agora é a vez da saga {_nome_da_saga(saga_id)}"
+    if agenda["modo"] == "rotacao_semanal":
+        return f"{vez}: cada dia da semana é de uma saga, e o episódio sai na saga do dia."
+    if agenda["modo"] == "saga_unica":
+        return f"{vez}: por enquanto, todos os episódios saem dela, na ordem do currículo."
+    return f"{vez}: as sagas se revezam, e sai a que está há mais tempo sem episódio novo."
+
+
+def _ordem_dos_episodios(config: Mapping[str, Any]) -> str:
+    agenda = config["agenda"]
+    if agenda["modo"] == "rotacao_semanal":
+        rotacao = agenda["rotacao_semanal"]
+        dias = ", ".join(f"{_DIAS_POR_EXTENSO[dia]} {_nome_da_saga(rotacao[dia])}"
+                         for dia in DIAS_DA_SEMANA if dia in rotacao)
+        regra = f"Cada dia da semana é de uma saga ({dias}), e dentro dela os episódios seguem o currículo."
+    elif agenda["modo"] == "saga_unica":
+        regra = (f"Por enquanto sai uma saga só, {_nome_da_saga(agenda['saga_unica'])}, "
+                 "um episódio depois do outro, na ordem do currículo.")
+    else:
+        regra = ("As sagas se revezam: sai a que está há mais tempo sem episódio novo, "
+                 "e dentro dela o próximo do currículo.")
+    if config["episodio"].get("exigir_referencias_verificadas"):
+        regra += " Só entra na vez o episódio com as referências já conferidas no livro; se não tiver, passa a vez."
+    return regra
+
+
+def _secao_proximo(proximo: Proximo | None, config: Mapping[str, Any]) -> str:
     if proximo is None:
         return _secao_proximo_vazio()
     objetivos = "".join(f"<li>{escape(o)}</li>" for o in proximo.episodio.dados.get("objetivos", []))
@@ -573,7 +611,8 @@ def _secao_proximo(proximo: Proximo | None) -> str:
       <div class="proximo__capa" aria-hidden="true"><span class="proximo__codigo">{_codigo(proximo.episodio.id)}</span></div>
       <div class="proximo__corpo">
         <p class="sobretitulo">Próximo episódio</p>
-        <h2 class="proximo__titulo">{escape(proximo.episodio.titulo)}</h2>{aprendizado}
+        <h2 class="proximo__titulo">{escape(proximo.episodio.titulo)}</h2>
+        <p class="proximo__vez">{escape(_vez_da_saga(config, proximo.saga.id))}</p>{aprendizado}
         <p class="proximo__estado">{escape(estado)}</p>
       </div>
     </article>
@@ -679,6 +718,7 @@ def _secao_como(config: Mapping[str, Any]) -> str:
     ciclos = config["revisao"]["max_ciclos"]
     passos = [
         ("Currículo", "Cada episódio tem objetivos, pré-requisitos e referências escolhidos à mão, livro e capítulo."),
+        ("A vez de cada saga", _ordem_dos_episodios(config)),
         ("Caso real", "Busca uma notícia recente que ilustre o tema. Se nenhuma servir, usa um cenário hipotético e avisa."),
         ("Roteiro", "Uma IA escreve o diálogo seguindo a história e o jeito de falar de cada personagem."),
         ("Revisão", f"Outra IA, sem ver como o roteiro foi feito, confere cada afirmação contra as fontes. "
