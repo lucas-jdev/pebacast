@@ -1,0 +1,222 @@
+{
+  "aprovado": true,
+  "roteiro_sha256": "af6957b76dad596084cc38f91327284cc430d383035a1af7690c057fcdcb1bee",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "o caso de hoje é hipotético",
+      "veredito": "correta",
+      "fonte": "noticia.json (tipo hipotetico)"
+    },
+    {
+      "fala": 3,
+      "afirmacao": "Imagine uma rede de clínicas que guarda tudo num banco de documentos. Cada paciente é um documento só. Dentro dele vão os dados cadastrais, a lista de consultas",
+      "veredito": "correta",
+      "fonte": "noticia.json"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "A diretoria quer saber quantas consultas cada médico fez por mês. E a área de qualidade quer rastrear indicações: paciente que indica outro paciente, médico que encaminha paciente pra outro médico",
+      "veredito": "correta",
+      "fonte": "noticia.json"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "o nome novo foi atualizado só em parte das fichas. O relatório mensal passou a contar o mesmo médico como se fossem dois. E a consulta de indicações virou um laço no código da aplicação",
+      "veredito": "correta",
+      "fonte": "noticia.json"
+    },
+    {
+      "fala": 18,
+      "afirmacao": "o capítulo dois de Designing Data-Intensive Applications, do Martin Kleppmann. O capítulo é todo sobre modelos de dados e linguagens de consulta, e ele compara justamente os três",
+      "veredito": "correta",
+      "fonte": "DDIA 1ª ed., sumário: cap. 2 'Data Models and Query Languages' (relacional, documento, grafo)"
+    },
+    {
+      "fala": 20,
+      "afirmacao": "O modelo relacional foi proposto pelo Edgar Codd em 1970",
+      "veredito": "correta",
+      "fonte": "Codd, 'A Relational Model of Data for Large Shared Data Banks' (CACM, 1970); citado em Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2"
+    },
+    {
+      "fala": 20,
+      "afirmacao": "O dado fica organizado em relações, que no SQL a gente chama de tabelas, e cada relação é uma coleção de tuplas, as linhas",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 ('relations (called tables in SQL) [...] unordered collection of tuples (rows in SQL)')"
+    },
+    {
+      "fala": 20,
+      "afirmacao": "você não precisa saber como o dado está guardado fisicamente pra consultá-lo. Você declara o que quer, e o banco decide como buscar",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (relacional esconde detalhes de implementação; consultas declarativas e otimizador)"
+    },
+    {
+      "fala": 22,
+      "afirmacao": "O nome vem da relação matemática, o conjunto de tuplas. A relação entre tabelas por chave estrangeira é outra coisa",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado (Codd 1970: relação no sentido matemático)"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "o Kleppmann dá um exemplo que eu adoro: um currículo, como um perfil do LinkedIn",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (Figura 2-1, perfil do LinkedIn)"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "Isso forma uma árvore de relacionamentos um para muitos, e essa árvore cabe naturalmente num documento",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (one-to-many forma uma árvore; JSON torna a estrutura explícita)"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "O nome que ele dá pra essa vantagem é localidade",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 ('the JSON representation has better locality'; seção de localidade de dados)"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "Ele também evita uma coisa que o capítulo chama de impedance mismatch",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 ('The Object-Relational Mismatch', chamado de impedance mismatch; JSON reduz o descompasso)"
+    },
+    {
+      "fala": 30,
+      "afirmacao": "Isso é um relacionamento muitos para um, de várias consultas para um médico",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado; Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 ('Many-to-One and Many-to-Many Relationships')"
+    },
+    {
+      "fala": 32,
+      "afirmacao": "guardar a região ou o setor de uma pessoa como texto livre, ou como um identificador",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (region e industry como texto livre vs. IDs)"
+    },
+    {
+      "fala": 32,
+      "afirmacao": "O identificador não tem significado pra quem lê, então ele nunca precisa mudar",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 ('Because it has no meaning to humans, it never needs to change')"
+    },
+    {
+      "fala": 34,
+      "afirmacao": "É a ideia por trás da normalização, sim: cada fato guardado em um lugar só",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 ('Removing such duplication is the key idea behind normalization')"
+    },
+    {
+      "fala": 36,
+      "afirmacao": "No modelo de documento, o suporte a join historicamente foi fraco. Em muitos bancos de documento, quem acaba fazendo essa junção é o código da aplicação, com várias buscas",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (suporte fraco a joins; o join passa para o código da aplicação)"
+    },
+    {
+      "fala": 40,
+      "afirmacao": "O modelo de documento costuma ser descrito como sem schema, e o Kleppmann prefere outro termo",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 ('sometimes called schemaless, but that's misleading [...] schema-on-read')"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "O schema existe, só que ele está implícito, e quem o interpreta é o código na hora da leitura. No relacional é schema on write",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (Schema flexibility in the document model)"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "Ele compara isso com tipagem dinâmica e tipagem estática nas linguagens",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (schema-on-read ~ dynamic type checking; schema-on-write ~ static)"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "Se os registros têm formatos muito variados, schema on read ajuda. Se todos têm a mesma forma, o schema explícito documenta e protege",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (vantagem com itens heterogêneos; schemas documentam e impõem estrutura quando é uniforme)"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "O grafo brilha quando os relacionamentos muitos para muitos são a parte mais importante do domínio",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 ('if many-to-many relationships are very common in your data [...] graph')"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "o property graph, em que nós e arestas têm propriedades e cada aresta tem um rótulo",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (Property Graphs: vértices e arestas com propriedades; aresta com label)"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "o triple store, em que tudo vira uma tripla de sujeito, predicado e objeto",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (Triple-Stores and SPARQL)"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "Pra consulta, ele mostra o Cypher, do Neo4j, o SPARQL e o Datalog",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (seções sobre Cypher, SPARQL e Datalog)"
+    },
+    {
+      "fala": 48,
+      "afirmacao": "Num grafo, seguir um número variável de arestas é a operação natural da linguagem",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (Cypher com caminhos de comprimento variável, :WITHIN*0..)"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "Pra percorrer em profundidade variável, o SQL tem a consulta recursiva, com o with recursive",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 ('Graph Queries in SQL', recursive common table expressions, WITH RECURSIVE)"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "o próprio capítulo mostra uma mesma consulta escrita em Cypher e em SQL recursivo, e a versão em SQL fica muito mais longa e difícil de ler",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 (mesma consulta em Cypher e SQL recursivo; a de SQL é bem mais longa e 'clumsy'); sem contagem de linhas, como pede o currículo"
+    },
+    {
+      "fala": 52,
+      "afirmacao": "O relatório da diretoria é uma agregação: contar consultas por médico por mês. Agregar e agrupar é o pão com manteiga do SQL",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado (GROUP BY e funções de agregação)"
+    },
+    {
+      "fala": 54,
+      "afirmacao": "Na LGPD, dado de saúde é dado pessoal sensível",
+      "veredito": "correta",
+      "fonte": "Lei 13.709/2018 (LGPD), art. 5º, II"
+    },
+    {
+      "fala": 68,
+      "afirmacao": "Os modelos estão convergindo. Bancos relacionais passaram a aceitar documentos JSON dentro de colunas, e bancos de documento passaram a oferecer formas de juntar dados",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 ('Convergence of document and relational databases': PostgreSQL/MySQL/DB2 com JSON; RethinkDB com joins, drivers do MongoDB resolvendo referências)"
+    },
+    {
+      "fala": 69,
+      "afirmacao": "eu poderia ter a ficha como JSON dentro do Postgres",
+      "veredito": "correta",
+      "fonte": "Documentação do PostgreSQL (tipos json/jsonb)"
+    },
+    {
+      "fala": 70,
+      "afirmacao": "o JSON dentro da coluna volta a ser schema on read",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado; coerente com Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2"
+    },
+    {
+      "fala": 73,
+      "afirmacao": "O documento é ótimo pra árvore [...] Ele sofre quando aparece muitos para um e muitos para muitos, porque aí ou eu duplico, e o dado diverge, ou eu junto no código",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2"
+    },
+    {
+      "fala": 75,
+      "afirmacao": "Ele até consegue percorrer redes com consulta recursiva, mas fica pesado de escrever e de ler",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Kleppmann, 1ª ed., cap. 2 ('Graph Queries in SQL')"
+    }
+  ]
+}

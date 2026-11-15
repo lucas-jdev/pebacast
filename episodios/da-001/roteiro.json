@@ -1,0 +1,349 @@
+{
+  "episodio": "da-001",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura sem decoreba. Antes de tudo, um aviso: este episódio foi gerado por inteligência artificial e revisado contra as fontes citadas. E hoje a gente abre uma saga nova, sobre dados, começando por uma pergunta que parece simples: relacional, documento ou grafo, como escolher o modelo de dados?"
+    },
+    {
+      "persona": "davi",
+      "texto": "E pra essa saga eu trouxe a Camila. A Camila é arquiteta de dados há treze anos, começou como DBA numa operadora de telecom e hoje cuida da governança de dados numa healthtech, onde a LGPD faz parte do dia a dia. Camila, seja muito bem-vinda!"
+    },
+    {
+      "persona": "camila",
+      "texto": "Obrigada, Davi! Oi, você que está ouvindo. Hoje a gente vai falar de forma, porque o formato em que você guarda o dado decide quais perguntas ficam fáceis e quais viram sofrimento."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então bora pro caso. E deixo claro: o caso de hoje é hipotético. Imagine uma rede de clínicas que guarda tudo num banco de documentos. Cada paciente é um documento só. Dentro dele vão os dados cadastrais, a lista de consultas e, em cada consulta, o nome e a especialidade do médico que atendeu."
+    },
+    {
+      "persona": "camila",
+      "texto": "Um documento por paciente. Até aqui faz sentido, continua."
+    },
+    {
+      "persona": "davi",
+      "texto": "Funcionou muito bem enquanto a pergunta era abrir a ficha do paciente. Uma leitura e pronto, a tela inteira montada. Aí chegaram duas perguntas novas. A diretoria quer saber quantas consultas cada médico fez por mês. E a área de qualidade quer rastrear indicações: paciente que indica outro paciente, médico que encaminha paciente pra outro médico."
+    },
+    {
+      "persona": "camila",
+      "texto": "E o que deu errado?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Duas coisas. Um médico mudou o nome no conselho, e o nome novo foi atualizado só em parte das fichas. O relatório mensal passou a contar o mesmo médico como se fossem dois. E a consulta de indicações virou um laço no código da aplicação, que busca um documento, lê quem indicou, busca o próximo, e assim vai."
+    },
+    {
+      "persona": "camila",
+      "texto": "Esse caso é bonito porque ele não tem vilão. Ninguém errou na primeira escolha. O domínio mudou de forma e o modelo ficou parado. Mas antes de falar em banco, Davi, me diz uma coisa: quem é o dono do cadastro de médicos nessa rede?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Pelo jeito, ninguém. Cada ficha de paciente tem a sua cópia."
+    },
+    {
+      "persona": "camila",
+      "texto": "Pois é. E isso já é metade do diagnóstico. Mas vai, você é o dev da rede. O que você propõe?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Olha, eu vou ser sincero. Minha primeira ideia é migrar tudo pra um banco de grafo. Tá todo mundo falando de grafo, indicação é literalmente uma rede, e um grafo resolveria as duas perguntas de uma vez. Pacientes, médicos e consultas viram nós, e as relações viram arestas. Pronto.",
+      "estilo": "empolgado"
+    },
+    {
+      "persona": "camila",
+      "texto": "Gostei da coragem. Agora deixa eu te fazer umas perguntas antes de responder. Quantas vezes por dia alguém abre a ficha de um paciente?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Sei lá, milhares. É a tela mais usada do sistema."
+    },
+    {
+      "persona": "camila",
+      "texto": "E quantas vezes por dia alguém roda a consulta de indicações?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Bem menos. A área de qualidade roda uma vez por semana, talvez."
+    },
+    {
+      "persona": "camila",
+      "texto": "E o relatório de consultas por médico?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Uma vez por mês. Peraí, deixa eu ver se eu entendi. Você está dizendo que eu ia trocar o banco da tela que roda milhares de vezes por dia por causa de uma consulta que roda uma vez por semana?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Eu estou dizendo que você ainda não olhou para as consultas. A escolha do modelo começa por duas perguntas: como as coisas se relacionam no domínio e quais perguntas você vai fazer sobre elas, com que frequência. Ferramenta vem depois. Pra isso, eu gosto de usar o capítulo dois de Designing Data-Intensive Applications, do Martin Kleppmann. O capítulo é todo sobre modelos de dados e linguagens de consulta, e ele compara justamente os três que a gente vai ver hoje."
+    },
+    {
+      "persona": "davi",
+      "texto": "Beleza. Então começa do começo. O que é o modelo relacional, direito?"
+    },
+    {
+      "persona": "camila",
+      "texto": "O modelo relacional foi proposto pelo Edgar Codd em 1970. O dado fica organizado em relações, que no SQL a gente chama de tabelas, e cada relação é uma coleção de tuplas, as linhas. A ideia forte é que você não precisa saber como o dado está guardado fisicamente pra consultá-lo. Você declara o que quer, e o banco decide como buscar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso é o tal do SQL ser declarativo, né?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Exato. E repara que a palavra é relação, não relacionamento. Muita gente acha que relacional quer dizer que as tabelas se relacionam. O nome vem da relação matemática, o conjunto de tuplas. A relação entre tabelas por chave estrangeira é outra coisa.",
+      "estilo": "corrigindo, com bom humor"
+    },
+    {
+      "persona": "davi",
+      "texto": "Olha, eu achava que era por causa dos relacionamentos. Primeira coisa que eu aprendo hoje."
+    },
+    {
+      "persona": "camila",
+      "texto": "E o modelo de documento?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Ah, você está me perguntando? Bom, é o que a rede usa. Você guarda um documento, tipo um JSON, com tudo que pertence àquela coisa dentro dele. A ficha do paciente com as consultas dentro."
+    },
+    {
+      "persona": "camila",
+      "texto": "Perfeito. E o Kleppmann dá um exemplo que eu adoro: um currículo, como um perfil do LinkedIn. Uma pessoa tem vários cargos, várias formações, vários contatos. Isso forma uma árvore de relacionamentos um para muitos, e essa árvore cabe naturalmente num documento. Você lê tudo de uma vez, numa só busca. O nome que ele dá pra essa vantagem é localidade: o que é lido junto fica guardado junto."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então a ficha do paciente é o currículo do LinkedIn da clínica."
+    },
+    {
+      "persona": "camila",
+      "texto": "É uma boa analogia. Enquanto a pergunta era abrir a ficha, o modelo de documento era a escolha certa. Ele também evita uma coisa que o capítulo chama de impedance mismatch, aquele descompasso entre os objetos do código e as tabelas, que obriga a montar o objeto a partir de várias linhas."
+    },
+    {
+      "persona": "davi",
+      "texto": "O trabalho que o ORM faz, e que eu passo metade da vida brigando com ele.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "camila",
+      "texto": "Esse mesmo. Agora, olha onde a árvore quebra. O médico não pertence ao paciente. O mesmo médico atende centenas de pacientes. Isso é um relacionamento muitos para um, de várias consultas para um médico. E quando você copia o nome do médico dentro de cada consulta, você tem duplicação."
+    },
+    {
+      "persona": "davi",
+      "texto": "E duplicação é o nome que muda em metade das fichas."
+    },
+    {
+      "persona": "camila",
+      "texto": "Exatamente. O capítulo discute isso com um exemplo simples: guardar a região ou o setor de uma pessoa como texto livre, ou como um identificador que aponta pra um lugar só. O identificador não tem significado pra quem lê, então ele nunca precisa mudar. O texto tem significado, e um dia muda. Se ele estiver copiado em mil lugares, você tem que mudar em mil lugares, e em algum deles vai esquecer."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso é normalização, né? Aquilo das formas normais que eu decorei na faculdade e esqueci depois da prova."
+    },
+    {
+      "persona": "camila",
+      "texto": "É a ideia por trás da normalização, sim: cada fato guardado em um lugar só. E aqui tem uma história pessoal. Numa empresa onde eu trabalhei, dois relatórios oficiais mostravam números diferentes pra mesma coisa. Cada um tinha a sua cópia da definição. Ninguém mentiu, e mesmo assim a diretoria passou semanas sem saber em qual número confiar. O seu caso da clínica é o mesmo problema, só que no nível do registro.",
+      "estilo": "mais séria"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas aí eu tiro o nome do médico da ficha e guardo só o identificador dele. Resolvido?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Resolve a duplicação. Mas agora, pra mostrar a ficha com o nome do médico, você precisa juntar dois conjuntos de dados. No relacional isso é um join, e o banco faz pra você. No modelo de documento, o suporte a join historicamente foi fraco. Em muitos bancos de documento, quem acaba fazendo essa junção é o código da aplicação, com várias buscas."
+    },
+    {
+      "persona": "davi",
+      "texto": "Que é exatamente o laço que a gente escreveu pras indicações."
+    },
+    {
+      "persona": "camila",
+      "texto": "Esse é o custo de forçar o domínio num modelo que não combina com ele. O banco não reclama. Ele aceita tudo. Quem paga é o código da aplicação, que vai acumulando a lógica que o banco faria melhor. E quem paga depois é o dado, que fica inconsistente sem ninguém perceber."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí. Então o relacional ganha? Joga tudo em tabela e acabou?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Calma, que você pulou de um extremo pro outro. Pensa na ficha. No relacional, ela vira uma tabela de pacientes, uma de consultas e uma de médicos. Pra montar a tela, você junta as três. Funciona, e com índice funciona bem. Mas você perdeu a localidade: o que era uma leitura virou uma consulta com joins. E tem outra coisa. O modelo de documento costuma ser descrito como sem schema, e o Kleppmann prefere outro termo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Qual?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Schema on read. O schema existe, só que ele está implícito, e quem o interpreta é o código na hora da leitura. No relacional é schema on write: o banco confere o formato na hora de gravar. Ele compara isso com tipagem dinâmica e tipagem estática nas linguagens. Nenhum dos dois é melhor sempre. Se os registros têm formatos muito variados, schema on read ajuda. Se todos têm a mesma forma, o schema explícito documenta e protege."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso eu entendo bem. É tipo Java contra JavaScript. Um reclama na hora de compilar, o outro reclama em produção.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "camila",
+      "texto": "Bom, o outro às vezes nem reclama, só mostra o dado errado. Mas é essa a ideia, sim."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, e o grafo? Eu ainda quero meu grafo."
+    },
+    {
+      "persona": "camila",
+      "texto": "Vamos lá. O grafo brilha quando os relacionamentos muitos para muitos são a parte mais importante do domínio. O capítulo descreve duas formas de grafo. A primeira é o property graph, em que nós e arestas têm propriedades e cada aresta tem um rótulo. A segunda é o triple store, em que tudo vira uma tripla de sujeito, predicado e objeto. Pra consulta, ele mostra o Cypher, do Neo4j, o SPARQL e o Datalog."
+    },
+    {
+      "persona": "davi",
+      "texto": "E como fica a indicação nesse mundo?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Paciente é um nó. Médico é um nó. Indicou é uma aresta de paciente pra paciente, e encaminhou é uma aresta de médico pra médico. A pergunta da qualidade é: partindo deste paciente, siga as indicações em qualquer profundidade e me mostre a cadeia. Num grafo, seguir um número variável de arestas é a operação natural da linguagem. Você escreve o padrão do caminho, e o banco percorre."
+    },
+    {
+      "persona": "davi",
+      "texto": "E no relacional dá pra fazer isso?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Dá. Uma tabela de indicações com duas colunas, quem indicou e quem foi indicado, já representa o grafo. Pra percorrer em profundidade variável, o SQL tem a consulta recursiva, com o with recursive. Funciona. Mas o próprio capítulo mostra uma mesma consulta escrita em Cypher e em SQL recursivo, e a versão em SQL fica muito mais longa e difícil de ler. A minha leitura é: o relacional consegue, mas a pergunta passa a brigar com a linguagem."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então, pra indicação, grafo. Mas agora a minha pergunta de ouvinte. Por que não trocar tudo pro grafo, então? Ele também guarda a ficha, não guarda?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Guarda. A pergunta é quanto custa. Volta pras frequências que você me deu. A tela mais usada é a ficha, que é uma árvore. O relatório da diretoria é uma agregação: contar consultas por médico por mês. Agregar e agrupar é o pão com manteiga do SQL. E a consulta de grafo roda uma vez por semana. Se você migra tudo, otimizou a consulta mais rara e mexeu na mais frequente."
+    },
+    {
+      "persona": "davi",
+      "texto": "Fora que ninguém no time sabe Cypher. Incluindo eu."
+    },
+    {
+      "persona": "camila",
+      "texto": "E isso conta! Um modelo novo traz linguagem nova, operação nova, backup novo, monitoramento novo. E tem um ponto que eu não deixo passar: isso aqui é dado de saúde. Na LGPD, dado de saúde é dado pessoal sensível. Cada cópia nova desse dado é mais um lugar pra proteger, controlar acesso e explicar pra quem audita. Copiar o histórico de pacientes pra outro banco não é um detalhe de infraestrutura.",
+      "estilo": "firme"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, isso eu não tinha pensado. Eu estava pensando no banco, não no paciente."
+    },
+    {
+      "persona": "camila",
+      "texto": "É normal, e por isso eu sempre pergunto de onde vem o dado e o que ele significa antes de discutir onde guardar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então qual seria o caminho pra clínica?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Não tem um só, e é isso que eu quero que fique. Vou te dar três e você me diz o que perde em cada um. Primeiro caminho: continua no banco de documentos, mas o médico sai de dentro da ficha e vira uma coleção com dono, referenciada por identificador. A indicação vira um campo com o identificador de quem indicou, e a consulta de cadeia continua no código."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ganho: mexo pouco, a ficha continua rápida. Perco: o join vira código, e a cadeia de indicações continua sendo um laço que eu tenho que manter."
+    },
+    {
+      "persona": "camila",
+      "texto": "Isso. Segundo caminho: migra pro relacional. Pacientes, consultas, médicos e uma tabela de indicações. O relatório fica trivial, a duplicação some, e a cadeia vira uma consulta recursiva."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ganho: consistência e relatório fácil. Perco: a ficha vira joins, preciso de uma migração grande, e a consulta recursiva é feia, mas funciona."
+    },
+    {
+      "persona": "camila",
+      "texto": "Terceiro caminho: mantém o principal onde está e alimenta um grafo só com o que a qualidade precisa, os identificadores de quem indicou quem e de quem encaminhou pra quem, sem o prontuário."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ganho: a consulta de cadeia fica natural. Perco: dois bancos, um pipeline entre eles, e a pergunta de qual dos dois está certo quando eles discordarem."
+    },
+    {
+      "persona": "camila",
+      "texto": "E aí volta a minha pergunta do começo. Quem é o dono desse dado? Se tiver duas cópias, uma tem que ser a fonte e a outra uma derivação. Sem isso, você recria o problema dos dois relatórios."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas eu quero uma resposta. Se fosse você?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Com o que você me contou, uma consulta de grafo por semana, um relatório por mês e a ficha o dia inteiro, eu iria pro segundo caminho, ou ficaria no primeiro se a migração for cara demais agora. O grafo dedicado eu só colocaria quando a pergunta de rede virasse o centro do negócio. Mas repara: é a minha opinião sobre este domínio, com estas consultas. Mudou a frequência, muda a resposta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso é o depende, né? Eu já estou aprendendo a ouvir.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "camila",
+      "texto": "É um depende com critério. E tem uma última coisa que o capítulo aponta e que ajuda a não tratar isso como religião. Os modelos estão convergindo. Bancos relacionais passaram a aceitar documentos JSON dentro de colunas, e bancos de documento passaram a oferecer formas de juntar dados. Então a pergunta não é qual produto, é qual forma o seu dado tem e quais perguntas você faz pra ele."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então eu poderia ter a ficha como JSON dentro do Postgres e as consultas em tabela?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Poderia, e é uma saída que eu já vi funcionar bem. Mas cuidado: o JSON dentro da coluna volta a ser schema on read. Se você enfiar o nome do médico lá dentro de novo, a duplicação volta junto."
+    },
+    {
+      "persona": "davi",
+      "texto": "O bug não liga pro banco, ele liga pra onde o dado está copiado."
+    },
+    {
+      "persona": "camila",
+      "texto": "Perfeito. Vou roubar essa frase.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu resumir com as minhas palavras pra ver se eu entendi mesmo. Os três modelos são formas diferentes de desenhar as relações. O documento é ótimo pra árvore, pra coisa que pertence a uma coisa só e é lida inteira de uma vez, como a ficha. Ele sofre quando aparece muitos para um e muitos para muitos, porque aí ou eu duplico, e o dado diverge, ou eu junto no código."
+    },
+    {
+      "persona": "camila",
+      "texto": "Isso."
+    },
+    {
+      "persona": "davi",
+      "texto": "O relacional guarda cada fato num lugar só, junta com join e é ótimo pra agregação, como o relatório por médico. O preço é montar a árvore com joins e ter um schema explícito pra manter. Ele até consegue percorrer redes com consulta recursiva, mas fica pesado de escrever e de ler."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o grafo é o melhor quando a rede é a pergunta, quando eu quero seguir relações em profundidade variável, como as indicações. O preço é mais um modelo, mais uma linguagem e, no nosso caso, mais uma cópia de dado sensível. E a escolha não começa pelo banco. Começa por olhar as relações do domínio e as consultas, com a frequência de cada uma. Forçar o domínio no modelo errado não dá erro na hora. O custo aparece depois, no código e no dado inconsistente."
+    },
+    {
+      "persona": "camila",
+      "texto": "Eu não resumiria melhor. Só acrescento: e antes de tudo isso, descobre quem é o dono do dado."
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado! E agora o desafio da semana. Pegue uma entidade central de um sistema que você mantém e modele-a nos três estilos. Diga qual consulta fica mais simples e qual fica mais difícil em cada um. Vale papel e caneta, vale quadro branco. O importante é escrever as consultas, não só desenhar as caixinhas."
+    },
+    {
+      "persona": "camila",
+      "texto": "E quando fizer, conta pra si mesmo quantas cópias de cada informação apareceram em cada modelo. Esse número diz muita coisa."
+    },
+    {
+      "persona": "davi",
+      "texto": "Camila, muito obrigado. Foi uma estreia de saga e tanto."
+    },
+    {
+      "persona": "camila",
+      "texto": "Eu que agradeço, Davi. Foi divertido. Até a próxima, pessoal!"
+    },
+    {
+      "persona": "davi",
+      "texto": "Valeu, Camila! E você que ouviu até aqui, obrigado pela companhia. Este foi o Pebacast. Até o próximo episódio!"
+    }
+  ],
+  "desafio": "Pegue uma entidade central de um sistema que você mantém e modele-a nos três estilos. Diga qual consulta fica mais simples e qual fica mais difícil em cada um.",
+  "fontes": [
+    "Designing Data-Intensive Applications, Martin Kleppmann, 1ª edição, cap. 2"
+  ]
+}
