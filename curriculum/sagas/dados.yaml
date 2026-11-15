@@ -42,7 +42,14 @@ episodios:
     referencias:
       - fonte: ddia
         capitulos: [2]
-    referencias_verificadas: false
+    # Conferido em 2026-11-14 pelo sumário do livro, pela prévia da O'Reilly e por notas de
+    # leitura, e não no livro. Cap. 2: "Relational Model Versus Document Model" e "Graph-Like Data
+    # Models", base do objetivo 1; "Many-to-One and Many-to-Many Relationships" e "Relational
+    # Versus Document Databases Today", base do objetivo 2; "The Object-Relational Mismatch" e
+    # "Graph Queries in SQL", base do objetivo 3. "When to Use Which Model", GraphQL e event
+    # sourcing são só da 2ª edição (2026), em que o tema virou o cap. 3. Não citar a contagem
+    # exata de linhas SQL contra Cypher, que não foi conferida.
+    referencias_verificadas: true
     desafio: >-
       Pegue uma entidade central de um sistema que você mantém e modele-a nos
       três estilos. Diga qual consulta fica mais simples e qual fica mais

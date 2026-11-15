@@ -31,7 +31,16 @@ episodios:
     pre_requisitos: []
     referencias:
       - fonte: elevator
-    referencias_verificadas: false
+        capitulos: [1, 4, 27, 32]
+    # Conferido em 2026-11-14 pelo sumário do livro e pelas prévias da O'Reilly, e não no livro.
+    # Cap. 1: "The Architect Elevator", base do objetivo 1, e "The Dangers of Riding the
+    # Elevator", base do objetivo 3. Cap. 4: "Enterprise Architect or Architect in the
+    # Enterprise?", base dos objetivos 2 e 3 ("Visit All Floors"). Caps. 27 "Control Is an
+    # Illusion" e 32 "Governance Through Inception": objetivo 2, conferido só pelos títulos das
+    # seções. "Penthouse" e "engine room" são do Hohpe; "sala da diretoria" é adaptação nossa.
+    # Jardineiro e guia turístico ficam no cap. 2. O Hohpe define o papel pela função, não pelo
+    # cargo: não atribuir a ele defesa de TOGAF ou de frameworks. O livro tem 41 capítulos.
+    referencias_verificadas: true
     desafio: >-
       Escolha uma decisão estratégica recente da sua empresa e descreva o
       impacto dela no sistema que você mantém. Anote quem fez essa ponte, ou
