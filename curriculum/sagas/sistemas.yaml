@@ -54,7 +54,14 @@ episodios:
     referencias:
       - fonte: ddia
         capitulos: [5]
-    referencias_verificadas: false
+    # Conferido em 2026-11-14 pelo sumário da O'Reilly e por notas de leitura, e não no livro.
+    # Cap. 5: "Leaders and Followers", "Multi-Leader Replication" e "Leaderless Replication", base
+    # do objetivo 1. "Problems with Replication Lag", com "Reading Your Own Writes", "Monotonic
+    # Reads" e "Consistent Prefix Reads", base do objetivo 2. "Reading Your Own Writes" e "Solutions
+    # for Replication Lag" mostram técnicas, mas o critério de quando ler da réplica é síntese do
+    # roteiro, não regra do livro. "Single-Leader Replication" é título da 2ª edição (2026), em
+    # que Replication virou o cap. 6; na 1ª a seção é "Leaders and Followers".
+    referencias_verificadas: true
     desafio: >-
       Encontre uma tela de um sistema que você conhece que lê de uma réplica,
       ou poderia ler, e descreva o que o usuário veria se a réplica estivesse

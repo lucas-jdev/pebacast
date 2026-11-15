@@ -63,11 +63,20 @@ episodios:
     objetivos:
       - Separar o que diferencia o negócio do que é commodity
       - Usar o estágio de evolução de um componente para decidir entre comprar e construir
-      - Reconhecer o custo escondido de customizar um produto comprado
+      - Reconhecer o custo de construir sob medida o que já virou commodity
     pre_requisitos: [sl-001]
     referencias:
       - fonte: wardley
-    referencias_verificadas: false
+        capitulos: [2, 3, 4]
+    # Conferido em 2026-11-14 no livro, publicado gratuitamente pelo autor no Medium (CC BY-SA 4.0;
+    # capítulos de 2016, compilados em 2018), e numa compilação do mesmo texto. Cap. 2: "Finding a
+    # path", o eixo de evolução, base do objetivo 2. Cap. 3: "Exploring the map", diferencial
+    # contra custo de fazer negócio, base do objetivo 1. Cap. 4: "Doctrine" ("Use appropriate
+    # methods" e "Remove duplication and bias"), base dos objetivos 2 e 3. O objetivo 3 dizia
+    # "customizar um produto comprado", tema que o livro não trata. "Core vs context" é do Geoffrey
+    # Moore; "custom built" é estágio de evolução, não sinônimo de feito em casa; "inertia" é
+    # resistência à evolução, não custo de customização.
+    referencias_verificadas: true
     desafio: >-
       Liste cinco componentes de um sistema que você conhece e classifique
       cada um como diferencial ou commodity. Aponte um que foi construído

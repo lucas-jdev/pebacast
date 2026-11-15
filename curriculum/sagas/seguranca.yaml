@@ -60,8 +60,15 @@ episodios:
     pre_requisitos: [se-001]
     referencias:
       - fonte: shostack
-        capitulos: [3]
-    referencias_verificadas: false
+        capitulos: [3, 9, 12]
+    # Conferido em 2026-11-14 pelo sumário da O'Reilly, pela prévia do cap. 3 e por capítulos que o
+    # autor publica em shostack.org, e não no livro inteiro. Cap. 3: as seis seções de ameaça, de
+    # "Spoofing Threats" a "Elevation of Privilege Threats", base do objetivo 1. Cap. 12: "The
+    # STRIDE Requirements", com a tabela "STRIDE and AINCAA", base do objetivo 2; o cap. 3 não traz
+    # essa tabela. Cap. 9: "Threat-Specific Prioritization Approaches", base do objetivo 3,
+    # conferido só pelo título. Probabilidade e impacto é critério do desafio, não do livro, e o
+    # DREAD não pode ser recomendado em nome do autor, que o critica. A 2ª edição renumera.
+    referencias_verificadas: true
     desafio: >-
       Aplique o STRIDE ao fluxo que você desenhou no desafio anterior e
       escolha a ameaça que trataria primeiro, justificando pela

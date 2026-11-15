@@ -62,8 +62,15 @@ episodios:
     pre_requisitos: [sw-001]
     referencias:
       - fonte: fosa
-        capitulos: [4, 5]
-    referencias_verificadas: false
+        capitulos: [4, 5, 6]
+    # Conferido em 2026-11-14 pelo sumário do livro e pelas prévias da O'Reilly, e não no livro.
+    # Cap. 4: a abertura e "Architectural Characteristics (Partially) Listed", base do objetivo 1;
+    # "Trade-Offs and Least Worst Architecture", base do objetivo 3. Cap. 5: "Extracting
+    # Architecture Characteristics from Domain Concerns", "...from Requirements" e "Case Study:
+    # Silicon Sandwiches", base do objetivo 2. Cap. 6: "Measuring and Governing Architecture
+    # Characteristics", base do desafio (o que não é medido). O livro pede uma lista curta, não
+    # exatamente três características. "Kata" e "Limiting and Prioritizing" são só da 2ª edição.
+    referencias_verificadas: true
     desafio: >-
       Liste as três características mais críticas de um sistema que você
       mantém, justificando cada uma com um requisito de negócio, e aponte
