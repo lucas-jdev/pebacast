@@ -21,6 +21,7 @@ from typing import Any, Protocol
 from xml.etree import ElementTree as ET
 
 from podcast.audio import Audio, Vinheta, duracao_mp3, exportar_mp3
+from podcast.curriculo import Saga
 from podcast.dominio import Fala, Persona
 from podcast.personas import carregar_personas
 from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
@@ -50,19 +51,45 @@ class GitHubReleases:
     executar: Callable[..., subprocess.CompletedProcess] = subprocess.run
 
     def publicar(self, episodio_id: str, titulo: str, arquivo: Path) -> str:
-        tag = f"episodio-{episodio_id}"
-        repo = ["--repo", self.repositorio]
-        ja_existe = self.executar(["gh", "release", "view", tag, *repo], capture_output=True).returncode == 0
+        tag = self._tag(episodio_id)
+        ja_existe = self.executar(["gh", "release", "view", tag, *self._repo], capture_output=True).returncode == 0
         if ja_existe:
             # Republicação do mesmo episódio: a URL e o GUID continuam os mesmos.
-            self.executar(["gh", "release", "upload", tag, str(arquivo), "--clobber", *repo], check=True)
-        else:
-            self.executar(
-                ["gh", "release", "create", tag, str(arquivo), "--title", titulo,
-                 "--notes", f"Áudio do episódio {episodio_id}.", *repo],
-                check=True,
-            )
-        return f"https://github.com/{self.repositorio}/releases/download/{tag}/{arquivo.name}"
+            return self.anexar(episodio_id, arquivo)
+        self.executar(
+            ["gh", "release", "create", tag, str(arquivo), "--title", titulo,
+             "--notes", f"Áudio do episódio {episodio_id}.", *self._repo],
+            check=True,
+        )
+        return self._url(episodio_id, arquivo.name)
+
+    def anexar(self, episodio_id: str, arquivo: Path) -> str:
+        """Sobe o arquivo no release do episódio, substituindo o asset de mesmo nome."""
+        self.executar(["gh", "release", "upload", self._tag(episodio_id), str(arquivo), "--clobber", *self._repo], check=True)
+        return self._url(episodio_id, arquivo.name)
+
+    def baixar(self, episodio_id: str, nome: str, pasta: Path) -> Path:
+        pasta.mkdir(parents=True, exist_ok=True)
+        self.executar(
+            ["gh", "release", "download", self._tag(episodio_id), "--pattern", nome,
+             "--dir", str(pasta), "--clobber", *self._repo],
+            check=True,
+        )
+        return pasta / nome
+
+    def remover(self, episodio_id: str, nome: str) -> None:
+        self.executar(["gh", "release", "delete-asset", self._tag(episodio_id), nome, "--yes", *self._repo], check=True)
+
+    @property
+    def _repo(self) -> list[str]:
+        return ["--repo", self.repositorio]
+
+    @staticmethod
+    def _tag(episodio_id: str) -> str:
+        return f"episodio-{episodio_id}"
+
+    def _url(self, episodio_id: str, nome: str) -> str:
+        return f"https://github.com/{self.repositorio}/releases/download/{self._tag(episodio_id)}/{nome}"
 
 
 @dataclass(frozen=True)
@@ -81,6 +108,19 @@ def episodios_pendentes(projeto: Projeto) -> list[str]:
         for pasta in projeto.episodios.iterdir()
         if (pasta / ROTEIRO).exists() and not (pasta / PUBLICACAO).exists()
     )
+
+
+def saga_do_episodio(sagas: Mapping[str, Saga], episodio_id: str) -> Saga | None:
+    return next((saga for saga in sagas.values() if any(e.id == episodio_id for e in saga.episodios)), None)
+
+
+def falas_do_episodio(pasta: Path, personas: Mapping[str, Persona], config_tts: Mapping[str, Any]) -> list[Fala]:
+    """As falas do roteiro, já com o dicionário de pronúncia aplicado."""
+    return aplicar_pronuncias(carregar_falas(_ler_json(pasta / ROTEIRO), personas), carregar_pronuncias(config_tts))
+
+
+def medir_mp3(mp3: Path) -> dict[str, int]:
+    return {"tamanho_bytes": mp3.stat().st_size, "duracao_segundos": round(duracao_mp3(mp3))}
 
 
 def carregar_falas(roteiro: Mapping[str, Any], personas: Mapping[str, Persona]) -> list[Fala]:
@@ -131,7 +171,7 @@ def publicar_pendentes(
     publicados, reprovados, avisos = [], {}, []
 
     for episodio_id in episodios_pendentes(projeto):
-        saga = next((s for s in sagas.values() if any(e.id == episodio_id for e in s.episodios)), None)
+        saga = saga_do_episodio(sagas, episodio_id)
         if saga is None:
             reprovados[episodio_id] = ["a pasta não corresponde a nenhum episódio do currículo"]
             continue
@@ -141,8 +181,7 @@ def publicar_pendentes(
             reprovados[episodio_id] = problemas
             continue
 
-        roteiro = _ler_json(pasta / ROTEIRO)
-        falas = aplicar_pronuncias(carregar_falas(roteiro, personas), carregar_pronuncias(config["tts"]))
+        falas = falas_do_episodio(pasta, personas, config["tts"])
         try:
             audio, provedor, erro_principal = sintetizar_com_fallback(
                 falas,
@@ -167,8 +206,7 @@ def publicar_pendentes(
         publicacao = {
             "guid": f"pebacast-{episodio_id}",
             "url_audio": url,
-            "tamanho_bytes": mp3.stat().st_size,
-            "duracao_segundos": round(duracao_mp3(mp3)),
+            **medir_mp3(mp3),
             "publicado_em": agora().isoformat(timespec="seconds"),
             "tts": {"provedor": provedor, "fallback": erro_principal is not None},
             "vinheta": vinheta is not None,
