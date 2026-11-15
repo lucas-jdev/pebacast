@@ -164,6 +164,24 @@ def test_etiqueta_mostra_a_saga_e_a_posicao_do_episodio(projeto):
     assert 'class="proximo" data-saga="software"' in inicial
 
 
+def test_capa_mostra_o_codigo_com_a_sigla_da_saga(projeto):
+    _usar_fila(projeto)
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+    _ja_publicado(projeto, "sl-001", "2026-11-08T15:00:00+00:00")
+
+    capas = [
+        capa
+        for pagina in (gerar_index(projeto, "feed.xml"), gerar_pagina_episodios(projeto, "feed.xml"))
+        for capa in re.findall(r'<div class="(?:episodio|item|proximo)__capa" aria-hidden="true">(.*?)</div>',
+                               pagina, re.DOTALL)
+    ]
+
+    codigos = [re.search(r'<span class="codigo__sigla">(\w+)</span>(\d+)', capa).groups() for capa in capas]
+
+    assert len(capas) == 4
+    assert {("SW", "001"), ("SL", "001")} <= set(codigos)
+
+
 def _dados_estruturados(pagina):
     return json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', pagina, re.DOTALL).group(1))
 
