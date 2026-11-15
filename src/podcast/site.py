@@ -646,15 +646,21 @@ def _secao_sagas(sagas: Mapping[str, Any], publicados: Sequence[Mapping[str, Any
             estado = f'<span class="saga__estado saga__estado--ativa">No ar · {feitos} de {total}</span>'
             progresso = f'<span class="saga__progresso" style="--p:{feitos / total if total else 0:.3f}"></span>'
             classe = "saga saga--ativa"
+            # Sem JS o filtro não roda e o link abre a lista completa, que continua servindo.
+            titulo = (f'<a class="saga__link" href="{PAGINA_EPISODIOS}?saga={escape(sid)}">{escape(nome)}'
+                      '<span class="so-leitor">: ver os episódios</span></a>')
+            ver = '<span class="saga__ver" aria-hidden="true">Ver episódios →</span>'
         else:
             estado = '<span class="saga__estado">Em breve</span>'
             progresso = ""
             classe = "saga"
+            titulo = escape(nome)
+            ver = ""
         cartoes.append(f"""<li class="{classe}" data-saga="{escape(sid)}">
   <span class="saga__numero">{indice:02d}</span>
-  <h3>{escape(nome)}</h3>
+  <h3>{titulo}</h3>
   <p>{escape(pergunta)}</p>
-  {estado}{progresso}
+  {estado}{progresso}{ver}
 </li>""")
     return f"""<section class="secao" id="sagas">
   <div class="largura">
