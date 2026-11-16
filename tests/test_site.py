@@ -1,5 +1,6 @@
 import json
 import re
+from datetime import date
 from pathlib import Path
 
 import yaml
@@ -383,3 +384,73 @@ def test_filtro_le_e_grava_a_saga_na_url_sem_criar_historico():
     assert 'new URLSearchParams(location.search).get("saga")' in js
     assert "history.replaceState" in js
     assert "history.pushState" not in js
+
+
+# ---------------------------------------------------------------- regra da ordem (#11)
+
+
+def _com_modo(projeto, modo):
+    config = yaml.safe_load((projeto.raiz / "config" / "pipeline.yaml").read_text(encoding="utf-8"))
+    config["agenda"]["modo"] = modo
+    _gravar(projeto.raiz / "config" / "pipeline.yaml", config)
+
+
+def _passo_da_ordem(pagina):
+    inicio = pagina.index("<h3>A vez de cada saga</h3>")
+    return pagina[inicio:pagina.index("</li>", inicio)]
+
+
+def test_no_modo_fila_o_proximo_diz_de_quem_e_a_vez_e_por_que(projeto):
+    _usar_fila(projeto)
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert ('<p class="proximo__vez">Agora é a vez da saga Soluções: as sagas se revezam, '
+            "e sai a que está há mais tempo sem episódio novo.</p>") in pagina
+
+
+def test_como_funciona_explica_o_revezamento_e_as_referencias_conferidas(projeto):
+    _usar_fila(projeto)
+
+    passo = _passo_da_ordem(gerar_index(projeto, "feed.xml"))
+
+    assert "As sagas se revezam: sai a que está há mais tempo sem episódio novo" in passo
+    assert "referências já conferidas no livro" in passo
+
+
+def test_na_rotacao_semanal_os_textos_falam_da_saga_do_dia(projeto):
+    _com_modo(projeto, "rotacao_semanal")
+
+    pagina = gerar_index(projeto, "feed.xml", data=date(2026, 11, 9))  # segunda: software
+
+    assert ("Agora é a vez da saga Software: cada dia da semana é de uma saga, "
+            "e o episódio sai na saga do dia.") in pagina
+    passo = _passo_da_ordem(pagina)
+    assert "Cada dia da semana é de uma saga (segunda Software, terça Soluções," in passo
+    assert "sábado Segurança, domingo Corporativa)" in passo
+    assert "referências já conferidas no livro" in passo
+    assert "se revezam" not in pagina
+
+
+def test_com_saga_unica_os_textos_falam_de_uma_saga_so(projeto):
+    _com_modo(projeto, "saga_unica")
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert "Agora é a vez da saga Software: por enquanto, todos os episódios saem dela, na ordem do currículo." in pagina
+    passo = _passo_da_ordem(pagina)
+    assert "Por enquanto sai uma saga só, Software, um episódio depois do outro" in passo
+    assert "referências já conferidas no livro" in passo
+    assert "se revezam" not in pagina
+
+
+def test_sem_proximo_o_estado_vazio_continua_igual(projeto):
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+    _ja_publicado(projeto, "sw-002", "2026-11-09T15:00:00+00:00")
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert "proximo__vez" not in pagina
+    assert ('<p class="proximo__texto">Episódio novo só sai depois que as referências dele são conferidas no livro.\n'
+            "          Assim que isso acontecer, ele aparece aqui e chega sozinho no seu app de podcast.</p>") in pagina
