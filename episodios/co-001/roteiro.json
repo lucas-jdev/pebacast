@@ -1,0 +1,326 @@
+{
+  "episodio": "co-001",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem estuda arquitetura de software. Antes de começar, o aviso de sempre: este episódio foi gerado por inteligência artificial e revisado contra as fontes citadas. E hoje a gente abre uma saga nova, a de arquitetura corporativa, com uma pergunta simples: quem leva a estratégia da empresa até o código que você escreve?"
+    },
+    {
+      "persona": "davi",
+      "texto": "E pra essa saga eu trouxe o Otávio. O Otávio é arquiteto corporativo há vinte e cinco anos. Foi desenvolvedor, foi gerente de TI de uma seguradora e coordenou a arquitetura de um órgão público na digitalização de serviços. Ou seja, já viu a empresa de cima a baixo."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Obrigado, Davi. Olá, você que está ouvindo, seja bem-vindo a essa conversa sobre andares, elevadores e quem tem coragem de subir e descer entre eles."
+    },
+    {
+      "persona": "davi",
+      "texto": "Andares e elevadores. Já gostei. Então bora pro caso de hoje, e deixo claro: ele é hipotético. Imagine uma rede de farmácias com trezentas lojas. Numa reunião de diretoria, sai a estratégia do ano: um programa de fidelidade único. O mesmo saldo de pontos na loja física, no app e no site. Prazo de seis meses."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Uma decisão estratégica bem clara. Até aqui, nada de errado."
+    },
+    {
+      "persona": "davi",
+      "texto": "Pois é. Só que essa decisão chega pras equipes como uma data num slide. E aí a equipe descobre que a rede tem três cadastros de clientes. Um do sistema de caixa das lojas, um do e-commerce e um do antigo cartão de desconto. E cada um tem uma diretoria que defende o seu."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Três cadastros, três donos. Eu já vi esse filme com quatro.",
+      "estilo": "rindo de leve"
+    },
+    {
+      "persona": "davi",
+      "texto": "E não para aí. O arquiteto corporativo da rede passa o semestre refinando um documento de padrões pra diretoria. O comitê de arquitetura exige um formulário de quarenta páginas antes de qualquer mudança. Então, pra cumprir o prazo, cada equipe integra os cadastros do seu jeito, ponto a ponto. No lançamento, o mesmo cliente aparece com três saldos diferentes."
+    },
+    {
+      "persona": "otavio",
+      "texto": "E o cliente, que só queria usar os pontos pra comprar um protetor solar, descobre que a empresa não sabe quem ele é."
+    },
+    {
+      "persona": "davi",
+      "texto": "Exato. E olha, eu trabalho com backend, então a minha cabeça já foi direto pra solução. Peraí, deixa eu ver se eu entendi o problema: são três bases que não conversam. Então o certo é criar um serviço de cadastro único, um microsserviço de cliente, com um barramento de eventos sincronizando tudo. Cada sistema publica as mudanças, o serviço novo consolida, e pronto. E pra garantir que ninguém faça besteira de novo, o comitê de arquitetura passa a aprovar cada integração. Mais controle, menos bagunça.",
+      "estilo": "empolgado"
+    },
+    {
+      "persona": "otavio",
+      "texto": "É uma proposta honesta, e tecnicamente ela pode até funcionar. Mas antes de responder, deixa eu te fazer algumas perguntas. Quem decidiu que o programa de fidelidade era a prioridade do ano?"
+    },
+    {
+      "persona": "davi",
+      "texto": "A diretoria."
+    },
+    {
+      "persona": "otavio",
+      "texto": "E quem decidiu que os três cadastros continuariam existindo?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hmm. Ninguém decidiu, né? Eles só estavam lá."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Essa é a questão. Agora a terceira pergunta. Quando a diretoria aprovou o prazo de seis meses, alguém naquela sala sabia que existiam três cadastros?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Provavelmente não. Senão alguém teria levantado a mão."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Então o seu microsserviço resolve um sintoma. O problema de verdade é que a decisão estratégica foi tomada num andar, e a realidade técnica morava em outro, e ninguém fez a viagem entre os dois. Repara: o seu serviço de cadastro único é uma decisão de engenharia. Mas qual cadastro vale quando os três discordam? Qual diretoria abre mão do seu? Isso não se resolve com evento. Isso é decisão de negócio."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, isso me pegou. Eu ia criar um serviço pra decidir uma briga que nem é técnica."
+    },
+    {
+      "persona": "otavio",
+      "texto": "E tem uma imagem que ajuda muito aqui. Ela vem de um livro do Gregor Hohpe, The Software Architect Elevator, o elevador do arquiteto de software. O Hohpe descreve a empresa grande como um prédio. Lá em cima fica o que ele chama de penthouse, a cobertura, onde a estratégia é definida. Lá embaixo fica a engine room, a sala de máquinas, onde os sistemas são construídos e operados. E entre os dois existem muitos andares."
+    },
+    {
+      "persona": "davi",
+      "texto": "Muitos andares, tipo diretor, gerente, coordenador, líder técnico..."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Isso. E cada andar a mais é uma chance da mensagem chegar distorcida, como um telefone sem fio. A ideia central do livro é que o arquiteto é quem pega o elevador. Ele sobe até a cobertura pra entender a estratégia e explicar, numa linguagem que a diretoria entende, o que a tecnologia permite e o que ela custa. E desce até a sala de máquinas pra entender como as coisas realmente funcionam e traduzir a estratégia em decisões técnicas."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o arquiteto é um tradutor."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Um tradutor nos dois sentidos, e é aí que muita gente erra. Não é só levar a ordem de cima pra baixo. É levar de baixo pra cima a notícia de que existem três cadastros, antes de alguém prometer seis meses."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. No nosso caso, se alguém tivesse feito essa viagem, a diretoria saberia dos três cadastros antes de fechar o prazo."
+    },
+    {
+      "persona": "otavio",
+      "texto": "E poderia escolher com informação. Talvez dissesse: o prazo é seis meses, então vamos lançar só no app primeiro. Ou: unificar o cadastro de clientes vira um objetivo estratégico, com dono e com orçamento. Qualquer uma das duas é melhor que descobrir no lançamento."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas e o arquiteto corporativo da rede? Ele existia. Ele estava lá, escrevendo o documento de padrões."
+    },
+    {
+      "persona": "otavio",
+      "texto": "E é aqui que entra o terceiro ponto da nossa conversa. Esse arquiteto estava parado num andar só. Ele passou o semestre na cobertura, produzindo documento pra diretoria, e nunca desceu pra ver os três cadastros. Tem um nome popular pra isso, que eu uso muito: arquiteto de torre de marfim."
+    },
+    {
+      "persona": "davi",
+      "texto": "Aquele que desenha a arquitetura bonita no slide e nunca viu um log de produção.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Esse mesmo. E o Hohpe dedica um trecho do livro justamente aos perigos de andar de elevador. Na minha leitura, um dos maiores é ficar preso num andar. O arquiteto que mora na cobertura perde contato com a realidade técnica, e as decisões dele viram ficção. Só que o contrário também acontece."
+    },
+    {
+      "persona": "davi",
+      "texto": "O contrário? O arquiteto que só fica embaixo?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Exato. O arquiteto que só circula na sala de máquinas. Ele conhece cada fila, cada índice, cada gargalo. Mas nunca sobe. Então quando a diretoria decide o programa de fidelidade, ele fica sabendo pelo slide, junto com todo mundo. Ele é ótimo tecnicamente e não tem influência nenhuma sobre a decisão que vai definir o trabalho dele pelo próximo ano."
+    },
+    {
+      "persona": "davi",
+      "texto": "Nossa. Esse sou eu, sinceramente. Eu fico sabendo das prioridades no planejamento do trimestre, já decididas.",
+      "estilo": "surpreso, mais devagar"
+    },
+    {
+      "persona": "otavio",
+      "texto": "E não é culpa sua. Mas é um bom exercício reparar quem, na sua empresa, faz essa viagem. Às vezes ninguém faz. Às vezes quem faz é um gerente de projeto, um líder técnico, alguém sem o cargo de arquiteto."
+    },
+    {
+      "persona": "davi",
+      "texto": "Alguém sem o cargo? Então arquiteto corporativo não é um cargo?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Pode ser um cargo, mas o que importa é a função. Tem um capítulo no livro com um título provocativo: Enterprise Architect or Architect in the Enterprise?, ou seja, arquiteto corporativo ou arquiteto dentro da empresa? O Hohpe define o papel pelo que a pessoa faz, e não pelo crachá. E nesse capítulo tem uma seção chamada Visit All Floors, visite todos os andares. Pra mim, essa é a descrição de trabalho mais curta que existe pra essa função."
+    },
+    {
+      "persona": "davi",
+      "texto": "Visite todos os andares. Gostei. Mas me ajuda numa coisa. Quando eu ouço arquitetura corporativa, eu penso em comitê, em formulário, em aprovação. Tipo o formulário de quarenta páginas do nosso caso. Isso não é arquitetura corporativa?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Essa é a confusão mais comum, e vale a gente parar nela. Deixa eu te devolver a pergunta com o meu bordão: isso serve a qual capacidade do negócio? O formulário de quarenta páginas ajudou a rede a ter um programa de fidelidade que funcione?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Não. Ele só fez as equipes darem a volta nele."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Pois é. Aquilo não é arquitetura corporativa. É governança burocrática. A diferença, pra mim, está no efeito. A burocracia mede o quanto de processo foi cumprido. A arquitetura corporativa mede se a organização consegue fazer o que a estratégia pede. Um formulário que todo mundo contorna produz o pior dos dois mundos: atrasa quem segue e não impede quem não segue."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então a minha ideia de colocar o comitê pra aprovar cada integração..."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Ia gerar mais do mesmo. Mais fila, mais contorno. E tem um título de capítulo no livro do Hohpe que resume bem isso: Control Is an Illusion, controle é uma ilusão. A minha leitura é que aquela sensação de controle que um comitê dá, com ata e carimbo, muitas vezes não corresponde ao que acontece de verdade nos sistemas. No nosso caso, o comitê aprovava formulários enquanto as integrações ponto a ponto se multiplicavam fora do radar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas aí fica a pergunta. Se não é comitê, como é que se governa? Porque deixar cada equipe fazer o que quiser também deu errado. Foi isso que gerou os três saldos."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Ótima pergunta, e é por isso que eu não sou contra governança. Sou contra governança que trava. Tem outro capítulo com um título curioso, Governance Through Inception. O nome lembra o filme, aquele em que plantam uma ideia na cabeça de alguém. Como eu leio essa proposta: em vez de proibir o caminho errado, você torna o caminho certo o mais fácil de seguir. Você planta a decisão, e a equipe escolhe porque é o que dá menos trabalho."
+    },
+    {
+      "persona": "davi",
+      "texto": "Me dá um exemplo concreto no caso das farmácias."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Imagina que a área de arquitetura, junto com as equipes, define um princípio curto: existe uma única fonte de verdade sobre quem é o cliente. E, em vez de um formulário, entrega uma API de consulta de cliente já pronta, documentada, com um time responsável. Quando a equipe do app precisar do cliente, o caminho mais rápido é usar essa API. Ninguém precisa ser fiscalizado. O caminho fácil e o caminho certo viraram o mesmo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso é tipo um template de projeto que já vem com log e monitoramento configurados. A gente usa porque é mais fácil, não porque alguém mandou."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Exatamente essa a ideia. Na cidade é parecido. Um bom urbanista não coloca um guarda em cada esquina mandando as pessoas atravessarem na faixa. Ele desenha a calçada de um jeito que a faixa fique no caminho natural de quem anda."
+    },
+    {
+      "persona": "davi",
+      "texto": "Gostei da cidade. Mas deixa eu ser o chato agora. Esse arquiteto que sobe e desce, ele não vira um gargalo? Todo mundo dependendo de uma pessoa?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "É um risco real, e é aqui que a gente precisa falar de trade-offs. Primeiro, o custo de andar de elevador. Subir e descer toma tempo. Cada hora numa reunião de diretoria é uma hora longe do código, e cada hora no código é uma hora longe da diretoria. Você nunca vai estar cem por cento em nenhum dos dois andares."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se a pessoa tentar estar nos dois o tempo todo, ela queima."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Queima, e vira gargalo, como você disse. Por isso o objetivo não é o arquiteto saber tudo. É ele garantir que a ponte existe. Às vezes ele leva a mensagem pessoalmente. Às vezes ele ensina um líder técnico a fazer a viagem. Às vezes ele cria um artefato que fala as duas línguas, como um mapa de capacidades do negócio."
+    },
+    {
+      "persona": "davi",
+      "texto": "Mapa de capacidades. Isso é o quê, exatamente?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "É uma visão do que a empresa precisa ser capaz de fazer, independente de quem faz ou com qual sistema. Gerenciar o relacionamento com o cliente. Vender no balcão. Vender online. Recompensar a fidelidade. A diretoria entende esse mapa porque ele fala de negócio. E a equipe técnica consegue pendurar os sistemas nele. Aí você olha e vê: a capacidade de conhecer o cliente está espalhada em três sistemas, com três donos. Pronto, o problema ficou visível pros dois andares ao mesmo tempo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso aí não é do livro do Hohpe, é?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Bem lembrado. O mapa de capacidades é uma prática de mercado que eu defendo pela minha experiência. Não estou atribuindo ao Hohpe. Ele tem a imagem do elevador. O mapa é uma das ferramentas que eu uso pra fazer a viagem render."
+    },
+    {
+      "persona": "davi",
+      "texto": "Valeu pela honestidade. E qual o segundo trade-off?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "O segundo é entre controle e autonomia. Do lado do comitê, você ganha uma sensação de ordem e um registro do que foi decidido. E perde velocidade, perde a confiança das equipes, e, como a gente viu, muitas vezes perde o próprio controle, porque as pessoas contornam. Do lado da autonomia total, você ganha velocidade no começo. E perde a coerência: três cadastros, três saldos, e um custo enorme pra juntar depois."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o meio do caminho é o tal do caminho fácil e certo."
+    },
+    {
+      "persona": "otavio",
+      "texto": "É o que eu prefiro. Poucos princípios, curtos e aplicados, e plataformas que tornam a escolha certa barata. Mas ele também tem custo. Construir aquela API de cliente exige um time, orçamento e alguém que convença três diretorias a abrir mão do seu cadastro. Sem patrocínio da cobertura, isso não sai."
+    },
+    {
+      "persona": "davi",
+      "texto": "E pra conseguir esse patrocínio, alguém tem que subir o elevador."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Você fechou o círculo. Tem um terceiro trade-off, mais pessoal. O arquiteto que sobe até a cobertura às vezes leva más notícias. Seis meses não dá. Esses três cadastros vão custar caro. Isso tem um custo político. É mais confortável ficar no seu andar, onde todo mundo concorda com você."
+    },
+    {
+      "persona": "davi",
+      "texto": "O cara da sala de máquinas reclamando do prazo no café, e o cara da cobertura achando que tá tudo bem."
+    },
+    {
+      "persona": "otavio",
+      "texto": "E os dois têm razão dentro do próprio andar. Por isso eu digo que um bom arquiteto corporativo é menos um desenhista de diagramas e mais um urbanista. Ele cuida das ruas que ligam os bairros. Não precisa construir cada casa, mas precisa garantir que dá pra ir de uma ponta à outra da cidade."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, e voltando à minha solução lá do começo, o microsserviço de cadastro com barramento de eventos. Ela morreu?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Não morreu. Ela pode ser a resposta técnica certa. O erro foi a ordem. Você começou pela tecnologia antes de saber qual decisão de negócio ela ia sustentar. Se a diretoria decidir que existe uma única fonte de verdade sobre o cliente, talvez o seu serviço seja exatamente o jeito de implementar isso. Mas aí ele nasce com dono, com prioridade e com o aval de quem precisa abrir mão dos cadastros antigos."
+    },
+    {
+      "persona": "davi",
+      "texto": "E, de preferência, com um roadmap que diz quando os três cadastros velhos vão ser desligados."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Isso. Um roadmap que mostra o que deixa de existir, e não só o que entra. Senão, daqui a dois anos, você tem quatro cadastros: os três antigos e o seu, novinho.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Socorro. Tá, deixa eu tentar resumir com as minhas palavras, e você me corrige. Primeiro: o papel do arquiteto corporativo é ligar a estratégia à tecnologia, nos dois sentidos. Levar a estratégia da cobertura pra sala de máquinas, e levar a realidade técnica da sala de máquinas pra cobertura, antes da decisão ser tomada. É a imagem do elevador do Gregor Hohpe."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Perfeito até aqui."
+    },
+    {
+      "persona": "davi",
+      "texto": "Segundo: arquitetura corporativa não é comitê nem formulário. Governança burocrática mede processo cumprido. Arquitetura corporativa mede se a empresa consegue fazer o que a estratégia pede. E a governança boa torna o caminho certo o mais fácil, em vez de só proibir o errado."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Isso."
+    },
+    {
+      "persona": "davi",
+      "texto": "Terceiro: cuidado com o arquiteto que só circula num andar. O da cobertura vira torre de marfim e decide no escuro. O da sala de máquinas entende tudo e não influencia nada. E o cargo não importa tanto: importa se alguém está fazendo a viagem. E os custos são reais: tempo, risco de virar gargalo e o desgaste de levar má notícia pra cima."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Resumiu melhor que muito relatório de consultoria. Só acrescento uma coisa: quando você estiver em dúvida se uma decisão técnica é importante, pergunte a qual capacidade do negócio ela serve. Se ninguém souber responder, alguém precisa pegar o elevador."
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado. E agora o desafio do episódio. Escolha uma decisão estratégica recente da sua empresa e descreva o impacto dela no sistema que você mantém. Anote quem fez essa ponte, ou se ninguém fez. Pode ser um produto novo, uma meta de custo, uma aquisição, qualquer coisa que veio de cima e chegou no seu código."
+    },
+    {
+      "persona": "otavio",
+      "texto": "E se descobrir que ninguém fez a ponte, isso já é uma descoberta valiosa. Talvez a próxima pessoa a pegar o elevador seja você."
+    },
+    {
+      "persona": "davi",
+      "texto": "Otávio, muito obrigado. Foi uma aula de urbanismo corporativo."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Eu que agradeço, Davi. Foi um prazer. Até a próxima."
+    },
+    {
+      "persona": "davi",
+      "texto": "E você que ouviu até aqui, obrigado pela companhia. Este foi o Pebacast, abrindo a saga de arquitetura corporativa. Até o próximo episódio!"
+    }
+  ],
+  "desafio": "Escolha uma decisão estratégica recente da sua empresa e descreva o impacto dela no sistema que você mantém. Anote quem fez essa ponte, ou se ninguém fez.",
+  "fontes": [
+    "The Software Architect Elevator: Redefining the Architect's Role in the Digital Enterprise, Gregor Hohpe, caps. 1, 4, 27 e 32"
+  ]
+}

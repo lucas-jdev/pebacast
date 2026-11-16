@@ -1,0 +1,102 @@
+{
+  "aprovado": true,
+  "roteiro_sha256": "c503d9520a07db744e1386fe8ce184ba6894b3e550fb1ba093cda6e1b778d5c8",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "deixo claro: ele é hipotético. Imagine uma rede de farmácias com trezentas lojas.",
+      "veredito": "correta",
+      "fonte": "noticia.json (tipo hipotetico): o roteiro anuncia o caso como hipotético; trezentas lojas, programa de fidelidade único e prazo de seis meses conferem com o cenário."
+    },
+    {
+      "fala": 5,
+      "afirmacao": "a rede tem três cadastros de clientes. Um do sistema de caixa das lojas, um do e-commerce e um do antigo cartão de desconto. E cada um tem uma diretoria que defende o seu.",
+      "veredito": "correta",
+      "fonte": "noticia.json: três cadastros (PDV, e-commerce, antigo cartão de desconto), cada um defendido por uma diretoria."
+    },
+    {
+      "fala": 7,
+      "afirmacao": "O arquiteto corporativo da rede passa o semestre refinando um documento de padrões pra diretoria. O comitê de arquitetura exige um formulário de quarenta páginas antes de qualquer mudança.",
+      "veredito": "correta",
+      "fonte": "noticia.json: documento de padrões, formulário de quarenta páginas, integrações ponto a ponto e três saldos no lançamento."
+    },
+    {
+      "fala": 18,
+      "afirmacao": "Ela vem de um livro do Gregor Hohpe, The Software Architect Elevator, o elevador do arquiteto de software.",
+      "veredito": "correta",
+      "fonte": "Hohpe, The Software Architect Elevator (2020); referência elevator do episódio."
+    },
+    {
+      "fala": 18,
+      "afirmacao": "O Hohpe descreve a empresa grande como um prédio. Lá em cima fica o que ele chama de penthouse, a cobertura, onde a estratégia é definida. Lá embaixo fica a engine room, a sala de máquinas, onde os sistemas são construídos e operados. E entre os dois existem muitos andares.",
+      "veredito": "correta",
+      "fonte": "Hohpe, The Software Architect Elevator (2020), cap. 1 'The Architect Elevator'; nota do currículo: 'penthouse' e 'engine room' são do Hohpe."
+    },
+    {
+      "fala": 20,
+      "afirmacao": "A ideia central do livro é que o arquiteto é quem pega o elevador. Ele sobe até a cobertura pra entender a estratégia e explicar, numa linguagem que a diretoria entende, o que a tecnologia permite e o que ela custa. E desce até a sala de máquinas",
+      "veredito": "correta",
+      "fonte": "Hohpe, The Software Architect Elevator (2020), cap. 1: o arquiteto conecta penthouse e engine room, nos dois sentidos."
+    },
+    {
+      "fala": 26,
+      "afirmacao": "Tem um nome popular pra isso, que eu uso muito: arquiteto de torre de marfim.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: 'ivory tower architect' é termo corrente na literatura e na prática; apresentado como nome popular, não atribuído a obra."
+    },
+    {
+      "fala": 28,
+      "afirmacao": "o Hohpe dedica um trecho do livro justamente aos perigos de andar de elevador. Na minha leitura, um dos maiores é ficar preso num andar.",
+      "veredito": "correta",
+      "fonte": "Hohpe, The Software Architect Elevator (2020), cap. 1, seção 'The Dangers of Riding the Elevator' (nota do currículo); a interpretação vem marcada como leitura da persona."
+    },
+    {
+      "fala": 34,
+      "afirmacao": "Tem um capítulo no livro com um título provocativo: Enterprise Architect or Architect in the Enterprise?",
+      "veredito": "correta",
+      "fonte": "Hohpe, The Software Architect Elevator (2020), cap. 4 (nota do currículo, conferida no sumário)."
+    },
+    {
+      "fala": 34,
+      "afirmacao": "O Hohpe define o papel pelo que a pessoa faz, e não pelo crachá. E nesse capítulo tem uma seção chamada Visit All Floors",
+      "veredito": "correta",
+      "fonte": "Hohpe, The Software Architect Elevator (2020), cap. 4, seção 'Visit All Floors'; nota do currículo: 'O Hohpe define o papel pela função, não pelo cargo'."
+    },
+    {
+      "fala": 40,
+      "afirmacao": "tem um título de capítulo no livro do Hohpe que resume bem isso: Control Is an Illusion, controle é uma ilusão. A minha leitura é",
+      "veredito": "correta",
+      "fonte": "Hohpe, The Software Architect Elevator (2020), cap. 27 'Control Is an Illusion' (nota do currículo); o conteúdo vem marcado como leitura da persona."
+    },
+    {
+      "fala": 42,
+      "afirmacao": "Tem outro capítulo com um título curioso, Governance Through Inception. O nome lembra o filme, aquele em que plantam uma ideia na cabeça de alguém. Como eu leio essa proposta",
+      "veredito": "correta",
+      "fonte": "Hohpe, The Software Architect Elevator (2020), cap. 32 'Governance Through Inception' (nota do currículo); A Origem (Inception, 2010) trata de implantar uma ideia na mente de alguém; a interpretação vem marcada como leitura da persona."
+    },
+    {
+      "fala": 52,
+      "afirmacao": "É uma visão do que a empresa precisa ser capaz de fazer, independente de quem faz ou com qual sistema.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado (TOGAF Series Guide: Business Capabilities; BIZBOK): capacidade descreve o que o negócio faz, independente de como, quem ou com qual sistema."
+    },
+    {
+      "fala": 54,
+      "afirmacao": "O mapa de capacidades é uma prática de mercado que eu defendo pela minha experiência. Não estou atribuindo ao Hohpe.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: mapa de capacidades é prática de mercado (TOGAF, BIZBOK); a fala retira explicitamente a atribuição ao Hohpe."
+    },
+    {
+      "fala": 67,
+      "afirmacao": "o papel do arquiteto corporativo é ligar a estratégia à tecnologia, nos dois sentidos. [...] É a imagem do elevador do Gregor Hohpe.",
+      "veredito": "correta",
+      "fonte": "Hohpe, The Software Architect Elevator (2020), cap. 1."
+    },
+    {
+      "fala": 69,
+      "afirmacao": "Governança burocrática mede processo cumprido. Arquitetura corporativa mede se a empresa consegue fazer o que a estratégia pede.",
+      "veredito": "correta",
+      "fonte": "Resumo da distinção que a persona apresentou como opinião na fala 38 ('pra mim'); não atribui a obra e é coerente com os caps. 4 e 27 do Hohpe."
+    }
+  ]
+}
