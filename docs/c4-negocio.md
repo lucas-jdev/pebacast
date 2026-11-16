@@ -61,6 +61,7 @@ flowchart TB
     watchdog["<b>Watchdog</b><br/>[GitHub Actions, a cada 6 h]<br/>avisa se a rotina parar"]:::conteiner
     capturar["<b>Capturar prints</b><br/>[GitHub Actions, PR que muda o site]<br/>fotografa as seções do main e do PR,<br/>só com leitura"]:::conteiner
     comentar["<b>Comentar prints</b><br/>[GitHub Actions, código do main]<br/>valida o artefato e comenta<br/>antes e depois no PR"]:::conteiner
+    motion["<b>Pebamotion</b><br/>[CLI local: Python + Chromium + ffmpeg]<br/>trailers animados dos episódios<br/>para as redes"]:::conteiner
 
     repo[("<b>Repositório</b><br/>[GitHub]<br/>currículo, personas, roteiros,<br/>revisões e publicações")]:::dados
 
@@ -82,6 +83,9 @@ flowchart TB
     repo -- "PR que muda o site dispara" --> capturar
     capturar -- "artefato com as seções<br/>que mudaram" --> comentar
     comentar -- "imagens no branch prints<br/>e comentário no PR" --> repo
+    lucas -. "gera o trailer<br/>de um episódio" .-> motion
+    motion -- "lê roteiro, cenas<br/>e a identidade do site" --> repo
+    motion -- "baixa o MP3" --> audio
     repo -- "push dispara" --> pipeline
     lucas -. "dispara a regravação<br/>de um áudio" .-> pipeline
     pipeline -- "narra" --> gemini
@@ -97,7 +101,7 @@ flowchart TB
     ouvinte -- "navega" --> site
 ```
 
-Lilás é IA (Claude), azul é código (GitHub Actions e site estático), verde é onde os dados ficam e bege são serviços de terceiros. O único humano no desenho é o Lucas, que entra pelo repositório (currículo e referências), pelo retorno e, quando um áudio sai ruim, disparando a regravação no Actions ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). O Lucas lê os recados pelo console do D1 ([votos.md](votos.md)), e o Pipeline registra o `publicacao.json` de volta no repositório. Depois de cada deploy, o Pipeline avisa o IndexNow das URLs que mudaram. O Lucas acompanha a indexação no Search Console e no Bing Webmaster Tools, que ficam fora do desenho porque não fazem parte da entrega ([pipeline.md](pipeline.md#entrar-no-índice-dos-buscadores)).
+Lilás é IA (Claude), azul é código (GitHub Actions, site estático e o Pebamotion, que roda na máquina do Lucas), verde é onde os dados ficam e bege são serviços de terceiros. O único humano no desenho é o Lucas, que entra pelo repositório (currículo e referências), pelo retorno e, quando um áudio sai ruim, disparando a regravação no Actions ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). Para divulgar um episódio, ele gera o trailer no Pebamotion ([ADR 0010](adr/0010-pebamotion.md)). O Lucas lê os recados pelo console do D1 ([votos.md](votos.md)), e o Pipeline registra o `publicacao.json` de volta no repositório. Depois de cada deploy, o Pipeline avisa o IndexNow das URLs que mudaram. O Lucas acompanha a indexação no Search Console e no Bing Webmaster Tools, que ficam fora do desenho porque não fazem parte da entrega ([pipeline.md](pipeline.md#entrar-no-índice-dos-buscadores)).
 
 Nos PRs que mudam o visual do site, o **Capturar prints** roda o código do PR, inclusive de fork, só com leitura, e entrega um artefato; o **Comentar prints** roda com o código do `main`, valida esse artefato e só então escreve no branch `prints` e no PR ([ADR 0009](adr/0009-prints-automaticos-nos-prs.md)).
 
@@ -105,6 +109,7 @@ Nos PRs que mudam o visual do site, o **Capturar prints** roda o código do PR, 
 
 - **O repositório é a fonte da verdade.** O estado de cada episódio vem dos arquivos (`roteiro.json`, `revisoes/`, `publicacao.json`), não de um banco, e todo passo fica auditável no histórico ([ADR 0006](adr/0006-roteiro-por-rotina-claude.md)).
 - **Julgamento separado de execução mecânica.** A IA escreve; o Actions não confia nela e valida de novo antes de gastar voz.
+- **Divulgação fora da esteira.** O Pebamotion é uma ferramenta local: lê o roteiro, o áudio publicado e a identidade do site e devolve vídeos, sem tocar na publicação ([ADR 0010](adr/0010-pebamotion.md)).
 - **Código de terceiros nunca roda com escrita.** Nos prints automáticos, o artefato é a fronteira de confiança entre o job que executa o PR e o job que escreve no repositório ([ADR 0009](adr/0009-prints-automaticos-nos-prs.md)).
 - **Custo zero de hospedagem.** Pages, Releases, Actions e o plano gratuito da Cloudflare ([ADR 0002](adr/0002-hospedagem-pages-releases.md), [ADR 0007](adr/0007-votos-worker-d1.md)).
 - **Único dado dinâmico fora do GitHub:** votos e recados. O site estático continua sem servidor.

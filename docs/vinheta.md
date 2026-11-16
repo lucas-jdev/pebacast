@@ -27,3 +27,7 @@ Pela mesma razão, a vinheta fica fora da CC BY 4.0 do conteúdo. Ver [LICENSE-C
 ## No GitHub Actions
 
 O workflow `publicar.yml` decifra a faixa com o secret antes de montar o episódio. Se a decifragem falhar, por secret ausente ou senha errada, o episódio sai sem vinheta e uma issue de aviso é aberta. Um episódio não deixa de sair por causa da vinheta.
+
+## Nos trailers
+
+O [pebamotion](../pebamotion/README.md) usa a faixa inteira, não só os recortes da vinheta: lê `assets/vinheta.mp3` direto, então quem renderiza precisa da faixa decifrada na máquina. Os trechos de cada trailer ficam no `episodio.json` do episódio. A licença permite a faixa dentro do vídeo; o arquivo de áudio continua sem ser distribuído sozinho, e os MP4 gerados ficam fora do Git (`pebamotion/saida/`).

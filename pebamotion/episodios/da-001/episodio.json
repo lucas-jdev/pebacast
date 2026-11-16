@@ -1,0 +1,137 @@
+{
+ "episodio": "da-001",
+ "duracao": 45.0,
+ "inicio": 0.45,
+ "cortes": [
+  {
+   "id": "forma",
+   "persona": "camila",
+   "entrada": 47.57,
+   "saida": 54.0,
+   "respiro": 0.0,
+   "texto": "porque o formato em que você guarda o dado decide quais perguntas ficam fáceis e quais viram sofrimento."
+  },
+  {
+   "id": "caso",
+   "persona": "davi",
+   "entrada": 58.42,
+   "saida": 64.36,
+   "respiro": 0.1,
+   "texto": "Imagine uma rede de clínicas que guarda tudo num banco de documentos. Cada paciente é um documento só."
+  },
+  {
+   "id": "copia",
+   "persona": "davi",
+   "entrada": 97.43,
+   "saida": 105.85,
+   "respiro": 0.1,
+   "texto": "Um médico mudou o nome no conselho, e o nome novo foi atualizado só em parte das fichas. O relatório mensal passou a contar o mesmo médico como se fossem dois."
+  },
+  {
+   "id": "grafo",
+   "persona": "davi",
+   "entrada": 140.15,
+   "saida": 142.9,
+   "respiro": 0.15,
+   "texto": "Minha primeira ideia é migrar tudo pra um banco de grafo."
+  },
+  {
+   "id": "consultas",
+   "persona": "camila",
+   "entrada": 187.77,
+   "saida": 190.37,
+   "respiro": 0.05,
+   "texto": "Eu estou dizendo que você ainda não olhou para as consultas."
+  },
+  {
+   "id": "ferramenta",
+   "persona": "camila",
+   "entrada": 199.2,
+   "saida": 200.45,
+   "respiro": 0.05,
+   "texto": "Ferramenta vem depois."
+  },
+  {
+   "id": "aceita",
+   "persona": "camila",
+   "entrada": 432.99,
+   "saida": 435.0,
+   "respiro": 0.2,
+   "texto": "O banco não reclama. Ele aceita tudo."
+  },
+  {
+   "id": "bug",
+   "persona": "davi",
+   "entrada": 856.55,
+   "saida": 860.62,
+   "respiro": 0.55,
+   "texto": "O bug não liga pro banco, ele liga pra onde o dado está copiado."
+  },
+  {
+   "id": "roubar",
+   "persona": "camila",
+   "entrada": 860.74,
+   "saida": 862.7,
+   "respiro": 0.05,
+   "texto": "Perfeito. Vou roubar essa frase."
+  },
+  {
+   "id": "dono",
+   "persona": "camila",
+   "entrada": 931.8,
+   "saida": 934.1,
+   "respiro": 0.2,
+   "texto": "descobre quem é o dono do dado."
+  }
+ ],
+ "trilha": {
+  "nivel": 0.36,
+  "ducking": 0.6,
+  "efeitos": 0.55,
+  "trechos": [
+   {
+    "de": 3.08,
+    "em": 0.0,
+    "dur": 30.67,
+    "fade_in": 0.4,
+    "fade_out": 0.06
+   },
+   {
+    "de": 86.35,
+    "em": 36.23,
+    "dur": 8.77,
+    "fade_in": 0.25,
+    "fade_out": 0.9
+   }
+  ]
+ },
+ "encerramento": {
+  "nivel": 0.5,
+  "ducking": 0.6,
+  "efeitos": 0.6,
+  "trechos": [
+   {
+    "de": 89.65,
+    "em": 0.0,
+    "dur": 6.0,
+    "fade_in": 0.3,
+    "fade_out": 0.8
+   }
+  ]
+ },
+ "limites_de_render": [
+  6.92,
+  13.02,
+  21.59,
+  28.49,
+  30.58,
+  36.23,
+  39.78
+ ],
+ "variantes": {
+  "": {},
+  "sem-nomes": {
+   "nomes": "0"
+  }
+ }
+}
