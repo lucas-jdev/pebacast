@@ -1,0 +1,418 @@
+{
+  "episodio": "sw-003",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura de software de verdade. Aviso importante: este episódio foi gerado por inteligência artificial e revisado contra as fontes citadas. O tema de hoje são as características arquiteturais, aqueles requisitos que quase ninguém escreve, mas que derrubam o sistema quando são esquecidos."
+    },
+    {
+      "persona": "davi",
+      "texto": "Eu sou o Davi, e pra essa conversa eu trouxe de novo a Helena. A Helena é arquiteta de software há quinze anos, já liderou uma migração pra microsserviços que precisou ser parcialmente desfeita, e hoje é quem o time chama antes de uma decisão difícil, e não depois. Helena, bem-vinda!"
+    },
+    {
+      "persona": "helena",
+      "texto": "Obrigada, Davi. Oi, você que está ouvindo, aqui é a Helena. E já aviso: hoje o assunto é justamente o que fica de fora do documento de requisitos."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então vamos pro caso. E deixo claro pra quem está ouvindo: o caso de hoje é hipotético. Imagine uma empresa que vende passagens de ônibus pela internet. Ela tem um documento de requisitos caprichado, com dezenas de histórias de usuário. Buscar viagens, escolher poltrona, pagar com Pix, cancelar, pedir reembolso. Tudo bonitinho."
+    },
+    {
+      "persona": "helena",
+      "texto": "Até aqui parece um time organizado. Qual é o problema, Davi?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O problema é a véspera de um feriado prolongado. O marketing lança uma promoção, o acesso dispara e o site cai. Fica fora do ar por várias horas. E o pior: uma parte dos clientes paga e não recebe a confirmação da poltrona. Imagina o suporte nesse dia."
+    },
+    {
+      "persona": "helena",
+      "texto": "Imagino bem. E o que aconteceu depois?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Reunião com a diretoria, claro. E a diretoria sai de lá pedindo um sistema escalável, disponível, seguro, rápido e barato. Tudo ao mesmo tempo."
+    },
+    {
+      "persona": "helena",
+      "texto": "Tudo ao mesmo tempo. Clássico. E se você fosse o arquiteto dessa empresa, Davi, o que você faria na segunda-feira?",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Olha, eu vou ser sincero, a minha primeira reação seria a da moda. Joga tudo na nuvem, quebra o sistema em microsserviços, liga o autoscaling em tudo e pronto. E, pra não acontecer de novo, eu acrescentaria um requisito no documento: o sistema deve ser escalável, disponível, seguro e performático. Escreveu, tá coberto."
+    },
+    {
+      "persona": "helena",
+      "texto": "Tá. Antes de discutir microsserviços, deixa eu te fazer uma pergunta. Buscar viagens é um requisito. Escolher poltrona é um requisito. O sistema aguentar a véspera do feriado é o mesmo tipo de requisito?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Parece que não. Buscar viagem é uma coisa que o usuário faz. Aguentar o feriado é... como o sistema se comporta enquanto o usuário faz as coisas?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Isso. Essa é a diferença entre requisito funcional e característica arquitetural. O requisito funcional descreve o que o sistema faz, o domínio do problema. A característica arquitetural descreve qualidades que o sistema precisa ter pra fazer isso direito. Muita gente chama de requisito não funcional, ou de atributo de qualidade."
+    },
+    {
+      "persona": "davi",
+      "texto": "As famosas ilities. Escalabilidade, disponibilidade, essas coisas."
+    },
+    {
+      "persona": "helena",
+      "texto": "Essas mesmas. Agora, Davi, uma pergunta que vai parecer chata: qualquer qualidade que alguém deseja vira característica arquitetural?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Eu diria que sim? Se o negócio quer, é característica."
+    },
+    {
+      "persona": "helena",
+      "texto": "Então pensa comigo. O negócio quer que o botão de comprar seja verde. Isso é característica arquitetural?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, aí não. Aí é design de tela.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "helena",
+      "texto": "Por quê? O que separa uma coisa da outra?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. A cor do botão não muda a estrutura do sistema. Você pinta o botão de azul amanhã e nada lá dentro precisa mudar."
+    },
+    {
+      "persona": "helena",
+      "texto": "Exatamente. No Fundamentals of Software Architecture, do Mark Richards e do Neal Ford, eles propõem três critérios pra uma característica arquitetural. Primeiro, ela especifica uma preocupação de design que não é do domínio. Segundo, ela influencia algum aspecto estrutural do design. Terceiro, ela é crítica ou importante pro sucesso da aplicação."
+    },
+    {
+      "persona": "davi",
+      "texto": "Não é do domínio, mexe na estrutura e é importante. A cor do botão falha no segundo critério."
+    },
+    {
+      "persona": "helena",
+      "texto": "Falha no segundo. E o terceiro critério é o que mais pega, porque tudo parece importante numa reunião. Se o critério fosse só desejável, a lista não acabaria nunca."
+    },
+    {
+      "persona": "davi",
+      "texto": "E aguentar a véspera do feriado passa nos três?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Me diz você, Davi. Passa?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu tentar. Não é domínio, ninguém compra passagem pra testar carga. Mexe na estrutura, porque talvez eu precise de mais instâncias, de fila, de cache. E é crítico, porque véspera de feriado é justamente quando a empresa mais vende."
+    },
+    {
+      "persona": "helena",
+      "texto": "Passa nos três. Agora a pergunta que interessa: se é tão crítico, por que não estava em nenhuma das dezenas de histórias de usuário?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Porque... ninguém pensou? Porque parecia óbvio?"
+    },
+    {
+      "persona": "helena",
+      "texto": "As duas coisas. Richards e Ford separam as características explícitas, que aparecem nos documentos de requisitos, das implícitas, que quase nunca aparecem, mas são necessárias mesmo assim. Disponibilidade é o exemplo típico. Ninguém escreve que o site deve ficar no ar, porque todo mundo acha óbvio. E o que é óbvio pra todo mundo vira responsabilidade de ninguém."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o papel do arquiteto é achar o que não está escrito."
+    },
+    {
+      "persona": "helena",
+      "texto": "É uma parte grande do papel. E aí entra o segundo ponto de hoje: como você extrai essas características. Davi, quando a diretoria diz que quer vender mais no feriado, isso é uma característica arquitetural?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Não, isso é objetivo de negócio. Mas tem uma característica escondida ali dentro, né?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Tem. O livro dedica um capítulo a isso, a traduzir preocupações do domínio em características. A ideia é que o negócio não fala a língua das ilities. Ele fala de prazo, de satisfação do cliente, de vantagem competitiva, de orçamento. E o trabalho do arquiteto é perguntar o que cada uma dessas frases exige da estrutura."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tipo um tradutor."
+    },
+    {
+      "persona": "helena",
+      "texto": "Tipo um tradutor desconfiado. Vamos fazer juntos com o nosso caso. Vender mais na véspera do feriado. Davi, o que isso exige?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Escalabilidade! Aguentar muita gente."
+    },
+    {
+      "persona": "helena",
+      "texto": "Será? Me diz uma coisa: essa empresa tem muita gente o tempo todo, ou tem pouca gente na maior parte do ano e um pico enorme em poucos dias?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O segundo. Terça-feira de manhã, em março, o site está tranquilo. O problema é o pico."
+    },
+    {
+      "persona": "helena",
+      "texto": "Então talvez a palavra certa não seja escalabilidade. O livro faz uma distinção que eu acho muito útil. Escalabilidade é a capacidade de lidar com um número grande de usuários simultâneos sem degradar o desempenho. Elasticidade é a capacidade de lidar com rajadas, picos repentinos de requisições."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ah, e isso muda a solução?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Muda bastante. Um sistema dimensionado pra carga alta o ano inteiro é uma coisa. Um sistema que cresce rápido quando o pico chega e encolhe depois é outra. São estruturas, custos e testes diferentes. Se você escreve só escalável, ninguém sabe qual dos dois problemas está resolvendo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas o meu autoscaling resolve elasticidade, não resolve?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Tá, e qual é o trade-off? Pensa no nosso caso. O site caiu, mas o pior não foi o site cair. Qual foi o pior?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O cliente que pagou e não recebeu a poltrona."
+    },
+    {
+      "persona": "helena",
+      "texto": "Isso. Agora imagina que você multiplica por dez o número de instâncias que recebem pedido de compra. Duas pessoas tentando a mesma poltrona, ao mesmo tempo, em instâncias diferentes. O que acontece?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Ou eu vendo a mesma poltrona duas vezes, ou eu preciso de algum mecanismo de reserva que todas as instâncias respeitem. E esse mecanismo vira o gargalo.",
+      "estilo": "surpreso, mais devagar"
+    },
+    {
+      "persona": "helena",
+      "texto": "Viu? Você acabou de achar outra característica que não estava escrita em lugar nenhum. Chama do que quiser, confiabilidade, consistência dos dados da reserva. O ponto é que ela puxa o design pra um lado, e a elasticidade puxa pro outro."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então não dá pra só ligar o autoscaling e ir pra casa."
+    },
+    {
+      "persona": "helena",
+      "texto": "Dá pra ligar. Só não dá pra achar que isso resolveu o problema de negócio. E repara que a gente chegou nisso fazendo perguntas sobre o negócio, não sobre a tecnologia."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, e as outras frases da diretoria? Seguro, por exemplo."
+    },
+    {
+      "persona": "helena",
+      "texto": "Pergunta pra diretoria: seguro contra o quê? Essa empresa guarda dados pessoais dos passageiros e processa pagamento. Aí tem exigência legal, tem privacidade, tem autenticação. No livro isso aparece como característica transversal, que atravessa o sistema todo em vez de morar num lugar só."
+    },
+    {
+      "persona": "davi",
+      "texto": "E as características têm categorias? Eu achava que era uma lista solta."
+    },
+    {
+      "persona": "helena",
+      "texto": "Richards e Ford organizam em três grupos. As operacionais, como desempenho, disponibilidade, escalabilidade, recuperabilidade. As estruturais, que falam da qualidade do código e da manutenção, como extensibilidade, manutenibilidade, portabilidade. E as transversais, como segurança, privacidade, acessibilidade, requisitos legais. E eles mesmos dizem que essa lista não é completa nem definitiva. Cada empresa inventa as suas. A elasticidade, que a gente acabou de discutir, eu colocaria junto das operacionais."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, então juntando tudo. Do caso da passagem a gente extraiu elasticidade, consistência da reserva, disponibilidade e segurança. É isso que eu escrevo no documento?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Calma, Davi. Antes, deixa eu te contar uma coisa que eu vivi. Lembra da migração pra microsserviços que eu liderei no banco?"
+    },
+    {
+      "persona": "davi",
+      "texto": "A que precisou ser desfeita em parte."
+    },
+    {
+      "persona": "helena",
+      "texto": "Essa. Na época, o argumento principal era escalabilidade. Todo slide falava disso. Só que, olhando pra trás, ninguém tinha perguntado ao negócio se aquele sistema precisava escalar. Era um sistema interno, com um número de usuários bem previsível. O que o negócio precisava de verdade era rastrear cada alteração, saber quem mudou o quê e quando, e não perder consistência entre as contas."
+    },
+    {
+      "persona": "davi",
+      "texto": "E microsserviços complicaram justamente isso."
+    },
+    {
+      "persona": "helena",
+      "texto": "Complicaram. Cada transação que antes acontecia num banco de dados só passou a atravessar vários serviços. A gente otimizou uma característica que ninguém pediu e piorou as duas que importavam. Desfazer parte daquilo custou mais do que ter perguntado no começo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Caramba. E por que ninguém perguntou?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Porque escalabilidade soava bem. E porque microsserviço no currículo também soava bem. Eu desconfio muito de arquitetura escolhida por moda, e eu aprendi isso do jeito caro."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas aí voltando. Por que eu não posso simplesmente pedir todas? Elasticidade, consistência, disponibilidade, segurança, desempenho, custo baixo. Qual é o mal em mirar alto?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Me responde com o nosso caso. A segurança pede autenticação forte, criptografia, auditoria em cada passo da compra. O que isso faz com o desempenho na véspera do feriado?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa tudo mais lento. Cada passo a mais é tempo a mais."
+    },
+    {
+      "persona": "helena",
+      "texto": "E a elasticidade, que pede várias instâncias independentes, o que faz com a consistência da reserva da poltrona?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Briga com ela. Já vimos isso."
+    },
+    {
+      "persona": "helena",
+      "texto": "E a disponibilidade altíssima, com redundância em vários lugares, o que faz com o custo baixo que a diretoria pediu?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Mata o custo baixo.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "helena",
+      "texto": "Pois é. Cada característica que você apoia exige alguma coisa do design, e muitas delas brigam entre si. Esse é o terceiro ponto de hoje: maximizar todas é inviável. Richards e Ford falam em mirar na arquitetura menos pior, e não na melhor. E, sinceramente, isso virou um mantra pra mim."
+    },
+    {
+      "persona": "davi",
+      "texto": "A menos pior. Isso é meio deprimente, Helena."
+    },
+    {
+      "persona": "helena",
+      "texto": "É libertador, Davi. Quando você aceita que não existe a melhor, você para de procurar a bala de prata e começa a escolher. E sabe o que acontece quando ninguém escolhe? Tem uma história que eu gosto de contar, a do Vasa."
+    },
+    {
+      "persona": "davi",
+      "texto": "Vasa? O que é isso?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Um navio de guerra sueco do século dezessete. Foi encomendado pra ser impressionante, com dois conveses cheios de canhões, e foram somando exigências ao projeto. Em 1628, ele afundou na viagem inaugural, pouco depois de zarpar, ainda perto de Estocolmo. Era pesado demais em cima e ficou instável."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o Vasa é a diretoria da empresa de passagens."
+    },
+    {
+      "persona": "helena",
+      "texto": "É um sistema que tenta ser tudo ao mesmo tempo. Cada exigência fazia sentido sozinha. Juntas, afundaram o navio. Uma arquitetura que tenta apoiar características demais vira uma solução genérica, complexa, que não atende bem nenhum problema de verdade.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, me convenceu. Mas aí na prática, como eu escolho? Eu chego na diretoria e digo: escolham uma?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Uma é pouco. O livro defende manter a lista de características curta. E eu, na minha experiência, faço algo bem prático: em vez de pedir pros stakeholders ordenarem a lista inteira, o que gera brigas intermináveis, eu peço que eles escolham as três características mais importantes, sem precisar ordenar. Três. Isso força a conversa sobre o que realmente importa."
+    },
+    {
+      "persona": "davi",
+      "texto": "E as outras somem?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Não somem. Elas continuam lá, só que você não otimiza o design pra elas. Você aceita um nível razoável e segue. A diferença é que agora isso é uma decisão consciente, e não um esquecimento."
+    },
+    {
+      "persona": "davi",
+      "texto": "E aí eu registro essa decisão num ADR, imagino. Já aprendi com você."
+    },
+    {
+      "persona": "helena",
+      "texto": "Exatamente, porque decisão que não foi registrada vai ser tomada de novo, provavelmente pior. Mas tem mais um passo, Davi. Se a diretoria escolhe disponibilidade, como você vai saber, daqui a seis meses, se o sistema está disponível?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Olhando se o site está no ar?"
+    },
+    {
+      "persona": "helena",
+      "texto": "No ar quanto? Pra quem? Medido onde? Disponível pra buscar viagem, ou disponível pra concluir a compra? Uma característica que ninguém mede vira um desejo. É por isso que o livro tem um capítulo inteiro sobre medir e governar características arquiteturais."
+    },
+    {
+      "persona": "davi",
+      "texto": "Medir como? Escalabilidade não tem régua."
+    },
+    {
+      "persona": "helena",
+      "texto": "Não tem uma régua pronta, então você define uma. Richards e Ford falam em medidas operacionais, como tempo de resposta e o comportamento sob carga; em medidas estruturais, que olham pro código, como a complexidade; e em medidas de processo, que olham pra coisas como a facilidade de testar e de fazer deploy. E eles apresentam as fitness functions, que são mecanismos que avaliam de forma objetiva se uma característica arquitetural continua sendo atendida."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tipo um teste automatizado, só que pra arquitetura."
+    },
+    {
+      "persona": "helena",
+      "texto": "Tipo isso. Pode ser um teste de carga que roda antes de toda temporada de feriado, um alerta sobre o tempo de resposta da compra, uma verificação de dependências no build. O importante é que a característica saia da conversa e vire algo verificável."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então, na empresa de passagens, um teste de carga simulando a véspera do feriado teria pegado o problema antes."
+    },
+    {
+      "persona": "helena",
+      "texto": "Talvez. Depende de quem desenhou o teste ter pensado na poltrona disputada, e não só no número de acessos. De novo, tudo começa na pergunta certa ao negócio."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, deixa eu ver se eu entendi o episódio inteiro, Helena, e você me corrige. Requisito funcional é o que o sistema faz: buscar viagem, escolher poltrona, pagar. Característica arquitetural é uma qualidade que não é do domínio, que mexe na estrutura do sistema e que é crítica pro sucesso dele. Muitas delas são implícitas, ninguém escreve, tipo disponibilidade."
+    },
+    {
+      "persona": "helena",
+      "texto": "Até aqui, perfeito."
+    },
+    {
+      "persona": "davi",
+      "texto": "Pra achar essas características, eu traduzo as frases do negócio. Vender mais no feriado vira elasticidade, que é diferente de escalabilidade. Cliente que pagou e não recebeu a poltrona vira consistência da reserva. Dado pessoal e pagamento viram segurança e requisitos legais. E eu desconfio da primeira palavra que me vem, porque escalável pode estar escondendo elástico."
+    },
+    {
+      "persona": "helena",
+      "texto": "Isso. E o terceiro ponto?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O terceiro é que eu não posso maximizar tudo. Segurança custa desempenho, elasticidade briga com consistência, disponibilidade custa dinheiro. Se eu tento tudo, eu viro o Vasa. Então eu peço pro negócio escolher as três mais importantes, registro a escolha num ADR e transformo cada uma em algo que eu consigo medir. E o meu autoscaling com microsserviços pode até ser parte da solução, mas só depois dessa conversa, não antes."
+    },
+    {
+      "persona": "helena",
+      "texto": "Eu assinaria embaixo. E repara, Davi, que em nenhum momento você disse a melhor arquitetura."
+    },
+    {
+      "persona": "davi",
+      "texto": "A menos pior. Tô aprendendo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Agora o desafio pra você que está ouvindo. Liste as três características mais críticas de um sistema que você mantém, justificando cada uma com um requisito de negócio, e aponte qual delas não é medida hoje. Eu aposto que pelo menos uma não é. Eu sei que no meu sistema não é."
+    },
+    {
+      "persona": "helena",
+      "texto": "E se nenhuma das três for medida, não se assuste. É mais comum do que parece. O importante é saber disso."
+    },
+    {
+      "persona": "davi",
+      "texto": "Helena, muito obrigado por mais essa conversa. Saio daqui com vontade de reler o documento de requisitos do meu time procurando o que não está escrito."
+    },
+    {
+      "persona": "helena",
+      "texto": "Obrigada você, Davi. E pra quem está ouvindo: na próxima reunião, quando alguém disser que o sistema tem que ser escalável, pergunta escalável pra quê."
+    },
+    {
+      "persona": "davi",
+      "texto": "Esse foi o Pebacast. Fontes do episódio: Fundamentals of Software Architecture, de Mark Richards e Neal Ford, capítulos quatro, cinco e seis. Até o próximo episódio!"
+    }
+  ],
+  "desafio": "Liste as três características mais críticas de um sistema que você mantém, justificando cada uma com um requisito de negócio, e aponte qual delas não é medida hoje.",
+  "fontes": [
+    "Fundamentals of Software Architecture, Mark Richards e Neal Ford, caps. 4, 5 e 6"
+  ]
+}

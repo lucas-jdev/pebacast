@@ -1,0 +1,121 @@
+{
+  "aprovado": false,
+  "roteiro_sha256": "22e50b5746311b0541cbb1d543c5e6f98e57d1c45ffa1aaa2e1006385e823cc6",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "o caso de hoje é hipotético",
+      "veredito": "correta",
+      "fonte": "noticia.json (tipo hipotetico)"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "O marketing lança uma promoção, o acesso dispara e o site cai. Fica fora do ar por várias horas. E o pior: uma parte dos clientes paga e não recebe a confirmação da poltrona.",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético)"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "a diretoria sai de lá pedindo um sistema escalável, disponível, seguro, rápido e barato. Tudo ao mesmo tempo.",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário hipotético)"
+    },
+    {
+      "fala": 12,
+      "afirmacao": "O requisito funcional descreve o que o sistema faz, o domínio do problema. A característica arquitetural descreve qualidades que o sistema precisa ter pra fazer isso direito. Muita gente chama de requisito não funcional, ou de atributo de qualidade.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 4, abertura"
+    },
+    {
+      "fala": 20,
+      "afirmacao": "eles propõem três critérios pra uma característica arquitetural. Primeiro, ela especifica uma preocupação de design que não é do domínio. Segundo, ela influencia algum aspecto estrutural do design. Terceiro, ela é crítica ou importante pro sucesso da aplicação.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 4, \"Architecture Characteristics Defined\""
+    },
+    {
+      "fala": 28,
+      "afirmacao": "Richards e Ford separam as características explícitas, que aparecem nos documentos de requisitos, das implícitas, que quase nunca aparecem, mas são necessárias mesmo assim. Disponibilidade é o exemplo típico.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 4 (implícitas: availability, reliability, security)"
+    },
+    {
+      "fala": 32,
+      "afirmacao": "O livro dedica um capítulo a isso, a traduzir preocupações do domínio em características. [...] Ele fala de prazo, de satisfação do cliente, de vantagem competitiva, de orçamento.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 5, \"Extracting Architecture Characteristics from Domain Concerns\" (tabela com time to market, user satisfaction, competitive advantage, time and budget)"
+    },
+    {
+      "fala": 38,
+      "afirmacao": "Escalabilidade é a capacidade de lidar com um número grande de usuários simultâneos sem degradar o desempenho. Elasticidade é a capacidade de lidar com rajadas, picos repentinos de requisições.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 5 (scalability vs. elasticity, \"ability to handle bursts of requests\")"
+    },
+    {
+      "fala": 45,
+      "afirmacao": "Ou eu vendo a mesma poltrona duas vezes, ou eu preciso de algum mecanismo de reserva que todas as instâncias respeitem. E esse mecanismo vira o gargalo.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado sobre concorrência em sistemas distribuídos"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "No livro isso aparece como característica transversal, que atravessa o sistema todo em vez de morar num lugar só.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 4, tabela de características cross-cutting (security, privacy, legal, authentication)"
+    },
+    {
+      "fala": 52,
+      "afirmacao": "Richards e Ford organizam em três grupos. As operacionais, como desempenho, disponibilidade, escalabilidade, elasticidade, recuperabilidade.",
+      "veredito": "imprecisa",
+      "correcao": "Na 1ª edição, a tabela de características operacionais (cap. 4) lista availability, continuity, performance, recoverability, reliability/safety, robustness e scalability; elasticidade não aparece nessa lista atribuída aos autores. Tire elasticidade da enumeração atribuída ao livro (por exemplo, trocar por confiabilidade ou robustez), ou deixe claro que é a Helena quem a acrescenta ao grupo operacional.",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 4, Table 4-1 (conhecimento do sumário/tabela; não conferido no texto integral)"
+    },
+    {
+      "fala": 52,
+      "afirmacao": "As estruturais, que falam da qualidade do código e da manutenção, como extensibilidade, manutenibilidade, portabilidade. E as transversais, como segurança, privacidade, acessibilidade, requisitos legais. E eles mesmos dizem que essa lista não é completa nem definitiva.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 4, \"Architectural Characteristics (Partially) Listed\", tabelas 4-2 e 4-3"
+    },
+    {
+      "fala": 68,
+      "afirmacao": "Richards e Ford falam em mirar na arquitetura menos pior, e não na melhor.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 4, \"Trade-Offs and Least Worst Architecture\""
+    },
+    {
+      "fala": 72,
+      "afirmacao": "Um navio de guerra sueco do século dezessete. Foi encomendado pra ser impressionante, com dois conveses cheios de canhões, e foram somando exigências ao projeto. Em 1628, ele afundou na viagem inaugural, pouco depois de zarpar, ainda perto de Estocolmo. Era pesado demais em cima e ficou instável.",
+      "veredito": "correta",
+      "fonte": "Vasa Museum (vasamuseet.se); Fundamentals of Software Architecture (1ª ed.), cap. 4, quadro sobre o Vasa"
+    },
+    {
+      "fala": 74,
+      "afirmacao": "Uma arquitetura que tenta apoiar características demais vira uma solução genérica, complexa, que não atende bem nenhum problema de verdade.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 4 (\"too many architecture characteristics leads to generic solutions\")"
+    },
+    {
+      "fala": 76,
+      "afirmacao": "O livro sugere algo bem prático: em vez de pedir pros stakeholders ordenarem a lista inteira, o que gera brigas intermináveis, você pede que eles escolham as três características mais importantes, sem precisar ordenar.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 5, \"Extracting Architecture Characteristics from Domain Concerns\" (\"select the top three most important characteristics from the final list (in any order)\"). Obs.: a nota do currículo diz que o livro pede só uma lista curta; o trecho do cap. 5 fala explicitamente nas três."
+    },
+    {
+      "fala": 82,
+      "afirmacao": "o livro tem um capítulo inteiro sobre medir e governar características arquiteturais.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 6, \"Measuring and Governing Architecture Characteristics\""
+    },
+    {
+      "fala": 84,
+      "afirmacao": "Richards e Ford falam em medidas operacionais, como tempo de resposta e o comportamento sob carga; em medidas estruturais, que olham pro código, como a complexidade; e em medidas de processo, que olham pra coisas como a facilidade de testar e de fazer deploy. E eles apresentam as fitness functions, que são mecanismos que avaliam de forma objetiva se uma característica arquitetural continua sendo atendida.",
+      "veredito": "correta",
+      "fonte": "Fundamentals of Software Architecture (1ª ed.), cap. 6 (operational, structural e process measures; definição de fitness function)"
+    },
+    {
+      "fala": 100,
+      "afirmacao": "Fontes do episódio: Fundamentals of Software Architecture, de Mark Richards e Neal Ford, capítulos quatro, cinco e seis.",
+      "veredito": "correta",
+      "fonte": "curriculum/sagas/software.yaml (sw-003: fosa, caps. 4, 5 e 6)"
+    }
+  ]
+}

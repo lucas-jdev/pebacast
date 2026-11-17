@@ -1,0 +1,4 @@
+{
+  "tipo": "hipotetico",
+  "cenario": "Uma empresa brasileira que vende passagens de ônibus pela internet tem um documento de requisitos com dezenas de histórias de usuário: buscar viagens, escolher poltrona, pagar com Pix, cancelar e pedir reembolso. Nenhuma delas fala de carga, de picos ou de quanto tempo o site pode ficar fora do ar. Na véspera de um feriado prolongado, o time de marketing lança uma promoção, o acesso dispara, o site cai por várias horas e parte dos clientes paga sem receber a confirmação da poltrona. Na reunião seguinte, a diretoria pede um sistema escalável, disponível, seguro, rápido e barato, tudo ao mesmo tempo."
+}
