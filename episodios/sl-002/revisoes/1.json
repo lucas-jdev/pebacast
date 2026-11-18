@@ -1,0 +1,152 @@
+{
+  "aprovado": false,
+  "roteiro_sha256": "ce790a6eb5fb4e2f94718c4b293e36b70a480295d8098878f2b9434f425760aa",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "o caso de hoje é hipotético, tá? Não é notícia, é um cenário que a gente montou pra conversa",
+      "veredito": "correta",
+      "fonte": "noticia.json (tipo: hipotetico)"
+    },
+    {
+      "fala": 3,
+      "afirmacao": "uma rede de farmácias regional, com umas oitenta lojas e um time de tecnologia de uns vinte devs",
+      "veredito": "correta",
+      "fonte": "noticia.json"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "Construiu o próprio módulo de emissão de nota fiscal. Construiu o próprio login dos clientes, com recuperação de senha e tudo. Construiu um disparador de e-mail e SMS.",
+      "veredito": "correta",
+      "fonte": "noticia.json"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "Justamente o que a diretoria ama. Porque metade do time vive apagando incêndio.",
+      "veredito": "correta",
+      "fonte": "noticia.json (detalhes extras do incidente e da queda do SMS são acréscimos ao cenário hipotético, já declarado como tal)"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "O novo diretor de tecnologia falou assim: com os assistentes de código de IA, construir ficou muito mais barato. Então, em vez de pagar licença de qualquer coisa, a gente reescreve tudo em casa",
+      "veredito": "correta",
+      "fonte": "noticia.json"
+    },
+    {
+      "fala": 24,
+      "afirmacao": "o livro Wardley Maps, do Simon Wardley. Ele propõe desenhar um mapa com dois eixos. No eixo vertical vai a cadeia de valor: no topo, o usuário e a necessidade dele, e embaixo os componentes que atendem essa necessidade, do mais visível pro usuário ao menos visível.",
+      "veredito": "correta",
+      "fonte": "Wardley Maps (Simon Wardley), cap. 1-2; referencias_base 'wardley'"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "O Wardley divide em quatro estágios. Primeiro a gênese, [...] Depois o construído sob medida, [...] Depois o produto, quando dá pra comprar pronto, e com o tempo também alugar. E por último a commodity, que vira utilidade",
+      "veredito": "correta",
+      "fonte": "Wardley Maps (Simon Wardley), cap. 2 (Genesis, Custom built, Product (+rental), Commodity (+utility))"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "os componentes evoluem da esquerda pra direita, empurrados pela competição, tanto do lado de quem oferece quanto do lado de quem demanda",
+      "veredito": "correta",
+      "fonte": "Wardley Maps (Simon Wardley), cap. 2 (evolução impulsionada pela competição de oferta e demanda)"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "Pensa em computação: já foi uma máquina enorme que poucas empresas tinham, virou produto que você comprava e instalava, e hoje é um serviço que você aluga e paga pelo uso.",
+      "veredito": "correta",
+      "fonte": "Wardley Maps (Simon Wardley), cap. 2 (exemplo da evolução da computação até utility)"
+    },
+    {
+      "fala": 32,
+      "afirmacao": "Emissão de nota é um problema resolvido, com regra definida pelo governo, igual pra todas as farmácias do país.",
+      "veredito": "imprecisa",
+      "correcao": "A NF-e/NFC-e tem leiaute nacional, mas a autorização é feita pela SEFAZ de cada estado e regras como ICMS e particularidades da NFC-e variam por estado. Dizer algo como: 'com regra definida pelo fisco e padronizada, a mesma para todas as farmácias que vendem no mesmo estado' ou simplesmente 'regra definida pelo governo, que vale igual para todos os concorrentes'.",
+      "fonte": "Conhecimento consolidado sobre NF-e/NFC-e (Ajuste SINIEF 07/05 e 19/16; autorização pelas SEFAZ estaduais; ICMS estadual)"
+    },
+    {
+      "fala": 32,
+      "afirmacao": "Tem várias empresas que vendem isso pronto e se atualizam quando a regra muda.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado (mercado de emissores de NF-e/NFC-e)"
+    },
+    {
+      "fala": 36,
+      "afirmacao": "cada mudança de regra vira um trabalho que muitas outras empresas estão fazendo ao mesmo tempo, cada uma no seu canto. Esse é o custo de construir sob medida o que já virou commodity.",
+      "veredito": "correta",
+      "fonte": "Wardley Maps (Simon Wardley), cap. 4 (Doctrine: 'Remove duplication and bias'; 'Use appropriate methods')"
+    },
+    {
+      "fala": 47,
+      "afirmacao": "Custo de oportunidade.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado (economia): o valor da melhor alternativa abandonada"
+    },
+    {
+      "fala": 52,
+      "afirmacao": "Se uma coisa diferencia o seu negócio e você compra pronta, ela tende a deixar de diferenciar, porque o fornecedor vende a mesma coisa pros seus concorrentes.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado; coerente com Wardley Maps (Simon Wardley), cap. 3 (diferencial vs custo de fazer negócio)"
+    },
+    {
+      "fala": 58,
+      "afirmacao": "o componente diferencial lá em cima e à esquerda, e embaixo dele uma porção de dependências mais à direita",
+      "veredito": "correta",
+      "fonte": "Wardley Maps (Simon Wardley), cap. 2-3 (leitura de mapa)"
+    },
+    {
+      "fala": 60,
+      "afirmacao": "Que o mapa envelhece. O que é diferencial hoje vai evoluir.",
+      "veredito": "correta",
+      "fonte": "Wardley Maps (Simon Wardley), cap. 2 (everything evolves)"
+    },
+    {
+      "fala": 62,
+      "afirmacao": "O Wardley chama essa resistência de inércia: a tendência de se agarrar ao jeito antigo porque já se investiu nele e porque ele deu certo no passado.",
+      "veredito": "correta",
+      "fonte": "Wardley Maps (Simon Wardley) (inertia como resistência à mudança vinda de investimento e sucesso passados); nota do currículo sl-002"
+    },
+    {
+      "fala": 66,
+      "afirmacao": "cada estágio de evolução pede um jeito diferente de trabalhar. Componente na gênese pede experimentação, aceitar que vai errar, mudar rápido. Componente commodity pede eficiência, padronização, previsibilidade.",
+      "veredito": "correta",
+      "fonte": "Wardley Maps (Simon Wardley), cap. 4 (Doctrine: 'Use appropriate methods')"
+    },
+    {
+      "fala": 70,
+      "afirmacao": "Você cria dependência, e trocar de fornecedor depois costuma custar caro.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado (vendor lock-in / custo de troca)"
+    },
+    {
+      "fala": 72,
+      "afirmacao": "Você ganha a manutenção feita por alguém que vive daquilo.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado"
+    },
+    {
+      "fala": 76,
+      "afirmacao": "Cada ligação entre sistemas é um ponto que pode quebrar, e você fica preso ao formato do sistema antigo.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado sobre acoplamento em integração"
+    },
+    {
+      "fala": 79,
+      "afirmacao": "Isso é diferencial. O resto, por mais importante que seja, é commodity",
+      "veredito": "imprecisa",
+      "correcao": "Na linguagem do livro, o que não diferencia é 'custo de fazer negócio' (cap. 3), e nem todo componente que não diferencia está no estágio commodity: pode estar em produto, ou até sob medida. Como o mesmo resumo usa 'commodity' logo depois como estágio de evolução, a frase mistura os dois sentidos. Dizer: 'O resto, por mais importante que seja, não diferencia: é custo de fazer negócio, e costuma estar mais à direita no mapa'.",
+      "fonte": "Wardley Maps (Simon Wardley), cap. 3 (differential vs cost of doing business) e cap. 2 (estágios de evolução); nota do currículo sl-002"
+    },
+    {
+      "fala": 79,
+      "afirmacao": "um mapa com a cadeia de valor na vertical e a evolução na horizontal, da gênese ao sob medida, ao produto e à commodity",
+      "veredito": "correta",
+      "fonte": "Wardley Maps (Simon Wardley), cap. 2"
+    },
+    {
+      "fala": 79,
+      "afirmacao": "Quanto mais à direita, mais faz sentido comprar ou alugar. Quanto mais à esquerda, mais faz sentido construir, experimentando.",
+      "veredito": "correta",
+      "fonte": "Wardley Maps (Simon Wardley), cap. 4 (Use appropriate methods; outsourcing de commodity/utility)"
+    }
+  ]
+}

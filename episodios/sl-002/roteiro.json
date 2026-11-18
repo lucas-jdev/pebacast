@@ -1,0 +1,359 @@
+{
+  "episodio": "sl-002",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura sem decoreba. Aviso de sempre: este episódio foi gerado por inteligência artificial e revisado contra as fontes citadas. E hoje a pergunta é daquelas que todo time já brigou por ela: quando a gente compra, quando a gente constrói e quando a gente só integra com o que já existe?"
+    },
+    {
+      "persona": "davi",
+      "texto": "E pra essa conversa a Beatriz está de volta. Ela é arquiteta de soluções com doze anos de carreira, começou como analista de negócios num hospital e hoje desenha iniciativas inteiras, da conversa com a diretoria até o diagrama de integração. Beatriz, seja bem-vinda de novo!"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Obrigada, Davi. Oi, você que está ouvindo! Hoje a gente vai falar de esforço gasto no lugar errado, que é um assunto que dói em todo mundo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Dói mesmo. Então, o caso de hoje é hipotético, tá? Não é notícia, é um cenário que a gente montou pra conversa. Imagine uma rede de farmácias regional, com umas oitenta lojas e um time de tecnologia de uns vinte devs."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Tamanho bem comum. Grande o suficiente pra ter um time próprio, pequeno o suficiente pra cada pessoa fazer falta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Exato. Nos últimos dois anos esse time construiu um monte de coisa em casa. Construiu o próprio módulo de emissão de nota fiscal. Construiu o próprio login dos clientes, com recuperação de senha e tudo. Construiu um disparador de e-mail e SMS. E tem um projeto que a diretoria ama: um serviço de acompanhamento pra quem usa remédio contínuo, tipo remédio de pressão, que avisa a pessoa antes de acabar e deixa o farmacêutico da loja conversar com ela."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Deixa eu adivinhar qual desses está atrasado."
+    },
+    {
+      "persona": "davi",
+      "texto": "Justamente o que a diretoria ama. Porque metade do time vive apagando incêndio. Toda vez que muda uma regra fiscal, alguém larga tudo pra mexer no módulo de nota. O login teve um incidente de segurança no ano passado. E o disparador de SMS cai em dia de promoção.",
+      "estilo": "rindo, meio sem graça"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Então a gente tem um time ocupado o tempo todo, e aquilo que o cliente percebe como diferente quase não anda."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso. E agora vem a parte que eu achei genial, sinceramente. O novo diretor de tecnologia falou assim: com os assistentes de código de IA, construir ficou muito mais barato. Então, em vez de pagar licença de qualquer coisa, a gente reescreve tudo em casa, rápido, e fica dono de tudo. Sem fornecedor, sem mensalidade, sem depender de ninguém. Eu confesso que eu compraria essa ideia. Quer dizer, construiria."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Boa! E olha, a ideia tem um apelo real. Escrever código ficou mais rápido, isso qualquer dev sente no dia a dia. Mas antes de decidir se constrói ou se compra, que problema a gente tá resolvendo mesmo?",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. O problema é que o time está lento e gasta muito com manutenção?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Esse é o sintoma. Vamos um passo antes. Quem é o usuário dessa farmácia, e do que ele precisa?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O cliente. Ele precisa comprar o remédio, de preferência sem deixar faltar, e com preço bom."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Tem também o farmacêutico, a loja e o fisco, mas vamos ficar no cliente. Agora me diz: quando o cliente escolhe essa rede em vez da concorrente do outro lado da rua, é por causa da nota fiscal?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Não, né. Ninguém escolhe farmácia pela nota fiscal. A nota tem que sair certa e pronto."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E pelo login?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Também não. Se o login funciona, ninguém lembra que ele existe. Se não funciona, aí o cliente lembra."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E pelo acompanhamento de remédio contínuo, com o farmacêutico chamando antes de acabar?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Aí sim. Isso a concorrente não tem. Peraí, deixa eu ver se eu entendi. Você está separando o que faz o cliente escolher a gente do que só precisa funcionar."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Exatamente. Essa é a primeira separação, e ela vem antes de qualquer conversa sobre tecnologia. Tem componente que diferencia o negócio e tem componente que é commodity. Commodity não quer dizer sem importância. A nota fiscal é obrigatória, se ela parar, a loja não vende. Quer dizer que ela é igual em todo lugar, que todo mundo precisa dela do mesmo jeito, e que fazer melhor que o vizinho não traz cliente nenhum."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tipo a energia elétrica da loja. Se faltar, para tudo. Mas ninguém escolhe a farmácia porque a tomada dela é melhor."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Ótima analogia. E repara que nenhuma farmácia monta a própria usina. Ela compra energia da rede, como todo mundo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas como eu sei se uma coisa é commodity ou diferencial? Na farmácia ficou fácil porque você escolheu os exemplos. No meu trabalho, na logística, eu não sei se saberia dizer."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Pergunta ótima, e é aqui que entra a referência do episódio, o livro Wardley Maps, do Simon Wardley. Ele propõe desenhar um mapa com dois eixos. No eixo vertical vai a cadeia de valor: no topo, o usuário e a necessidade dele, e embaixo os componentes que atendem essa necessidade, do mais visível pro usuário ao menos visível."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tipo, o aplicativo da farmácia lá em cima, e o banco de dados lá embaixo."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Isso. E no eixo horizontal vai a evolução de cada componente. O Wardley divide em quatro estágios. Primeiro a gênese, quando algo é novo, incerto, e ninguém sabe direito como fazer. Depois o construído sob medida, quando algumas empresas já sabem fazer, mas cada uma faz a sua. Depois o produto, quando dá pra comprar pronto, e com o tempo também alugar. E por último a commodity, que vira utilidade, padronizada, algo que você consome quase sem pensar."
+    },
+    {
+      "persona": "davi",
+      "texto": "E isso muda com o tempo?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Muda, e essa é a parte que mais importa. Uma ideia central do livro é que os componentes evoluem da esquerda pra direita, empurrados pela competição, tanto do lado de quem oferece quanto do lado de quem demanda. O que hoje é novidade amanhã é produto, e depois de amanhã é commodity. Pensa em computação: já foi uma máquina enorme que poucas empresas tinham, virou produto que você comprava e instalava, e hoje é um serviço que você aluga e paga pelo uso."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí. Então o mapa da farmácia ficaria como?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Vamos montar juntos. No topo, o cliente que precisa não ficar sem remédio. Logo abaixo, o acompanhamento de uso contínuo. Esse fica bem à esquerda, perto da gênese ou do sob medida, porque é algo que essa rede está inventando do jeito dela, com o farmacêutico da loja no meio."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a nota fiscal?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Lá na direita. Emissão de nota é um problema resolvido, com um padrão definido pelo governo, que toda farmácia precisa seguir, com variações de estado pra estado que valem pra todo mundo do mesmo jeito. Tem várias empresas que vendem isso pronto e se atualizam quando a regra muda. Login de cliente também fica bem à direita. Disparo de e-mail e SMS, mesma coisa."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o time gastou dois anos construindo coisa que está do lado direito do mapa."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E deixou com pouca gente justamente o que está do lado esquerdo. É o desenho invertido. E aqui vale uma pergunta que eu faço em todo projeto: quem ganha quando a gente faz a nossa própria nota fiscal?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. O time, que aprende?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "O time aprende, isso é verdade. Mas o cliente não ganha nada. O fisco não ganha nada. E cada mudança de regra vira um trabalho que muitas outras empresas estão fazendo ao mesmo tempo, cada uma no seu canto. Esse é o custo de construir sob medida o que já virou commodity."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas o ponto do diretor continua de pé, né? Se a IA deixa o código barato, construir a nota fiscal em casa não fica barato também?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Fica mais barato escrever a primeira versão. E agora eu te pergunto: quanto do custo do módulo de nota estava na primeira versão?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Pensando no que eu contei, quase nada. O custo estava em mudar toda vez que a regra muda."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E o login?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O incidente de segurança. E ficar acompanhando ataque novo, vulnerabilidade nova."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E o disparador de SMS?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Aguentar o pico da promoção. Ficar de plantão. É, todos os custos que eu falei vieram depois de pronto.",
+      "estilo": "mais devagar, percebendo"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Pois é. Construir é o começo da conta, não a conta. Quem constrói vira dono de tudo que vem depois: a correção, a atualização, o plantão de madrugada, a pessoa que entende aquele código e um dia sai da empresa. Na minha experiência, quando alguém compara construir com comprar, costuma comparar o custo dos primeiros meses de desenvolvimento com anos de licença. É uma comparação torta."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a IA não ajuda na manutenção também?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Ajuda a escrever a mudança, sim. Mas alguém ainda precisa saber que a regra mudou, entender o impacto, testar, e responder se a nota sair errada. Isso é atenção do time. E atenção é o recurso mais escasso de qualquer time de tecnologia. Cada hora no módulo de nota é uma hora a menos no acompanhamento de remédio contínuo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Custo de oportunidade."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Exato. Esse é o custo que quase nunca aparece na planilha."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, me convenceu sobre a nota fiscal. Mas então a solução é o contrário? Compra tudo? Deve ter plataforma de varejo farmacêutico que faz tudo, inclusive programa de acompanhamento. Assina uma e acabou."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Aí a gente cai no erro oposto, e eu já vi esse de perto. Num projeto da consultoria, uma rede de lojas comprou uma plataforma completa, incluindo o programa de relacionamento com o cliente, que era justamente o que eles faziam de diferente. A plataforma tinha o jeito dela de fazer fidelidade, o mesmo pra todos os clientes do fornecedor. Em um ano, a rede estava adaptando o próprio processo pra caber no produto, e o diferencial foi sumindo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ficaram iguais à concorrência."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Ficaram iguais a todo mundo que comprou o mesmo produto. Se uma coisa diferencia o seu negócio e você compra pronta, ela tende a deixar de diferenciar, porque o fornecedor vende a mesma coisa pros seus concorrentes."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então a regra é: compra o que é commodity, constrói o que é diferencial."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Como ponto de partida, sim. É o que eu defendo na maioria dos projetos. Mas tem duas sutilezas. A primeira é que existe o terceiro caminho do título do episódio: integrar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Integrar com o quê?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Com o que já existe, dentro e fora de casa. Olha o acompanhamento de remédio contínuo. Ele é diferencial, então a lógica dele, as regras de quando avisar, como o farmacêutico entra na conversa, isso o time constrói. Mas ele precisa mandar mensagem pro cliente. Precisa saber o que o cliente comprou, e isso já está no sistema de vendas das lojas. Precisa de login. Nada disso precisa ser construído de novo pra ele."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ah, então o diferencial é construído em casa, mas apoiado em peças compradas e em sistemas que já existem."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Isso. O diferencial raramente é um sistema inteiro. Ele costuma ser uma camada fina e valiosa em cima de muita commodity. O mapa ajuda a enxergar isso: o componente diferencial lá em cima e à esquerda, e embaixo dele uma porção de dependências mais à direita. Pra mim, o trabalho da arquitetura de soluções é construir essa camada fina e ligá-la bem às peças de baixo."
+    },
+    {
+      "persona": "davi",
+      "texto": "E qual é a segunda sutileza?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Que o mapa envelhece. O que é diferencial hoje vai evoluir. Daqui a alguns anos, talvez o acompanhamento de remédio contínuo vire produto, e as farmácias comprem pronto. Quando isso acontecer, a rede precisa ter coragem de largar o que construiu, comprar, e procurar o próximo diferencial."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso parece fácil de falar e difícil de fazer. Ninguém gosta de jogar fora o que construiu."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Difícil mesmo. O Wardley chama essa resistência de inércia: a tendência de se agarrar ao jeito antigo porque já se investiu nele e porque ele deu certo no passado. Ela aparece muito em time que construiu algo e se orgulha disso, com razão. O módulo de nota fiscal da farmácia provavelmente tem gente que adora ele."
+    },
+    {
+      "persona": "davi",
+      "texto": "Provavelmente fui eu que escrevi, nessa história.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Pode ser! E não tem vergonha nenhuma nisso. No caso da nota, já existia o que comprar, então ali foi escolha mesmo. Mas em geral é comum uma decisão de construir ter sido certa na época, quando não havia produto bom no mercado, e estar errada hoje, porque o componente evoluiu. Por isso a pergunta não é se foi certo construir. É: onde esse componente está no mapa agora?",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Gostei disso. A decisão tem prazo de validade."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Tem. E tem uma consequência prática que o Wardley também trabalha: cada estágio de evolução pede um jeito diferente de trabalhar. Componente na gênese pede experimentação, aceitar que vai errar, mudar rápido. Componente commodity pede eficiência, padronização, previsibilidade. Usar o mesmo método pra tudo é um erro."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. Se eu tratar o acompanhamento de remédio como trato a nota fiscal, eu mato a inovação. E se eu tratar a nota fiscal como trato o acompanhamento, eu fico reinventando a roda sem parar."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Perfeito. E o time da farmácia estava fazendo um pouco das duas coisas: tratando a nota fiscal como projeto de criação, com gente talentosa reinventando o que já existe, e o acompanhamento como projeto pra quando sobrar tempo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas vamos pros trade-offs, porque eu não quero sair daqui achando que comprar é sempre lindo. O que se perde comprando?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Bastante coisa. Você perde controle sobre o ritmo: se o fornecedor demora pra lançar algo que você precisa, você espera. Você cria dependência, e trocar de fornecedor depois costuma custar caro. Você paga enquanto usar. E você precisa se adaptar ao jeito do produto, o que é ótimo pra commodity e péssimo pra diferencial."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o que se ganha?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Você ganha a manutenção feita por alguém que vive daquilo. A mudança de regra fiscal vira problema de quem tem muitos clientes pra atender e se organiza pra isso. Você ganha tempo do time. E ganha um custo mais previsível, em vez de uma fila de incêndios."
+    },
+    {
+      "persona": "davi",
+      "texto": "E construir? O que se ganha e o que se perde?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Ganha controle total, ganha a capacidade de fazer algo que ninguém mais faz, e ganha um aprendizado que vira vantagem. Perde tempo, perde atenção, e assume pra sempre o custo de manter. Por isso construir só compensa onde essa vantagem importa pro usuário."
+    },
+    {
+      "persona": "davi",
+      "texto": "E integrar?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Integrar costuma ser o caminho mais barato no começo, porque aproveita o que já existe e não troca tudo de uma vez. Mas integração também tem custo. Cada ligação entre sistemas é um ponto que pode quebrar, e você fica preso ao formato do sistema antigo. Se você integra com um sistema que está morrendo, só está adiando a troca. Eu prefiro integrar antes de substituir, mas sabendo que a integração também entra no mapa e também precisa de dono."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se a resposta mudar daqui a dois anos?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Aí você refaz o mapa. Eu gosto de revisitar sempre que aparece uma decisão grande. Leva uma tarde, com gente do negócio e da tecnologia na mesma sala. E essa conversa, por si só, já vale muito, porque obriga todo mundo a concordar sobre quem é o usuário e do que ele precisa."
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu tentar resumir com as minhas palavras. Primeiro: antes de falar em comprar ou construir, a gente pergunta o que faz o cliente escolher a gente. Isso é diferencial. O resto, por mais importante que seja, é custo de fazer negócio, igual à energia elétrica da loja: tem que funcionar, mas não faz ninguém escolher a gente. Segundo: o livro Wardley Maps, do Simon Wardley, dá uma ferramenta pra enxergar isso, um mapa com a cadeia de valor na vertical e a evolução na horizontal, da gênese ao sob medida, ao produto e à commodity. Quanto mais à direita, mais faz sentido comprar ou alugar. Quanto mais à esquerda, mais faz sentido construir, experimentando. Terceiro: construir em casa o que já é commodity sai caro, e o custo não está na primeira versão. Está na manutenção, no plantão, e principalmente no tempo que o time deixa de dar pro diferencial. A IA barateia o código, mas não barateia a atenção. Quarto: o diferencial normalmente é uma camada fina construída em casa, integrada com peças compradas e com o que já existe. E quinto: o mapa muda, porque tudo evolui, e a decisão de ontem pode estar errada hoje."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Resumo impecável. Eu só acrescentaria uma frase: comprar ou construir não é uma decisão sobre tecnologia. É uma decisão sobre onde a empresa quer ser diferente."
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado. E agora, o desafio pra você que está ouvindo: liste cinco componentes de um sistema que você conhece e classifique cada um como diferencial ou commodity. Depois aponte um que foi construído em casa e poderia ter sido comprado, ou o contrário. Vale o sistema do trabalho, vale um projeto pessoal."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E se você travar em algum, faça esta pergunta: se esse componente fosse igual ao do concorrente, algum cliente perceberia? Ela resolve muita coisa."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ótima dica. Beatriz, muito obrigado por mais uma conversa. Eu vou voltar pro trabalho olhando torto pra cada coisa que a gente construiu em casa."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Obrigada, Davi, foi um prazer. Olha torto, mas com carinho."
+    },
+    {
+      "persona": "davi",
+      "texto": "Com carinho. Esse foi o Pebacast. Obrigado por ouvir, até o próximo episódio e bons estudos!",
+      "estilo": "rindo"
+    }
+  ],
+  "desafio": "Liste cinco componentes de um sistema que você conhece e classifique cada um como diferencial ou commodity. Aponte um que foi construído em casa e poderia ter sido comprado, ou o contrário.",
+  "fontes": [
+    "Wardley Maps, Simon Wardley, caps. 2, 3 e 4"
+  ]
+}
