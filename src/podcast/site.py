@@ -471,7 +471,7 @@ def _caso(noticia: Mapping[str, Any]) -> str:
 def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
     duracao = publicacao["duracao_segundos"]
     return f"""<div class="player" data-duracao="{duracao}" data-episodio="{escape(episodio_id)}">
-      <audio controls preload="none" src="{escape(publicacao['url_audio'])}"></audio>
+      <audio controls preload="none"><source src="{escape(publicacao['url_audio'])}" type="audio/mpeg"></audio>
       <button class="player__play" type="button" aria-label="Tocar">
         <svg class="player__icone-play" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-play"/></svg>
         <svg class="player__icone-pausa" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-pause"/></svg>

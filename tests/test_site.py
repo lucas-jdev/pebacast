@@ -47,7 +47,7 @@ def test_pagina_mostra_episodio_publicado_com_player_e_desafio(projeto, tmp_path
 
     assert 'id="sw-001"' in pagina
     assert "Liste dois trade-offs." in pagina
-    assert '<audio controls preload="none" src="' in pagina
+    assert re.search(r'<audio controls preload="none"><source src="[^"]+" type="audio/mpeg"></audio>', pagina)
     assert "Apagão &lt;ao vivo&gt;" in pagina
     assert "feed.xml" in pagina
 
