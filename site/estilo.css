@@ -697,3 +697,69 @@ h1.episodio__titulo { font-size: clamp(1.9rem, 4vw, 2.8rem); }
 .player__aviso { grid-column: 1 / -1; margin: 0; font-size: 0.9rem; font-weight: 600; }
 .player__aviso:empty { display: none; }
 .player__aviso a { color: var(--texto); }
+
+/* ---------------------------------------------------------------- transcrição (#55) */
+/* Na página do episódio, a transcrição é leitura corrida: sem caixa com rolagem própria, linha de até ~66
+   caracteres, a fonte do corpo e o nome de quem fala numa linha só dele. */
+.transcricao--corrida { max-height: none; overflow: visible; max-width: 66ch; padding: 0.4rem 0 1.4rem;
+  font-size: var(--tamanho-texto); gap: 1.15rem; }
+.transcricao--corrida .fala__quem { margin-bottom: 0.15rem; }
+#transcricao { scroll-margin-top: 110px; }
+/* Nas listas, o mesmo lugar da dobra vira um link para a transcrição na página do episódio. */
+.dobra--link { display: flex; align-items: center; gap: 0.6rem; min-height: 48px; padding: 0.7rem 0;
+  font-weight: 650; color: var(--texto); text-decoration: none; }
+.dobra--link > span[aria-hidden] { margin-left: auto; margin-right: 2px; }
+.dobra--link:hover { text-decoration: underline 3px var(--destaque); text-underline-offset: 0.25em; }
+
+/* ---------------------------------------------------------------- acabamento (#57) */
+/* Títulos: um tamanho para o h1 das páginas internas (maior que os h2 delas) e sem viúvas. */
+h1, h2, h3 { text-wrap: balance; }
+h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
+.secao__titulo--menor { font-size: clamp(1.7rem, 3.4vw, 2.4rem); }
+
+/* Página do episódio: o título vence o código. A etiqueta da saga continua sendo o identificador legível. */
+.episodio--pagina h1.episodio__titulo { font-size: clamp(2.2rem, 4.6vw, 3.4rem); }
+.episodio--pagina .episodio__codigo { font-size: clamp(2.6rem, 5vw, 4rem); }
+
+/* Play como carimbo: o amarelo marca a ação principal. A velocidade volta a ser papel. */
+.player__play { background: var(--destaque); color: var(--texto); border: 3px solid var(--texto); box-shadow: 4px 4px 0 var(--texto); }
+.player__play:hover { background: #ffd54f; }
+.player__play:active { box-shadow: 1px 1px 0 var(--texto); translate: 3px 3px; }
+.player__velocidade { background: #fffaf0; }
+
+/* Selo de revisão como carimbo verde, do mesmo jeito que o carimbo beta. */
+.selo { background: transparent; border: 2px solid var(--verde); border-radius: 2px; color: var(--texto);
+  rotate: -1deg; transform-origin: left center; }
+.selo svg { color: var(--verde); }
+
+/* Fundo das seções alternadas: kraft escuro, para não parecer seção da saga Software (rosa). */
+.secao--alternada { background: var(--fundo-2); --papel: var(--fundo-2); --texto-suave: #4a3e2e; --fundo: #f3ead2; }
+
+/* Paisagem também nas páginas novas: céu no topo da Sobre, sertão no fim dela e mar no fim do episódio. */
+#sobre { --cena-topo: var(--cena-ceu); }
+#sobre::before { content: ""; --cena-altura: 300px; }
+#nome { --cena-base: var(--cena-sertao); padding-bottom: clamp(10rem, 17vw, 15rem); }
+#nome::after { content: ""; --cena-altura: 380px; }
+#episodio { --cena-base: var(--cena-mar-fundo); padding-bottom: clamp(9rem, 17vw, 15rem); }
+#episodio::after { content: ""; --cena-altura: 300px; }
+@media (max-width: 1180px) {
+  #nome { padding-bottom: calc(300px * var(--cena-escala)); }
+  #nome::after { --cena-altura: calc(290px * var(--cena-escala)); }
+  #episodio { --cena-base: var(--cena-mar-aberto); padding-bottom: calc(290px * var(--cena-escala)); }
+  #episodio::after { --cena-altura: calc(300px * var(--cena-escala)); }
+}
+
+/* Sobre: o tatu vai para a coluna do título, e o texto volta a começar no mesmo x dos outros blocos. */
+.sobre__peba { display: block; margin-top: 1rem; }
+
+/* Celular. */
+@media (max-width: 760px) {
+  /* As vozes mostram a história em 3 linhas, com "Ler a história" para abrir (sem JS, tudo aparece). */
+  .js .voz:not([data-aberta]) .voz__historico { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .js .voz__mais { display: inline-flex; }
+  /* A ilustração do hero encolhe: o episódio chega mais cedo. */
+  .toca { max-width: 260px; margin-inline: auto; }
+}
+.voz__mais { display: none; align-items: center; min-height: 44px; margin: -0.4rem 0 0.6rem; padding: 0; border: 0;
+  background: none; color: var(--texto); font: inherit; font-weight: 700; text-decoration: underline 2px; cursor: pointer; }
+@media (max-width: 420px) { .feed__url { flex: none; height: 48px; } }

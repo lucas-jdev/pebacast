@@ -116,6 +116,23 @@
     const opcoes = [...filtro.querySelectorAll(".filtro__opcao")];
     const meses = [...document.querySelectorAll(".mes")];
     const status = filtro.querySelector("[data-filtro-status]");
+    const arquivo = document.querySelector(".arquivo");
+    const lead = document.querySelector("[data-arquivo-lead]");
+    const leadOriginal = lead?.textContent;
+
+    // Com uma saga escolhida, a lista vai na ordem do currículo (do mais antigo ao mais novo), que é a ordem em
+    // que se ouve uma saga. A ordem muda no DOM, e não só no CSS, para o Tab seguir o que se vê.
+    const ordenar = (doCurriculo) => {
+      const ordem = doCurriculo ? [...meses].reverse() : meses;
+      ordem.forEach((mes) => {
+        arquivo.append(mes);
+        const lista = mes.querySelector(".mes__lista");
+        const itens = [...lista.children].sort((a, b) => Number(a.dataset.ordem) - Number(b.dataset.ordem));
+        (doCurriculo ? itens.reverse() : itens).forEach((item) => lista.append(item));
+      });
+      if (lead) lead.textContent = doCurriculo ? "Na ordem do currículo: do primeiro episódio ao mais recente." : leadOriginal;
+    };
+    meses.flatMap((mes) => [...mes.querySelectorAll(".item")]).forEach((item, indice) => { item.dataset.ordem = indice; });
 
     const aplicar = (saga) => {
       let visiveis = 0;
@@ -129,7 +146,10 @@
         mes.hidden = doMes === 0;
         visiveis += doMes;
       });
+      ordenar(Boolean(saga));
       opcoes.forEach((opcao) => opcao.setAttribute("aria-pressed", String(opcao.dataset.saga === saga)));
+      // No celular a faixa de sagas rola de lado: traz a escolhida para o meio, em vez de deixá-la cortada.
+      filtro.querySelector('.filtro__opcao[aria-pressed="true"]')?.scrollIntoView({ block: "nearest", inline: "center" });
       status.textContent = `${visiveis} ${visiveis === 1 ? "episódio" : "episódios"}`;
     };
 
@@ -153,6 +173,24 @@
       if (alvo && !alvo.hidden) alvo.scrollIntoView();
     }
   }
+
+  // Link para uma dobra (como .../episodios/sw-002/#transcricao): abre a dobra e rola até ela.
+  const abrirDobraDaAncora = () => {
+    const alvo = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (alvo instanceof HTMLDetailsElement) {
+      alvo.open = true;
+      alvo.scrollIntoView();
+    }
+  };
+  abrirDobraDaAncora();
+  window.addEventListener("hashchange", abrirDobraDaAncora);
+
+  // Vozes no celular: a história fica em 3 linhas até a pessoa pedir para ler.
+  document.querySelectorAll(".voz__mais").forEach((botao) => botao.addEventListener("click", () => {
+    const aberta = botao.closest(".voz").toggleAttribute("data-aberta");
+    botao.setAttribute("aria-expanded", String(aberta));
+    botao.textContent = aberta ? "Fechar a história" : "Ler a história";
+  }));
 
   // Curti / não curti. O voto vale por navegador: fica no localStorage para o botão lembrar, e o servidor guarda um por visitante.
   // O corpo vai como texto puro de propósito: é um pedido "simples" de CORS, sem a ida e volta do preflight.
