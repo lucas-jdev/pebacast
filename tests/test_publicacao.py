@@ -158,6 +158,7 @@ def test_feed_lista_episodios_publicados_com_enclosure_e_guid(projeto, tmp_path)
     assert item.find("title").text == "Saga Software · ep. 1 — Um"
     assert item.find("guid").text == "pebacast-sw-001"
     assert item.find("guid").get("isPermaLink") == "false"
+    assert item.find("link").text == "https://x.github.io/pebacast/episodios/sw-001/"
     assert item.find("enclosure").get("type") == "audio/mpeg"
     assert item.find("pubDate").text == "Sun, 08 Nov 2026 01:00:00 +0000"
     notas = item.find("description").text

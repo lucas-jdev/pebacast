@@ -120,6 +120,8 @@ O MP3 vai para o `AudioStorage` (um release `episodio-<id>` por episódio) e o A
 
 Mudanças que só afetam o site ou o feed (`site/`, `src/podcast/site.py`, `src/podcast/publicacao.py`, `curriculum/`, `config/`) são publicadas por `.github/workflows/site.yml`, sem esperar episódio novo. Ele também pode ser disparado à mão.
 
+O site ganha uma página por episódio publicado em `episodios/<id>/`, e o `<link>` de cada item do feed aponta para ela. Essa URL não muda, e o id do episódio não é renomeado depois de publicado ([ADR 0010](adr/0010-url-permanente-do-episodio.md)).
+
 Decisão de hospedagem em [ADR 0002](adr/0002-hospedagem-pages-releases.md).
 
 ### Entrar no índice dos buscadores
