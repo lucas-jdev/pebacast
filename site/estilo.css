@@ -215,12 +215,12 @@ button { font: inherit; }
 /* detalhes */
 .episodio__detalhes { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.8rem; }
 @media (max-width: 900px) { .episodio__detalhes { grid-template-columns: 1fr; } }
-.episodio__detalhes h4 { font-family: var(--fonte-texto); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--texto-suave); margin-bottom: 0.7rem; text-transform: none; }
+.detalhes__titulo { font-family: var(--fonte-texto); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--texto-suave); margin-bottom: 0.7rem; text-transform: none; }
 .lista-marcada { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
 .lista-marcada li { position: relative; padding-left: 1.5rem; }
 .lista-marcada li::before { content: ""; position: absolute; left: 0.1rem; top: 0.55em; width: 9px; height: 9px; background: var(--destaque); transform: rotate(45deg); }
 .desafio { background: var(--fundo); border: var(--borda) solid var(--linha); border-left: 5px solid var(--acento); border-radius: calc(var(--raio) * 0.66); padding: 1.1rem 1.25rem; }
-.desafio h4 { color: var(--acento); }
+.desafio .detalhes__titulo { color: var(--acento); }
 .desafio p { font-family: var(--fonte-titulo); font-size: 1.12rem; line-height: 1.45; }
 .selo { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; padding: 0.45rem 0.9rem 0.45rem 0.6rem; border-radius: var(--raio-botao); font-size: 0.92rem; font-weight: 550; background: color-mix(in srgb, var(--verde) 16%, transparent); color: color-mix(in srgb, var(--verde) 55%, var(--texto)); }
 .selo svg { width: 18px; height: 18px; flex: none; }
@@ -443,7 +443,7 @@ body { line-height: 1.7; }
 .player__barra::-webkit-slider-thumb { border-radius: 0; background: var(--destaque); border: 2px solid var(--texto); margin-top: -6px; }
 .player__velocidade { border: 3px solid var(--texto); background: var(--destaque); border-radius: 2px; }
 .desafio { border: 3px solid var(--texto); border-radius: 2px; background: var(--destaque); }
-.desafio h4 { color: var(--texto); }
+.desafio .detalhes__titulo { color: var(--texto); }
 .caso__rotulo { color: var(--texto); }
 .lista-marcada li::before { background: var(--texto); }
 .fala__quem { color: var(--acento-2); }
@@ -679,3 +679,21 @@ h1.episodio__titulo { font-size: clamp(1.9rem, 4vw, 2.8rem); }
   cursor: pointer; }
 .votos__recado[aria-expanded="true"] { text-decoration-color: var(--texto); }
 .recado__aviso a { color: var(--texto); font-weight: 650; }
+
+/* Página do episódio: quem chega por um link sabe o que é o podcast, o que ouvir antes e o que vem depois. */
+.apresenta { margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--texto-suave); }
+.apresenta a { color: var(--texto); font-weight: 650; }
+.antes { max-width: 46rem; margin: -0.6rem 0 1.4rem; padding: 0.7rem 1rem; border-left: 6px solid var(--capa-fundo, var(--destaque));
+  background: rgba(255, 250, 240, 0.7); }
+.antes a { color: var(--texto); font-weight: 650; }
+.vizinhos__em-breve { font-family: var(--fonte-texto); font-size: 1rem; line-height: 1.5; text-align: left; border-style: dashed; }
+.vizinhos__em-breve:hover { background: #fffaf0; }
+.vizinhos__em-breve .botao { display: flex; width: max-content; margin-top: 0.8rem; }
+
+/* Player: carregando (o MP3 vem de um redirect do GitHub Releases) e erro, com o caminho para baixar o arquivo. */
+.player--carregando .player__play { animation: carregando 1s ease-in-out infinite alternate; }
+@keyframes carregando { from { opacity: 1; } to { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) { .player--carregando .player__play { animation: none; opacity: 0.6; } }
+.player__aviso { grid-column: 1 / -1; margin: 0; font-size: 0.9rem; font-weight: 600; }
+.player__aviso:empty { display: none; }
+.player__aviso a { color: var(--texto); }

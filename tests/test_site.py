@@ -658,7 +658,7 @@ def test_pagina_do_episodio_tem_titulo_descricao_e_canonical_proprios(projeto):
 
     assert "<title>Dois · Saga Software · ep. 2 · Pebacast</title>" in pagina
     assert '<link rel="canonical" href="https://x.github.io/pebacast/episodios/sw-002/">' in pagina
-    assert '<h1 class="episodio__titulo">Dois</h1>' in pagina
+    assert '<h1 class="episodio__titulo" id="titulo-sw-002">Dois</h1>' in pagina
     assert 'class="player"' in pagina and "Liste dois trade-offs." in pagina
 
 
@@ -705,13 +705,26 @@ def test_vizinhos_so_ligam_episodios_publicados_da_mesma_saga(projeto):
     assert 'vizinhos__link--anterior' not in primeiro
     assert 'class="vizinhos__link vizinhos__link--proximo" href="../../episodios/sw-002/"' in primeiro
     assert 'class="vizinhos__link vizinhos__link--anterior" href="../../episodios/sw-001/"' in ultimo
-    assert 'vizinhos__link--proximo' not in ultimo
+    assert 'href="../../episodios/sw-003/"' not in ultimo, "o sw-003 não foi publicado"
 
 
-def test_episodio_sozinho_na_saga_nao_tem_navegacao(projeto):
+def test_sem_proximo_publicado_diz_qual_e_o_proximo_do_curriculo_e_convida_a_assinar(projeto):
     _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
 
-    assert 'class="vizinhos"' not in gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+    pagina = _texto(gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001"))
+
+    assert "O ep. 2 da saga Software, Dois" in pagina
+    assert "ainda não saiu. As sagas se revezam: assine para receber." in pagina
+    assert "Anterior" not in pagina
+
+
+def test_ultimo_episodio_do_curriculo_diz_que_a_saga_acabou(projeto):
+    _tres_publicados(projeto)
+    _ja_publicado(projeto, "sw-003", "2026-11-10T15:00:00+00:00")
+
+    pagina = _texto(gerar_pagina_do_episodio(projeto, "feed.xml", "sw-003"))
+
+    assert "Este é o último episódio da saga Software no currículo." in pagina
 
 
 def test_pagina_do_episodio_busca_css_js_e_icones_na_raiz_do_site(projeto):
@@ -720,7 +733,7 @@ def test_pagina_do_episodio_busca_css_js_e_icones_na_raiz_do_site(projeto):
     pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
 
     assert '<link rel="stylesheet" href="../../estilo.css">' in pagina
-    assert '<a href="../../episodios.html">Episódios</a>' in pagina
+    assert '<a href="../../episodios.html" aria-current="true">Episódios</a>' in pagina
     assert '<a href="../../episodios.html?saga=software">← Episódios da saga Software</a>' in pagina
     assert not re.search(r'(?:href|src)="(?:estilo\.css|app\.js|favicon|fontes/|\.\./(?!\.\./))', pagina)
 
@@ -731,7 +744,7 @@ def test_listas_levam_a_pagina_do_episodio(projeto):
     inicial = gerar_index(projeto, "feed.xml")
     arquivo = gerar_pagina_episodios(projeto, "feed.xml")
 
-    assert '<h3 class="episodio__titulo"><a href="episodios/sw-002/">Dois</a></h3>' in inicial
+    assert '<h3 class="episodio__titulo" id="titulo-sw-002"><a href="episodios/sw-002/">Dois</a></h3>' in inicial
     assert '<a href="episodios/sw-001/">Um</a></h3>' in arquivo
     assert 'href="episodios/sw-001/">Link deste episódio' in arquivo
     assert 'id="sw-001"' in arquivo, "as âncoras antigas (episodios.html#sw-001) continuam valendo"
@@ -896,3 +909,50 @@ def test_recado_tem_botao_proprio_sem_precisar_votar(projeto):
             '        aria-controls="form-recado-sw-001">Deixar um recado</button>') in pagina
     assert '<form class="recado" id="form-recado-sw-001" data-recado hidden>' in pagina
     assert 'data-repositorio>Repositório</a>' in pagina
+
+
+# ---------------------------------------------------------------- página do episódio e player (#53, #56)
+
+
+def test_pagina_do_episodio_se_apresenta_e_leva_a_sobre(projeto):
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+    assert '<p class="apresenta"><strong>Pebacast</strong> · podcast diário de arquitetura em diálogo' in pagina
+    assert '<a href="../../sobre/">O que é →</a>' in pagina
+
+
+def test_antes_ouca_mostra_o_pre_requisito_publicado(projeto):
+    _tres_publicados(projeto)
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+
+    assert '<p class="antes">Este episódio continua <a href="../../episodios/sw-001/">Um</a>.' in pagina
+    assert 'class="antes"' not in gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+
+def test_pre_requisito_que_nao_saiu_nao_vira_link(projeto):
+    _ja_publicado(projeto, "sw-002", "2026-11-09T15:00:00+00:00")
+
+    assert 'class="antes"' not in gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+
+
+def test_titulos_da_pagina_do_episodio_nao_pulam_nivel(projeto):
+    _tres_publicados(projeto)
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+
+    niveis = [int(n) for n in re.findall(r"<h([1-6])[ >]", pagina)]
+    assert niveis[0] == 1
+    assert all(depois - antes <= 1 for antes, depois in zip(niveis, niveis[1:])), niveis
+
+
+def test_cada_player_tem_o_nome_do_episodio(projeto):
+    _tres_publicados(projeto)
+
+    for pagina in (gerar_index(projeto, "feed.xml"), gerar_pagina_episodios(projeto, "feed.xml"),
+                   gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")):
+        for eid in re.findall(r'<div class="player" role="group" aria-labelledby="titulo-([\w-]+)"', pagina):
+            assert f'id="titulo-{eid}"' in pagina
+        assert 'data-player-aviso' in pagina

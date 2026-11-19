@@ -190,7 +190,7 @@ def gerar_pagina_do_episodio(projeto: Projeto, arquivo_feed: str, episodio_id: s
         pular_texto="Pular para o episódio",
         raiz="../../",
         cabecalho=_cabecalho(meta, atual="episodio", raiz="../../", beta=_config_do_site(config)["beta"]),
-        conteudo=_secao_do_episodio(item, publicados, projeto.personas(), _config_do_site(config)["votos"]),
+        conteudo=_secao_do_episodio(item, publicados, projeto.personas(), _config_do_site(config)["votos"], meta),
     )
 
 
@@ -214,8 +214,9 @@ def _vizinhos(item: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]]) 
 
 
 def _secao_do_episodio(item: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]],
-                       personas: Mapping[str, Any], votos: str) -> str:
-    episodio, saga = item["episodio"], item["saga"]
+                       personas: Mapping[str, Any], votos: str, meta: Mapping[str, Any]) -> str:
+    """A página de quem chega por um link: diz o que é o podcast, o que ouvir antes e o que vem depois."""
+    saga = item["saga"]
     anterior, proximo = _vizinhos(item, publicados)
 
     def vizinho(outro: Mapping[str, Any] | None, rotulo: str, classe: str) -> str:
@@ -224,16 +225,44 @@ def _secao_do_episodio(item: Mapping[str, Any], publicados: Sequence[Mapping[str
         return (f'<a class="vizinhos__link vizinhos__link--{classe}" href="../../{caminho_do_episodio(outro["episodio"]["id"])}">'
                 f'<span class="vizinhos__rotulo">{rotulo}</span>{escape(outro["episodio"]["titulo"])}</a>')
 
-    links = vizinho(anterior, "← Anterior", "anterior") + vizinho(proximo, "Próximo →", "proximo")
-    navegacao = (f'<nav class="vizinhos" aria-label="Outros episódios da saga {escape(saga.nome_curto)}">{links}</nav>'
-                 if links else "")
+    links = vizinho(anterior, "← Anterior", "anterior") + (
+        vizinho(proximo, "Próximo →", "proximo") if proximo else _proximo_que_nao_saiu(item))
     return f"""<section class="secao" id="episodio">
   <div class="largura">
+    <p class="apresenta"><strong>{escape(meta['titulo'])}</strong> · podcast diário de arquitetura em diálogo,
+      15 a 20 min · <a href="../../{PAGINA_SOBRE}">O que é →</a></p>
     <p class="voltar"><a href="../../{PAGINA_EPISODIOS}?saga={escape(saga.id)}">← Episódios da saga {escape(saga.nome_curto)}</a></p>
+    {_antes_ouca(item, publicados)}
     {_episodio_destaque(item, personas, votos, na_propria_pagina=True)}
-    {navegacao}
+    <nav class="vizinhos" aria-label="Outros episódios da saga {escape(saga.nome_curto)}">{links}</nav>
   </div>
 </section>"""
+
+
+def _antes_ouca(item: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]]) -> str:
+    """Os pré-requisitos do currículo que já saíram: quem chega pelo ep. 2 sabe que o 1 vem antes."""
+    no_ar = {i["episodio"]["id"]: i["episodio"]["titulo"] for i in publicados}
+    antes = [eid for eid in item["episodio"].get("pre_requisitos", []) if eid in no_ar]
+    if not antes:
+        return ""
+    links = " e ".join(f'<a href="../../{caminho_do_episodio(eid)}">{escape(no_ar[eid])}</a>' for eid in antes)
+    return f'<p class="antes">Este episódio continua {links}. Se ainda não ouviu, vale começar por lá.</p>'
+
+
+def _proximo_que_nao_saiu(item: Mapping[str, Any]) -> str:
+    """Sem próximo publicado na saga: diz qual é o próximo do currículo, ou que a saga acabou, e convida a assinar."""
+    saga, episodio_id = item["saga"], item["episodio"]["id"]
+    ordem = [e.id for e in saga.episodios]
+    seguinte = saga.episodios[ordem.index(episodio_id) + 1] if ordem.index(episodio_id) + 1 < len(ordem) else None
+    if seguinte is None:
+        texto = f"Este é o último episódio da saga {escape(saga.nome_curto)} no currículo."
+    else:
+        texto = (f"O ep. {saga.posicao_do(seguinte.id)} da saga {escape(saga.nome_curto)}, "
+                 f"<em>{escape(seguinte.titulo)}</em>, ainda não saiu. As sagas se revezam: assine para receber.")
+    return f"""<div class="vizinhos__link vizinhos__link--proximo vizinhos__em-breve">
+      <span class="vizinhos__rotulo">Próximo</span>{texto}
+      <a class="botao botao--pequeno" href="../../#assinar">Assinar</a>
+    </div>"""
 
 
 def gerar_sitemap(projeto: Projeto) -> str:
@@ -484,7 +513,9 @@ def _cabecalho(meta: Mapping[str, Any], atual: str, raiz: str = "", beta: bool =
                'aria-label="Versão beta: o que isso quer dizer">beta</a>' if beta else "")
 
     def corrente(pagina: str) -> str:
-        return ' aria-current="page"' if atual == pagina else ""
+        if atual == pagina:
+            return ' aria-current="page"'
+        return ' aria-current="true"' if (atual, pagina) == ("episodio", "episodios") else ""
 
     return f"""<header class="topo">
   <div class="largura topo__linha">
@@ -561,8 +592,8 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     episodio, roteiro, saga = item["episodio"], item["roteiro"], item["saga"]
     eid = escape(episodio["id"])
     link = "./" if na_propria_pagina else caminho_do_episodio(episodio["id"])
-    titulo = (f'<h1 class="episodio__titulo">{escape(episodio["titulo"])}</h1>' if na_propria_pagina else
-              f'<h3 class="episodio__titulo"><a href="{escape(link)}">{escape(episodio["titulo"])}</a></h3>')
+    titulo = (f'<h1 class="episodio__titulo" id="titulo-{eid}">{escape(episodio["titulo"])}</h1>' if na_propria_pagina else
+              f'<h3 class="episodio__titulo" id="titulo-{eid}"><a href="{escape(link)}">{escape(episodio["titulo"])}</a></h3>')
     return f"""<article class="episodio episodio--destaque" id="{eid}" data-saga="{escape(saga.id)}">
   {_etiqueta(saga, episodio["id"])}
   <div class="episodio__capa" aria-hidden="true">
@@ -574,7 +605,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     {titulo}
     {_caso(item["noticia"])}
     {_player(item["publicacao"], episodio["id"])}{_votos(episodio["id"], votos)}
-    {_objetivos_e_desafio(episodio, roteiro)}
+    {_objetivos_e_desafio(episodio, roteiro, nivel="h2" if na_propria_pagina else "h4")}
     {_selo(item)}
     {_dobra_transcricao(roteiro, personas)}
     <details class="dobra">
@@ -705,7 +736,7 @@ def _primeira_frase(texto: str, limite: int = 180) -> str:
 
 def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
     duracao = publicacao["duracao_segundos"]
-    return f"""<div class="player" data-duracao="{duracao}" data-episodio="{escape(episodio_id)}">
+    return f"""<div class="player" role="group" aria-labelledby="titulo-{escape(episodio_id)}" data-duracao="{duracao}" data-episodio="{escape(episodio_id)}">
       <audio controls preload="none"><source src="{escape(publicacao['url_audio'])}" type="audio/mpeg"></audio>
       <button class="player__play" type="button" aria-label="Tocar">
         <svg class="player__icone-play" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-play"/></svg>
@@ -716,6 +747,7 @@ def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
         <div class="player__tempos"><span class="player__atual">0:00</span><span><span class="so-leitor">de </span>{escape(_duracao(duracao))}</span></div>
       </div>
       <button class="player__velocidade" type="button"><span class="so-leitor">Velocidade de reprodução: </span><span class="player__velocidade-valor">1×</span></button>
+      <p class="player__aviso" role="status" data-player-aviso></p>
     </div>"""
 
 
@@ -745,15 +777,16 @@ def _votos(episodio_id: str, api: str) -> str:
     </div>"""
 
 
-def _objetivos_e_desafio(episodio: Mapping[str, Any], roteiro: Mapping[str, Any]) -> str:
+def _objetivos_e_desafio(episodio: Mapping[str, Any], roteiro: Mapping[str, Any], nivel: str = "h4") -> str:
+    """`nivel` é h2 na página do episódio (logo abaixo do h1) e h4 nas listas, para os títulos não pularem nível."""
     objetivos = "".join(f"<li>{escape(o)}</li>" for o in episodio.get("objetivos", []))
     return f"""<div class="episodio__detalhes">
       <div>
-        <h4>Ao final, você deve conseguir</h4>
+        <{nivel} class="detalhes__titulo">Ao final, você deve conseguir</{nivel}>
         <ul class="lista-marcada">{objetivos}</ul>
       </div>
       <div class="desafio">
-        <h4>Desafio do episódio</h4>
+        <{nivel} class="detalhes__titulo">Desafio do episódio</{nivel}>
         <p>{escape(roteiro.get('desafio', ''))}</p>
       </div>
     </div>"""
