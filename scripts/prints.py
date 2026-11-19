@@ -29,7 +29,10 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
-PAGINAS = ("index", "episodios")
+PAGINAS = ("index", "episodios", "sobre", "episodio")
+# Como cada página aparece no comentário. "episodio" é uma página de episódio só, a primeira em ordem
+# alfabética: a mesma nos dois lados da comparação, já que o PR raramente muda quais episódios existem.
+ROTULOS = {"index": "index.html", "episodios": "episodios.html", "sobre": "sobre/", "episodio": "episodios/<id>/"}
 TELAS = {"desktop": (1280, 900), "celular": (390, 844)}
 ESTADOS = ("alterada", "nova", "removida")
 SELETOR = "header, footer, section"
@@ -175,6 +178,16 @@ def _servidor(site: Path):
     return servidor
 
 
+def caminho_da_pagina(site: Path, pagina: str) -> str | None:
+    """Caminho relativo da página no site gerado, ou None quando ela não existe nesse lado (página nova
+    ou removida pelo PR): sem arquivo não há print, e a comparação marca as seções como novas ou removidas."""
+    if pagina == "episodio":
+        paginas = sorted((site / "episodios").glob("*/index.html"))
+        return f"{paginas[0].parent.relative_to(site).as_posix()}/" if paginas else None
+    arquivo = site / (f"{pagina}/index.html" if pagina == "sobre" else f"{pagina}.html")
+    return ROTULOS[pagina] if arquivo.is_file() else None
+
+
 def capturar(site: Path, saida: Path, paginas: Iterable[str] = PAGINAS) -> list[Path]:
     from playwright.sync_api import sync_playwright
 
@@ -196,7 +209,10 @@ def capturar(site: Path, saida: Path, paginas: Iterable[str] = PAGINAS) -> list[
                 contexto.route("**/*", lambda rota: rota.continue_() if rota.request.url.startswith(base) else rota.abort())
                 pagina_web = contexto.new_page()
                 for pagina in paginas:
-                    pagina_web.goto(f"{base}{pagina}.html", wait_until="networkidle")
+                    caminho = caminho_da_pagina(site, pagina)
+                    if caminho is None:
+                        continue
+                    pagina_web.goto(f"{base}{caminho}", wait_until="networkidle")
                     pagina_web.add_style_tag(content=_CSS_OCULTOS)
                     pagina_web.evaluate(_JS_PREPARAR)
                     pagina_web.wait_for_timeout(ESPERA_MS)
@@ -347,6 +363,11 @@ def validar(pasta: Path) -> dict[str, Any]:
 
 # ---------------------------------------------------------------- comentário
 
+def _paginas_capturadas() -> str:
+    rotulos = [f"`{ROTULOS[p]}`" for p in PAGINAS]
+    return ", ".join(rotulos[:-1]) + " e " + rotulos[-1]
+
+
 def comentario(manifesto: Mapping[str, Any], repo: str, sha: str) -> str:
     """Markdown do comentário; recebe só manifesto já validado."""
     if not RE_REPO.match(repo) or not RE_SHA.match(sha):
@@ -356,9 +377,9 @@ def comentario(manifesto: Mapping[str, Any], repo: str, sha: str) -> str:
     linhas = [MARCADOR, "## Prints de antes e depois", ""]
     itens = manifesto["itens"]
     if not itens:
-        linhas.append(f"{SEM_MUDANCA} (`index.html` e `episodios.html`, desktop e celular), no commit `{curto}`.")
+        linhas.append(f"{SEM_MUDANCA} ({_paginas_capturadas()}, desktop e celular), no commit `{curto}`.")
         return "\n".join(linhas) + "\n"
-    linhas += [f"Seções que mudaram em `index.html` e `episodios.html`, no commit `{curto}`. "
+    linhas += [f"Seções que mudaram nas páginas capturadas ({_paginas_capturadas()}), no commit `{curto}`. "
                "Gerado pelos workflows Capturar e Comentar (ADR 0009).", ""]
     for tela, (largura, _) in TELAS.items():
         da_tela = [i for i in itens if i["tela"] == tela]
@@ -371,7 +392,7 @@ def comentario(manifesto: Mapping[str, Any], repo: str, sha: str) -> str:
                     return "_seção nova_" if lado == "antes" else "_seção removida_"
                 # A query muda a cada commit e fura o cache das imagens no comentário editado.
                 return f"![{lado.capitalize()}: {item['secao']}]({base}/{nome_imagem(item, lado)}?v={curto})"
-            linhas += [f"**{item['pagina']}.html · {item['secao']}** ({item['estado']})", "",
+            linhas += [f"**{ROTULOS[item['pagina']]} · {item['secao']}** ({item['estado']})", "",
                        "| Antes | Depois |", "|---|---|", f"| {celula('antes')} | {celula('depois')} |", ""]
     return "\n".join(linhas)
 

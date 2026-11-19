@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Gera os prints do site, um por seção (cabeçalho, cada <section> e rodapé) de index.html e episodios.html,
+# Gera os prints do site, um por seção (cabeçalho, cada <section> e rodapé) de index.html, episodios.html,
+# sobre/ e de uma página de episódio (a primeira em ordem alfabética),
 # no desktop (1280 px) e no celular (390 px). Usa o Playwright via scripts/prints.py (ADR 0009).
 # Nos PRs, os workflows Capturar e Comentar fazem isso sozinhos; este script é para olhar localmente.
 #
