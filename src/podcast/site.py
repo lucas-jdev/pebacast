@@ -29,7 +29,7 @@ from podcast.roteiro import (
     data_de_publicacao,
     proximo_a_publicar,
 )
-from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO
+from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, max_revisoes
 
 ARQUIVOS_ESTATICOS = "site"
 PAGINA_EPISODIOS = "episodios.html"
@@ -416,6 +416,7 @@ def _url_feed(meta: Mapping[str, Any], arquivo_feed: str) -> str:
 
 
 def _publicados(projeto: Projeto) -> list[dict[str, Any]]:
+    repositorio = projeto.config()["feed"]["url_repositorio"].rstrip("/")
     itens = []
     for saga in projeto.sagas().values():
         for episodio in saga.episodios:
@@ -430,6 +431,8 @@ def _publicados(projeto: Projeto) -> list[dict[str, Any]]:
                 "roteiro": _ler_json(pasta / ROTEIRO),
                 "noticia": _ler_json(pasta / NOTICIA) if (pasta / NOTICIA).exists() else {},
                 "revisoes": [_ler_json(arquivo) for arquivo in revisoes],
+                "relatorio": (f"{repositorio}/blob/main/{pasta.relative_to(projeto.raiz).as_posix()}/"
+                              f"{PASTA_REVISOES}/{revisoes[-1].name}" if revisoes else ""),
             })
     itens.sort(key=lambda item: item["publicacao"]["publicado_em"], reverse=True)
     return itens
@@ -507,8 +510,8 @@ def _hero(ultimo: Mapping[str, Any] | None) -> str:
       <p class="sobretitulo">Podcast diário de arquitetura</p>
       <h1>Cava até achar o <em>porquê</em>.</h1>
       <p class="hero__lead">Uma conversa de 15 a 20 minutos por dia sobre como sistemas são pensados.
-        Cada episódio parte de um caso real, pesa os trade-offs sem torcida e termina com um desafio
-        pra você levar pro trabalho.</p>
+        Cada episódio parte de um caso (real quando há notícia boa, hipotético e avisado quando não há),
+        pesa os trade-offs sem torcida e termina com um desafio pra você levar pro trabalho.</p>
       <div class="hero__acoes">
         {acao}
         <a class="botao botao--contorno" href="#assinar">Assinar o feed</a>
@@ -565,7 +568,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     {_caso(item["noticia"])}
     {_player(item["publicacao"], episodio["id"])}{_votos(episodio["id"], votos)}
     {_objetivos_e_desafio(episodio, roteiro)}
-    {_selo(item["revisoes"])}
+    {_selo(item)}
     {_dobra_transcricao(roteiro, personas)}
     <details class="dobra">
       <summary>Fontes</summary>
@@ -645,7 +648,7 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     {_dobra_transcricao(roteiro, personas)}
     <details class="dobra">
       <summary>Fontes</summary>
-      {_selo(item["revisoes"])}
+      {_selo(item)}
       {_fontes(roteiro)}
     </details>
     {_links(item, caminho_do_episodio(episodio["id"]))}
@@ -676,7 +679,21 @@ def _caso(noticia: Mapping[str, Any]) -> str:
         return (f'<p class="caso"><span class="caso__rotulo">Ponto de partida</span>'
                 f'<a href="{escape(noticia["url"])}" rel="noopener">{escape(noticia["titulo"])}</a>'
                 f' <span class="caso__fonte">{escape(noticia["fonte"])}</span></p>')
-    return '<p class="caso"><span class="caso__rotulo">Ponto de partida</span>Um cenário hipotético.</p>'
+    cenario = _primeira_frase(noticia.get("cenario", ""))
+    if not cenario:
+        return ""
+    return (f'<p class="caso"><span class="caso__rotulo">Ponto de partida · cenário hipotético</span>'
+            f"{escape(cenario)}</p>")
+
+
+def _primeira_frase(texto: str, limite: int = 180) -> str:
+    """A primeira frase do cenário, que basta para o ouvinte saber de onde a conversa parte."""
+    texto = " ".join(texto.split())
+    frase = re.match(r".+?[.!?](?=\s|$)", texto)
+    frase = frase.group(0) if frase else texto
+    if len(frase) <= limite:
+        return frase
+    return frase[: limite - 1].rsplit(" ", 1)[0].rstrip(",;:") + "…"
 
 
 def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
@@ -733,12 +750,16 @@ def _objetivos_e_desafio(episodio: Mapping[str, Any], roteiro: Mapping[str, Any]
     </div>"""
 
 
-def _selo(revisoes: Sequence[Mapping[str, Any]]) -> str:
+def _selo(item: Mapping[str, Any]) -> str:
+    """Quantas afirmações a segunda IA revisou, e o link para o relatório: quem duvidar confere."""
+    revisoes = item["revisoes"]
     if not revisoes:
         return ""
     afirmacoes = len(revisoes[-1].get("afirmacoes", []))
+    relatorio = item["relatorio"]
     return (f'<p class="selo"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-check"/></svg>'
-            f"{afirmacoes} afirmações checadas contra as fontes, aprovado na {len(revisoes)}ª revisão</p>")
+            f"{afirmacoes} afirmações revisadas por uma 2ª IA, aprovado na {len(revisoes)}ª revisão · "
+            f'<a href="{escape(relatorio)}" rel="noopener">ver o relatório</a></p>')
 
 
 def _dobra_transcricao(roteiro: Mapping[str, Any], personas: Mapping[str, Any]) -> str:
@@ -875,8 +896,9 @@ def _secao_vozes(personas: Mapping[str, Any]) -> str:
     <div class="secao__cabeca">
       <p class="sobretitulo">Quem conversa</p>
       <h2 class="secao__titulo">Uma pessoa pergunta, a outra já errou antes</h2>
-      <p class="secao__lead">As vozes são personagens com história fixa. Quem apresenta faz as perguntas que você faria;
-        quem é convidada desmonta a resposta fácil e conta o que viu dar errado.</p>
+      <p class="secao__lead">As vozes são personagens fictícios, com história fixa e voz sintética. Quem apresenta faz
+        as perguntas que você faria; quem é convidado desmonta a resposta fácil e conta o que viu dar errado. As
+        histórias são inventadas para ilustrar; os conceitos passam pela revisão.</p>
     </div>
     <div class="vozes">{''.join(cartoes)}</div>
   </div>
@@ -926,27 +948,37 @@ def _secao_sagas(sagas: Mapping[str, Any], publicados: Sequence[Mapping[str, Any
 
 
 def _secao_como(config: Mapping[str, Any]) -> str:
-    ciclos = config["revisao"]["max_ciclos"]
+    """As etapas com quem faz cada uma (humano, IA ou código), nas mesmas cores de docs/fluxo-do-episodio.md.
+    O processo diz que há gente, e não quem: a autoria do projeto fica na Sobre."""
+    revisoes = max_revisoes(config["revisao"]["max_ciclos"])
+    quem = {"humano": "Humano", "ia": "IA", "codigo": "Código"}
     passos = [
-        ("Currículo", "Cada episódio tem objetivos, pré-requisitos e referências escolhidos à mão, livro e capítulo."),
-        ("A vez de cada saga", _ordem_dos_episodios(config)),
-        ("Caso real", "Busca uma notícia recente que ilustre o tema. Se nenhuma servir, usa um cenário hipotético e avisa."),
-        ("Roteiro", "Uma IA escreve o diálogo seguindo a história e o jeito de falar de cada personagem."),
-        ("Revisão", f"Outra IA, sem ver como o roteiro foi feito, confere cada afirmação contra as fontes. "
-                    f"Se não aprovar em {ciclos} rodadas, o episódio não sai."),
-        ("Voz e feed", "O áudio é sintetizado, montado com a vinheta e publicado no feed, com as fontes nas notas."),
+        ("humano", "Currículo", "Uma pessoa escolhe a obra e o capítulo de cada episódio e confere que a fonte "
+                                "existe e trata do tema. Objetivos e pré-requisitos também são escritos à mão."),
+        ("codigo", "A vez de cada saga", _ordem_dos_episodios(config)),
+        ("ia", "Caso", "Busca uma notícia recente que ilustre o tema. Se nenhuma servir, usa um cenário hipotético "
+                       "e avisa."),
+        ("ia", "Roteiro", "Uma IA escreve o diálogo seguindo a história e o jeito de falar de cada personagem."),
+        ("ia", "Revisão", f"Outra IA, sem ver como o roteiro foi feito, revisa cada afirmação com o que sabe e, na "
+                          f"dúvida, com uma busca. São até {revisoes} revisões; se não aprovar, o episódio não sai."),
+        ("codigo", "Voz e feed", "O áudio é sintetizado, montado com a vinheta e publicado no feed, com as fontes "
+                                 "nas notas."),
+        ("humano", "Escuta", "Depois de publicado, o episódio é ouvido por uma pessoa, que registra o que achou e "
+                             "manda regravar se o áudio saiu ruim."),
     ]
     itens = "\n".join(
-        f'<li><span class="passo__num">{i}</span><h3>{escape(t)}</h3><p>{escape(d)}</p></li>'
-        for i, (t, d) in enumerate(passos, start=1)
+        f'<li><span class="passo__num">{i}</span><span class="passo__quem passo__quem--{papel}">{escape(quem[papel])}</span>'
+        f"<h3>{escape(t)}</h3><p>{escape(d)}</p></li>"
+        for i, (papel, t, d) in enumerate(passos, start=1)
     )
     return f"""<section class="secao secao--escura" id="como">
   <div class="largura">
     <div class="secao__cabeca">
       <p class="sobretitulo">Como cada episódio nasce</p>
-      <h2 class="secao__titulo">Feito por IA, conferido contra a fonte</h2>
-      <p class="secao__lead">Não tem gente gravando. Tem um processo aberto, com cada etapa registrada no repositório,
-        e uma regra simples: afirmação que não bate com a fonte derruba o episódio.</p>
+      <h2 class="secao__titulo">Feito por IA, com gente nas duas pontas</h2>
+      <p class="secao__lead">Ninguém grava: as vozes são sintéticas. Mas tem curadoria humana das fontes antes e
+        escuta humana depois, e cada etapa fica registrada no repositório, com uma regra simples: roteiro que a
+        revisão reprova não vira episódio.</p>
     </div>
     <ol class="passos">{itens}</ol>
   </div>
@@ -991,7 +1023,9 @@ def _sobre_definicao(meta: Mapping[str, Any], criador: str) -> str:
     <p class="sobre__definicao">O {escape(meta['titulo'])} é um podcast diário em português sobre arquitetura
       de software, criado por {escape(criador)}. São sete sagas ({escape(sagas)}), com episódios de 15 a
       20 minutos em forma de diálogo e um desafio prático no fim de cada um. O conteúdo é gerado por
-      inteligência artificial e conferido, afirmação por afirmação, contra as fontes citadas.</p>
+      inteligência artificial, com curadoria humana: as fontes de cada episódio são escolhidas e conferidas à
+      mão, uma segunda IA revisa as afirmações do roteiro antes do áudio, e cada episódio é ouvido por uma pessoa
+      depois de publicado.</p>
   </div>
 </section>"""
 
@@ -1019,10 +1053,13 @@ def _sobre_como(meta: Mapping[str, Any]) -> str:
   <div class="largura sobre__bloco">
     <h2 class="secao__titulo secao__titulo--menor">Como é feito</h2>
     <div class="sobre__texto">
-      <p>Uma IA escreve o roteiro a partir de um currículo montado à mão, com o livro e o capítulo de cada
-        referência. Outra IA, sem ver como o roteiro foi feito, confere cada afirmação contra essas fontes;
-        se o roteiro não for aprovado, o episódio não sai. Depois, as vozes são sintetizadas e o episódio vai
-        para o feed.</p>
+      <p>Antes de tudo, uma pessoa escolhe a obra e o capítulo de cada episódio e confere que a fonte existe e
+        trata do tema. Uma IA escreve o roteiro a partir desse currículo. Outra IA, sem ver como o roteiro foi
+        feito, revisa cada afirmação com o que sabe e, na dúvida, com uma busca; se o roteiro não for
+        aprovado, o episódio não sai. Depois, as vozes são sintetizadas e o episódio vai para o feed.</p>
+      <p>Por último, cada episódio é ouvido por uma pessoa depois de publicado, que registra o que achou e manda
+        regravar quando o áudio sai ruim. A revisão tem um limite que vale dizer: a revisora é do mesmo modelo que a roteirista e
+        pode ter os mesmos pontos cegos. Por isso cada relatório de revisão fica aberto, ao lado do roteiro.</p>
       <p>Tudo fica registrado e aberto no repositório: currículo, roteiros, revisões e código.</p>
       <p class="sobre__acoes"><a class="botao botao--contorno" href="../#como">Ver as etapas</a>
         <a class="botao botao--contorno" href="{escape(meta['url_repositorio'])}">Código e roteiros no GitHub</a></p>
@@ -1095,7 +1132,8 @@ def _rodape(meta: Mapping[str, Any], config: Mapping[str, Any], raiz: str = "") 
       <p><strong>{escape(meta['titulo'])}</strong><br>Cava até achar o porquê.</p>
     </div>
     <div class="rodape__texto">
-      <p>Conteúdo gerado por inteligência artificial e revisado contra as fontes citadas.
+      <p>Conteúdo gerado por inteligência artificial, com fontes escolhidas à mão e afirmações revisadas por
+        uma segunda IA.
         Episódios e roteiros sob {escape(meta['licenca'])}; código sob MIT.</p>
       {credito_html}
       <p><a href="{escape(meta['url_repositorio'])}">Repositório</a> · <a href="{raiz}feed.xml">RSS</a>

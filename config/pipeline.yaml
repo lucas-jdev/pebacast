@@ -79,8 +79,8 @@ feed:
     Podcast diário para estudar arquitetura de software, soluções, sistemas,
     dados, infraestrutura, segurança e arquitetura corporativa. Cada episódio
     é um diálogo de 15 a 20 minutos que termina com um desafio prático.
-    Conteúdo gerado por inteligência artificial e revisado contra as fontes
-    citadas.
+    Conteúdo gerado por inteligência artificial, com fontes escolhidas à mão e
+    afirmações revisadas por uma segunda IA.
   autor: Lucas Fernandes
   # Público no feed: o Spotify e o Apple mandam o código de verificação para cá.
   email_dono: lucas.jdev1@gmail.com

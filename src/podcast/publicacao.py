@@ -265,7 +265,8 @@ def escrever_site(projeto: Projeto, site: Path) -> None:
 def show_notes(episodio: Mapping[str, Any], roteiro: Mapping[str, Any], noticia: Mapping[str, Any],
                revisoes: Sequence[Mapping[str, Any]], credito_vinheta: str | None = None) -> str:
     linhas = [
-        "Conteúdo gerado por inteligência artificial e revisado contra as fontes citadas.",
+        "Conteúdo gerado por inteligência artificial, com fontes escolhidas à mão e afirmações revisadas por "
+        "uma segunda IA.",
         "",
         "Objetivos:",
         *[f"- {objetivo}" for objetivo in episodio.get("objetivos", [])],

@@ -19,6 +19,8 @@ from tests.test_roteiro import (  # noqa: F401 (fixture)
     SAGA,
     _escrever_episodio,
     _gravar,
+    _revisao,
+    _roteiro,
     _usar_fila,
     projeto,
 )
@@ -31,8 +33,9 @@ SAGA_SEM_EPISODIO_PUBLICADO = {
 }
 
 
-def _ja_publicado(projeto, episodio, publicado_em):
-    _escrever_episodio(projeto, episodio)
+def _ja_publicado(projeto, episodio, publicado_em, reescrever=True):
+    if reescrever:
+        _escrever_episodio(projeto, episodio)
     _gravar(projeto.episodios / episodio / "publicacao.json", {
         "guid": f"pebacast-{episodio}", "url_audio": f"https://cdn/{episodio}.mp3", "tamanho_bytes": 1,
         "duracao_segundos": 960, "publicado_em": publicado_em,
@@ -741,3 +744,89 @@ def test_sitemap_lista_cada_episodio_com_a_data_de_publicacao(projeto):
 
     assert "<url><loc>https://x.github.io/pebacast/episodios/sw-001/</loc><lastmod>2026-11-07</lastmod></url>" in sitemap
     assert "<url><loc>https://x.github.io/pebacast/episodios/sw-002/</loc><lastmod>2026-11-09</lastmod></url>" in sitemap
+
+
+# ---------------------------------------------------------------- honestidade do processo (#52)
+
+
+def _site_inteiro(projeto, tmp_path):
+    site = tmp_path / "_site"
+    site.mkdir(exist_ok=True)
+    escrever_pagina(projeto, site, "feed.xml")
+    return "\n".join(_texto(p.read_text(encoding="utf-8")) for p in sorted(site.rglob("*.html")))
+
+
+def test_nenhuma_pagina_promete_revisao_contra_as_fontes(projeto, tmp_path):
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    texto = _site_inteiro(projeto, tmp_path)
+
+    for exagero in ("contra as fontes", "contra a fonte", "checadas", "afirmação por afirmação", "caso real,",
+                    "Não tem gente"):
+        assert exagero not in texto, exagero
+
+
+def test_como_mostra_as_duas_etapas_humanas_e_quem_faz_cada_uma(projeto):
+    _com_criador(projeto)
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    passos = re.findall(r'<span class="passo__quem passo__quem--(\w+)">([^<]+)</span><h3>([^<]+)</h3>', pagina)
+    assert [(papel, titulo) for papel, _, titulo in passos] == [
+        ("humano", "Currículo"), ("codigo", "A vez de cada saga"), ("ia", "Caso"), ("ia", "Roteiro"),
+        ("ia", "Revisão"), ("codigo", "Voz e feed"), ("humano", "Escuta")]
+    assert {quem for papel, quem, _ in passos if papel == "humano"} == {"Humano"}
+    assert "depois de publicado" in _texto(pagina).lower()
+
+
+def test_o_processo_diz_que_ha_gente_mas_nao_quem(projeto):
+    _com_criador(projeto)
+
+    como = re.search(r'<section class="secao secao--escura" id="como">.*?</section>', gerar_index(projeto, "feed.xml"),
+                     re.DOTALL).group(0)
+    sobre_como = re.search(r'id="como-e-feito">.*?</section>', gerar_pagina_sobre(projeto, "feed.xml"), re.DOTALL).group(0)
+
+    assert "Lucas" not in como and "Lucas" not in sobre_como
+    assert "curadoria humana" in _texto(como)
+
+
+def test_numero_de_revisoes_vem_da_configuracao(projeto):
+    _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "revisao": {**CONFIG["revisao"], "max_ciclos": 4}})
+
+    assert "São até 5 revisões; se não aprovar, o episódio não sai." in _texto(gerar_index(projeto, "feed.xml"))
+
+
+def test_selo_diz_quem_revisou_e_leva_ao_relatorio_da_ultima_revisao(projeto):
+    roteiro = _roteiro("sw-001")
+    _escrever_episodio(projeto, "sw-001", revisoes=[_revisao(roteiro, aprovado=False, veredito="incorreta"),
+                                                     _revisao(roteiro)])
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00", reescrever=False)
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+    assert "afirmações revisadas por uma 2ª IA, aprovado na 2ª revisão" in pagina
+    assert ('href="https://github.com/x/pebacast/blob/main/episodios/sw-001/revisoes/2.json" rel="noopener">'
+            "ver o relatório</a>") in pagina
+
+
+def test_cenario_hipotetico_mostra_a_primeira_frase_e_avisa(projeto):
+    _escrever_episodio(projeto, "sw-001", noticia={"tipo": "hipotetico", "cenario":
+                       "Uma loja tem três cadastros de clientes. Cada time mantém o seu."})
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00", reescrever=False)
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+    assert ('<span class="caso__rotulo">Ponto de partida · cenário hipotético</span>'
+            "Uma loja tem três cadastros de clientes.</p>") in pagina
+    assert "Cada time mantém o seu" not in pagina
+
+
+def test_cenario_vazio_nao_mostra_bloco_de_ponto_de_partida(projeto):
+    _escrever_episodio(projeto, "sw-001", noticia={"tipo": "hipotetico", "cenario": "  "})
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00", reescrever=False)
+
+    assert 'class="caso"' not in gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+
+def test_vozes_avisam_que_sao_personagens_ficticios(projeto):
+    assert "personagens fictícios" in _texto(gerar_index(projeto, "feed.xml"))

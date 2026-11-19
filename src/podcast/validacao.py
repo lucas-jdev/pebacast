@@ -46,8 +46,12 @@ class Regras:
 
     @property
     def max_revisoes(self) -> int:
-        # Cada ciclo é uma revisão seguida de correção; a última correção precisa de uma revisão final.
-        return self.max_ciclos + 1
+        return max_revisoes(self.max_ciclos)
+
+
+def max_revisoes(max_ciclos: int) -> int:
+    """Cada ciclo é uma revisão seguida de correção; a última correção precisa de uma revisão final."""
+    return max_ciclos + 1
 
 
 def hash_do_roteiro(roteiro: Any) -> str:

@@ -34,7 +34,7 @@ flowchart TD
         relevante{Achou notícia<br/>acima da nota mínima?}
         hipotetico[Cenário hipotético,<br/>dito como tal no áudio]
         roteiro["Roteiro: diálogo apresentador × expert<br/>abertura, problema, solução ingênua,<br/>desconstrução, trade-offs, desafio"]
-        revisao["Revisão N: subagente novo, sem contexto,<br/>checa cada afirmação contra as fontes"]
+        revisao["Revisão N: subagente novo, sem contexto,<br/>revisa cada afirmação pelo que sabe<br/>e, na dúvida, com busca"]
         aprovado{Aprovado?}
         limite{Ainda cabe outra revisão?}
         correcao[Corrige só as falas apontadas]
