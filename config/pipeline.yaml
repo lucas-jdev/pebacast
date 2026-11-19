@@ -111,6 +111,8 @@ site:
     nome: Lucas Fernandes
     papel: Desenvolvedor full stack · inteligência industrial
     cidade: Natal, RN
+    # Relativa ao url_site, em site/: o retrato redondo do card "Quem faz" e o image da Person.
+    foto: criador.jpg
     bio: >-
       Lucas Fernandes é desenvolvedor full stack em Natal (RN) e atua com
       inteligência industrial. Criou o Pebacast como o próprio roteiro de estudo

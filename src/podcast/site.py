@@ -179,6 +179,7 @@ def _config_do_criador(criador: Mapping[str, Any], autor: str) -> dict[str, Any]
         "papel": " ".join(str(criador.get("papel") or "").split()),
         "cidade": " ".join(str(criador.get("cidade") or "").split()),
         "bio": " ".join(str(criador.get("bio") or "").split()),
+        "foto": foto if re.fullmatch(r"[a-z0-9_-]+\.(?:jpg|jpeg|png|webp)", foto := str(criador.get("foto") or "")) else "",
         "links": links,
     }
 
@@ -224,6 +225,8 @@ def _criador(config: Mapping[str, Any]) -> dict[str, Any]:
         pessoa["jobTitle"] = criador["papel"]
     if criador["cidade"]:
         pessoa["homeLocation"] = {"@type": "Place", "name": criador["cidade"]}
+    if criador["foto"]:
+        pessoa["image"] = _url(meta, criador["foto"])
     if criador["links"]:
         pessoa["sameAs"] = [link["url"] for link in criador["links"]]
     return pessoa
@@ -915,7 +918,9 @@ def _sobre_como(meta: Mapping[str, Any]) -> str:
 
 
 def _sobre_quem_faz(criador: Mapping[str, Any]) -> str:
-    linha = " · ".join(escape(parte) for parte in (criador["papel"], criador["cidade"]) if parte)
+    # Cada pedaço entre "·" não quebra por dentro: a linha quebra entre eles ("Natal, RN" fica junto).
+    partes = [p.strip() for campo in (criador["papel"], criador["cidade"]) for p in campo.split("·") if p.strip()]
+    linha = " · ".join(f'<span class="criador__parte">{escape(parte)}</span>' for parte in partes)
     papel = f'<p class="criador__papel">{linha}</p>' if linha else ""
     bio = f'<p class="criador__bio">{escape(criador["bio"])}</p>' if criador["bio"] else ""
     links = "".join(
@@ -924,11 +929,15 @@ def _sobre_quem_faz(criador: Mapping[str, Any]) -> str:
         for link in criador["links"]
     )
     links_html = f'<p class="criador__links">{links}</p>' if links else ""
+    retrato = (f'<img class="criador__foto" src="../{escape(criador["foto"])}" alt="Foto de {escape(criador["nome"])}"'
+               ' width="104" height="104" loading="lazy" decoding="async">'
+               if criador["foto"] else
+               f'<div class="criador__inicial" aria-hidden="true">{escape(criador["nome"][:1])}</div>')
     return f"""<section class="secao" id="quem-faz">
   <div class="largura sobre__bloco">
     <h2 class="secao__titulo secao__titulo--menor">Quem faz</h2>
     <article class="criador">
-      <div class="criador__inicial" aria-hidden="true">{escape(criador["nome"][:1])}</div>
+      {retrato}
       <div>
         <h3 class="criador__nome">{escape(criador["nome"])}</h3>
         {papel}

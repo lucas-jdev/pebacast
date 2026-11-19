@@ -510,12 +510,14 @@ def test_sobre_explica_o_nome_e_que_nao_e_pebcak(projeto):
 
 
 def test_quem_faz_mostra_nome_papel_cidade_bio_e_links(projeto):
-    _com_criador(projeto)
+    _com_criador(projeto, papel="Desenvolvedor full stack · inteligência industrial")
 
     pagina = gerar_pagina_sobre(projeto, "feed.xml")
 
     assert '<h3 class="criador__nome">Lucas Fernandes</h3>' in pagina
-    assert '<p class="criador__papel">Desenvolvedor full stack · Natal, RN</p>' in pagina
+    assert ('<p class="criador__papel"><span class="criador__parte">Desenvolvedor full stack</span> · '
+            '<span class="criador__parte">inteligência industrial</span> · '
+            '<span class="criador__parte">Natal, RN</span></p>') in pagina
     assert "criou o Pebacast para estudar arquitetura" in pagina
     assert 'href="https://github.com/lucas-jdev" rel="me noopener">GitHub · lucas-jdev' in pagina
     assert 'href="https://www.linkedin.com/in/lucas-jdev" rel="me noopener">LinkedIn · lucas-jdev' in pagina
@@ -597,3 +599,28 @@ def test_sobre_busca_css_js_e_icones_na_raiz_do_site(projeto):
     assert '<a href="../#sagas">Sagas</a>' in pagina
     assert '<a class="pular" href="#sobre">Pular para o conteúdo</a>' in pagina
     assert not re.search(r'(?:href|src)="(?:estilo\.css|app\.js|favicon|fontes/)', pagina)
+
+
+def test_quem_faz_mostra_a_foto_redonda_e_a_person_ganha_image(projeto):
+    _com_criador(projeto, foto="criador.jpg")
+
+    pagina = gerar_pagina_sobre(projeto, "feed.xml")
+
+    assert '<img class="criador__foto" src="../criador.jpg" alt="Foto de Lucas Fernandes"' in pagina
+    assert 'class="criador__inicial"' not in pagina
+    assert _dados_estruturados(pagina)["mainEntity"]["author"]["image"] == "https://x.github.io/pebacast/criador.jpg"
+
+
+def test_sem_foto_ou_com_nome_invalido_fica_a_inicial(projeto):
+    for foto in ("", "../segredo.jpg", 'x.jpg" onerror="alert(1)', "https://outro.site/foto.jpg"):
+        _com_criador(projeto, foto=foto)
+        pagina = gerar_pagina_sobre(projeto, "feed.xml")
+        assert '<div class="criador__inicial" aria-hidden="true">L</div>' in pagina
+        assert "criador__foto" not in pagina and "image" not in _dados_estruturados(pagina)["mainEntity"]["author"]
+
+
+def test_foto_configurada_existe_no_site():
+    raiz = Path(__file__).resolve().parents[1]
+    foto = yaml.safe_load((raiz / "config" / "pipeline.yaml").read_text(encoding="utf-8"))["site"]["criador"]["foto"]
+
+    assert (raiz / "site" / foto).is_file()
