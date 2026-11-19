@@ -789,8 +789,17 @@ def _objetivos_e_desafio(episodio: Mapping[str, Any], roteiro: Mapping[str, Any]
       <div class="desafio">
         <{nivel} class="detalhes__titulo">Desafio do episódio</{nivel}>
         <p>{escape(roteiro.get('desafio', ''))}</p>
+        {_desafio_iniciante(roteiro)}
       </div>
     </div>"""
+
+
+def _desafio_iniciante(roteiro: Mapping[str, Any]) -> str:
+    """A variante para quem ainda não trabalha na área. Roteiros antigos não têm, e aí nada aparece."""
+    texto = " ".join(str(roteiro.get("desafio_iniciante") or "").split())
+    if not texto:
+        return ""
+    return f'<p class="desafio__iniciante"><strong>Ainda não trabalha na área?</strong> {escape(texto)}</p>'
 
 
 def _selo(item: Mapping[str, Any]) -> str:

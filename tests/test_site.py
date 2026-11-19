@@ -1019,3 +1019,23 @@ def test_vozes_tem_botao_para_ler_a_historia(projeto):
 def test_titulos_sem_viuvas_e_campo_do_feed_com_altura_no_celular():
     assert "h1, h2, h3 { text-wrap: balance; }" in CSS
     assert "@media (max-width: 420px) { .feed__url { flex: none; height: 48px; } }" in CSS
+
+
+# ---------------------------------------------------------------- desafio para iniciantes (#58)
+
+
+def test_desafio_iniciante_aparece_dentro_do_desafio(projeto):
+    roteiro = {**_roteiro("sw-001"), "desafio_iniciante": "Abra o site.py do Pebacast e aponte o acoplamento."}
+    _escrever_episodio(projeto, "sw-001", roteiro=roteiro, revisoes=[_revisao(roteiro)])
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00", reescrever=False)
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+    assert ('<p class="desafio__iniciante"><strong>Ainda não trabalha na área?</strong> '
+            "Abra o site.py do Pebacast e aponte o acoplamento.</p>") in pagina
+
+
+def test_roteiro_sem_desafio_iniciante_nao_mostra_nada(projeto):
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    assert "desafio__iniciante" not in gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")

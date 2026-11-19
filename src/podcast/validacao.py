@@ -119,6 +119,9 @@ def _validar_roteiro(roteiro: Any, regras: Regras) -> list[str]:
 
     if not _texto_preenchido(roteiro.get("desafio")):
         problemas.append(f"{ROTEIRO}: desafio vazio")
+    # Opcional: os roteiros anteriores ao desafio para iniciantes (#58) não têm o campo.
+    if "desafio_iniciante" in roteiro and not _texto_preenchido(roteiro["desafio_iniciante"]):
+        problemas.append(f"{ROTEIRO}: desafio_iniciante, quando existe, não pode ser vazio")
 
     fontes = roteiro.get("fontes")
     if not isinstance(fontes, list) or not fontes or not all(_texto_preenchido(f) for f in fontes):
