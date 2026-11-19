@@ -109,8 +109,8 @@ site:
   # Códigos de verificação de dono, que viram meta tags em todas as páginas (docs/pipeline.md,
   # "Entrar no índice dos buscadores"). Vazio, a meta tag não aparece.
   verificacao:
-    google: ""
-    bing: ""
+    google: 55IhAYxidRMWE6Xk53Mzg80fQmW1baH9p53XJ0OVvH0
+    bing: 9F3D1F5A07690E838800E30C9CB70CC6
   # Chave do IndexNow, gerada no Bing Webmaster Tools. Não é segredo: o site a publica em
   # <url_site>/<chave>.txt, por desenho do protocolo. Vazia, ninguém é avisado.
   indexnow: ""
