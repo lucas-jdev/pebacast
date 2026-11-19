@@ -956,3 +956,66 @@ def test_cada_player_tem_o_nome_do_episodio(projeto):
         for eid in re.findall(r'<div class="player" role="group" aria-labelledby="titulo-([\w-]+)"', pagina):
             assert f'id="titulo-{eid}"' in pagina
         assert 'data-player-aviso' in pagina
+
+
+# ---------------------------------------------------------------- transcrição e acabamento (#55, #57)
+
+
+def test_transcricao_fica_so_na_pagina_do_episodio(projeto):
+    _tres_publicados(projeto)
+    fala = _roteiro("sw-002")["falas"][1]["texto"]
+
+    inicial = gerar_index(projeto, "feed.xml")
+    arquivo = gerar_pagina_episodios(projeto, "feed.xml")
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+
+    assert fala in pagina
+    assert fala not in inicial and fala not in arquivo
+    assert 'class="transcricao' not in inicial and 'class="transcricao' not in arquivo
+    assert '<a class="dobra dobra--link" href="episodios/sw-002/#transcricao">Transcrição' in inicial
+    assert '<a class="dobra dobra--link" href="episodios/sw-001/#transcricao">Transcrição' in arquivo
+
+
+def test_transcricao_da_pagina_e_leitura_corrida_com_ancora(projeto):
+    _tres_publicados(projeto)
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+
+    assert '<details class="dobra" id="transcricao">' in pagina
+    assert 'class="transcricao transcricao--corrida"' in pagina
+    assert re.search(r"\.transcricao--corrida \{ max-height: none; overflow: visible; max-width: 66ch;", CSS)
+
+
+def test_ancoras_antigas_do_arquivo_continuam_existindo(projeto):
+    _tres_publicados(projeto)
+
+    arquivo = gerar_pagina_episodios(projeto, "feed.xml")
+
+    assert '<li class="item" id="sw-001"' in arquivo and '<li class="item" id="sw-002"' in arquivo
+
+
+def test_pagina_do_episodio_marca_o_card_para_o_titulo_vencer_o_codigo(projeto):
+    _tres_publicados(projeto)
+
+    assert 'class="episodio episodio--destaque episodio--pagina"' in gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+    assert "episodio--pagina" not in gerar_index(projeto, "feed.xml")
+    assert re.search(r"\.episodio--pagina h1\.episodio__titulo \{ font-size: clamp\(2\.2rem", CSS)
+
+
+def test_theme_color_e_um_so_e_bate_com_o_fundo(projeto):
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert pagina.count('name="theme-color"') == 1
+    assert '<meta name="theme-color" content="#efe4c8">' in pagina
+
+
+def test_vozes_tem_botao_para_ler_a_historia(projeto):
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert '<button class="voz__mais" type="button" aria-expanded="false" aria-controls="historico-davi">' in pagina
+    assert 'id="historico-davi"' in pagina
+
+
+def test_titulos_sem_viuvas_e_campo_do_feed_com_altura_no_celular():
+    assert "h1, h2, h3 { text-wrap: balance; }" in CSS
+    assert "@media (max-width: 420px) { .feed__url { flex: none; height: 48px; } }" in CSS
