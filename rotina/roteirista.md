@@ -43,7 +43,7 @@ Escreva um diálogo entre `personas.apresentador` e `personas.expert`. Leia as d
 
 Estrutura fixa, nesta ordem:
 
-1. **Abertura.** A primeira fala é do apresentador. Ele dá as boas-vindas ao Pebacast, avisa que o episódio foi gerado por inteligência artificial e revisado contra as fontes, e diz o tema do dia em uma frase.
+1. **Abertura.** A primeira fala é do apresentador. Ele dá as boas-vindas ao Pebacast, avisa que o episódio foi gerado por inteligência artificial e revisado por uma segunda IA, e diz o tema do dia em uma frase.
 2. **Apresentação do expert.** Ainda nas três primeiras falas, o apresentador apresenta o expert pelo nome, com uma ou duas frases tiradas do `historico` da persona, e o expert cumprimenta o ouvinte. É uma apresentação curta, e não um currículo.
 3. **Problema.** A notícia, com o nome do veículo, ou o cenário hipotético.
 4. **Solução ingênua.** O apresentador propõe, de boa-fé, a solução da moda ou a mais óbvia.
