@@ -1045,6 +1045,14 @@ def _secao_como(config: Mapping[str, Any]) -> str:
 </section>"""
 
 
+def _quebravel(url: str) -> str:
+    """O endereço escapado, com ponto de quebra depois de cada barra do caminho, para caber em tela estreita sem cortar."""
+    esquema, separador, resto = url.partition("://")
+    if not separador:
+        return escape(url)
+    return escape(esquema + separador) + "/<wbr>".join(escape(parte) for parte in resto.split("/"))
+
+
 def _secao_assinar(url_feed: str, meta: Mapping[str, Any], beta: bool = False) -> str:
     spotify = " No Spotify em breve; por enquanto, pelo feed." if beta else ""
     return f"""<section class="secao" id="assinar">
@@ -1056,13 +1064,13 @@ def _secao_assinar(url_feed: str, meta: Mapping[str, Any], beta: bool = False) -
         Apple Podcasts ou Overcast. Episódio novo chega sozinho.{spotify}</p>
     </div>
     <div class="feed">
-      <label class="feed__rotulo" for="url-feed">Endereço do feed</label>
+      <p class="feed__rotulo">Endereço do feed</p>
       <div class="feed__linha">
-        <input id="url-feed" class="feed__url" type="text" readonly value="{escape(url_feed)}">
+        <code id="url-feed" class="feed__url">{_quebravel(url_feed)}</code>
         <button class="botao feed__copiar" type="button" data-copiar="url-feed">Copiar</button>
       </div>
       <p class="feed__extra"><a href="{escape(url_feed)}">Abrir o XML</a>
-        <span aria-hidden="true">·</span> <a href="{escape(meta['url_repositorio'])}">Código e roteiros no GitHub</a></p>
+        <a href="{escape(meta['url_repositorio'])}">Código e roteiros no GitHub</a></p>
     </div>
   </div>
 </section>"""

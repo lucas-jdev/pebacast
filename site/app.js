@@ -317,9 +317,9 @@
     botao.addEventListener("click", async () => {
       const campo = document.getElementById(botao.dataset.copiar);
       try {
-        await navigator.clipboard.writeText(campo.value);
+        await navigator.clipboard.writeText(campo.textContent);
       } catch {
-        campo.select();
+        getSelection().selectAllChildren(campo);
         document.execCommand("copy");
       }
       const original = botao.textContent;

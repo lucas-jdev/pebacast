@@ -1028,7 +1028,17 @@ def test_vozes_tem_botao_para_ler_a_historia(projeto):
 
 def test_titulos_sem_viuvas_e_campo_do_feed_com_altura_no_celular():
     assert "h1, h2, h3 { text-wrap: balance; }" in CSS
-    assert "@media (max-width: 420px) { .feed__url { flex: none; height: 48px; } }" in CSS
+    assert "@media (max-width: 420px) { .feed__linha { flex-direction: column; } .feed__url { flex: none; } }" in CSS
+
+
+def test_endereco_do_feed_quebra_depois_das_barras_sem_separador_solto(projeto):
+    _tres_publicados(projeto)
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert '<code id="url-feed" class="feed__url">https://x.github.io/<wbr>pebacast/<wbr>feed.xml</code>' in pagina
+    links_do_feed = pagina.split('<p class="feed__extra">')[1].split("</p>")[0]
+    assert "·" not in links_do_feed
 
 
 # ---------------------------------------------------------------- desafio para iniciantes (#58)
