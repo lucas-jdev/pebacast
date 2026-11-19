@@ -612,3 +612,31 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-event
 .codigo__sigla { display: block; font-size: 0.5em; letter-spacing: 0.06em; margin-bottom: 0.18em; }
 .proximo__codigo .codigo__sigla { -webkit-text-stroke-width: 2px; }
 .hero h1 { padding-bottom: 0.2em; margin-bottom: -0.2em; }
+
+/* Sobre: o que é o podcast e quem faz. Título à esquerda e texto à direita, como um folheto aberto. */
+.sobre__definicao { max-width: 46rem; font-size: clamp(1.2rem, 2.2vw, 1.45rem); line-height: 1.6; }
+.sobre__bloco { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 1rem clamp(2rem, 5vw, 4rem); align-items: start; }
+@media (max-width: 860px) { .sobre__bloco { grid-template-columns: 1fr; } }
+.sobre__texto { max-width: 44rem; }
+.sobre__texto > p + p { margin-top: 1rem; }
+.sobre__sagas { list-style: none; margin: 1.2rem 0 0; padding: 0; display: grid; gap: 0.6rem; }
+.sobre__sagas li { border: 3px solid var(--texto); border-left-width: 14px; border-left-color: var(--capa-fundo); background: #fffaf0; padding: 0.7rem 1rem; }
+.sobre__sagas strong { display: block; font-family: var(--fonte-titulo); font-weight: 400; font-size: 1.15rem; }
+.sobre__acoes { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+.sobre__nome { display: grid; grid-template-columns: auto 1fr; gap: 1.25rem; align-items: center; }
+.sobre__peba { width: 96px; height: 60px; color: var(--texto); }
+@media (max-width: 420px) { .sobre__nome { grid-template-columns: 1fr; } }
+
+.criador { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.5rem; max-width: 44rem; padding: clamp(1.4rem, 3vw, 2rem);
+  border: 4px solid var(--texto); background: #fffaf0; box-shadow: 9px 9px 0 var(--destaque), 9px 9px 0 3px var(--texto); }
+@media (max-width: 560px) { .criador { grid-template-columns: 1fr; gap: 1rem; } }
+.criador__inicial { display: grid; place-items: center; width: 72px; height: 72px; border: 3px solid var(--texto); border-radius: 50%;
+  background: var(--destaque); color: var(--texto-sobre-destaque, #1d1814); font-family: var(--fonte-titulo); font-size: 2.2rem; }
+.criador__foto { display: block; width: 104px; height: 104px; border-radius: 50%; object-fit: cover;
+  border: 3px solid var(--texto); box-shadow: 4px 4px 0 var(--destaque); background: var(--fundo-2); }
+.criador__parte { white-space: nowrap; }
+.criador__nome { font-size: clamp(1.6rem, 3vw, 2rem); }
+.criador__papel { font-weight: 600; color: var(--texto); margin: 0.25rem 0 0.9rem; }
+.criador__bio { color: var(--texto); }
+.criador__links { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.2rem; }
+.criador__links .botao svg { width: 16px; height: 16px; }

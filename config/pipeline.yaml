@@ -104,6 +104,26 @@ site:
   # Código do site no GoatCounter (o "xxx" de xxx.goatcounter.com): analytics sem cookie.
   # Vazio, nenhum script de analytics é carregado.
   goatcounter: ""
+  # Quem faz o podcast, na página sobre/ e no JSON-LD de todas as páginas (Person com o mesmo @id).
+  # A bio é do Lucas e pode ser reescrita sem mexer no código; vazia, a página mostra só nome e links.
+  # Os links viram o sameAs da Person: só https.
+  criador:
+    nome: Lucas Fernandes
+    papel: Desenvolvedor full stack · inteligência industrial
+    cidade: Natal, RN
+    # Relativa ao url_site, em site/: o retrato redondo do card "Quem faz" e o image da Person.
+    foto: criador.jpg
+    bio: >-
+      Lucas Fernandes é desenvolvedor full stack em Natal (RN) e atua com
+      inteligência industrial. Criou o Pebacast como o próprio roteiro de estudo
+      para chegar a arquiteto de software: entender os conceitos a fundo e saber
+      quando aplicar cada um, num tempo em que a IA escreve boa parte do código.
+      Roteiros, pipeline e site são abertos no GitHub.
+    links:
+      - rotulo: GitHub
+        url: https://github.com/lucas-jdev
+      - rotulo: LinkedIn
+        url: https://www.linkedin.com/in/lucas-jdev
   # URL do Worker de votos (votos/, docs/votos.md). Vazio: o site não mostra o curti / não curti.
   votos_api: "https://pebacast-votos.lucas-jdev1.workers.dev"
   # Códigos de verificação de dono, que viram meta tags em todas as páginas (docs/pipeline.md,
