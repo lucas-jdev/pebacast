@@ -454,4 +454,3 @@ def test_sem_proximo_o_estado_vazio_continua_igual(projeto):
     assert "proximo__vez" not in pagina
     assert ('<p class="proximo__texto">Episódio novo só sai depois que as referências dele são conferidas no livro.\n'
             "          Assim que isso acontecer, ele aparece aqui e chega sozinho no seu app de podcast.</p>") in pagina
-
