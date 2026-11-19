@@ -9,6 +9,7 @@ from podcast.site import (
     escrever_pagina,
     gerar_index,
     gerar_pagina_episodios,
+    gerar_pagina_sobre,
     gerar_sitemap,
 )
 from tests.test_publicacao import _publicar
@@ -149,6 +150,7 @@ def test_escreve_inicial_e_arquivo(projeto, tmp_path):
     assert (site / "index.html").exists()
     assert (site / "episodios.html").exists()
     assert (site / "sitemap.xml").exists()
+    assert (site / "sobre" / "index.html").exists()
 
 
 def test_etiqueta_mostra_a_saga_e_a_posicao_do_episodio(projeto):
@@ -254,6 +256,7 @@ def test_sitemap_lista_as_paginas_com_a_data_do_ultimo_episodio(projeto):
 
     assert "<loc>https://x.github.io/pebacast/</loc><lastmod>2026-11-07</lastmod>" in sitemap
     assert "<loc>https://x.github.io/pebacast/episodios.html</loc>" in sitemap
+    assert "<loc>https://x.github.io/pebacast/sobre/</loc>" in sitemap
 
 
 def test_imagem_de_compartilhamento_leva_a_versao_do_conteudo_na_url(projeto):
@@ -454,3 +457,143 @@ def test_sem_proximo_o_estado_vazio_continua_igual(projeto):
     assert "proximo__vez" not in pagina
     assert ('<p class="proximo__texto">Episódio novo só sai depois que as referências dele são conferidas no livro.\n'
             "          Assim que isso acontecer, ele aparece aqui e chega sozinho no seu app de podcast.</p>") in pagina
+
+
+# ---------------------------------------------------------------- sobre
+
+CRIADOR = {
+    "nome": "Lucas Fernandes",
+    "papel": "Desenvolvedor full stack",
+    "cidade": "Natal, RN",
+    "bio": "Lucas Fernandes é desenvolvedor full stack e criou o Pebacast para estudar arquitetura.",
+    "links": [{"rotulo": "GitHub", "url": "https://github.com/lucas-jdev"},
+              {"rotulo": "LinkedIn", "url": "https://www.linkedin.com/in/lucas-jdev/"}],
+}
+
+
+def _com_criador(projeto, **criador):
+    _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "site": {"criador": {**CRIADOR, **criador}}})
+
+
+def _texto(html):
+    return " ".join(re.sub(r"<[^>]+>", " ", html).split())
+
+
+def test_sobre_responde_o_que_e_e_quem_criou_no_primeiro_paragrafo(projeto):
+    _com_criador(projeto)
+
+    pagina = gerar_pagina_sobre(projeto, "feed.xml")
+
+    primeiro = _texto(re.search(r'<p class="sobre__definicao">(.*?)</p>', pagina, re.DOTALL).group(1))
+    for termo in ("Pebacast", "podcast", "arquitetura", "Lucas Fernandes"):
+        assert termo in primeiro
+    assert "Software, Soluções, Sistemas, Dados e Informação, Infraestrutura, Segurança e Corporativa" in primeiro
+
+
+def test_sobre_tem_titulo_descricao_e_canonical_proprios(projeto):
+    _com_criador(projeto)
+
+    pagina = gerar_pagina_sobre(projeto, "feed.xml")
+
+    titulo = re.search(r"<title>(.*?)</title>", pagina).group(1)
+    descricao = re.search(r'<meta name="description" content="(.*?)">', pagina).group(1)
+    assert len(titulo) <= 60 and "Sobre" in titulo
+    assert len(descricao) <= 155 and "Lucas Fernandes" in descricao
+    assert '<link rel="canonical" href="https://x.github.io/pebacast/sobre/">' in pagina
+
+
+def test_sobre_explica_o_nome_e_que_nao_e_pebcak(projeto):
+    pagina = _texto(gerar_pagina_sobre(projeto, "feed.xml"))
+
+    assert "tatu-peba" in pagina
+    assert "Não tem relação com PEBCAK" in pagina
+
+
+def test_quem_faz_mostra_nome_papel_cidade_bio_e_links(projeto):
+    _com_criador(projeto)
+
+    pagina = gerar_pagina_sobre(projeto, "feed.xml")
+
+    assert '<h3 class="criador__nome">Lucas Fernandes</h3>' in pagina
+    assert '<p class="criador__papel">Desenvolvedor full stack · Natal, RN</p>' in pagina
+    assert "criou o Pebacast para estudar arquitetura" in pagina
+    assert 'href="https://github.com/lucas-jdev" rel="me noopener">GitHub · lucas-jdev' in pagina
+    assert 'href="https://www.linkedin.com/in/lucas-jdev" rel="me noopener">LinkedIn · lucas-jdev' in pagina
+
+
+def test_sem_bio_quem_faz_mostra_so_nome_e_links(projeto):
+    _com_criador(projeto, bio="", papel="", cidade="")
+
+    pagina = gerar_pagina_sobre(projeto, "feed.xml")
+
+    assert 'class="criador__bio"' not in pagina
+    assert 'class="criador__papel"' not in pagina
+    assert '<h3 class="criador__nome">Lucas Fernandes</h3>' in pagina
+    assert 'class="criador__links"' in pagina
+
+
+def test_sem_criador_configurado_usa_o_autor_do_feed_sem_inventar_nada(projeto):
+    pessoa = _dados_estruturados(gerar_index(projeto, "feed.xml"))["author"]
+
+    assert pessoa == {"@type": "Person", "@id": "https://x.github.io/pebacast/sobre/#criador",
+                      "name": "Lucas", "url": "https://x.github.io/pebacast/sobre/"}
+    assert 'class="criador__links"' not in gerar_pagina_sobre(projeto, "feed.xml")
+
+
+def test_person_traz_papel_cidade_e_os_links_como_sameas(projeto):
+    _com_criador(projeto)
+
+    pessoa = _dados_estruturados(gerar_index(projeto, "feed.xml"))["author"]
+
+    assert pessoa["jobTitle"] == "Desenvolvedor full stack"
+    assert pessoa["homeLocation"] == {"@type": "Place", "name": "Natal, RN"}
+    assert pessoa["sameAs"] == ["https://github.com/lucas-jdev", "https://www.linkedin.com/in/lucas-jdev"]
+
+
+def test_link_que_nao_e_https_fica_de_fora_da_pagina_e_do_sameas(projeto):
+    _com_criador(projeto, links=[{"rotulo": "X", "url": "javascript:alert(1)"},
+                                 {"rotulo": "Y", "url": 'https://a.dev/" onclick="x'},
+                                 {"rotulo": "Z", "url": "http://a.dev"}])
+
+    pagina = gerar_pagina_sobre(projeto, "feed.xml")
+
+    assert "sameAs" not in json.dumps(_dados_estruturados(pagina))
+    assert "alert(1)" not in pagina and "onclick" not in pagina and "http://a.dev" not in pagina
+    assert 'class="criador__links"' not in pagina
+
+
+def test_todas_as_paginas_ligam_o_podcast_a_mesma_person(projeto):
+    _com_criador(projeto)
+
+    inicial = _dados_estruturados(gerar_index(projeto, "feed.xml"))
+    arquivo = _dados_estruturados(gerar_pagina_episodios(projeto, "feed.xml"))
+    sobre = _dados_estruturados(gerar_pagina_sobre(projeto, "feed.xml"))
+
+    assert sobre["@type"] == "AboutPage"
+    assert sobre["mainEntity"]["@id"] == inicial["@id"] == "https://x.github.io/pebacast/#podcast"
+    autores = {json.dumps(serie["author"], sort_keys=True) for serie in (inicial, arquivo, sobre["mainEntity"])}
+    assert len(autores) == 1
+
+
+def test_cabecalho_e_rodape_levam_para_sobre_em_todas_as_paginas(projeto):
+    inicial = gerar_index(projeto, "feed.xml")
+    arquivo = gerar_pagina_episodios(projeto, "feed.xml")
+    sobre = gerar_pagina_sobre(projeto, "feed.xml")
+
+    assert '<a href="sobre/">Sobre</a>' in inicial
+    assert '<a href="sobre/">Sobre</a>' in arquivo
+    assert '<a href="../sobre/" aria-current="page">Sobre</a>' in sobre
+    assert '· <a href="sobre/">Lucas</a>' in inicial
+    assert '· <a href="../sobre/">Lucas</a>' in sobre
+
+
+def test_sobre_busca_css_js_e_icones_na_raiz_do_site(projeto):
+    pagina = gerar_pagina_sobre(projeto, "feed.xml")
+
+    assert '<link rel="stylesheet" href="../estilo.css">' in pagina
+    assert '<script defer src="../app.js"></script>' in pagina
+    assert '<link rel="icon" href="../favicon.ico" sizes="48x48">' in pagina
+    assert '<a href="../episodios.html">Episódios</a>' in pagina
+    assert '<a href="../#sagas">Sagas</a>' in pagina
+    assert '<a class="pular" href="#sobre">Pular para o conteúdo</a>' in pagina
+    assert not re.search(r'(?:href|src)="(?:estilo\.css|app\.js|favicon|fontes/)', pagina)

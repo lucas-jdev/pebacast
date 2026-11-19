@@ -1,12 +1,14 @@
 # Pebacast
 
-O Pebacast é um podcast gerado automaticamente para estudo de arquitetura em sete sagas: Software, Soluções, Sistemas, Dados e Informação, Infraestrutura, Segurança e Corporativa.
+**Site:** [lucas-jdev.github.io/pebacast](https://lucas-jdev.github.io/pebacast/) · [O que é e quem faz](https://lucas-jdev.github.io/pebacast/sobre/) · [Feed RSS](https://lucas-jdev.github.io/pebacast/feed.xml)
+
+O Pebacast é um podcast diário em português sobre arquitetura de software, criado por [Lucas Fernandes](https://github.com/lucas-jdev). O estudo é dividido em sete sagas: Software, Soluções, Sistemas, Dados e Informação, Infraestrutura, Segurança e Corporativa. O conteúdo é gerado por inteligência artificial e conferido contra as fontes citadas.
 
 Cada episódio tem entre 15 e 20 minutos, é um diálogo entre o apresentador e o expert da saga e termina com um desafio prático.
 
 ## Status
 
-MVP privado: uma saga (Software), quatro episódios, um expert. O feed é consumido no AntennaPod como homologação, seguindo os critérios do Spotify. A publicação no Spotify depende do critério de go/no-go descrito no fim de [docs/pipeline.md](docs/pipeline.md).
+MVP: as sete sagas já têm episódios publicados, cada uma com a sua voz convidada. O site é público, e o feed é consumido no AntennaPod como homologação, seguindo os critérios do Spotify. A publicação no Spotify depende do critério de go/no-go descrito no fim de [docs/pipeline.md](docs/pipeline.md).
 
 ## Como funciona
 

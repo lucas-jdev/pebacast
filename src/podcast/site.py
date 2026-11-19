@@ -1,8 +1,8 @@
 """Páginas do Pebacast no GitHub Pages.
 
-Gera o index.html (vitrine: último episódio e o próximo) e o episodios.html (arquivo
-de tudo que já foi publicado) a partir do que está no repositório, e copia os
-arquivos estáticos de site/. O feed continua saindo de podcast.publicacao.
+Gera o index.html (vitrine: último episódio e o próximo), o episodios.html (arquivo
+de tudo que já foi publicado) e o sobre/ (o que é o podcast e quem faz) a partir do
+que está no repositório, e copia os arquivos estáticos de site/. O feed continua saindo de podcast.publicacao.
 
     python -m podcast.publicacao --site _site feed
 """
@@ -32,6 +32,7 @@ from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO
 
 ARQUIVOS_ESTATICOS = "site"
 PAGINA_EPISODIOS = "episodios.html"
+PAGINA_SOBRE = "sobre/"
 SITEMAP = "sitemap.xml"
 # Gerada de assets/og.svg por scripts/gerar_imagens.sh; o tamanho vai nas meta tags de Open Graph.
 IMAGEM_COMPARTILHAMENTO = "og.jpg"
@@ -49,6 +50,8 @@ def escrever_pagina(projeto: Projeto, site: Path, arquivo_feed: str) -> None:
         shutil.copytree(estaticos, site, dirs_exist_ok=True)
     (site / "index.html").write_text(gerar_index(projeto, arquivo_feed), encoding="utf-8")
     (site / PAGINA_EPISODIOS).write_text(gerar_pagina_episodios(projeto, arquivo_feed), encoding="utf-8")
+    (site / PAGINA_SOBRE).mkdir(exist_ok=True)
+    (site / PAGINA_SOBRE / "index.html").write_text(gerar_pagina_sobre(projeto, arquivo_feed), encoding="utf-8")
     (site / SITEMAP).write_text(gerar_sitemap(projeto), encoding="utf-8")
 
 
@@ -79,7 +82,7 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
         estaticos=projeto.raiz / ARQUIVOS_ESTATICOS,
         dados_estruturados=_serie(config, arquivo_feed),
         pular_para="episodios",
-        cabecalho=_cabecalho(meta, na_inicial=True),
+        cabecalho=_cabecalho(meta, atual="inicio"),
         conteudo="\n".join(s for s in secoes if s),
     )
 
@@ -98,8 +101,47 @@ def gerar_pagina_episodios(projeto: Projeto, arquivo_feed: str) -> str:
         estaticos=projeto.raiz / ARQUIVOS_ESTATICOS,
         dados_estruturados=serie,
         pular_para="arquivo",
-        cabecalho=_cabecalho(meta, na_inicial=False),
+        cabecalho=_cabecalho(meta, atual="episodios"),
         conteudo=_secao_arquivo(publicados, projeto.personas(), votos=_config_do_site(config)["votos"]),
+    )
+
+
+def gerar_pagina_sobre(projeto: Projeto, arquivo_feed: str) -> str:
+    """O que é o podcast e quem faz, em texto corrido: é a página que uma IA cita para responder isso."""
+    config = projeto.config()
+    meta = config["feed"]
+    url = _url(meta, PAGINA_SOBRE)
+    serie = _serie(config, arquivo_feed)
+    del serie["@context"]
+    sobre = {
+        "@context": "https://schema.org",
+        "@type": "AboutPage",
+        "@id": f"{url}#pagina",
+        "url": url,
+        "name": f"Sobre o {meta['titulo']}",
+        "inLanguage": "pt-BR",
+        "mainEntity": serie,
+    }
+    criador = _criador(config)
+    return _documento(
+        config, arquivo_feed,
+        titulo=f"Sobre o {meta['titulo']} · o que é e quem faz",
+        descricao=(f"O {meta['titulo']} é um podcast diário de arquitetura de software em português, "
+                   f"criado por {criador['name']}. A proposta, como é feito e quem faz."),
+        url=url,
+        estaticos=projeto.raiz / ARQUIVOS_ESTATICOS,
+        dados_estruturados=sobre,
+        pular_para="sobre",
+        pular_texto="Pular para o conteúdo",
+        raiz="../",
+        cabecalho=_cabecalho(meta, atual="sobre", raiz="../"),
+        conteudo="\n".join([
+            _sobre_definicao(meta, criador["name"]),
+            _sobre_proposta(),
+            _sobre_como(meta),
+            _sobre_quem_faz(_config_do_site(config)["criador"]),
+            _sobre_nome(meta),
+        ]),
     )
 
 
@@ -108,11 +150,12 @@ def gerar_sitemap(projeto: Projeto) -> str:
     publicados = _publicados(projeto)
     ultima = (f"<lastmod>{_data_iso(publicados[0]['publicacao']['publicado_em'])}</lastmod>" if publicados else "")
     urls = "".join(f"<url><loc>{escape(_url(meta, caminho))}</loc>{ultima}</url>" for caminho in ("", PAGINA_EPISODIOS))
+    urls += f"<url><loc>{escape(_url(meta, PAGINA_SOBRE))}</loc></url>"
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
             f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n')
 
 
-def _config_do_site(config: Mapping[str, Any]) -> dict[str, str]:
+def _config_do_site(config: Mapping[str, Any]) -> dict[str, Any]:
     site = config.get("site") or {}
     descricao = site.get("descricao") or config["feed"]["descricao"]
     return {
@@ -120,7 +163,29 @@ def _config_do_site(config: Mapping[str, Any]) -> dict[str, str]:
         "imagem": site.get("imagem_compartilhamento") or IMAGEM_COMPARTILHAMENTO,
         "goatcounter": site.get("goatcounter") or "",
         "votos": _api_de_votos(site.get("votos_api") or ""),
+        "criador": _config_do_criador(site.get("criador") or {}, config["feed"]["autor"]),
     }
+
+
+def _config_do_criador(criador: Mapping[str, Any], autor: str) -> dict[str, Any]:
+    """Quem faz o podcast. Só entra o que está na configuração: sem bio, a página não inventa uma."""
+    links = [
+        {"rotulo": str(link.get("rotulo") or ""), "url": str(link["url"]).rstrip("/")}
+        for link in criador.get("links") or []
+        if isinstance(link, Mapping) and _link_seguro(str(link.get("url") or ""))
+    ]
+    return {
+        "nome": " ".join(str(criador.get("nome") or autor).split()),
+        "papel": " ".join(str(criador.get("papel") or "").split()),
+        "cidade": " ".join(str(criador.get("cidade") or "").split()),
+        "bio": " ".join(str(criador.get("bio") or "").split()),
+        "links": links,
+    }
+
+
+def _link_seguro(url: str) -> bool:
+    """O link vai parar num href e no sameAs: só https, sem aspas nem espaço que fechem o atributo."""
+    return re.fullmatch(r"https://[A-Za-z0-9.-]+(?:/[A-Za-z0-9._~%-]*)*/?", url) is not None
 
 
 def _api_de_votos(url: str) -> str:
@@ -141,8 +206,27 @@ def _serie(config: Mapping[str, Any], arquivo_feed: str) -> dict[str, Any]:
         "webFeed": _url_feed(meta, arquivo_feed),
         "image": _url(meta, meta["capa"]),
         "inLanguage": "pt-BR",
-        "author": {"@type": "Person", "name": meta["autor"]},
+        "author": _criador(config),
     }
+
+
+def _criador(config: Mapping[str, Any]) -> dict[str, Any]:
+    """A mesma Person, com o mesmo @id, em toda página: é o que liga o podcast a quem o faz."""
+    meta = config["feed"]
+    criador = _config_do_site(config)["criador"]
+    pessoa: dict[str, Any] = {
+        "@type": "Person",
+        "@id": _url(meta, f"{PAGINA_SOBRE}#criador"),
+        "name": criador["nome"],
+        "url": _url(meta, PAGINA_SOBRE),
+    }
+    if criador["papel"]:
+        pessoa["jobTitle"] = criador["papel"]
+    if criador["cidade"]:
+        pessoa["homeLocation"] = {"@type": "Place", "name": criador["cidade"]}
+    if criador["links"]:
+        pessoa["sameAs"] = [link["url"] for link in criador["links"]]
+    return pessoa
 
 
 def _episodio_estruturado(item: Mapping[str, Any], meta: Mapping[str, Any], serie: str) -> dict[str, Any]:
@@ -183,7 +267,9 @@ def _versionada(url: str, arquivo: Path) -> str:
 
 
 def _documento(config: Mapping[str, Any], arquivo_feed: str, *, titulo: str, descricao: str, url: str, estaticos: Path,
-               dados_estruturados: Mapping[str, Any], pular_para: str, cabecalho: str, conteudo: str) -> str:
+               dados_estruturados: Mapping[str, Any], pular_para: str, cabecalho: str, conteudo: str,
+               pular_texto: str = "Pular para os episódios", raiz: str = "") -> str:
+    """`raiz` leva das páginas em subpasta (sobre/) aos arquivos da raiz do site: CSS, JS, fontes e ícones."""
     meta = config["feed"]
     site = _config_do_site(config)
     largura, altura = TAMANHO_DA_IMAGEM_COMPARTILHAMENTO
@@ -202,9 +288,11 @@ def _documento(config: Mapping[str, Any], arquivo_feed: str, *, titulo: str, des
         analytics=_analytics(site["goatcounter"]),
         simbolos=_SIMBOLOS,
         pular_para=pular_para,
+        pular_texto=escape(pular_texto),
+        raiz=raiz,
         cabecalho=cabecalho,
         conteudo=conteudo,
-        rodape=_rodape(meta, config),
+        rodape=_rodape(meta, config, raiz),
     )
 
 
@@ -270,9 +358,14 @@ def _codigo(episodio_id: str) -> str:
 # ---------------------------------------------------------------- seções
 
 
-def _cabecalho(meta: Mapping[str, Any], na_inicial: bool) -> str:
-    inicial = "" if na_inicial else "./"
-    atual = "" if na_inicial else ' aria-current="page"'
+def _cabecalho(meta: Mapping[str, Any], atual: str, raiz: str = "") -> str:
+    """`atual` é a página aberta ("inicio", "episodios" ou "sobre"): ganha aria-current e, na inicial, as
+    âncoras ficam na própria página."""
+    inicial = "" if atual == "inicio" else (raiz or "./")
+
+    def corrente(pagina: str) -> str:
+        return ' aria-current="page"' if atual == pagina else ""
+
     return f"""<header class="topo">
   <div class="largura topo__linha">
     <a class="marca" href="{inicial}#inicio" aria-label="{escape(meta['titulo'])}, início">
@@ -280,9 +373,10 @@ def _cabecalho(meta: Mapping[str, Any], na_inicial: bool) -> str:
       <span class="marca__nome">{escape(meta['titulo'])}</span>
     </a>
     <nav class="topo__nav" aria-label="Seções">
-      <a href="{PAGINA_EPISODIOS}"{atual}>Episódios</a>
+      <a href="{raiz}{PAGINA_EPISODIOS}"{corrente("episodios")}>Episódios</a>
       <a href="{inicial}#sagas">Sagas</a>
       <a href="{inicial}#como">Como funciona</a>
+      <a href="{raiz}{PAGINA_SOBRE}"{corrente("sobre")}>Sobre</a>
       <a class="botao botao--pequeno" href="{inicial}#assinar">Assinar</a>
     </nav>
   </div>
@@ -764,7 +858,110 @@ def _secao_assinar(url_feed: str, meta: Mapping[str, Any]) -> str:
 </section>"""
 
 
-def _rodape(meta: Mapping[str, Any], config: Mapping[str, Any]) -> str:
+# ---------------------------------------------------------------- sobre
+
+
+def _sobre_definicao(meta: Mapping[str, Any], criador: str) -> str:
+    """O primeiro parágrafo responde sozinho o que é o podcast: é o trecho que uma IA tende a citar."""
+    nomes = [nome for _, nome, _ in SAGAS]
+    sagas = ", ".join(nomes[:-1]) + " e " + nomes[-1]
+    return f"""<section class="secao sobre" id="sobre">
+  <div class="largura">
+    <div class="secao__cabeca">
+      <p class="sobretitulo">Sobre</p>
+      <h1 class="secao__titulo">O que é o {escape(meta['titulo'])}</h1>
+    </div>
+    <p class="sobre__definicao">O {escape(meta['titulo'])} é um podcast diário em português sobre arquitetura
+      de software, criado por {escape(criador)}. São sete sagas ({escape(sagas)}), com episódios de 15 a
+      20 minutos em forma de diálogo e um desafio prático no fim de cada um. O conteúdo é gerado por
+      inteligência artificial e conferido, afirmação por afirmação, contra as fontes citadas.</p>
+  </div>
+</section>"""
+
+
+def _sobre_proposta() -> str:
+    sagas = "".join(
+        f'<li data-saga="{escape(sid)}"><strong>{escape(nome)}</strong> {escape(pergunta)}</li>'
+        for sid, nome, pergunta in SAGAS
+    )
+    return f"""<section class="secao secao--sem-topo" id="proposta">
+  <div class="largura sobre__bloco">
+    <h2 class="secao__titulo secao__titulo--menor">Pra quem é</h2>
+    <div class="sobre__texto">
+      <p>Pra quem programa e quer entender por que os sistemas são desenhados do jeito que são: de quem está
+        começando na área a quem já escreve código todo dia e quer dar o passo para a arquitetura.</p>
+      <p>Cada saga tem um currículo próprio, com os episódios em ordem, e responde a uma pergunta:</p>
+      <ul class="sobre__sagas">{sagas}</ul>
+    </div>
+  </div>
+</section>"""
+
+
+def _sobre_como(meta: Mapping[str, Any]) -> str:
+    return f"""<section class="secao secao--alternada" id="como-e-feito">
+  <div class="largura sobre__bloco">
+    <h2 class="secao__titulo secao__titulo--menor">Como é feito</h2>
+    <div class="sobre__texto">
+      <p>Uma IA escreve o roteiro a partir de um currículo montado à mão, com o livro e o capítulo de cada
+        referência. Outra IA, sem ver como o roteiro foi feito, confere cada afirmação contra essas fontes;
+        se o roteiro não for aprovado, o episódio não sai. Depois, as vozes são sintetizadas e o episódio vai
+        para o feed.</p>
+      <p>Tudo fica registrado e aberto no repositório: currículo, roteiros, revisões e código.</p>
+      <p class="sobre__acoes"><a class="botao botao--contorno" href="../#como">Ver as etapas</a>
+        <a class="botao botao--contorno" href="{escape(meta['url_repositorio'])}">Código e roteiros no GitHub</a></p>
+    </div>
+  </div>
+</section>"""
+
+
+def _sobre_quem_faz(criador: Mapping[str, Any]) -> str:
+    linha = " · ".join(escape(parte) for parte in (criador["papel"], criador["cidade"]) if parte)
+    papel = f'<p class="criador__papel">{linha}</p>' if linha else ""
+    bio = f'<p class="criador__bio">{escape(criador["bio"])}</p>' if criador["bio"] else ""
+    links = "".join(
+        f'<a class="botao botao--contorno botao--pequeno" href="{escape(link["url"])}" rel="me noopener">'
+        f'{escape(_rotulo_do_link(link))}<svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-fora"/></svg></a>'
+        for link in criador["links"]
+    )
+    links_html = f'<p class="criador__links">{links}</p>' if links else ""
+    return f"""<section class="secao" id="quem-faz">
+  <div class="largura sobre__bloco">
+    <h2 class="secao__titulo secao__titulo--menor">Quem faz</h2>
+    <article class="criador">
+      <div class="criador__inicial" aria-hidden="true">{escape(criador["nome"][:1])}</div>
+      <div>
+        <h3 class="criador__nome">{escape(criador["nome"])}</h3>
+        {papel}
+        {bio}
+        {links_html}
+      </div>
+    </article>
+  </div>
+</section>"""
+
+
+def _rotulo_do_link(link: Mapping[str, str]) -> str:
+    """"GitHub · lucas-jdev": o nome do serviço e o usuário, que é o último pedaço da URL."""
+    usuario = link["url"].rsplit("/", 1)[-1]
+    rotulo = link["rotulo"] or link["url"].split("/")[2]
+    return f"{rotulo} · {usuario}" if usuario and "." not in usuario else rotulo
+
+
+def _sobre_nome(meta: Mapping[str, Any]) -> str:
+    return f"""<section class="secao secao--sem-topo" id="nome">
+  <div class="largura sobre__bloco">
+    <h2 class="secao__titulo secao__titulo--menor">Por que {escape(meta['titulo'])}</h2>
+    <div class="sobre__texto sobre__nome">
+      <svg class="sobre__peba" viewBox="0 0 128 80" aria-hidden="true"><use href="#peba"/></svg>
+      <p>O nome vem do tatu-peba, bicho do Nordeste, de onde o {escape(meta['titulo'])} é feito, que cava a terra
+        até achar o que procura. Daí o lema: cava até achar o porquê. Não tem relação com PEBCAK, a gíria de
+        suporte técnico.</p>
+    </div>
+  </div>
+</section>"""
+
+
+def _rodape(meta: Mapping[str, Any], config: Mapping[str, Any], raiz: str = "") -> str:
     credito = (config.get("audio", {}).get("vinheta") or {}).get("credito", "")
     credito_html = f"<p>{escape(credito)}</p>" if credito else ""
     return f"""<footer class="rodape">
@@ -778,7 +975,8 @@ def _rodape(meta: Mapping[str, Any], config: Mapping[str, Any]) -> str:
       <p>Conteúdo gerado por inteligência artificial e revisado contra as fontes citadas.
         Episódios e roteiros sob {escape(meta['licenca'])}; código sob MIT.</p>
       {credito_html}
-      <p><a href="{escape(meta['url_repositorio'])}">Repositório</a> · <a href="feed.xml">RSS</a> · {escape(meta['autor'])}</p>
+      <p><a href="{escape(meta['url_repositorio'])}">Repositório</a> · <a href="{raiz}feed.xml">RSS</a>
+        · <a href="{raiz}{PAGINA_SOBRE}">{escape(_config_do_site(config)["criador"]["nome"])}</a></p>
     </div>
   </div>
 </footer>"""
@@ -806,6 +1004,7 @@ _SIMBOLOS = """<svg width="0" height="0" style="position:absolute" aria-hidden="
   <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M6 4h4v16H6zm8 0h4v16h-4z"/></symbol>
   <symbol id="i-curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
   <symbol id="i-nao_curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" transform="rotate(180 12 12)" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
+  <symbol id="i-fora" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6m0-6-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
 </svg>"""
 
@@ -870,22 +1069,22 @@ _PAGINA = """<!doctype html>
 <meta name="twitter:image:alt" content="{imagem_descricao}">
 <link rel="canonical" href="{url}">
 <link rel="alternate" type="application/rss+xml" title="{nome}" href="{url_feed}">
-<link rel="icon" href="favicon.ico" sizes="48x48">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="preload" href="fontes/literata-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fontes/literata-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fontes/alfa-slab-one-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="amarracao-verso.svg" as="image" fetchpriority="high">
-<link rel="preload" href="amarracao-frente.svg" as="image" fetchpriority="high">
-<link rel="stylesheet" href="estilo.css">
-<script defer src="app.js"></script>
+<link rel="icon" href="{raiz}favicon.ico" sizes="48x48">
+<link rel="icon" href="{raiz}favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{raiz}apple-touch-icon.png">
+<link rel="preload" href="{raiz}fontes/literata-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{raiz}fontes/literata-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{raiz}fontes/alfa-slab-one-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{raiz}amarracao-verso.svg" as="image" fetchpriority="high">
+<link rel="preload" href="{raiz}amarracao-frente.svg" as="image" fetchpriority="high">
+<link rel="stylesheet" href="{raiz}estilo.css">
+<script defer src="{raiz}app.js"></script>
 <script type="application/ld+json">{dados_estruturados}</script>
 {analytics}
 </head>
 <body>
 {simbolos}
-<a class="pular" href="#{pular_para}">Pular para os episódios</a>
+<a class="pular" href="#{pular_para}">{pular_texto}</a>
 {cabecalho}
 <main>
 {conteudo}
