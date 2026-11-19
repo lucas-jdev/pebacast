@@ -17,7 +17,31 @@
     const atual = player.querySelector(".player__atual");
     const velocidade = player.querySelector(".player__velocidade");
     const valorDaVelocidade = velocidade.querySelector(".player__velocidade-valor");
+    const aviso = player.querySelector("[data-player-aviso]");
+    const fonte = audio.querySelector("source");
     let arrastando = false;
+
+    // Carregando: o MP3 vem de um redirect do GitHub Releases e pode demorar.
+    const carregando = (sim) => {
+      player.classList.toggle("player--carregando", sim);
+      play.setAttribute("aria-label", sim ? "Carregando" : audio.paused ? "Tocar" : "Pausar");
+    };
+    // Erro: volta para "Tocar" e oferece o arquivo, em vez de ficar parado em "Pausar" no 0:00.
+    const falhou = () => {
+      carregando(false);
+      player.classList.remove("player--tocando");
+      play.setAttribute("aria-label", "Tocar");
+      aviso.textContent = "Não deu pra carregar o áudio. ";
+      const baixar = document.createElement("a");
+      baixar.href = fonte?.src || audio.currentSrc;
+      baixar.textContent = "Baixar o MP3";
+      aviso.append(baixar);
+    };
+    // O erro de um <source> dispara nele, e não no <audio>.
+    fonte?.addEventListener("error", falhou);
+    audio.addEventListener("error", falhou);
+    audio.addEventListener("waiting", () => carregando(true));
+    audio.addEventListener("playing", () => { aviso.textContent = ""; carregando(false); });
 
     audio.removeAttribute("controls");
 
@@ -31,7 +55,8 @@
     play.addEventListener("click", () => {
       if (audio.paused) {
         players.forEach((outro) => outro !== player && outro.querySelector("audio").pause());
-        audio.play();
+        if (audio.readyState < 3) carregando(true);
+        audio.play().catch((erro) => { if (erro.name !== "AbortError") falhou(); });
       } else {
         audio.pause();
       }
@@ -42,7 +67,10 @@
     audio.addEventListener("play", () => {
       window.goatcounter?.count?.({ path: `ouviu/${player.dataset.episodio}`, title: "Play no site", event: true });
     }, { once: true });
-    audio.addEventListener("pause", () => { player.classList.remove("player--tocando"); play.setAttribute("aria-label", "Tocar"); });
+    audio.addEventListener("pause", () => {
+      player.classList.remove("player--tocando", "player--carregando");
+      play.setAttribute("aria-label", "Tocar");
+    });
     audio.addEventListener("loadedmetadata", () => {
       if (Number.isFinite(audio.duration)) barra.max = Math.round(audio.duration);
       pintar();
