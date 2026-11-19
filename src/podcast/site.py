@@ -1,8 +1,9 @@
 """Páginas do Pebacast no GitHub Pages.
 
 Gera o index.html (vitrine: último episódio e o próximo), o episodios.html (arquivo
-de tudo que já foi publicado) e o sobre/ (o que é o podcast e quem faz) a partir do
-que está no repositório, e copia os arquivos estáticos de site/. O feed continua saindo de podcast.publicacao.
+de tudo que já foi publicado), uma página por episódio publicado em episodios/<id>/
+e o sobre/ (o que é o podcast e quem faz) a partir do que está no repositório, e
+copia os arquivos estáticos de site/. O feed continua saindo de podcast.publicacao.
 
     python -m podcast.publicacao --site _site feed
 """
@@ -33,6 +34,7 @@ from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO
 ARQUIVOS_ESTATICOS = "site"
 PAGINA_EPISODIOS = "episodios.html"
 PAGINA_SOBRE = "sobre/"
+PASTA_DOS_EPISODIOS = "episodios"
 SITEMAP = "sitemap.xml"
 # Gerada de assets/og.svg por scripts/gerar_imagens.sh; o tamanho vai nas meta tags de Open Graph.
 IMAGEM_COMPARTILHAMENTO = "og.jpg"
@@ -52,7 +54,17 @@ def escrever_pagina(projeto: Projeto, site: Path, arquivo_feed: str) -> None:
     (site / PAGINA_EPISODIOS).write_text(gerar_pagina_episodios(projeto, arquivo_feed), encoding="utf-8")
     (site / PAGINA_SOBRE).mkdir(exist_ok=True)
     (site / PAGINA_SOBRE / "index.html").write_text(gerar_pagina_sobre(projeto, arquivo_feed), encoding="utf-8")
+    for item in _publicados(projeto):
+        pasta = site / caminho_do_episodio(item["episodio"]["id"])
+        pasta.mkdir(parents=True, exist_ok=True)
+        (pasta / "index.html").write_text(
+            gerar_pagina_do_episodio(projeto, arquivo_feed, item["episodio"]["id"]), encoding="utf-8")
     (site / SITEMAP).write_text(gerar_sitemap(projeto), encoding="utf-8")
+
+
+def caminho_do_episodio(episodio_id: str) -> str:
+    """URL permanente do episódio, relativa ao url_site: não muda nunca (ADR 0010)."""
+    return f"{PASTA_DOS_EPISODIOS}/{episodio_id}/"
 
 
 def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -> str:
@@ -145,12 +157,94 @@ def gerar_pagina_sobre(projeto: Projeto, arquivo_feed: str) -> str:
     )
 
 
+def gerar_pagina_do_episodio(projeto: Projeto, arquivo_feed: str, episodio_id: str) -> str:
+    """Página de um episódio publicado, com URL própria: é o endereço que buscadores e IAs citam."""
+    config = projeto.config()
+    meta = config["feed"]
+    publicados = _publicados(projeto)
+    item = next(i for i in publicados if i["episodio"]["id"] == episodio_id)
+    episodio, saga = item["episodio"], item["saga"]
+    url = _url(meta, caminho_do_episodio(episodio_id))
+    serie = _serie(config, arquivo_feed)
+    del serie["@context"]
+    dados = {
+        "@context": "https://schema.org",
+        **_episodio_estruturado(item, meta, serie["@id"]),
+        "partOfSeries": serie,
+        "author": serie["author"],
+        "inLanguage": "pt-BR",
+    }
+    fontes = item["roteiro"].get("fontes", [])
+    if fontes:
+        dados["citation"] = [{"@type": "CreativeWork", "name": fonte} for fonte in fontes]
+    return _documento(
+        config, arquivo_feed,
+        titulo=f"{episodio['titulo']} · {saga.rotulo_do(episodio_id)} · {meta['titulo']}",
+        descricao=_resumo(episodio, meta["titulo"]),
+        url=url,
+        estaticos=projeto.raiz / ARQUIVOS_ESTATICOS,
+        dados_estruturados=dados,
+        pular_para="episodio",
+        pular_texto="Pular para o episódio",
+        raiz="../../",
+        cabecalho=_cabecalho(meta, atual="episodio", raiz="../../"),
+        conteudo=_secao_do_episodio(item, publicados, projeto.personas(), _config_do_site(config)["votos"]),
+    )
+
+
+def _resumo(episodio: Mapping[str, Any], nome: str, limite: int = 155) -> str:
+    """Descrição para buscadores: os objetivos do episódio, cortados numa palavra até o limite."""
+    texto = " ".join(" ".join(episodio.get("objetivos", [])).split()) or f"Episódio do {nome}."
+    if len(texto) <= limite:
+        return texto
+    return texto[: limite - 1].rsplit(" ", 1)[0].rstrip(",;:.") + "…"
+
+
+def _vizinhos(item: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]]) -> tuple[Any, Any]:
+    """O anterior e o próximo publicados da mesma saga, na ordem do currículo."""
+    saga = item["saga"]
+    no_ar = {i["episodio"]["id"]: i for i in publicados if i["saga"].id == saga.id}
+    ordem = [e.id for e in saga.episodios if e.id in no_ar]
+    posicao = ordem.index(item["episodio"]["id"])
+    anterior = no_ar[ordem[posicao - 1]] if posicao > 0 else None
+    proximo = no_ar[ordem[posicao + 1]] if posicao + 1 < len(ordem) else None
+    return anterior, proximo
+
+
+def _secao_do_episodio(item: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]],
+                       personas: Mapping[str, Any], votos: str) -> str:
+    episodio, saga = item["episodio"], item["saga"]
+    anterior, proximo = _vizinhos(item, publicados)
+
+    def vizinho(outro: Mapping[str, Any] | None, rotulo: str, classe: str) -> str:
+        if outro is None:
+            return ""
+        return (f'<a class="vizinhos__link vizinhos__link--{classe}" href="../../{caminho_do_episodio(outro["episodio"]["id"])}">'
+                f'<span class="vizinhos__rotulo">{rotulo}</span>{escape(outro["episodio"]["titulo"])}</a>')
+
+    links = vizinho(anterior, "← Anterior", "anterior") + vizinho(proximo, "Próximo →", "proximo")
+    navegacao = (f'<nav class="vizinhos" aria-label="Outros episódios da saga {escape(saga.nome_curto)}">{links}</nav>'
+                 if links else "")
+    return f"""<section class="secao" id="episodio">
+  <div class="largura">
+    <p class="voltar"><a href="../../{PAGINA_EPISODIOS}?saga={escape(saga.id)}">← Episódios da saga {escape(saga.nome_curto)}</a></p>
+    {_episodio_destaque(item, personas, votos, na_propria_pagina=True)}
+    {navegacao}
+  </div>
+</section>"""
+
+
 def gerar_sitemap(projeto: Projeto) -> str:
     meta = projeto.config()["feed"]
     publicados = _publicados(projeto)
     ultima = (f"<lastmod>{_data_iso(publicados[0]['publicacao']['publicado_em'])}</lastmod>" if publicados else "")
     urls = "".join(f"<url><loc>{escape(_url(meta, caminho))}</loc>{ultima}</url>" for caminho in ("", PAGINA_EPISODIOS))
     urls += f"<url><loc>{escape(_url(meta, PAGINA_SOBRE))}</loc></url>"
+    urls += "".join(
+        f"<url><loc>{escape(_url(meta, caminho_do_episodio(item['episodio']['id'])))}</loc>"
+        f"<lastmod>{_data_iso(item['publicacao']['publicado_em'])}</lastmod></url>"
+        for item in publicados
+    )
     return ('<?xml version="1.0" encoding="UTF-8"?>\n'
             f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>\n')
 
@@ -237,7 +331,7 @@ def _episodio_estruturado(item: Mapping[str, Any], meta: Mapping[str, Any], seri
     return {
         "@type": "PodcastEpisode",
         "name": episodio["titulo"],
-        "url": _url(meta, f"{PAGINA_EPISODIOS}#{episodio['id']}"),
+        "url": _url(meta, caminho_do_episodio(episodio["id"])),
         "datePublished": publicacao["publicado_em"],
         "timeRequired": f"PT{max(1, round(publicacao['duracao_segundos'] / 60))}M",
         "description": " ".join(episodio.get("objetivos", [])),
@@ -451,9 +545,14 @@ def _secao_ultimo(item: Mapping[str, Any] | None, personas: Mapping[str, Any], t
 </section>"""
 
 
-def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], votos: str = "") -> str:
+def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], votos: str = "",
+                       na_propria_pagina: bool = False) -> str:
+    """O card grande do episódio. Na página dele, o título é o h1 e não é link (já se está lá)."""
     episodio, roteiro, saga = item["episodio"], item["roteiro"], item["saga"]
     eid = escape(episodio["id"])
+    link = "./" if na_propria_pagina else caminho_do_episodio(episodio["id"])
+    titulo = (f'<h1 class="episodio__titulo">{escape(episodio["titulo"])}</h1>' if na_propria_pagina else
+              f'<h3 class="episodio__titulo"><a href="{escape(link)}">{escape(episodio["titulo"])}</a></h3>')
     return f"""<article class="episodio episodio--destaque" id="{eid}" data-saga="{escape(saga.id)}">
   {_etiqueta(saga, episodio["id"])}
   <div class="episodio__capa" aria-hidden="true">
@@ -462,7 +561,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
   </div>
   <div class="episodio__corpo">
     {_meta(item)}
-    <h3 class="episodio__titulo">{escape(episodio['titulo'])}</h3>
+    {titulo}
     {_caso(item["noticia"])}
     {_player(item["publicacao"], episodio["id"])}{_votos(episodio["id"], votos)}
     {_objetivos_e_desafio(episodio, roteiro)}
@@ -472,7 +571,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
       <summary>Fontes</summary>
       {_fontes(roteiro)}
     </details>
-    {_links(item, f"{PAGINA_EPISODIOS}#{eid}")}
+    {_links(item, link)}
   </div>
 </article>"""
 
@@ -536,7 +635,7 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any], vot
   </div>
   <article class="item__corpo" aria-labelledby="titulo-{eid}">
     {_meta(item)}
-    <h3 class="item__titulo" id="titulo-{eid}">{escape(episodio['titulo'])}</h3>
+    <h3 class="item__titulo" id="titulo-{eid}"><a href="{escape(caminho_do_episodio(episodio['id']))}">{escape(episodio['titulo'])}</a></h3>
     {_caso(item["noticia"])}
     {_player(item["publicacao"], episodio["id"])}{_votos(episodio["id"], votos)}
     <details class="dobra">
@@ -549,7 +648,7 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any], vot
       {_selo(item["revisoes"])}
       {_fontes(roteiro)}
     </details>
-    {_links(item, f"#{eid}")}
+    {_links(item, caminho_do_episodio(episodio["id"]))}
   </article>
 </li>"""
 

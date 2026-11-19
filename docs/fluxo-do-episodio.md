@@ -54,7 +54,7 @@ flowchart TD
         mix["Vinheta + mixagem + loudnorm<br/>→ MP3"]
         release[Sobe o MP3 no GitHub Releases]
         registro["Grava <code>publicacao.json</code><br/>e commita"]
-        feed[Gera feed.xml e o site]
+        feed["Gera feed.xml e o site,<br/>com uma página por episódio"]
         pages[Publica no GitHub Pages]
         indexnow["Avisa o IndexNow das URLs<br/>que mudaram; falha só vira aviso"]
         issue(["Issue do episódio<br/>(Roteiro reprovado: &lt;id&gt;)<br/>reprovar de novo só comenta"]):::falha

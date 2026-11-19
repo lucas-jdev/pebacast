@@ -640,3 +640,19 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 30; pointer-event
 .criador__bio { color: var(--texto); }
 .criador__links { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.2rem; }
 .criador__links .botao svg { width: 16px; height: 16px; }
+
+/* Página do episódio: o mesmo folheto do destaque, com o título como h1, a volta para a saga e os vizinhos. */
+.episodio__titulo a, .item__titulo a { text-decoration: none; }
+.episodio__titulo a:hover, .item__titulo a:hover { text-decoration: underline 3px var(--destaque); text-underline-offset: 0.12em; }
+h1.episodio__titulo { font-size: clamp(1.9rem, 4vw, 2.8rem); }
+.voltar { margin-bottom: 1.6rem; font-weight: 600; }
+.voltar a { text-decoration: none; }
+.voltar a:hover { text-decoration: underline 3px var(--destaque); text-underline-offset: 0.3em; }
+.vizinhos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 2.5rem; }
+@media (max-width: 560px) { .vizinhos { grid-template-columns: 1fr; } }
+.vizinhos__link { display: block; padding: 1rem 1.2rem; border: 3px solid var(--texto); background: #fffaf0; text-decoration: none;
+  font-family: var(--fonte-titulo); font-size: 1.15rem; line-height: 1.3; }
+.vizinhos__link:hover { background: var(--destaque); }
+.vizinhos__link--proximo { grid-column: 2; text-align: right; }
+@media (max-width: 560px) { .vizinhos__link--proximo { grid-column: auto; } }
+.vizinhos__rotulo { display: block; font-family: var(--fonte-texto); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; }

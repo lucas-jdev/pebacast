@@ -27,7 +27,7 @@ from podcast.indexacao import escrever_chave
 from podcast.personas import carregar_personas
 from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
 from podcast.roteiro import Projeto, regras_para
-from podcast.site import escrever_pagina
+from podcast.site import caminho_do_episodio, escrever_pagina
 from podcast.tts.provedor import RequisicaoRecusada, TtsProvider
 from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, validar_episodio
 
@@ -249,7 +249,7 @@ def gerar_feed(projeto: Projeto) -> str:
 
     itens = sorted(_episodios_publicados(projeto), key=lambda item: item["publicacao"]["publicado_em"], reverse=True)
     for item in itens:
-        _adicionar_item(canal, item)
+        _adicionar_item(canal, item, url_site)
 
     ET.indent(rss)
     return '<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(rss, encoding="unicode") + "\n"
@@ -312,10 +312,12 @@ def _episodios_publicados(projeto: Projeto) -> list[dict[str, Any]]:
     return itens
 
 
-def _adicionar_item(canal: ET.Element, item: Mapping[str, Any]) -> None:
+def _adicionar_item(canal: ET.Element, item: Mapping[str, Any], url_site: str) -> None:
     episodio, publicacao = item["episodio"], item["publicacao"]
     no = ET.SubElement(canal, "item")
     _sub(no, "title", f"{item['rotulo']} — {episodio['titulo']}")
+    # Apps e diretórios de podcast mostram este link como "página do episódio".
+    _sub(no, "link", url_site + caminho_do_episodio(episodio["id"]))
     _sub(no, "description", item["notas"])
     ET.SubElement(no, "guid", {"isPermaLink": "false"}).text = publicacao["guid"]
     _sub(no, "pubDate", format_datetime(datetime.fromisoformat(publicacao["publicado_em"])))

@@ -8,6 +8,7 @@ import yaml
 from podcast.site import (
     escrever_pagina,
     gerar_index,
+    gerar_pagina_do_episodio,
     gerar_pagina_episodios,
     gerar_pagina_sobre,
     gerar_sitemap,
@@ -82,7 +83,7 @@ def test_inicial_mostra_so_o_ultimo_e_aponta_para_o_arquivo(projeto):
     assert 'id="sw-002"' in pagina
     assert 'id="sw-001"' not in pagina
     assert 'href="episodios.html">Ver os 2 episódios publicados' in pagina
-    assert 'href="episodios.html#sw-002">Link deste episódio' in pagina
+    assert 'href="episodios/sw-002/">Link deste episódio' in pagina
 
 
 def test_proximo_segue_a_fila_da_pipeline(projeto):
@@ -208,7 +209,7 @@ def test_arquivo_descreve_a_serie_e_os_episodios_para_buscadores(projeto):
     assert serie["@type"] == "PodcastSeries"
     assert serie["webFeed"] == "https://x.github.io/pebacast/feed.xml"
     [episodio] = serie["episode"]
-    assert episodio["url"] == "https://x.github.io/pebacast/episodios.html#sw-001"
+    assert episodio["url"] == "https://x.github.io/pebacast/episodios/sw-001/"
     assert episodio["timeRequired"] == "PT16M"
     assert episodio["associatedMedia"]["contentUrl"] == "https://cdn/sw-001.mp3"
 
@@ -624,3 +625,119 @@ def test_foto_configurada_existe_no_site():
     foto = yaml.safe_load((raiz / "config" / "pipeline.yaml").read_text(encoding="utf-8"))["site"]["criador"]["foto"]
 
     assert (raiz / "site" / foto).is_file()
+
+
+# ---------------------------------------------------------------- página do episódio
+
+
+def _tres_publicados(projeto):
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+    _ja_publicado(projeto, "sw-002", "2026-11-09T15:00:00+00:00")
+
+
+def test_cada_episodio_publicado_ganha_pagina_e_o_resto_nao(projeto, tmp_path):
+    _tres_publicados(projeto)
+    _escrever_episodio(projeto, "sw-003")
+    site = tmp_path / "_site"
+    site.mkdir()
+
+    escrever_pagina(projeto, site, "feed.xml")
+
+    assert (site / "episodios" / "sw-001" / "index.html").exists()
+    assert (site / "episodios" / "sw-002" / "index.html").exists()
+    assert not (site / "episodios" / "sw-003").exists()
+
+
+def test_pagina_do_episodio_tem_titulo_descricao_e_canonical_proprios(projeto):
+    _tres_publicados(projeto)
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+
+    assert "<title>Dois · Saga Software · ep. 2 · Pebacast</title>" in pagina
+    assert '<link rel="canonical" href="https://x.github.io/pebacast/episodios/sw-002/">' in pagina
+    assert '<h1 class="episodio__titulo">Dois</h1>' in pagina
+    assert 'class="player"' in pagina and "Liste dois trade-offs." in pagina
+
+
+def test_titulos_das_paginas_de_episodio_nao_se_repetem(projeto):
+    _tres_publicados(projeto)
+
+    titulos = {re.search(r"<title>(.*?)</title>", gerar_pagina_do_episodio(projeto, "feed.xml", eid)).group(1)
+               for eid in ("sw-001", "sw-002")}
+
+    assert len(titulos) == 2
+
+
+def test_descricao_cabe_no_limite_e_corta_numa_palavra(projeto):
+    longo = {**SAGA["episodios"][0], "objetivos": ["Entender " + "acoplamento " * 30]}
+    _gravar(projeto.raiz / "curriculum" / "sagas" / "software.yaml", {**SAGA, "episodios": [longo, *SAGA["episodios"][1:]]})
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+    descricao = re.search(r'<meta name="description" content="(.*?)">', pagina).group(1)
+    assert len(descricao) <= 155
+    assert descricao.endswith("acoplamento…")
+
+
+def test_dados_estruturados_do_episodio_citam_as_fontes_e_ligam_serie_e_criador(projeto):
+    _tres_publicados(projeto)
+
+    dados = _dados_estruturados(gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002"))
+
+    assert dados["@type"] == "PodcastEpisode"
+    assert dados["url"] == "https://x.github.io/pebacast/episodios/sw-002/"
+    assert dados["citation"] == [{"@type": "CreativeWork", "name": "fosa cap. 1"}]
+    assert dados["partOfSeries"]["@id"] == "https://x.github.io/pebacast/#podcast"
+    assert dados["author"]["@id"] == dados["partOfSeries"]["author"]["@id"] == "https://x.github.io/pebacast/sobre/#criador"
+
+
+def test_vizinhos_so_ligam_episodios_publicados_da_mesma_saga(projeto):
+    _tres_publicados(projeto)
+    _escrever_episodio(projeto, "sw-003")
+
+    primeiro = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+    ultimo = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+
+    assert 'vizinhos__link--anterior' not in primeiro
+    assert 'class="vizinhos__link vizinhos__link--proximo" href="../../episodios/sw-002/"' in primeiro
+    assert 'class="vizinhos__link vizinhos__link--anterior" href="../../episodios/sw-001/"' in ultimo
+    assert 'vizinhos__link--proximo' not in ultimo
+
+
+def test_episodio_sozinho_na_saga_nao_tem_navegacao(projeto):
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    assert 'class="vizinhos"' not in gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+
+def test_pagina_do_episodio_busca_css_js_e_icones_na_raiz_do_site(projeto):
+    _tres_publicados(projeto)
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+
+    assert '<link rel="stylesheet" href="../../estilo.css">' in pagina
+    assert '<a href="../../episodios.html">Episódios</a>' in pagina
+    assert '<a href="../../episodios.html?saga=software">← Episódios da saga Software</a>' in pagina
+    assert not re.search(r'(?:href|src)="(?:estilo\.css|app\.js|favicon|fontes/|\.\./(?!\.\./))', pagina)
+
+
+def test_listas_levam_a_pagina_do_episodio(projeto):
+    _tres_publicados(projeto)
+
+    inicial = gerar_index(projeto, "feed.xml")
+    arquivo = gerar_pagina_episodios(projeto, "feed.xml")
+
+    assert '<h3 class="episodio__titulo"><a href="episodios/sw-002/">Dois</a></h3>' in inicial
+    assert '<a href="episodios/sw-001/">Um</a></h3>' in arquivo
+    assert 'href="episodios/sw-001/">Link deste episódio' in arquivo
+    assert 'id="sw-001"' in arquivo, "as âncoras antigas (episodios.html#sw-001) continuam valendo"
+
+
+def test_sitemap_lista_cada_episodio_com_a_data_de_publicacao(projeto):
+    _tres_publicados(projeto)
+
+    sitemap = gerar_sitemap(projeto)
+
+    assert "<url><loc>https://x.github.io/pebacast/episodios/sw-001/</loc><lastmod>2026-11-07</lastmod></url>" in sitemap
+    assert "<url><loc>https://x.github.io/pebacast/episodios/sw-002/</loc><lastmod>2026-11-09</lastmod></url>" in sitemap
