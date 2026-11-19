@@ -84,7 +84,7 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
         _secao_vozes(personas),
         _secao_sagas(sagas, publicados),
         _secao_como(config),
-        _secao_assinar(_url_feed(meta, arquivo_feed), meta),
+        _secao_assinar(_url_feed(meta, arquivo_feed), meta, beta=_config_do_site(config)["beta"]),
     ]
     return _documento(
         config, arquivo_feed,
@@ -94,7 +94,7 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
         estaticos=projeto.raiz / ARQUIVOS_ESTATICOS,
         dados_estruturados=_serie(config, arquivo_feed),
         pular_para="episodios",
-        cabecalho=_cabecalho(meta, atual="inicio"),
+        cabecalho=_cabecalho(meta, atual="inicio", beta=_config_do_site(config)["beta"]),
         conteudo="\n".join(s for s in secoes if s),
     )
 
@@ -113,7 +113,7 @@ def gerar_pagina_episodios(projeto: Projeto, arquivo_feed: str) -> str:
         estaticos=projeto.raiz / ARQUIVOS_ESTATICOS,
         dados_estruturados=serie,
         pular_para="arquivo",
-        cabecalho=_cabecalho(meta, atual="episodios"),
+        cabecalho=_cabecalho(meta, atual="episodios", beta=_config_do_site(config)["beta"]),
         conteudo=_secao_arquivo(publicados, projeto.personas(), votos=_config_do_site(config)["votos"]),
     )
 
@@ -146,12 +146,14 @@ def gerar_pagina_sobre(projeto: Projeto, arquivo_feed: str) -> str:
         pular_para="sobre",
         pular_texto="Pular para o conteúdo",
         raiz="../",
-        cabecalho=_cabecalho(meta, atual="sobre", raiz="../"),
+        cabecalho=_cabecalho(meta, atual="sobre", raiz="../", beta=_config_do_site(config)["beta"]),
         conteudo="\n".join([
             _sobre_definicao(meta, criador["name"]),
             _sobre_proposta(),
             _sobre_como(meta),
             _sobre_quem_faz(_config_do_site(config)["criador"]),
+            _sobre_beta(meta) if _config_do_site(config)["beta"] else "",
+            _sobre_fala_comigo(meta),
             _sobre_nome(meta),
         ]),
     )
@@ -187,7 +189,7 @@ def gerar_pagina_do_episodio(projeto: Projeto, arquivo_feed: str, episodio_id: s
         pular_para="episodio",
         pular_texto="Pular para o episódio",
         raiz="../../",
-        cabecalho=_cabecalho(meta, atual="episodio", raiz="../../"),
+        cabecalho=_cabecalho(meta, atual="episodio", raiz="../../", beta=_config_do_site(config)["beta"]),
         conteudo=_secao_do_episodio(item, publicados, projeto.personas(), _config_do_site(config)["votos"]),
     )
 
@@ -257,6 +259,7 @@ def _config_do_site(config: Mapping[str, Any]) -> dict[str, Any]:
         "imagem": site.get("imagem_compartilhamento") or IMAGEM_COMPARTILHAMENTO,
         "goatcounter": site.get("goatcounter") or "",
         "votos": _api_de_votos(site.get("votos_api") or ""),
+        "beta": bool(site.get("beta", False)),
         "criador": _config_do_criador(site.get("criador") or {}, config["feed"]["autor"]),
     }
 
@@ -473,20 +476,24 @@ def _codigo(episodio_id: str) -> str:
 # ---------------------------------------------------------------- seções
 
 
-def _cabecalho(meta: Mapping[str, Any], atual: str, raiz: str = "") -> str:
+def _cabecalho(meta: Mapping[str, Any], atual: str, raiz: str = "", beta: bool = False) -> str:
     """`atual` é a página aberta ("inicio", "episodios" ou "sobre"): ganha aria-current e, na inicial, as
-    âncoras ficam na própria página."""
+    âncoras ficam na própria página. `beta` põe o carimbo ao lado da marca, levando à explicação na Sobre."""
     inicial = "" if atual == "inicio" else (raiz or "./")
+    carimbo = (f'<a class="carimbo-beta" href="{raiz}{PAGINA_SOBRE}#beta" '
+               'aria-label="Versão beta: o que isso quer dizer">beta</a>' if beta else "")
 
     def corrente(pagina: str) -> str:
         return ' aria-current="page"' if atual == pagina else ""
 
     return f"""<header class="topo">
   <div class="largura topo__linha">
+    <div class="topo__marca">
     <a class="marca" href="{inicial}#inicio" aria-label="{escape(meta['titulo'])}, início">
       <svg class="marca__peba" viewBox="0 0 128 80" aria-hidden="true"><use href="#peba"/></svg>
       <span class="marca__nome">{escape(meta['titulo'])}</span>
-    </a>
+    </a>{carimbo}
+    </div>
     <nav class="topo__nav" aria-label="Seções">
       <a href="{raiz}{PAGINA_EPISODIOS}"{corrente("episodios")}>Episódios</a>
       <a href="{inicial}#sagas">Sagas</a>
@@ -725,8 +732,10 @@ def _votos(episodio_id: str, api: str) -> str:
     return f"""
     <div class="votos" role="group" aria-labelledby="votos-{eid}" data-episodio="{eid}" data-api="{escape(api)}">
       <p class="votos__pergunta" id="votos-{eid}">Curtiu o episódio?</p>{opcoes}
-      <form class="recado" data-recado hidden>
-        <label class="recado__rotulo" for="recado-{eid}">Quer contar o porquê? <span>Opcional, vai só pra quem faz o podcast.</span></label>
+      <button class="votos__recado" type="button" data-abrir-recado aria-expanded="false"
+        aria-controls="form-recado-{eid}">Deixar um recado</button>
+      <form class="recado" id="form-recado-{eid}" data-recado hidden>
+        <label class="recado__rotulo" for="recado-{eid}">Seu recado sobre o episódio <span>Vai só pra quem faz o podcast.</span></label>
         <textarea class="recado__texto" id="recado-{eid}" name="texto" rows="3" minlength="3" maxlength="1000" required></textarea>
         <div class="recado__isca"><label>Site <input name="site" tabindex="-1" autocomplete="off"></label></div>
         <button class="votos__opcao" type="submit">Enviar recado</button>
@@ -985,14 +994,15 @@ def _secao_como(config: Mapping[str, Any]) -> str:
 </section>"""
 
 
-def _secao_assinar(url_feed: str, meta: Mapping[str, Any]) -> str:
+def _secao_assinar(url_feed: str, meta: Mapping[str, Any], beta: bool = False) -> str:
+    spotify = " No Spotify em breve; por enquanto, pelo feed." if beta else ""
     return f"""<section class="secao" id="assinar">
   <div class="largura assinar">
     <div>
       <p class="sobretitulo">Ouça no seu app</p>
       <h2 class="secao__titulo">Assine pelo feed</h2>
       <p class="secao__lead">Cole o endereço em qualquer app de podcast que aceite RSS, como AntennaPod, Pocket Casts,
-        Apple Podcasts ou Overcast. Episódio novo chega sozinho.</p>
+        Apple Podcasts ou Overcast. Episódio novo chega sozinho.{spotify}</p>
     </div>
     <div class="feed">
       <label class="feed__rotulo" for="url-feed">Endereço do feed</label>
@@ -1100,6 +1110,42 @@ def _sobre_quem_faz(criador: Mapping[str, Any]) -> str:
 </section>"""
 
 
+def _sobre_beta(meta: Mapping[str, Any]) -> str:
+    """Recado do criador, em primeira pessoa: o que já é firme, o que pode mudar e como avisar um erro."""
+    return f"""<section class="secao secao--sem-topo" id="beta">
+  <div class="largura sobre__bloco">
+    <h2 class="secao__titulo secao__titulo--menor">Ainda é beta</h2>
+    <div class="sobre__texto">
+      <p>O {escape(meta['titulo'])} sai todo dia, mas o jeito de fazer ainda está mudando, e por isso a sua opinião
+        pesa agora mais do que vai pesar depois.</p>
+      <p><strong>O que já é firme:</strong> as fontes de cada episódio são escolhidas e conferidas à mão, nenhum
+        roteiro sai sem passar na revisão, e o link de cada episódio não muda.</p>
+      <p><strong>O que pode mudar:</strong> as vozes, o visual, a numeração e a ordem das sagas. Ainda não está no
+        Spotify.</p>
+      <p><strong>O que pode dar errado:</strong> uma voz que tropeça, um dia sem episódio, um erro que passou na
+        revisão. Achou um? Me conta. Eu corrijo e, se precisar, regravo.</p>
+    </div>
+  </div>
+</section>"""
+
+
+def _sobre_fala_comigo(meta: Mapping[str, Any]) -> str:
+    repositorio = meta["url_repositorio"].rstrip("/")
+    return f"""<section class="secao secao--sem-topo" id="fala-comigo">
+  <div class="largura sobre__bloco">
+    <h2 class="secao__titulo secao__titulo--menor">Fala comigo</h2>
+    <div class="sobre__texto">
+      <p>Sobre um episódio, use o <strong>Deixar um recado</strong> na página dele: chega só pra mim. Para uma ideia
+        ou um problema no site ou no podcast, abra uma issue no GitHub. Lá fica público, e dá pra acompanhar.</p>
+      <p class="sobre__acoes">
+        <a class="botao botao--contorno" href="{escape(repositorio)}/issues/new?template=1-ideia.yml">Sugerir uma ideia</a>
+        <a class="botao botao--contorno" href="{escape(repositorio)}/issues/new?template=2-bug.yml">Avisar um problema</a>
+      </p>
+    </div>
+  </div>
+</section>"""
+
+
 def _rotulo_do_link(link: Mapping[str, str]) -> str:
     """"GitHub · lucas-jdev": o nome do serviço e o usuário, que é o último pedaço da URL."""
     usuario = link["url"].rsplit("/", 1)[-1]
@@ -1136,7 +1182,7 @@ def _rodape(meta: Mapping[str, Any], config: Mapping[str, Any], raiz: str = "") 
         uma segunda IA.
         Episódios e roteiros sob {escape(meta['licenca'])}; código sob MIT.</p>
       {credito_html}
-      <p><a href="{escape(meta['url_repositorio'])}">Repositório</a> · <a href="{raiz}feed.xml">RSS</a>
+      <p><a href="{escape(meta['url_repositorio'])}" data-repositorio>Repositório</a> · <a href="{raiz}feed.xml">RSS</a>
         · <a href="{raiz}{PAGINA_SOBRE}">{escape(_config_do_site(config)["criador"]["nome"])}</a></p>
     </div>
   </div>

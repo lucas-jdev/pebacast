@@ -2,4 +2,4 @@ blank_issues_enabled: true
 contact_links:
   - name: Ouviu um episódio e quer comentar?
     url: https://lucas-jdev.github.io/pebacast/episodios.html
-    about: Use o "Curtiu o episódio?" na página do episódio. O recado chega direto para quem faz o podcast.
+    about: Use o "Deixar um recado" na página do episódio. O recado chega só para quem faz o podcast.
