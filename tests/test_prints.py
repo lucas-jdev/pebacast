@@ -228,7 +228,33 @@ class TestValidacao:
             prints.validar(pasta)
 
 
+class TestPaginas:
+    def test_cada_pagina_tem_o_seu_caminho_no_site(self, tmp_path):
+        for arquivo in ("index.html", "episodios.html", "sobre/index.html",
+                        "episodios/sw-002/index.html", "episodios/co-001/index.html"):
+            (tmp_path / arquivo).parent.mkdir(parents=True, exist_ok=True)
+            (tmp_path / arquivo).write_text("<html></html>")
+        assert [prints.caminho_da_pagina(tmp_path, p) for p in prints.PAGINAS] == [
+            "index.html", "episodios.html", "sobre/", "episodios/co-001/"]
+
+    def test_pagina_que_nao_existe_nesse_lado_nao_tem_caminho(self, tmp_path):
+        (tmp_path / "index.html").write_text("<html></html>")
+        assert prints.caminho_da_pagina(tmp_path, "sobre") is None
+        assert prints.caminho_da_pagina(tmp_path, "episodio") is None
+
+    def test_toda_pagina_tem_rotulo_e_cabe_no_nome_do_arquivo(self):
+        assert set(prints.ROTULOS) == set(prints.PAGINAS)
+        for pagina in prints.PAGINAS:
+            assert prints.RE_CAPTURA.match(prints.nome_captura(pagina, "cabecalho", "desktop"))
+
+
 class TestComentario:
+    def test_pagina_nova_aparece_com_o_caminho_no_titulo_do_par(self):
+        item = {"pagina": "sobre", "secao": "quem-faz", "tela": "celular", "estado": "nova"}
+        corpo = prints.comentario({"pr": 3, "itens": [item]}, "dono/repo", SHA)
+        assert "**sobre/ · quem-faz** (nova)" in corpo
+        assert "`index.html`, `episodios.html`, `sobre/` e `episodios/<id>/`" in corpo
+
     def test_tabela_antes_e_depois_separando_desktop_e_celular(self):
         corpo = prints.comentario({"pr": 42, "itens": [ALTERADA, NOVA, REMOVIDA]}, "dono/repo", SHA)
         assert corpo.startswith(prints.MARCADOR)
