@@ -763,3 +763,8 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 .voz__mais { display: none; align-items: center; min-height: 44px; margin: -0.4rem 0 0.6rem; padding: 0; border: 0;
   background: none; color: var(--texto); font: inherit; font-weight: 700; text-decoration: underline 2px; cursor: pointer; }
 @media (max-width: 420px) { .feed__url { flex: none; height: 48px; } }
+
+/* Desafio para quem ainda não trabalha na área (#58), dentro do bloco amarelo do desafio. */
+.desafio__iniciante { margin-top: 0.9rem; padding-top: 0.8rem; border-top: 2px dashed currentColor; font-family: var(--fonte-texto);
+  font-size: 0.98rem; font-weight: 500; line-height: 1.55; }
+.desafio__iniciante strong { display: block; font-weight: 700; }
