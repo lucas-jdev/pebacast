@@ -104,6 +104,9 @@ site:
   # Código do site no GoatCounter (o "xxx" de xxx.goatcounter.com): analytics sem cookie.
   # Vazio, nenhum script de analytics é carregado.
   goatcounter: ""
+  # Liga o carimbo "beta" no cabeçalho, a seção "Ainda é beta" na Sobre, o "No Spotify em breve" e o aviso
+  # no fim da descrição do feed. No lançamento, é só desligar.
+  beta: true
   # Quem faz o podcast, na página sobre/ e no JSON-LD de todas as páginas (Person com o mesmo @id).
   # A bio é do Lucas e pode ser reescrita sem mexer no código; vazia, a página mostra só nome e links.
   # Os links viram o sameAs da Person: só https.

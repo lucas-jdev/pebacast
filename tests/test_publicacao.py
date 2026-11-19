@@ -19,6 +19,7 @@ from podcast.publicacao import (
 from podcast.tts.provedor import RequisicaoRecusada
 from tests.conftest import ProvedorFalso, ProvedorQuebrado
 from tests.test_roteiro import (  # noqa: F401 (fixture)
+    CONFIG,
     _escrever_episodio,
     _gravar,
     _revisao,
@@ -287,3 +288,17 @@ def test_relatorio_tem_uma_entrada_por_episodio_para_as_issues():
     assert "- revisoes/3.json" in dados["reprovados"]["sl-001"]
     assert "episodios/sl-001/revisoes/" in dados["reprovados"]["sl-001"]
     assert "sem falas" not in dados["reprovados"]["sl-001"]
+
+
+def test_beta_acrescenta_o_aviso_no_fim_da_descricao_do_canal(projeto):
+    _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "site": {"beta": True}})
+
+    descricao = ET.fromstring(gerar_feed(projeto)).find("channel/description").text
+
+    assert descricao.endswith("Em beta: o formato, as vozes e o visual ainda podem mudar.")
+
+
+def test_sem_beta_a_descricao_do_canal_fica_como_esta(projeto):
+    descricao = ET.fromstring(gerar_feed(projeto)).find("channel/description").text
+
+    assert "beta" not in descricao.lower()

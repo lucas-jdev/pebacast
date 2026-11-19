@@ -119,7 +119,7 @@ button { font: inherit; }
   .topo__linha { flex-wrap: wrap; row-gap: 0; padding-top: 6px; }
   .topo__linha { column-gap: 1.1rem; padding-block: 6px; }
   .topo__nav { display: contents; }
-  .marca { order: 1; flex: 1 0 calc(100% - 9rem); }
+  .topo__marca { order: 1; flex: 1 0 calc(100% - 9rem); }
   .topo__nav .botao { order: 2; }
   .topo__nav a:not(.botao) { order: 3; white-space: nowrap; padding-block: 0.5rem; }
 }
@@ -665,3 +665,17 @@ h1.episodio__titulo { font-size: clamp(1.9rem, 4vw, 2.8rem); }
 .passo__quem--ia { background: #cdb8ea; }
 .passo__quem--codigo { background: #a9c8ec; }
 .selo a { color: inherit; font-weight: 700; }
+
+/* Carimbo "beta" ao lado da marca: tinta da paleta que não é cor de saga, girado como um carimbo de cordel. */
+.topo__marca { display: flex; align-items: center; gap: 0.5rem; }
+.carimbo-beta { padding: 0.05rem 0.4rem; border: 2px solid #b0154f; border-radius: 2px;
+  color: #b0154f; font: 400 0.72rem/1.3 var(--fonte-titulo); letter-spacing: 0.08em; text-transform: uppercase;
+  text-decoration: none; rotate: -4deg; background: rgba(255, 250, 240, 0.6); }
+.carimbo-beta:hover, .carimbo-beta:focus-visible { background: #b0154f; color: #fffaf0; }
+
+/* "Deixar um recado": ação secundária ao lado dos votos, com cara de link para não competir com o Curti. */
+.votos__recado { min-height: 44px; padding: 0 0.4rem; border: 0; background: none; color: var(--texto); font: inherit;
+  font-size: 0.95rem; font-weight: 650; text-decoration: underline 2px var(--destaque); text-underline-offset: 0.25em;
+  cursor: pointer; }
+.votos__recado[aria-expanded="true"] { text-decoration-color: var(--texto); }
+.recado__aviso a { color: var(--texto); font-weight: 650; }
