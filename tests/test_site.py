@@ -246,7 +246,7 @@ def test_votos_so_aparecem_com_api_https_configurada(projeto):
         assert pagina.count('class="votos__opcao" type="button" data-voto=') == 2
         assert 'aria-labelledby="votos-sw-001"' in pagina and 'id="votos-sw-001"' in pagina
         assert '<label class="recado__rotulo" for="recado-sw-001">' in pagina and 'id="recado-sw-001"' in pagina
-        assert '<form class="recado" data-recado hidden>' in pagina
+        assert '<form class="recado" id="form-recado-sw-001" data-recado hidden>' in pagina
 
     for invalida in ("http://votos.exemplo.dev", 'https://x" onload="alert(1)', "javascript:alert(1)"):
         _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "site": {"votos_api": invalida}})
@@ -830,3 +830,68 @@ def test_cenario_vazio_nao_mostra_bloco_de_ponto_de_partida(projeto):
 
 def test_vozes_avisam_que_sao_personagens_ficticios(projeto):
     assert "personagens fictícios" in _texto(gerar_index(projeto, "feed.xml"))
+
+
+# ---------------------------------------------------------------- beta e canal de opinião (#54)
+
+
+def _com_beta(projeto, beta=True):
+    _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "site": {"beta": beta, "votos_api": "https://votos.x.dev"}})
+
+
+def test_beta_poe_o_carimbo_em_todas_as_paginas_levando_a_sobre(projeto):
+    _com_beta(projeto)
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    assert '<a class="carimbo-beta" href="sobre/#beta"' in gerar_index(projeto, "feed.xml")
+    assert '<a class="carimbo-beta" href="sobre/#beta"' in gerar_pagina_episodios(projeto, "feed.xml")
+    assert '<a class="carimbo-beta" href="../sobre/#beta"' in gerar_pagina_sobre(projeto, "feed.xml")
+    assert '<a class="carimbo-beta" href="../../sobre/#beta"' in gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+
+def test_beta_explica_na_sobre_e_avisa_do_spotify(projeto):
+    _com_beta(projeto)
+
+    sobre = _texto(gerar_pagina_sobre(projeto, "feed.xml"))
+    assert "Ainda é beta" in sobre and "O que já é firme" in sobre and "Ainda não está no Spotify" in sobre
+    assert "No Spotify em breve; por enquanto, pelo feed." in _texto(gerar_index(projeto, "feed.xml"))
+
+
+def test_sem_beta_nada_fala_em_beta_mas_o_fala_comigo_fica(projeto, tmp_path):
+    _com_beta(projeto, beta=False)
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    texto = _site_inteiro(projeto, tmp_path)
+
+    assert "beta" not in texto.lower() and "Spotify em breve" not in texto
+    assert "Fala comigo" in texto
+
+
+def test_beta_nunca_aparece_no_card_do_episodio(projeto):
+    _com_beta(projeto)
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+    artigo = re.search(r"<article.*?</article>", pagina, re.DOTALL).group(0)
+    assert "beta" not in artigo.lower()
+    assert "beta" not in re.search(r"<title>(.*?)</title>", pagina).group(1).lower()
+
+
+def test_fala_comigo_leva_aos_formularios_de_issue(projeto):
+    pagina = gerar_pagina_sobre(projeto, "feed.xml")
+
+    assert 'href="https://github.com/x/pebacast/issues/new?template=1-ideia.yml"' in pagina
+    assert 'href="https://github.com/x/pebacast/issues/new?template=2-bug.yml"' in pagina
+
+
+def test_recado_tem_botao_proprio_sem_precisar_votar(projeto):
+    _com_beta(projeto)
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+    assert ('<button class="votos__recado" type="button" data-abrir-recado aria-expanded="false"\n'
+            '        aria-controls="form-recado-sw-001">Deixar um recado</button>') in pagina
+    assert '<form class="recado" id="form-recado-sw-001" data-recado hidden>' in pagina
+    assert 'data-repositorio>Repositório</a>' in pagina

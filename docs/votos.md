@@ -32,6 +32,8 @@ LEFT JOIN votos v ON v.episodio = r.episodio AND v.visitante = r.visitante
 ORDER BY r.criado_em DESC;
 ```
 
+O recado não depende do voto: o botão "Deixar um recado" abre o formulário direto, e aí a coluna `voto` vem vazia. Se o Worker falhar, o site oferece mandar o mesmo texto como issue no GitHub, avisando que lá fica público.
+
 ## Testes
 
 ```

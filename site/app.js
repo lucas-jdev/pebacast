@@ -161,7 +161,10 @@
       fila = fila.then(() => enviar(voto)).then(() => {
         guardado.gravar(episodio, voto);
         status.textContent = voto ? "Voto registrado. Valeu! Se quiser, conte o porquê no campo abaixo." : "Voto removido.";
-        if (voto && formulario.dataset.enviado !== "sim") formulario.hidden = false;
+        if (voto && formulario.dataset.enviado !== "sim") {
+          formulario.hidden = false;
+          bloco.querySelector("[data-abrir-recado]")?.setAttribute("aria-expanded", "true");
+        }
       }).catch(() => {
         if (atual !== voto) return;
         atual = anterior;
@@ -172,7 +175,24 @@
     }));
   });
 
-  // O recado aparece depois do voto: quem não vota não vê formulário, e o card continua limpo.
+  // O recado abre pelo botão "Deixar um recado" (sem precisar votar) ou depois de um voto.
+  document.querySelectorAll("[data-abrir-recado]").forEach((botao) => {
+    const formulario = botao.closest(".votos").querySelector("[data-recado]");
+    botao.addEventListener("click", () => {
+      formulario.hidden = !formulario.hidden;
+      botao.setAttribute("aria-expanded", String(!formulario.hidden));
+      if (!formulario.hidden) formulario.elements.texto.focus();
+    });
+  });
+
+  // Se o servidor de recados falhar, o recado ainda pode ir como issue no GitHub, avisando que lá é público.
+  const linkDeIssue = (episodio, texto) => {
+    const repositorio = document.querySelector("[data-repositorio]")?.href.replace(/\/$/, "");
+    if (!repositorio) return null;
+    const parametros = new URLSearchParams({ title: `Recado sobre ${episodio}`, body: texto });
+    return `${repositorio}/issues/new?${parametros}`;
+  };
+
   const AVISOS_DO_RECADO = {
     400: "O recado precisa ter entre 3 e 1000 caracteres.",
     429: "Você já mandou recados demais hoje. Tenta amanhã?",
@@ -201,12 +221,21 @@
         if (!resposta.ok) throw resposta.status;
         formulario.dataset.enviado = "sim";
         formulario.hidden = true;
+        formulario.closest(".votos").querySelector("[data-abrir-recado]")?.setAttribute("aria-expanded", "false");
         formulario.reset();
         const status = formulario.closest(".votos").querySelector(".votos__pergunta");
         status.textContent = "Recado enviado. Valeu!";
         formulario.closest(".votos").querySelector("[data-votos-status]").textContent = "Recado enviado. Valeu!";
       } catch (status) {
         aviso.textContent = AVISOS_DO_RECADO[status] ?? "Não deu pra enviar agora. Tenta de novo?";
+        const issue = AVISOS_DO_RECADO[status] ? null : linkDeIssue(episodio, texto);
+        if (issue) {
+          const link = document.createElement("a");
+          link.href = issue;
+          link.rel = "noopener";
+          link.textContent = "Ou mande pelo GitHub (lá fica público)";
+          aviso.append(" ", link);
+        }
       } finally {
         enviar.disabled = false;
       }
