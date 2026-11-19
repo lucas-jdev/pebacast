@@ -28,6 +28,7 @@ Regras que valem sempre:
 - **Atribuição sem certeza.** Uma afirmação atribuída a uma obra ("o livro diz", "segundo Richards e Ford") que você não consegue confirmar é `imprecisa`, e não `nao_verificavel`. A correção é tirar a atribuição ou transformar a frase em opinião da persona. Citação literal, página ou número que você não consegue confirmar seguem a mesma regra.
 - **Fontes fora das referências.** Se o roteiro citar uma obra que não está nas referências do episódio, o veredito é `imprecisa`.
 - **Cenário hipotético.** Se `noticia.json` for `hipotetico` e o roteiro apresentar o caso como real, o veredito é `incorreta`.
+- **Desafio para quem está começando.** Se o roteiro tiver `desafio_iniciante`, confira que dá para fazer sem trabalhar na área, só com material aberto, e que os arquivos e projetos que ele cita existem. Registre a fala em que o apresentador apresenta a variante como uma afirmação. Se ela exigir um emprego, um time ou um sistema privado, ou citar um arquivo que não existe, o veredito é `imprecisa`.
 - **Na dúvida entre `correta` e `imprecisa`,** escolha `imprecisa`. Um falso alarme custa uma correção. Um erro aprovado custa o aprendizado de quem ouve.
 
 ## Relatório

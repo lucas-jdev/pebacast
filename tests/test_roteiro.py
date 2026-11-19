@@ -325,6 +325,7 @@ def test_aceita_aprovacao_na_terceira_revisao(projeto):
                    r["falas"].insert(1, {"persona": "davi", "texto": "E mais um recado."}), "Helena precisa falar"),
         (lambda r: r["falas"].append({"persona": "bruno", "texto": "oi"}), "persona 'bruno' fora do episódio"),
         (lambda r: r.update(desafio=" "), "desafio vazio"),
+        (lambda r: r.update(desafio_iniciante="  "), "desafio_iniciante, quando existe, não pode ser vazio"),
         (lambda r: r.update(fontes=[]), "fontes precisa ser"),
         (lambda r: r.update(episodio="sw-002"), "esperado 'sw-001'"),
         (lambda r: r["falas"].extend(r["falas"][1:] * 3), "fora da faixa 20-60"),
@@ -335,6 +336,11 @@ def test_problemas_no_roteiro(projeto, alterar, trecho):
     alterar(roteiro)
     _escrever_episodio(projeto, "sw-001", roteiro=roteiro, revisoes=[_revisao(roteiro)])
     assert any(trecho in p for p in _problemas(projeto, "sw-001")), _problemas(projeto, "sw-001")
+
+
+def test_roteiro_sem_desafio_iniciante_continua_valido(projeto):
+    _escrever_episodio(projeto, "sw-001")
+    assert not any("desafio_iniciante" in p for p in _problemas(projeto, "sw-001"))
 
 
 def test_noticia_abaixo_da_nota_minima_e_reprovada(projeto):
