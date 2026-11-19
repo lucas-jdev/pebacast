@@ -854,6 +854,7 @@ def test_beta_explica_na_sobre_e_avisa_do_spotify(projeto):
 
     sobre = _texto(gerar_pagina_sobre(projeto, "feed.xml"))
     assert "Ainda é beta" in sobre and "O que já é firme" in sobre and "Ainda não está no Spotify" in sobre
+    assert "as fontes de cada episódio são escolhidas e conferidas à mão" in sobre
     assert "No Spotify em breve; por enquanto, pelo feed." in _texto(gerar_index(projeto, "feed.xml"))
 
 
