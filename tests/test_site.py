@@ -455,18 +455,3 @@ def test_sem_proximo_o_estado_vazio_continua_igual(projeto):
     assert ('<p class="proximo__texto">Episódio novo só sai depois que as referências dele são conferidas no livro.\n'
             "          Assim que isso acontecer, ele aparece aqui e chega sozinho no seu app de podcast.</p>") in pagina
 
-
-def test_meta_de_verificacao_so_aparece_com_codigo_valido(projeto):
-    assert "google-site-verification" not in gerar_index(projeto, "feed.xml")
-    assert "msvalidate.01" not in gerar_index(projeto, "feed.xml")
-
-    _gravar(projeto.raiz / "config" / "pipeline.yaml",
-            {**CONFIG, "site": {"verificacao": {"google": "AbC_123-xyz987", "bing": "0A1B2C3D4E5F"}}})
-    for pagina in (gerar_index(projeto, "feed.xml"), gerar_pagina_episodios(projeto, "feed.xml")):
-        assert '<meta name="google-site-verification" content="AbC_123-xyz987">' in pagina
-        assert '<meta name="msvalidate.01" content="0A1B2C3D4E5F">' in pagina
-
-    _gravar(projeto.raiz / "config" / "pipeline.yaml",
-            {**CONFIG, "site": {"verificacao": {"google": 'x" onload="alert(1)', "bing": ""}}})
-    pagina = gerar_index(projeto, "feed.xml")
-    assert "google-site-verification" not in pagina and "msvalidate.01" not in pagina

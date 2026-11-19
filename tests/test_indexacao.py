@@ -10,6 +10,7 @@ from podcast.indexacao import (
     urls_para_avisar,
 )
 from podcast.publicacao import escrever_site
+from podcast.site import gerar_index, gerar_pagina_episodios
 from tests.test_roteiro import CONFIG, _gravar, projeto  # noqa: F401 (fixture)
 
 CHAVE = "a1b2c3d4e5f6a7b8"
@@ -140,3 +141,19 @@ def test_sitemap_ausente_ou_quebrado_vira_aviso(projeto, tmp_path):
     assert avisar(projeto, vazio, hoje=HOJE, enviar=EnvioFalso()).startswith("::warning::")
     assert avisar(projeto, _site_com_sitemap(tmp_path, "<urlset"), hoje=HOJE,
                   enviar=EnvioFalso()).startswith("::warning::")
+
+
+def test_meta_de_verificacao_so_aparece_com_codigo_valido(projeto):
+    assert "google-site-verification" not in gerar_index(projeto, "feed.xml")
+    assert "msvalidate.01" not in gerar_index(projeto, "feed.xml")
+
+    _gravar(projeto.raiz / "config" / "pipeline.yaml",
+            {**CONFIG, "site": {"verificacao": {"google": "AbC_123-xyz987", "bing": "0A1B2C3D4E5F"}}})
+    for pagina in (gerar_index(projeto, "feed.xml"), gerar_pagina_episodios(projeto, "feed.xml")):
+        assert '<meta name="google-site-verification" content="AbC_123-xyz987">' in pagina
+        assert '<meta name="msvalidate.01" content="0A1B2C3D4E5F">' in pagina
+
+    _gravar(projeto.raiz / "config" / "pipeline.yaml",
+            {**CONFIG, "site": {"verificacao": {"google": 'x" onload="alert(1)', "bing": ""}}})
+    pagina = gerar_index(projeto, "feed.xml")
+    assert "google-site-verification" not in pagina and "msvalidate.01" not in pagina
