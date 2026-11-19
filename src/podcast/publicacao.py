@@ -23,10 +23,10 @@ from xml.etree import ElementTree as ET
 from podcast.audio import Audio, Vinheta, duracao_mp3, exportar_mp3
 from podcast.curriculo import Saga
 from podcast.dominio import Fala, Persona
+from podcast.indexacao import escrever_chave
 from podcast.personas import carregar_personas
 from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
 from podcast.roteiro import Projeto, regras_para
-from podcast.indexacao import escrever_chave
 from podcast.site import escrever_pagina
 from podcast.tts.provedor import RequisicaoRecusada, TtsProvider
 from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, validar_episodio
