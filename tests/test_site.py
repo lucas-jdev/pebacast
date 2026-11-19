@@ -1002,6 +1002,16 @@ def test_pagina_do_episodio_marca_o_card_para_o_titulo_vencer_o_codigo(projeto):
     assert re.search(r"\.episodio--pagina h1\.episodio__titulo \{ font-size: clamp\(2\.2rem", CSS)
 
 
+def test_play_vem_antes_do_ponto_de_partida_so_na_pagina_do_episodio(projeto):
+    _tres_publicados(projeto)
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+    inicial = gerar_index(projeto, "feed.xml")
+
+    assert pagina.index('class="player"') < pagina.index('class="caso"')
+    assert inicial.index('class="caso"') < inicial.index('class="player"')
+
+
 def test_theme_color_e_um_so_e_bate_com_o_fundo(projeto):
     pagina = gerar_index(projeto, "feed.xml")
 
