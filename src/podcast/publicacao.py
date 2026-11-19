@@ -26,6 +26,7 @@ from podcast.dominio import Fala, Persona
 from podcast.personas import carregar_personas
 from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
 from podcast.roteiro import Projeto, regras_para
+from podcast.indexacao import escrever_chave
 from podcast.site import escrever_pagina
 from podcast.tts.provedor import RequisicaoRecusada, TtsProvider
 from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, validar_episodio
@@ -258,6 +259,7 @@ def escrever_site(projeto: Projeto, site: Path) -> None:
     site.mkdir(parents=True, exist_ok=True)
     (site / ARQUIVO_FEED).write_text(gerar_feed(projeto), encoding="utf-8")
     escrever_pagina(projeto, site, ARQUIVO_FEED)
+    escrever_chave(projeto.config(), site)
 
 
 def show_notes(episodio: Mapping[str, Any], roteiro: Mapping[str, Any], noticia: Mapping[str, Any],

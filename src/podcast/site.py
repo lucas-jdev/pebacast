@@ -171,6 +171,20 @@ def _analytics(codigo: str) -> str:
     return f'<script data-goatcounter="https://{codigo}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>'
 
 
+# Verificação de dono no Search Console (Gemini, AI Overviews) e no Bing Webmaster Tools (ChatGPT,
+# Copilot). Numa subpasta do github.io não dá para pôr arquivo na raiz do domínio, então vai por meta tag.
+_VERIFICACOES = {"google": "google-site-verification", "bing": "msvalidate.01"}
+
+
+def _verificacao(config: Mapping[str, Any]) -> str:
+    codigos = (config.get("site") or {}).get("verificacao") or {}
+    return "".join(
+        f'<meta name="{nome}" content="{codigo}">\n'
+        for chave, nome in _VERIFICACOES.items()
+        if re.fullmatch(r"[A-Za-z0-9_-]{8,128}", codigo := str(codigos.get(chave) or ""))
+    )
+
+
 def _url(meta: Mapping[str, Any], caminho: str) -> str:
     return meta["url_site"].rstrip("/") + "/" + caminho
 
@@ -200,6 +214,7 @@ def _documento(config: Mapping[str, Any], arquivo_feed: str, *, titulo: str, des
         imagem_descricao=escape(DESCRICAO_DA_IMAGEM),
         dados_estruturados=_json_ld(dados_estruturados),
         analytics=_analytics(site["goatcounter"]),
+        verificacao=_verificacao(config),
         simbolos=_SIMBOLOS,
         pular_para=pular_para,
         cabecalho=cabecalho,
@@ -850,7 +865,7 @@ _PAGINA = """<!doctype html>
 <meta name="description" content="{descricao}">
 <meta name="author" content="{autor}">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="theme-color" content="#f4ecdd" media="(prefers-color-scheme: light)">
+{verificacao}<meta name="theme-color" content="#f4ecdd" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{titulo}">

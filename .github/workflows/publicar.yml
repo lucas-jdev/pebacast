@@ -91,6 +91,12 @@ jobs:
         if: ${{ hashFiles('_site/feed.xml') != '' }}
         uses: actions/deploy-pages@v5
 
+      # Só depois do deploy: o IndexNow confere a chave no site já publicado. Nunca derruba a publicação.
+      - name: Avisar os buscadores (IndexNow)
+        if: ${{ steps.deploy.outcome == 'success' }}
+        continue-on-error: true
+        run: python -m podcast.indexacao --site _site avisar
+
       # Uma issue por episódio, com o id no título: reprovar de novo comenta na mesma,
       # e publicar fecha, porque o problema que ela apontava deixou de existir.
       - name: Atualizar issues
