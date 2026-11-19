@@ -1,0 +1,12 @@
+{
+  "guid": "pebacast-si-002",
+  "url_audio": "https://github.com/lucas-jdev/pebacast/releases/download/episodio-si-002/pebacast-si-002.mp3",
+  "tamanho_bytes": 8278124,
+  "duracao_segundos": 1035,
+  "publicado_em": "2026-11-19T22:22:54+00:00",
+  "tts": {
+    "provedor": "gemini-3.8-flash-tts",
+    "fallback": false
+  },
+  "vinheta": true
+}
