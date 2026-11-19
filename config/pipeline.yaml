@@ -106,3 +106,11 @@ site:
   goatcounter: ""
   # URL do Worker de votos (votos/, docs/votos.md). Vazio: o site não mostra o curti / não curti.
   votos_api: "https://pebacast-votos.lucas-jdev1.workers.dev"
+  # Códigos de verificação de dono, que viram meta tags em todas as páginas (docs/pipeline.md,
+  # "Entrar no índice dos buscadores"). Vazio, a meta tag não aparece.
+  verificacao:
+    google: 55IhAYxidRMWE6Xk53Mzg80fQmW1baH9p53XJ0OVvH0
+    bing: 9F3D1F5A07690E838800E30C9CB70CC6
+  # Chave do IndexNow, gerada no Bing Webmaster Tools. Não é segredo: o site a publica em
+  # <url_site>/<chave>.txt, por desenho do protocolo. Vazia, ninguém é avisado.
+  indexnow: ""

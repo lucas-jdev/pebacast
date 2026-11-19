@@ -23,6 +23,7 @@ from xml.etree import ElementTree as ET
 from podcast.audio import Audio, Vinheta, duracao_mp3, exportar_mp3
 from podcast.curriculo import Saga
 from podcast.dominio import Fala, Persona
+from podcast.indexacao import escrever_chave
 from podcast.personas import carregar_personas
 from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
 from podcast.roteiro import Projeto, regras_para
@@ -258,6 +259,7 @@ def escrever_site(projeto: Projeto, site: Path) -> None:
     site.mkdir(parents=True, exist_ok=True)
     (site / ARQUIVO_FEED).write_text(gerar_feed(projeto), encoding="utf-8")
     escrever_pagina(projeto, site, ARQUIVO_FEED)
+    escrever_chave(projeto.config(), site)
 
 
 def show_notes(episodio: Mapping[str, Any], roteiro: Mapping[str, Any], noticia: Mapping[str, Any],

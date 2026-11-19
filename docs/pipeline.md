@@ -122,6 +122,20 @@ Mudanças que só afetam o site ou o feed (`site/`, `src/podcast/site.py`, `src/
 
 Decisão de hospedagem em [ADR 0002](adr/0002-hospedagem-pages-releases.md).
 
+### Entrar no índice dos buscadores
+
+As IAs que respondem com busca na web só acham o que está no índice do Google (Gemini, AI Overviews) ou do Bing (ChatGPT, Copilot). O site mora numa subpasta do `github.io`, então não dá para pôr arquivo de verificação nem `robots.txt` na raiz do domínio. Por isso, a verificação vai por meta tag e o IndexNow usa uma chave publicada dentro da subpasta.
+
+Depois de cada deploy, `publicar.yml` e `site.yml` rodam `python -m podcast.indexacao --site _site avisar`. O comando manda ao IndexNow as URLs do `sitemap.xml` com `lastmod` nos últimos 2 dias. Sem chave configurada, não faz nada. Resposta de erro ou falha de rede viram um `::warning::` no log, e a publicação segue.
+
+Configuração, feita uma vez pelo Lucas:
+
+1. **Search Console.** Em [search.google.com/search-console](https://search.google.com/search-console), adicione uma propriedade do tipo **prefixo de URL** com `https://lucas-jdev.github.io/pebacast/`. Escolha a verificação por **tag HTML** e copie só o valor do `content` para `site.verificacao.google` no `config/pipeline.yaml`. Faça o commit, espere o `site.yml` publicar e clique em *Verificar*. Depois, em *Sitemaps*, envie `sitemap.xml`.
+2. **Bing Webmaster Tools.** Em [bing.com/webmasters](https://www.bing.com/webmasters), use **Importar do Google Search Console**, que reaproveita a verificação. Se preferir verificar à parte, use a meta tag e ponha o valor em `site.verificacao.bing`. Confira se o sitemap apareceu.
+3. **Chave do IndexNow.** No Bing Webmaster Tools, em *IndexNow*, gere uma chave e ponha em `site.indexnow`. A chave não é segredo: o próprio site a publica em `<url_site>/<chave>.txt`, por desenho do protocolo.
+4. **Primeiro aviso.** Rode o `site.yml` à mão (*Actions → Publicar site → Run workflow*) com **todas** marcado. Isso avisa todas as URLs do sitemap de uma vez, inclusive as que não têm `lastmod`, como a `sobre/`. Daí em diante, cada publicação avisa só o que mudou.
+5. **Conferir.** Na inspeção de URL do Search Console e do Bing, `sobre/` deve aparecer como indexada. Isso leva de dias a semanas.
+
 ## Regravação do áudio
 
 Quando um áudio publicado sai ruim, `.github/workflows/regravar.yml` narra o mesmo roteiro de novo, disparado à mão no Actions com o id do episódio:

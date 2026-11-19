@@ -12,6 +12,11 @@ on:
       - "curriculum/**"
       - "config/**"
   workflow_dispatch:
+    inputs:
+      todas:
+        description: "Avisar o IndexNow de todas as URLs do sitemap (use uma vez, depois de configurar a chave)"
+        type: boolean
+        default: false
 
 concurrency:
   group: publicar
@@ -52,3 +57,10 @@ jobs:
       - name: Publicar no Pages
         id: deploy
         uses: actions/deploy-pages@v5
+
+      # Só depois do deploy: o IndexNow confere a chave no site já publicado. Nunca derruba o job.
+      - name: Avisar os buscadores (IndexNow)
+        continue-on-error: true
+        env:
+          TODAS: ${{ inputs.todas && '--todas' || '' }}
+        run: python -m podcast.indexacao --site _site avisar $TODAS

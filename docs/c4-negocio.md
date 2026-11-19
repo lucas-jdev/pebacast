@@ -21,6 +21,7 @@ flowchart TB
     noticias["<b>Fontes na web</b><br/>[sistema externo]<br/>notícias e referências"]:::externo
     gemini["<b>Gemini API</b><br/>[sistema externo]<br/>voz das personas"]:::externo
     apps["<b>Apps de podcast</b><br/>[sistema externo]<br/>AntennaPod, Spotify"]:::externo
+    buscadores["<b>Buscadores</b><br/>[sistema externo]<br/>Google e Bing, de onde as IAs<br/>tiram o que buscam na web"]:::externo
 
     ouvinte -- "ouve episódios" --> apps
     apps -- "assinam o feed RSS" --> pebacast
@@ -29,6 +30,8 @@ flowchart TB
     pebacast -- "pede roteiro e revisão" --> claude
     claude -- "busca notícia e<br/>checa afirmações" --> noticias
     pebacast -- "sintetiza o diálogo" --> gemini
+    pebacast -- "avisa o que mudou" --> buscadores
+    ouvinte -- "pergunta a uma IA,<br/>que busca no índice" --> buscadores
 ```
 
 | Elemento | Valor para o negócio |
@@ -38,6 +41,7 @@ flowchart TB
 | Claude | Escala a escrita, e a revisão independente reduz o risco de afirmação errada. |
 | Gemini API | Dá vozes distintas às personas. Sem ela, o fallback local sustenta a publicação, com qualidade menor. |
 | Apps de podcast | Distribuição sem custo, pelo padrão RSS. |
+| Buscadores | Quem pergunta a uma IA sobre o Pebacast só recebe resposta se o site estiver no índice do Google (Gemini) e do Bing (ChatGPT, Copilot). |
 
 ## Nível 2 · Contêineres
 
@@ -69,6 +73,7 @@ flowchart TB
 
     apps["<b>Apps de podcast</b><br/>[externo]"]:::externo
     goat["<b>GoatCounter</b><br/>[externo]<br/>visitas, sem cookie"]:::externo
+    indexnow["<b>IndexNow</b><br/>[externo]<br/>repassa ao Bing as URLs novas"]:::externo
 
     lucas -- "edita currículo,<br/>verifica referências" --> repo
     rotina <-- "pede revisão" --> revisor
@@ -82,6 +87,8 @@ flowchart TB
     pipeline -- "narra" --> gemini
     pipeline -- "sobe o MP3" --> audio
     pipeline -- "gera e publica" --> site
+    pipeline -. "avisa as URLs que mudaram,<br/>sem bloquear" .-> indexnow
+    indexnow -. "busca a chave e as páginas" .-> site
     site -- "voto e recado" --> votos
     site -- "visitas" --> goat
     apps -- "leem o feed" --> site
@@ -90,7 +97,7 @@ flowchart TB
     ouvinte -- "navega" --> site
 ```
 
-Lilás é IA (Claude), azul é código (GitHub Actions e site estático), verde é onde os dados ficam e bege são serviços de terceiros. O único humano no desenho é o Lucas, que entra pelo repositório (currículo e referências), pelo retorno e, quando um áudio sai ruim, disparando a regravação no Actions ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). O Lucas lê os recados pelo console do D1 ([votos.md](votos.md)), e o Pipeline registra o `publicacao.json` de volta no repositório.
+Lilás é IA (Claude), azul é código (GitHub Actions e site estático), verde é onde os dados ficam e bege são serviços de terceiros. O único humano no desenho é o Lucas, que entra pelo repositório (currículo e referências), pelo retorno e, quando um áudio sai ruim, disparando a regravação no Actions ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). O Lucas lê os recados pelo console do D1 ([votos.md](votos.md)), e o Pipeline registra o `publicacao.json` de volta no repositório. Depois de cada deploy, o Pipeline avisa o IndexNow das URLs que mudaram. O Lucas acompanha a indexação no Search Console e no Bing Webmaster Tools, que ficam fora do desenho porque não fazem parte da entrega ([pipeline.md](pipeline.md#entrar-no-índice-dos-buscadores)).
 
 Nos PRs que mudam o visual do site, o **Capturar prints** roda o código do PR, inclusive de fork, só com leitura, e entrega um artefato; o **Comentar prints** roda com o código do `main`, valida esse artefato e só então escreve no branch `prints` e no PR ([ADR 0009](adr/0009-prints-automaticos-nos-prs.md)).
 

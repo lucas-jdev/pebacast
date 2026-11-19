@@ -56,6 +56,7 @@ flowchart TD
         registro["Grava <code>publicacao.json</code><br/>e commita"]
         feed[Gera feed.xml e o site]
         pages[Publica no GitHub Pages]
+        indexnow["Avisa o IndexNow das URLs<br/>que mudaram; falha só vira aviso"]
         issue(["Issue do episódio<br/>(Roteiro reprovado: &lt;id&gt;)<br/>reprovar de novo só comenta"]):::falha
     end
     app([App de podcast baixa o episódio]):::saida
@@ -94,6 +95,7 @@ flowchart TD
     erro_tts -- "401 / 403 ou<br/>tentativas esgotadas" --> kokoro --> mix
     mix --> release --> registro --> feed --> pages
     pages --> app
+    pages -.-> indexnow
     pages --> site
     pages -. "fecha a issue de<br/>reprovação do episódio" .-> issue
     issue --> triagem
@@ -102,12 +104,12 @@ flowchart TD
     ouvir -. "regravar.yml: candidata,<br/>depois substituir" .-> release
 
     class aguardando,selecao,elegivel,noticia,relevante,hipotetico,roteiro,revisao,aprovado,limite,correcao,validar_local,commit rotina
-    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,mix,release,registro,feed,pages actions
+    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,mix,release,registro,feed,pages,indexnow actions
 ```
 
 ## Fora do caminho principal
 
 - **Watchdog** (`watchdog.yml`, a cada 6 h): abre uma issue se a rotina passar 36 h sem commitar roteiro, e fecha quando ela volta.
 - **Regravação** (`regravar.yml`, manual): quando o Lucas ouve e o áudio saiu ruim, narra o mesmo roteiro de novo como candidata; se ficar melhor, ele manda substituir e o episódio troca de áudio sem mudar URL, GUID nem data ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)).
-- **Site e feed** também são regenerados quando muda o site, o currículo ou a configuração (`site.yml`), sem gerar áudio.
+- **Site e feed** também são regenerados quando muda o site, o currículo ou a configuração (`site.yml`), sem gerar áudio. Depois do deploy, os dois workflows avisam o IndexNow das URLs que mudaram, para o Bing indexar logo. Isso nunca bloqueia a publicação ([pipeline.md](pipeline.md#entrar-no-índice-dos-buscadores)).
 - **Votos e recados** vivem fora do GitHub, num Worker da Cloudflare com D1 ([votos.md](votos.md)).
