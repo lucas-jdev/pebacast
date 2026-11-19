@@ -588,12 +588,15 @@ def _secao_ultimo(item: Mapping[str, Any] | None, personas: Mapping[str, Any], t
 
 def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], votos: str = "",
                        na_propria_pagina: bool = False) -> str:
-    """O card grande do episódio. Na página dele, o título é o h1 e não é link (já se está lá)."""
+    """O card grande do episódio. Na página dele, o título é o h1 e não é link (já se está lá), e o play
+    vem antes do ponto de partida: quem abriu a página já escolheu o episódio e quer ouvir."""
     episodio, roteiro, saga = item["episodio"], item["roteiro"], item["saga"]
     eid = escape(episodio["id"])
     link = "./" if na_propria_pagina else caminho_do_episodio(episodio["id"])
     titulo = (f'<h1 class="episodio__titulo" id="titulo-{eid}">{escape(episodio["titulo"])}</h1>' if na_propria_pagina else
               f'<h3 class="episodio__titulo" id="titulo-{eid}"><a href="{escape(link)}">{escape(episodio["titulo"])}</a></h3>')
+    caso, player = _caso(item["noticia"]), _player(item["publicacao"], episodio["id"])
+    abertura = f"{player}\n    {caso}" if na_propria_pagina else f"{caso}\n    {player}"
     classe = "episodio episodio--destaque" + (" episodio--pagina" if na_propria_pagina else "")
     return f"""<article class="{classe}" id="{eid}" data-saga="{escape(saga.id)}">
   {_etiqueta(saga, episodio["id"])}
@@ -604,8 +607,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
   <div class="episodio__corpo">
     {_meta(item)}
     {titulo}
-    {_caso(item["noticia"])}
-    {_player(item["publicacao"], episodio["id"])}{_votos(episodio["id"], votos)}
+    {abertura}{_votos(episodio["id"], votos)}
     {_objetivos_e_desafio(episodio, roteiro, nivel="h2" if na_propria_pagina else "h4")}
     {_selo(item)}
     {_dobra_transcricao(roteiro, personas, link=None if na_propria_pagina else link)}

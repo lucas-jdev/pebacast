@@ -673,6 +673,20 @@ h1.episodio__titulo { font-size: clamp(1.9rem, 4vw, 2.8rem); }
   text-decoration: none; rotate: -4deg; background: rgba(255, 250, 240, 0.6); }
 .carimbo-beta:hover, .carimbo-beta:focus-visible { background: #b0154f; color: #fffaf0; }
 
+/* Abaixo de 400 px o cabeçalho fixo cabe em duas linhas: marca, carimbo e Assinar na primeira, os links na segunda. */
+@media (max-width: 400px) {
+  .topo__linha { column-gap: 0.6rem; }
+  .marca { gap: 0.4rem; }
+  .marca__peba { width: 34px; height: 21px; }
+  .marca__nome { font-size: 1.3rem; }
+  .topo__marca { gap: 0.35rem; }
+  .carimbo-beta { padding: 0.25rem; font-size: 0.62rem; letter-spacing: 0.05em; }
+  .topo__nav .botao--pequeno { padding-inline: 0.75rem; font-size: 0.9rem; }
+  .topo__nav a:not(.botao) { font-size: 0.88rem; }
+  .player { gap: 0.6rem; padding: 0.6rem; }
+  .player__tempos { gap: 0.4rem; }
+}
+
 /* "Deixar um recado": ação secundária ao lado dos votos, com cara de link para não competir com o Curti. */
 .votos__recado { min-height: 44px; padding: 0 0.4rem; border: 0; background: none; color: var(--texto); font: inherit;
   font-size: 0.95rem; font-weight: 650; text-decoration: underline 2px var(--destaque); text-underline-offset: 0.25em;
@@ -721,6 +735,17 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 .episodio--pagina h1.episodio__titulo { font-size: clamp(2.2rem, 4.6vw, 3.4rem); }
 .episodio--pagina .episodio__codigo { font-size: clamp(2.6rem, 5vw, 4rem); }
 
+/* No celular, a página do episódio põe o play na primeira tela: capa em faixa, título e aviso mais compactos. */
+@media (max-width: 560px) {
+  .episodio--pagina .episodio__capa { padding: 2.6rem 1.2rem 0.9rem; align-items: center; }
+  .episodio--pagina .episodio__codigo { font-size: 2.3rem; }
+  .episodio--pagina .codigo__sigla { display: inline; font-size: 1em; margin: 0 0.25em 0 0; }
+  .episodio--pagina .episodio__peba { width: 60px; height: 38px; }
+  .episodio--pagina h1.episodio__titulo { font-size: 1.85rem; }
+  .episodio--pagina .player { margin-top: 1rem; }
+  .antes { margin-bottom: 1rem; padding: 0.5rem 0.8rem; font-size: 0.92rem; line-height: 1.5; }
+}
+
 /* Play como carimbo: o amarelo marca a ação principal. A velocidade volta a ser papel. */
 .player__play { background: var(--destaque); color: var(--texto); border: 3px solid var(--texto); box-shadow: 4px 4px 0 var(--texto); }
 .player__play:hover { background: #ffd54f; }
@@ -759,6 +784,12 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
   .js .voz__mais { display: inline-flex; }
   /* A ilustração do hero encolhe: o episódio chega mais cedo. */
   .toca { max-width: 260px; margin-inline: auto; }
+  /* Nas listas, o ponto de partida é isca: rótulo e três linhas. Inteiro, ele está na página do episódio. */
+  .episodio:not(.episodio--pagina) .caso { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+}
+@media (max-width: 560px) {
+  .hero__grade { gap: 1.75rem; }
+  .hero__lead { margin-top: 1rem; font-size: 1.02rem; line-height: 1.6; }
 }
 .voz__mais { display: none; align-items: center; min-height: 44px; margin: -0.4rem 0 0.6rem; padding: 0; border: 0;
   background: none; color: var(--texto); font: inherit; font-weight: 700; text-decoration: underline 2px; cursor: pointer; }
