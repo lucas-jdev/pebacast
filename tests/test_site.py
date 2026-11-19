@@ -773,10 +773,21 @@ def test_como_mostra_as_duas_etapas_humanas_e_quem_faz_cada_uma(projeto):
 
     passos = re.findall(r'<span class="passo__quem passo__quem--(\w+)">([^<]+)</span><h3>([^<]+)</h3>', pagina)
     assert [(papel, titulo) for papel, _, titulo in passos] == [
-        ("pessoa", "Currículo"), ("codigo", "A vez de cada saga"), ("ia", "Caso"), ("ia", "Roteiro"),
-        ("ia", "Revisão"), ("codigo", "Voz e feed"), ("pessoa", "Escuta")]
-    assert {quem for papel, quem, _ in passos if papel == "pessoa"} == {"Lucas"}
+        ("humano", "Currículo"), ("codigo", "A vez de cada saga"), ("ia", "Caso"), ("ia", "Roteiro"),
+        ("ia", "Revisão"), ("codigo", "Voz e feed"), ("humano", "Escuta")]
+    assert {quem for papel, quem, _ in passos if papel == "humano"} == {"Humano"}
     assert "depois de publicado" in _texto(pagina).lower()
+
+
+def test_o_processo_diz_que_ha_gente_mas_nao_quem(projeto):
+    _com_criador(projeto)
+
+    como = re.search(r'<section class="secao secao--escura" id="como">.*?</section>', gerar_index(projeto, "feed.xml"),
+                     re.DOTALL).group(0)
+    sobre_como = re.search(r'id="como-e-feito">.*?</section>', gerar_pagina_sobre(projeto, "feed.xml"), re.DOTALL).group(0)
+
+    assert "Lucas" not in como and "Lucas" not in sobre_como
+    assert "curadoria humana" in _texto(como)
 
 
 def test_numero_de_revisoes_vem_da_configuracao(projeto):

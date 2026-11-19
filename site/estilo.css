@@ -661,7 +661,7 @@ h1.episodio__titulo { font-size: clamp(1.9rem, 4vw, 2.8rem); }
 .passo__quem { display: inline-block; margin: 0 0 0.5rem; padding: 0.1rem 0.5rem; border: 2px solid #15110c;
   font: 700 0.72rem/1.4 var(--fonte-texto); letter-spacing: 0.04em; text-transform: uppercase; color: #15110c;
   vertical-align: middle; text-shadow: none; }
-.passo__quem--pessoa { background: #f2a7bf; }
+.passo__quem--humano { background: #f2a7bf; }
 .passo__quem--ia { background: #cdb8ea; }
 .passo__quem--codigo { background: #a9c8ec; }
 .selo a { color: inherit; font-weight: 700; }

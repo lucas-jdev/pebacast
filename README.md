@@ -2,7 +2,7 @@
 
 **Site:** [lucas-jdev.github.io/pebacast](https://lucas-jdev.github.io/pebacast/) · [O que é e quem faz](https://lucas-jdev.github.io/pebacast/sobre/) · [Feed RSS](https://lucas-jdev.github.io/pebacast/feed.xml)
 
-O Pebacast é um podcast diário em português sobre arquitetura de software, criado por [Lucas Fernandes](https://github.com/lucas-jdev). O estudo é dividido em sete sagas: Software, Soluções, Sistemas, Dados e Informação, Infraestrutura, Segurança e Corporativa. O conteúdo é gerado por inteligência artificial: o Lucas escolhe e confere as fontes de cada episódio, uma segunda IA revisa as afirmações do roteiro antes do áudio, e ele ouve cada episódio depois de publicado.
+O Pebacast é um podcast diário em português sobre arquitetura de software, criado por [Lucas Fernandes](https://github.com/lucas-jdev). O estudo é dividido em sete sagas: Software, Soluções, Sistemas, Dados e Informação, Infraestrutura, Segurança e Corporativa. O conteúdo é gerado por inteligência artificial, com curadoria humana: as fontes de cada episódio são escolhidas e conferidas à mão, uma segunda IA revisa as afirmações do roteiro antes do áudio, e cada episódio é ouvido por uma pessoa depois de publicado.
 
 Cada episódio tem entre 15 e 20 minutos, é um diálogo entre o apresentador e o expert da saga e termina com um desafio prático.
 

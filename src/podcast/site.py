@@ -150,7 +150,7 @@ def gerar_pagina_sobre(projeto: Projeto, arquivo_feed: str) -> str:
         conteudo="\n".join([
             _sobre_definicao(meta, criador["name"]),
             _sobre_proposta(),
-            _sobre_como(meta, _primeiro_nome(config)),
+            _sobre_como(meta),
             _sobre_quem_faz(_config_do_site(config)["criador"]),
             _sobre_nome(meta),
         ]),
@@ -947,17 +947,13 @@ def _secao_sagas(sagas: Mapping[str, Any], publicados: Sequence[Mapping[str, Any
 </section>"""
 
 
-def _primeiro_nome(config: Mapping[str, Any]) -> str:
-    return _config_do_site(config)["criador"]["nome"].split()[0]
-
-
 def _secao_como(config: Mapping[str, Any]) -> str:
-    """As etapas com quem faz cada uma (pessoa, IA ou código), nas mesmas cores de docs/fluxo-do-episodio.md."""
+    """As etapas com quem faz cada uma (humano, IA ou código), nas mesmas cores de docs/fluxo-do-episodio.md.
+    O processo diz que há gente, e não quem: a autoria do projeto fica na Sobre."""
     revisoes = max_revisoes(config["revisao"]["max_ciclos"])
-    pessoa = _primeiro_nome(config)
-    quem = {"pessoa": pessoa, "ia": "IA", "codigo": "Código"}
+    quem = {"humano": "Humano", "ia": "IA", "codigo": "Código"}
     passos = [
-        ("pessoa", "Currículo", f"{pessoa} escolhe a obra e o capítulo de cada episódio e confere que a fonte "
+        ("humano", "Currículo", "Uma pessoa escolhe a obra e o capítulo de cada episódio e confere que a fonte "
                                 "existe e trata do tema. Objetivos e pré-requisitos também são escritos à mão."),
         ("codigo", "A vez de cada saga", _ordem_dos_episodios(config)),
         ("ia", "Caso", "Busca uma notícia recente que ilustre o tema. Se nenhuma servir, usa um cenário hipotético "
@@ -967,8 +963,8 @@ def _secao_como(config: Mapping[str, Any]) -> str:
                           f"dúvida, com uma busca. São até {revisoes} revisões; se não aprovar, o episódio não sai."),
         ("codigo", "Voz e feed", "O áudio é sintetizado, montado com a vinheta e publicado no feed, com as fontes "
                                  "nas notas."),
-        ("pessoa", "Escuta", f"Depois de publicado, {pessoa} ouve o episódio, registra o que achou e manda "
-                             "regravar se o áudio saiu ruim."),
+        ("humano", "Escuta", "Depois de publicado, o episódio é ouvido por uma pessoa, que registra o que achou e "
+                             "manda regravar se o áudio saiu ruim."),
     ]
     itens = "\n".join(
         f'<li><span class="passo__num">{i}</span><span class="passo__quem passo__quem--{papel}">{escape(quem[papel])}</span>'
@@ -980,8 +976,8 @@ def _secao_como(config: Mapping[str, Any]) -> str:
     <div class="secao__cabeca">
       <p class="sobretitulo">Como cada episódio nasce</p>
       <h2 class="secao__titulo">Feito por IA, com gente nas duas pontas</h2>
-      <p class="secao__lead">Ninguém grava: as vozes são sintéticas. Mas {escape(pessoa)} escolhe as fontes antes e
-        ouve o episódio depois, e cada etapa fica registrada no repositório, com uma regra simples: roteiro que a
+      <p class="secao__lead">Ninguém grava: as vozes são sintéticas. Mas tem curadoria humana das fontes antes e
+        escuta humana depois, e cada etapa fica registrada no repositório, com uma regra simples: roteiro que a
         revisão reprova não vira episódio.</p>
     </div>
     <ol class="passos">{itens}</ol>
@@ -1027,8 +1023,9 @@ def _sobre_definicao(meta: Mapping[str, Any], criador: str) -> str:
     <p class="sobre__definicao">O {escape(meta['titulo'])} é um podcast diário em português sobre arquitetura
       de software, criado por {escape(criador)}. São sete sagas ({escape(sagas)}), com episódios de 15 a
       20 minutos em forma de diálogo e um desafio prático no fim de cada um. O conteúdo é gerado por
-      inteligência artificial: {escape(criador)} escolhe as fontes de cada episódio, uma segunda IA revisa as
-      afirmações do roteiro antes do áudio, e ele ouve cada episódio depois de publicado.</p>
+      inteligência artificial, com curadoria humana: as fontes de cada episódio são escolhidas e conferidas à
+      mão, uma segunda IA revisa as afirmações do roteiro antes do áudio, e cada episódio é ouvido por uma pessoa
+      depois de publicado.</p>
   </div>
 </section>"""
 
@@ -1051,17 +1048,17 @@ def _sobre_proposta() -> str:
 </section>"""
 
 
-def _sobre_como(meta: Mapping[str, Any], pessoa: str) -> str:
+def _sobre_como(meta: Mapping[str, Any]) -> str:
     return f"""<section class="secao secao--alternada" id="como-e-feito">
   <div class="largura sobre__bloco">
     <h2 class="secao__titulo secao__titulo--menor">Como é feito</h2>
     <div class="sobre__texto">
-      <p>Antes de tudo, {escape(pessoa)} escolhe a obra e o capítulo de cada episódio e confere que a fonte existe e
+      <p>Antes de tudo, uma pessoa escolhe a obra e o capítulo de cada episódio e confere que a fonte existe e
         trata do tema. Uma IA escreve o roteiro a partir desse currículo. Outra IA, sem ver como o roteiro foi
         feito, revisa cada afirmação com o que sabe e, na dúvida, com uma busca; se o roteiro não for
         aprovado, o episódio não sai. Depois, as vozes são sintetizadas e o episódio vai para o feed.</p>
-      <p>Por último, ele ouve cada episódio depois de publicado, registra o que achou e manda regravar quando o
-        áudio sai ruim. A revisão tem um limite que vale dizer: a revisora é do mesmo modelo que a roteirista e
+      <p>Por último, cada episódio é ouvido por uma pessoa depois de publicado, que registra o que achou e manda
+        regravar quando o áudio sai ruim. A revisão tem um limite que vale dizer: a revisora é do mesmo modelo que a roteirista e
         pode ter os mesmos pontos cegos. Por isso cada relatório de revisão fica aberto, ao lado do roteiro.</p>
       <p>Tudo fica registrado e aberto no repositório: currículo, roteiros, revisões e código.</p>
       <p class="sobre__acoes"><a class="botao botao--contorno" href="../#como">Ver as etapas</a>
