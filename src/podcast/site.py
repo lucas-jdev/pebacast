@@ -1118,8 +1118,8 @@ def _sobre_beta(meta: Mapping[str, Any]) -> str:
     <div class="sobre__texto">
       <p>O {escape(meta['titulo'])} sai todo dia, mas o jeito de fazer ainda está mudando, e por isso a sua opinião
         pesa agora mais do que vai pesar depois.</p>
-      <p><strong>O que já é firme:</strong> eu escolho e confiro as fontes de cada episódio, nenhum roteiro sai sem
-        passar na revisão, e o link de cada episódio não muda.</p>
+      <p><strong>O que já é firme:</strong> as fontes de cada episódio são escolhidas e conferidas à mão, nenhum
+        roteiro sai sem passar na revisão, e o link de cada episódio não muda.</p>
       <p><strong>O que pode mudar:</strong> as vozes, o visual, a numeração e a ordem das sagas. Ainda não está no
         Spotify.</p>
       <p><strong>O que pode dar errado:</strong> uma voz que tropeça, um dia sem episódio, um erro que passou na
