@@ -50,7 +50,7 @@ Estrutura fixa, nesta ordem:
 5. **Desconstrução.** A expert desmonta a proposta com perguntas antes de dar respostas.
 6. **Trade-offs.** O que se ganha e o que se perde em cada caminho.
 7. **Resumo.** O apresentador resume com as próprias palavras.
-8. **Desafio e despedida.** O apresentador apresenta o `episodio.desafio`, agradece o expert e se despede em nome do Pebacast.
+8. **Desafio e despedida.** O apresentador apresenta o `episodio.desafio` e, em uma frase, a variante para quem ainda não trabalha na área (`desafio_iniciante`, abaixo). Depois agradece o expert e se despede em nome do Pebacast.
 
 Regras:
 
@@ -60,6 +60,9 @@ Regras:
 - **Texto para ser ouvido.** Sem markdown, listas, emojis ou parênteses. Siglas que se soletram vão como se fala ("ADR" pode ficar; "e.g." não). Termos técnicos em inglês ficam em inglês.
 - **Ritmo.** Varie o tamanho das falas, porque monólogos longos cansam no áudio. O campo `estilo` é opcional e vai direto para o TTS como instrução de interpretação. Use-o só quando a emoção mudar ("rindo", "surpreso, mais devagar").
 - **Feedback.** Leve em conta os `feedbacks_recentes`: o que o ouvinte não gostou e os erros que ele encontrou não podem se repetir.
+- **Desafio para quem está começando.** O `episodio.desafio` costuma pedir "um sistema que você mantém", e quem ainda estuda não tem um. Escreva em `desafio_iniciante` uma variante do mesmo exercício que dê para fazer sem trabalhar na área, em uma ou duas frases. O sistema padrão é o próprio repositório do Pebacast (github.com/lucas-jdev/pebacast), que é aberto e tem pipeline, site, um Worker na Cloudflare, ADRs em `docs/adr/` e o C4 em `docs/c4-negocio.md`. Se ele não servir para o tema, use um projeto aberto e conhecido, e diga qual. Exemplos:
+  - Desafio "classifique a conascência entre dois módulos de um sistema que você mantém" → "Abra `src/podcast/site.py` e `src/podcast/publicacao.py` no repositório do Pebacast e classifique a conascência mais forte entre os dois."
+  - Desafio "escreva um ADR para uma decisão recente do seu time" → "Escolha um ADR de `docs/adr/` no repositório do Pebacast e escreva a alternativa que ele descartou como se ela tivesse vencido."
 
 Grave `$PASTA/roteiro.json`:
 
@@ -68,6 +71,7 @@ Grave `$PASTA/roteiro.json`:
   "episodio": "$ID",
   "falas": [{"persona": "davi", "texto": "...", "estilo": "opcional"}],
   "desafio": "...",
+  "desafio_iniciante": "...",
   "fontes": ["Fundamentals of Software Architecture, Richards e Ford, caps. 1 e 2"]
 }
 ```

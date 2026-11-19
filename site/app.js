@@ -17,7 +17,31 @@
     const atual = player.querySelector(".player__atual");
     const velocidade = player.querySelector(".player__velocidade");
     const valorDaVelocidade = velocidade.querySelector(".player__velocidade-valor");
+    const aviso = player.querySelector("[data-player-aviso]");
+    const fonte = audio.querySelector("source");
     let arrastando = false;
+
+    // Carregando: o MP3 vem de um redirect do GitHub Releases e pode demorar.
+    const carregando = (sim) => {
+      player.classList.toggle("player--carregando", sim);
+      play.setAttribute("aria-label", sim ? "Carregando" : audio.paused ? "Tocar" : "Pausar");
+    };
+    // Erro: volta para "Tocar" e oferece o arquivo, em vez de ficar parado em "Pausar" no 0:00.
+    const falhou = () => {
+      carregando(false);
+      player.classList.remove("player--tocando");
+      play.setAttribute("aria-label", "Tocar");
+      aviso.textContent = "Não deu pra carregar o áudio. ";
+      const baixar = document.createElement("a");
+      baixar.href = fonte?.src || audio.currentSrc;
+      baixar.textContent = "Baixar o MP3";
+      aviso.append(baixar);
+    };
+    // O erro de um <source> dispara nele, e não no <audio>.
+    fonte?.addEventListener("error", falhou);
+    audio.addEventListener("error", falhou);
+    audio.addEventListener("waiting", () => carregando(true));
+    audio.addEventListener("playing", () => { aviso.textContent = ""; carregando(false); });
 
     audio.removeAttribute("controls");
 
@@ -31,7 +55,8 @@
     play.addEventListener("click", () => {
       if (audio.paused) {
         players.forEach((outro) => outro !== player && outro.querySelector("audio").pause());
-        audio.play();
+        if (audio.readyState < 3) carregando(true);
+        audio.play().catch((erro) => { if (erro.name !== "AbortError") falhou(); });
       } else {
         audio.pause();
       }
@@ -42,7 +67,10 @@
     audio.addEventListener("play", () => {
       window.goatcounter?.count?.({ path: `ouviu/${player.dataset.episodio}`, title: "Play no site", event: true });
     }, { once: true });
-    audio.addEventListener("pause", () => { player.classList.remove("player--tocando"); play.setAttribute("aria-label", "Tocar"); });
+    audio.addEventListener("pause", () => {
+      player.classList.remove("player--tocando", "player--carregando");
+      play.setAttribute("aria-label", "Tocar");
+    });
     audio.addEventListener("loadedmetadata", () => {
       if (Number.isFinite(audio.duration)) barra.max = Math.round(audio.duration);
       pintar();
@@ -88,6 +116,23 @@
     const opcoes = [...filtro.querySelectorAll(".filtro__opcao")];
     const meses = [...document.querySelectorAll(".mes")];
     const status = filtro.querySelector("[data-filtro-status]");
+    const arquivo = document.querySelector(".arquivo");
+    const lead = document.querySelector("[data-arquivo-lead]");
+    const leadOriginal = lead?.textContent;
+
+    // Com uma saga escolhida, a lista vai na ordem do currículo (do mais antigo ao mais novo), que é a ordem em
+    // que se ouve uma saga. A ordem muda no DOM, e não só no CSS, para o Tab seguir o que se vê.
+    const ordenar = (doCurriculo) => {
+      const ordem = doCurriculo ? [...meses].reverse() : meses;
+      ordem.forEach((mes) => {
+        arquivo.append(mes);
+        const lista = mes.querySelector(".mes__lista");
+        const itens = [...lista.children].sort((a, b) => Number(a.dataset.ordem) - Number(b.dataset.ordem));
+        (doCurriculo ? itens.reverse() : itens).forEach((item) => lista.append(item));
+      });
+      if (lead) lead.textContent = doCurriculo ? "Na ordem do currículo: do primeiro episódio ao mais recente." : leadOriginal;
+    };
+    meses.flatMap((mes) => [...mes.querySelectorAll(".item")]).forEach((item, indice) => { item.dataset.ordem = indice; });
 
     const aplicar = (saga) => {
       let visiveis = 0;
@@ -101,7 +146,10 @@
         mes.hidden = doMes === 0;
         visiveis += doMes;
       });
+      ordenar(Boolean(saga));
       opcoes.forEach((opcao) => opcao.setAttribute("aria-pressed", String(opcao.dataset.saga === saga)));
+      // No celular a faixa de sagas rola de lado: traz a escolhida para o meio, em vez de deixá-la cortada.
+      filtro.querySelector('.filtro__opcao[aria-pressed="true"]')?.scrollIntoView({ block: "nearest", inline: "center" });
       status.textContent = `${visiveis} ${visiveis === 1 ? "episódio" : "episódios"}`;
     };
 
@@ -125,6 +173,24 @@
       if (alvo && !alvo.hidden) alvo.scrollIntoView();
     }
   }
+
+  // Link para uma dobra (como .../episodios/sw-002/#transcricao): abre a dobra e rola até ela.
+  const abrirDobraDaAncora = () => {
+    const alvo = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (alvo instanceof HTMLDetailsElement) {
+      alvo.open = true;
+      alvo.scrollIntoView();
+    }
+  };
+  abrirDobraDaAncora();
+  window.addEventListener("hashchange", abrirDobraDaAncora);
+
+  // Vozes no celular: a história fica em 3 linhas até a pessoa pedir para ler.
+  document.querySelectorAll(".voz__mais").forEach((botao) => botao.addEventListener("click", () => {
+    const aberta = botao.closest(".voz").toggleAttribute("data-aberta");
+    botao.setAttribute("aria-expanded", String(aberta));
+    botao.textContent = aberta ? "Fechar a história" : "Ler a história";
+  }));
 
   // Curti / não curti. O voto vale por navegador: fica no localStorage para o botão lembrar, e o servidor guarda um por visitante.
   // O corpo vai como texto puro de propósito: é um pedido "simples" de CORS, sem a ida e volta do preflight.
@@ -161,7 +227,10 @@
       fila = fila.then(() => enviar(voto)).then(() => {
         guardado.gravar(episodio, voto);
         status.textContent = voto ? "Voto registrado. Valeu! Se quiser, conte o porquê no campo abaixo." : "Voto removido.";
-        if (voto && formulario.dataset.enviado !== "sim") formulario.hidden = false;
+        if (voto && formulario.dataset.enviado !== "sim") {
+          formulario.hidden = false;
+          bloco.querySelector("[data-abrir-recado]")?.setAttribute("aria-expanded", "true");
+        }
       }).catch(() => {
         if (atual !== voto) return;
         atual = anterior;
@@ -172,7 +241,24 @@
     }));
   });
 
-  // O recado aparece depois do voto: quem não vota não vê formulário, e o card continua limpo.
+  // O recado abre pelo botão "Deixar um recado" (sem precisar votar) ou depois de um voto.
+  document.querySelectorAll("[data-abrir-recado]").forEach((botao) => {
+    const formulario = botao.closest(".votos").querySelector("[data-recado]");
+    botao.addEventListener("click", () => {
+      formulario.hidden = !formulario.hidden;
+      botao.setAttribute("aria-expanded", String(!formulario.hidden));
+      if (!formulario.hidden) formulario.elements.texto.focus();
+    });
+  });
+
+  // Se o servidor de recados falhar, o recado ainda pode ir como issue no GitHub, avisando que lá é público.
+  const linkDeIssue = (episodio, texto) => {
+    const repositorio = document.querySelector("[data-repositorio]")?.href.replace(/\/$/, "");
+    if (!repositorio) return null;
+    const parametros = new URLSearchParams({ title: `Recado sobre ${episodio}`, body: texto });
+    return `${repositorio}/issues/new?${parametros}`;
+  };
+
   const AVISOS_DO_RECADO = {
     400: "O recado precisa ter entre 3 e 1000 caracteres.",
     429: "Você já mandou recados demais hoje. Tenta amanhã?",
@@ -201,12 +287,21 @@
         if (!resposta.ok) throw resposta.status;
         formulario.dataset.enviado = "sim";
         formulario.hidden = true;
+        formulario.closest(".votos").querySelector("[data-abrir-recado]")?.setAttribute("aria-expanded", "false");
         formulario.reset();
         const status = formulario.closest(".votos").querySelector(".votos__pergunta");
         status.textContent = "Recado enviado. Valeu!";
         formulario.closest(".votos").querySelector("[data-votos-status]").textContent = "Recado enviado. Valeu!";
       } catch (status) {
         aviso.textContent = AVISOS_DO_RECADO[status] ?? "Não deu pra enviar agora. Tenta de novo?";
+        const issue = AVISOS_DO_RECADO[status] ? null : linkDeIssue(episodio, texto);
+        if (issue) {
+          const link = document.createElement("a");
+          link.href = issue;
+          link.rel = "noopener";
+          link.textContent = "Ou mande pelo GitHub (lá fica público)";
+          aviso.append(" ", link);
+        }
       } finally {
         enviar.disabled = false;
       }

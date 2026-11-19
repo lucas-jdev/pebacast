@@ -218,6 +218,15 @@ def publicar_pendentes(
     return Resultado(publicados, reprovados, avisos)
 
 
+# Vai no fim da descrição do canal enquanto site.beta estiver ligado: quem acha o feed num app também fica sabendo.
+AVISO_BETA = "Em beta: o formato, as vozes e o visual ainda podem mudar."
+
+
+def _descricao_do_canal(config: Mapping[str, Any]) -> str:
+    descricao = " ".join(config["feed"]["descricao"].split())
+    return f"{descricao} {AVISO_BETA}" if (config.get("site") or {}).get("beta") else descricao
+
+
 def gerar_feed(projeto: Projeto) -> str:
     config = projeto.config()
     meta = config["feed"]
@@ -231,7 +240,7 @@ def gerar_feed(projeto: Projeto) -> str:
     canal = ET.SubElement(rss, "channel")
     _sub(canal, "title", meta["titulo"])
     _sub(canal, "link", url_site)
-    _sub(canal, "description", meta["descricao"].strip())
+    _sub(canal, "description", _descricao_do_canal(config))
     _sub(canal, "language", meta["idioma"])
     _sub(canal, "copyright", f"{meta['autor']}, {meta['licenca']}")
     ET.SubElement(canal, f"{{{ATOM}}}link", {"href": url_feed, "rel": "self", "type": "application/rss+xml"})
