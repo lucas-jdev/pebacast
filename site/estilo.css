@@ -352,13 +352,13 @@ button { font: inherit; }
 .assinar { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
 @media (max-width: 860px) { .assinar { grid-template-columns: 1fr; } }
 .feed { background: var(--fundo-2); border: var(--borda) solid var(--linha); border-radius: var(--raio); padding: 1.6rem; }
-.feed__rotulo { display: block; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--texto-suave); margin-bottom: 0.6rem; }
+.feed__rotulo { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--texto-suave); margin-bottom: 0.6rem; }
 .feed__linha { display: flex; gap: 0.5rem; }
-.feed__url { flex: 1; min-width: 0; height: 48px; padding: 0 1rem; border: var(--borda) solid var(--linha); border-radius: calc(var(--raio) * 0.66); background: var(--fundo); color: var(--texto); font: 0.95rem var(--fonte-mono); }
+.feed__url { flex: 1; min-width: 0; min-height: 48px; display: flex; align-items: center; padding: 0.55rem 1rem; line-height: 1.45; overflow-wrap: anywhere; user-select: all; border: var(--borda) solid var(--linha); border-radius: calc(var(--raio) * 0.66); background: var(--fundo); color: var(--texto); font: 0.95rem var(--fonte-mono); }
 .feed__copiar { border-radius: calc(var(--raio) * 0.66); }
-.feed__extra { margin-top: 1rem; font-size: 0.95rem; color: var(--texto-suave); }
+.feed__extra { display: flex; flex-wrap: wrap; column-gap: 1.25rem; margin-top: 1rem; font-size: 0.95rem; color: var(--texto-suave); }
 .feed__extra a { display: inline-block; padding-block: 0.4rem; }
-@media (max-width: 420px) { .feed__linha { flex-direction: column; } }
+@media (max-width: 420px) { .feed__linha { flex-direction: column; } .feed__url { flex: none; } }
 
 /* rodapé */
 .rodape { padding-bottom: 3rem; }
@@ -793,7 +793,6 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 }
 .voz__mais { display: none; align-items: center; min-height: 44px; margin: -0.4rem 0 0.6rem; padding: 0; border: 0;
   background: none; color: var(--texto); font: inherit; font-weight: 700; text-decoration: underline 2px; cursor: pointer; }
-@media (max-width: 420px) { .feed__url { flex: none; height: 48px; } }
 
 /* Desafio para quem ainda não trabalha na área (#58), dentro do bloco amarelo do desafio. */
 .desafio__iniciante { margin-top: 0.9rem; padding-top: 0.8rem; border-top: 2px dashed currentColor; font-family: var(--fonte-texto);
