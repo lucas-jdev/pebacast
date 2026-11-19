@@ -594,7 +594,8 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     link = "./" if na_propria_pagina else caminho_do_episodio(episodio["id"])
     titulo = (f'<h1 class="episodio__titulo" id="titulo-{eid}">{escape(episodio["titulo"])}</h1>' if na_propria_pagina else
               f'<h3 class="episodio__titulo" id="titulo-{eid}"><a href="{escape(link)}">{escape(episodio["titulo"])}</a></h3>')
-    return f"""<article class="episodio episodio--destaque" id="{eid}" data-saga="{escape(saga.id)}">
+    classe = "episodio episodio--destaque" + (" episodio--pagina" if na_propria_pagina else "")
+    return f"""<article class="{classe}" id="{eid}" data-saga="{escape(saga.id)}">
   {_etiqueta(saga, episodio["id"])}
   <div class="episodio__capa" aria-hidden="true">
     <span class="episodio__codigo">{_codigo(episodio['id'])}</span>
@@ -607,7 +608,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     {_player(item["publicacao"], episodio["id"])}{_votos(episodio["id"], votos)}
     {_objetivos_e_desafio(episodio, roteiro, nivel="h2" if na_propria_pagina else "h4")}
     {_selo(item)}
-    {_dobra_transcricao(roteiro, personas)}
+    {_dobra_transcricao(roteiro, personas, link=None if na_propria_pagina else link)}
     <details class="dobra">
       <summary>Fontes</summary>
       {_fontes(roteiro)}
@@ -638,7 +639,7 @@ def _secao_arquivo(publicados: Sequence[Mapping[str, Any]], personas: Mapping[st
     <div class="secao__cabeca">
       <p class="sobretitulo">Arquivo</p>
       <h1 class="secao__titulo">Todos os episódios</h1>
-      <p class="secao__lead">{escape(lead)}</p>
+      <p class="secao__lead" data-arquivo-lead>{escape(lead)}</p>
     </div>
     {_filtro_por_saga(publicados)}
     <div class="arquivo">{grupos}</div>
@@ -683,7 +684,7 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any], vot
       <summary>Objetivos e desafio</summary>
       {_objetivos_e_desafio(episodio, roteiro)}
     </details>
-    {_dobra_transcricao(roteiro, personas)}
+    {_dobra_transcricao(roteiro, personas, link=caminho_do_episodio(episodio["id"]))}
     <details class="dobra">
       <summary>Fontes</summary>
       {_selo(item)}
@@ -804,17 +805,22 @@ def _selo(item: Mapping[str, Any]) -> str:
             f'<a href="{escape(relatorio)}" rel="noopener">ver o relatório</a></p>')
 
 
-def _dobra_transcricao(roteiro: Mapping[str, Any], personas: Mapping[str, Any]) -> str:
+def _dobra_transcricao(roteiro: Mapping[str, Any], personas: Mapping[str, Any], link: str | None = None) -> str:
+    """Na página do episódio, a transcrição inteira, em texto corrido. Nas listas (`link` dado), só o caminho até
+    ela: as transcrições eram 75% do peso do arquivo, e a mesma fala em duas URLs dividia o buscador."""
     falas = roteiro.get("falas", [])
+    palavras = f'{sum(len(f["texto"].split()) for f in falas):,}'.replace(",", ".")
+    if link is not None:
+        return (f'<a class="dobra dobra--link" href="{escape(link)}#transcricao">Transcrição '
+                f'<span class="dobra__extra">{palavras} palavras</span><span aria-hidden="true">→</span></a>')
     transcricao = "\n".join(
         f'<p><span class="fala__quem fala__quem--{escape(f["persona"])}">'
         f'{escape(personas.get(f["persona"], {}).get("nome", f["persona"]))}</span>{escape(f["texto"])}</p>'
         for f in falas
     )
-    palavras = f'{sum(len(f["texto"].split()) for f in falas):,}'.replace(",", ".")
-    return f"""<details class="dobra">
+    return f"""<details class="dobra" id="transcricao">
       <summary>Transcrição <span class="dobra__extra">{palavras} palavras</span></summary>
-      <div class="transcricao" tabindex="0" role="region" aria-label="Transcrição do episódio">{transcricao}</div>
+      <div class="transcricao transcricao--corrida" role="region" aria-label="Transcrição do episódio">{transcricao}</div>
     </details>"""
 
 
@@ -930,7 +936,8 @@ def _secao_vozes(personas: Mapping[str, Any]) -> str:
   <div class="voz__inicial" aria-hidden="true">{escape(persona['nome'][0])}</div>
   <h3>{escape(persona['nome'])}</h3>
   <p class="voz__papel">{escape(papel)}</p>
-  <p>{escape(' '.join(persona.get('historico', '').split()))}</p>
+  <p class="voz__historico" id="historico-{escape(persona['id'])}">{escape(' '.join(persona.get('historico', '').split()))}</p>
+  <button class="voz__mais" type="button" aria-expanded="false" aria-controls="historico-{escape(persona['id'])}">Ler a história</button>
   {f'<blockquote class="voz__bordao">{escape(bordao)}</blockquote>' if bordao else ''}
 </article>""")
     return f"""<section class="secao secao--alternada" id="vozes">
@@ -1189,9 +1196,11 @@ def _rotulo_do_link(link: Mapping[str, str]) -> str:
 def _sobre_nome(meta: Mapping[str, Any]) -> str:
     return f"""<section class="secao secao--sem-topo" id="nome">
   <div class="largura sobre__bloco">
-    <h2 class="secao__titulo secao__titulo--menor">Por que {escape(meta['titulo'])}</h2>
-    <div class="sobre__texto sobre__nome">
+    <div>
+      <h2 class="secao__titulo secao__titulo--menor">Por que {escape(meta['titulo'])}</h2>
       <svg class="sobre__peba" viewBox="0 0 128 80" aria-hidden="true"><use href="#peba"/></svg>
+    </div>
+    <div class="sobre__texto">
       <p>O nome vem do tatu-peba, bicho do Nordeste, de onde o {escape(meta['titulo'])} é feito, que cava a terra
         até achar o que procura. Daí o lema: cava até achar o porquê. Não tem relação com PEBCAK, a gíria de
         suporte técnico.</p>
@@ -1289,8 +1298,7 @@ _PAGINA = """<!doctype html>
 <meta name="description" content="{descricao}">
 <meta name="author" content="{autor}">
 <meta name="robots" content="index, follow, max-image-preview:large">
-{verificacao}<meta name="theme-color" content="#f4ecdd" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
+{verificacao}<meta name="theme-color" content="#efe4c8">
 <meta property="og:type" content="website">
 <meta property="og:title" content="{titulo}">
 <meta property="og:description" content="{descricao}">

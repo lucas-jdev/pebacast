@@ -38,5 +38,5 @@ Positivas:
 
 Negativas:
 
-- Enquanto a transcrição também aparecer nas listas, o mesmo texto existe em duas URLs. Cada página aponta para si mesma no `canonical`, e o buscador escolhe uma. A decisão sobre onde a transcrição fica foi adiada.
+- ~~Enquanto a transcrição também aparecer nas listas, o mesmo texto existe em duas URLs.~~ Resolvido em 19/11 (#55): a transcrição fica só na página do episódio, e as listas levam a ela por `episodios/<id>/#transcricao`. Era 75% do peso do `episodios.html`.
 - Renomear um id passa a ser proibido na prática. Um episódio que mude de saga ganha um id novo e vira outro episódio.
