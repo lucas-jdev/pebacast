@@ -1,0 +1,321 @@
+{
+  "episodio": "si-002",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura sem decoreba. Aviso de sempre: este episódio foi gerado por inteligência artificial e revisado por uma segunda IA. Hoje o tema é replicação, ou seja, o que acontece quando você guarda cópias do mesmo dado em várias máquinas e elas começam a discordar."
+    },
+    {
+      "persona": "davi",
+      "texto": "E quem volta pra conversar comigo é o Rafael. O Rafael tem catorze anos de sistemas distribuídos, começou com sensores em máquinas agrícolas, onde a rede caía todo dia, e depois foi pra uma empresa de pagamentos. Rafael, bem-vindo de volta!"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Obrigado, Davi. Oi, você que está ouvindo. Hoje a gente vai falar de cópias. E toda cópia, uma hora, mente um pouquinho.",
+      "estilo": "com humor seco"
+    },
+    {
+      "persona": "davi",
+      "texto": "Começa forte. No episódio passado a gente viu que em sistema distribuído tudo falha. Hoje eu trouxe um caso real pra mostrar uma falha bem específica. Ele está num pull request público no GitHub, o número três mil setecentos e noventa e sete do repositório do Capgo, um serviço que entrega atualizações pra aplicativos. Foi aberto e mergeado no dia vinte e um de outubro de dois mil e vinte e seis."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Pull request como notícia. Gostei. É o tipo de documento que conta o que realmente aconteceu."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então, segundo a descrição do PR, um cliente publicou as versões um ponto zero ponto duzentos e quarenta e cinco e duzentos e quarenta e seis do aplicativo. Os aparelhos atendidos pelo data center da Oceania continuaram recebendo a versão duzentos e quarenta e quatro por mais de uma hora. Hong Kong e as outras regiões já entregavam a duzentos e quarenta e seis."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Uma hora com a versão errada, só numa região. E o que tinha na frente dessa região?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Um cache de borda. E atrás dele, réplicas de leitura do Postgres. Quando alguém conferiu, a réplica da Oceania já respondia a versão nova. Quem estava preso no passado era a entrada do cache. Um purge manual resolveu na hora."
+    },
+    {
+      "persona": "rafael",
+      "texto": "E como uma resposta velha foi parar no cache?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O PR explica o mecanismo assim: depois de uma mudança, o sistema limpava o cache algumas vezes, em intervalos. Se a réplica ainda estivesse atrasada depois da última limpeza, o próximo preenchimento guardava as linhas antigas pelo tempo de vida inteiro do cache, que podia ser de uma hora."
+    },
+    {
+      "persona": "rafael",
+      "texto": "E ninguém percebeu o atraso? Não tinha um monitor?",
+      "estilo": "mais devagar"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tinha, e esse é o detalhe. A consulta que media o atraso só funcionava na réplica lógica da Europa. As réplicas da Oceania, de Hong Kong e da América do Norte são réplicas físicas, então o atraso delas aparecia sempre como unknown, desconhecido."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Pois é. O painel dizendo, com toda a sinceridade, que não fazia ideia. E ninguém olhando pra esse não sei. Já vi esse filme numa madrugada.",
+      "estilo": "rindo baixo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas peraí. Vou fazer o papel do dev otimista aqui. Pra mim a lição é: o problema foi o cache, não a réplica. Réplica de leitura é o jeito clássico de escalar. Você tem um banco principal que recebe as escritas e põe várias cópias pra aguentar as leituras. Joga todas as leituras nas réplicas, deixa o principal livre, e se quiser ir mais longe, coloca um banco que aceita escrita em cada região. Cada região escreve perto do usuário, tudo fica rápido. Não é isso que todo mundo grande faz?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "É uma proposta bem honesta, e muita gente faz isso. Então vamos testar com perguntas. Primeira: quando o principal recebe uma escrita, ele espera a réplica confirmar antes de responder pro usuário?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Acho que não, senão ficaria lento, né?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Exatamente. Isso tem nome. O Martin Kleppmann, no capítulo cinco de Designing Data-Intensive Applications, separa replicação síncrona de assíncrona. Na síncrona, o líder espera a seguidora confirmar. Na assíncrona, ele confirma pro cliente e manda a mudança depois. E aqui já tem os primeiros nomes do episódio: no modelo do Kleppmann, o banco principal é o líder e as réplicas são seguidoras."
+    },
+    {
+      "persona": "davi",
+      "texto": "Líder e seguidoras. Beleza. E qual é o problema da assíncrona?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Segunda pergunta. Se a confirmação vem antes da cópia, por quanto tempo a seguidora fica pra trás?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Normalmente pouco, né? Fração de segundo?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Normalmente. E quando a rede ficar lenta, quando a seguidora estiver rodando uma consulta pesada, quando ela estiver se recuperando de uma queda? Na replicação assíncrona não existe um limite garantido pra esse atraso. Pode ser segundos, pode ser minutos. O livro chama isso de replication lag, o atraso de replicação. E é por isso que a gente fala em consistência eventual: se as escritas pararem, as seguidoras chegam lá. Eventualmente. A palavra não promete quando."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. Então o caso do Capgo é literalmente isso: uma seguidora atrasada, e o cache fotografou o atraso e guardou por uma hora."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Pela explicação do PR, é isso. O cache não criou o problema. Ele transformou um atraso de alguns segundos ou minutos numa hora inteira de resposta velha. O atraso de replicação estava ali, quieto, e o cache deu a ele um tempo de vida."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas pro usuário final, o que muda? A versão chega um pouco depois, e daí?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Depende do dado, e é aí que ficam as anomalias. O Kleppmann descreve três que eu acho que todo mundo deveria saber de cor. A primeira é ler a própria escrita. Imagine você editando seu perfil. Salva, a tela recarrega, e a leitura vai pra uma seguidora atrasada. Seu nome antigo aparece."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ah, eu já vi isso! O usuário acha que não salvou e salva de novo.",
+      "estilo": "surpreso"
+    },
+    {
+      "persona": "rafael",
+      "texto": "E abre um chamado dizendo que o sistema não salva. A garantia que resolve isso se chama read-after-write consistency, ou read-your-writes: o usuário sempre enxerga o que ele mesmo escreveu. Repara que é sobre o próprio usuário. Os outros podem ver o nome antigo mais um pouco."
+    },
+    {
+      "persona": "davi",
+      "texto": "E como se garante isso?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Alguns jeitos. Ler do líder tudo o que o usuário pode ter editado, por exemplo o próprio perfil. Ou, por um tempo depois de uma escrita, mandar as leituras daquele usuário pro líder. Ou o cliente guardar a marca da última escrita e só aceitar uma réplica que já chegou nela. Na minha experiência, o segundo é o mais comum, e o mais fácil de esquecer num canto."
+    },
+    {
+      "persona": "davi",
+      "texto": "Faz sentido. Qual é a segunda anomalia?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "A segunda é andar pra trás no tempo. Você abre uma lista de comentários e vê um comentário novo. Recarrega, e dessa vez a leitura vai pra outra seguidora, mais atrasada. O comentário some. Recarrega de novo, ele volta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso é pior que ver velho. É ver o passado depois do futuro."
+    },
+    {
+      "persona": "rafael",
+      "texto": "É. A garantia aqui se chama monotonic reads, leituras monotônicas: depois de ver um estado, você não volta pra um mais antigo. Um jeito simples é cada usuário ler sempre da mesma réplica, escolhida por um hash do id dele. Até a réplica cair, claro."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a terceira?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "A terceira é a mais esquisita. Ver a resposta antes da pergunta. Imagine duas pessoas conversando, e as mensagens estão em partes diferentes do banco, que replicam em ritmos diferentes. Quem observa de fora pode ver a resposta chegar antes da pergunta. A garantia se chama consistent prefix reads: se as escritas aconteceram numa ordem, quem lê vê essa ordem. Esse problema aparece principalmente quando o banco é particionado."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, então eu já entendi o recado sobre ler da réplica. Mas e a minha segunda ideia? Um líder em cada região. Aí o usuário da Oceania escreve na Oceania, e pronto."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Beleza. E quando a rede cair?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Eu sabia que essa pergunta vinha.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Sério agora. Isso é replicação com vários líderes, multi-leader. Ela existe e faz sentido em alguns casos: vários data centers, aplicativo que funciona offline, edição colaborativa. Mas me responde: o usuário edita o título de uma página na Oceania. Ao mesmo tempo, um colega edita o mesmo título na Europa. Cada líder aceita a sua escrita na hora. Depois eles trocam as mudanças. Qual título vale?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O mais recente?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Mais recente segundo qual relógio? Lembra do episódio passado. Relógios de máquinas diferentes não concordam. Essa estratégia tem nome, last write wins, a última escrita vence. Ela converge, todo mundo termina com o mesmo valor. Mas ela converge jogando fora escritas que o sistema já tinha confirmado pro usuário. Alguém clicou em salvar, viu sucesso, e o dado sumiu sem erro nenhum."
+    },
+    {
+      "persona": "davi",
+      "texto": "Nossa. E tem alternativa?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Tem algumas, todas com custo. Evitar o conflito, mandando todas as escritas de um mesmo registro sempre pro mesmo líder, por exemplo o da região de origem do usuário. Guardar as duas versões e deixar a aplicação ou o usuário resolver. Ou usar estruturas de dados feitas pra fundir mudanças. O ponto é que conflito de escrita deixa de ser hipótese e vira regra de negócio. Alguém precisa decidir o que acontece. Na minha opinião, se você não precisa de várias regiões escrevendo, a complexidade não se paga."
+    },
+    {
+      "persona": "davi",
+      "texto": "E existe um terceiro jeito, sem líder nenhum? Lembro que vi isso em algum lugar."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Existe, e o Kleppmann chama de leaderless, sem líder. É o estilo do Dynamo, da Amazon, que inspirou bancos como o Cassandra. O cliente manda a escrita pra várias réplicas ao mesmo tempo e lê de várias também. Se você tem n réplicas, exige w confirmações na escrita e consulta r réplicas na leitura, com w mais r maior que n. Aí pelo menos uma das réplicas lidas tem o valor mais novo. Isso se chama quórum."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. Com três réplicas, eu escrevo em duas e leio de duas. Como dois mais dois dá quatro, que é mais que três, pelo menos uma das que eu li recebeu a escrita."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Isso. E quando o cliente percebe que uma réplica devolveu um valor velho, ele pode corrigir na hora. Isso é read repair. E um processo de fundo que compara as réplicas e copia o que falta é o anti-entropy. A vantagem é que não existe failover: uma réplica caída não para o sistema, enquanto o quórum aguentar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então é a resposta perfeita?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Nada é. Escritas concorrentes no mesmo dado continuam existindo, e o sistema precisa detectar e resolver, de novo com last write wins ou com a aplicação fundindo versões. E o quórum não é a garantia forte que parece. O próprio livro discute casos de borda em que, mesmo com w mais r maior que n, uma leitura pode devolver um valor velho. Quórum diminui a chance de ler velho, não elimina."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá. Mas e o líder único, que era o meu ponto de partida? Ele parece o mais simples."
+    },
+    {
+      "persona": "rafael",
+      "texto": "É o mais simples, e por isso é o mais comum. Mas ele tem o seu próprio momento de falha: quando o líder cai. Alguém precisa promover uma seguidora. Se a replicação era assíncrona, a seguidora promovida pode não ter as últimas escritas. Elas somem. E se o líder antigo voltar achando que ainda é líder, você tem dois líderes aceitando escrita. O livro chama isso de split brain. Eu já passei uma madrugada assim, com dois nós achando que mandavam, e não recomendo.",
+      "estilo": "sério"
+    },
+    {
+      "persona": "davi",
+      "texto": "E a replicação síncrona não resolve isso?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Resolve a perda, mas cobra. Se toda escrita espera todas as seguidoras, basta uma seguidora lenta pra travar todas as escritas. Por isso, o que o Kleppmann descreve como comum é ter uma seguidora síncrona e as outras assíncronas. Ele chama de semi-síncrono. Se a síncrona fica lenta, outra assume esse papel. Assim sempre existem pelo menos duas cópias atualizadas."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então vamos pros trade-offs, que eu quero ver tudo junto."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Vamos. Líder único: simples de raciocinar, toda escrita passa por um lugar, sem conflito de escrita. Em troca, a escrita depende de uma máquina, o failover é delicado, e ler das seguidoras traz o atraso de replicação e as três anomalias."
+    },
+    {
+      "persona": "davi",
+      "texto": "Vários líderes?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Escrita perto do usuário e tolerância a um data center inteiro fora do ar. Em troca, conflito de escrita como coisa do dia a dia, e regras de resolução que podem perder dados em silêncio."
+    },
+    {
+      "persona": "davi",
+      "texto": "E sem líder?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Disponibilidade alta e nenhum failover. Em troca, você ajusta quóruns, convive com escritas concorrentes e aceita que até leituras por quórum podem vir velhas em casos de borda."
+    },
+    {
+      "persona": "davi",
+      "texto": "E agora a pergunta que me trouxe aqui. Quando é aceitável ler da réplica?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Eu faço três perguntas pra cada tela. Primeira: quem escreveu esse dado é quem está lendo agora? Se sim, como no perfil logo depois de salvar, leia do líder ou garanta read-your-writes. Segunda: o que acontece se o dado estiver dez segundos velho? Se a resposta for nada grave, como o número de curtidas, um relatório ou um catálogo, a réplica é ótima. Terceira: o que acontece se estiver uma hora velho?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Que foi o caso do Capgo."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Exato. O atraso normal talvez fosse aceitável. O que não era aceitável era o sistema não saber o tamanho do atraso. Por isso eu gosto da correção. Pelo que o PR descreve, eles passaram a medir o atraso das réplicas físicas pelo tempo de replay. E quando uma réplica está mais de sessenta segundos atrás do líder, o que ela responde fica no cache só por trinta segundos, em vez do tempo cheio."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ou seja, ainda leem da réplica, mas com prazo de validade curto quando ela está atrasada."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Isso. E repara num detalhe. Um ajuste posterior fez a verificação falhar aberta: se o atraso for desconhecido, o cache mantém o comportamento antigo. É uma escolha. Eles preferiram não punir o desempenho quando o monitor não sabe, e aceitaram o risco nesse caso. Pode ser a decisão certa. O importante é que agora é uma decisão, escrita, e não um acidente."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso me lembra o que você falou no episódio passado, decidir antes o que acontece quando a coisa mente."
+    },
+    {
+      "persona": "rafael",
+      "texto": "É o mesmo princípio. A réplica atrasada é só uma máquina dizendo uma verdade antiga com toda a confiança. Você precisa decidir, dado por dado, quanto de passado você tolera."
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu resumir com as minhas palavras. Replicação é ter cópias do mesmo dado. Tem três jeitos. Com líder único, um banco recebe as escritas e as seguidoras copiam, e é o mais simples, mas o atraso das seguidoras aparece pro usuário e a troca de líder pode perder dados. Com vários líderes, cada região escreve perto, mas aí escritas no mesmo dado brigam, e a regra da última escrita vence joga dados fora sem avisar. Sem líder, o cliente escreve e lê de várias réplicas com quórum, sem failover, mas com escritas concorrentes pra resolver e sem garantia absoluta de ler o mais novo."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Até agora, perfeito."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o atraso de replicação causa três anomalias: não ver o que eu mesmo salvei, ver o tempo andar pra trás entre uma recarga e outra, e ver a resposta antes da pergunta. Ler da réplica é aceitável quando o dado velho não machuca ninguém, desde que eu saiba quanto velho ele pode estar. E, pelo caso do Capgo, um cache na frente da réplica pode transformar alguns minutos de atraso em uma hora."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Eu só acrescentaria uma coisa: monitore o atraso, e trate um atraso desconhecido como um alerta, não como um zero."
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado. Agora o desafio da semana. Encontre uma tela de um sistema que você conhece que lê de uma réplica, ou poderia ler, e descreva o que o usuário veria se a réplica estivesse dez segundos atrasada."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se você ainda não trabalha na área, abra o arquivo votos barra src barra index ponto js no repositório do Pebacast, que é aberto no GitHub, e descreva o que um ouvinte veria logo depois de votar se a contagem de votos fosse lida de uma cópia dez segundos atrasada."
+    },
+    {
+      "persona": "davi",
+      "texto": "Rafael, mais uma vez, valeu demais. Saio daqui desconfiando de todo dado que aparece na minha tela."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Esse é o espírito. Obrigado, Davi. E pra você que ouviu: boa noite, e que nenhuma réplica te acorde de madrugada.",
+      "estilo": "com humor seco"
+    },
+    {
+      "persona": "davi",
+      "texto": "Esse foi o Pebacast. Até o próximo episódio!"
+    }
+  ],
+  "desafio": "Encontre uma tela de um sistema que você conhece que lê de uma réplica, ou poderia ler, e descreva o que o usuário veria se a réplica estivesse dez segundos atrasada.",
+  "desafio_iniciante": "Abra votos/src/index.js no repositório do Pebacast, github.com/lucas-jdev/pebacast, e descreva o que um ouvinte veria logo depois de votar se a contagem de votos fosse lida de uma cópia dez segundos atrasada.",
+  "fontes": [
+    "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5"
+  ]
+}

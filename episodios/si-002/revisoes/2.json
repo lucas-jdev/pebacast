@@ -1,0 +1,198 @@
+{
+  "aprovado": true,
+  "roteiro_sha256": "348acba5b0f3ce716fcb49bc194a4d9b100258b6e40fe59294e49f0830699261",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "o número três mil setecentos e noventa e sete do repositório do Capgo, um serviço que entrega atualizações pra aplicativos. Foi aberto e mergeado no dia vinte e um de outubro de dois mil e vinte e seis.",
+      "veredito": "correta",
+      "fonte": "https://github.com/Cap-go/capgo.app/pull/3797 (descrição e commits do PR); aberto e mergeado em 21/10/2026"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "Os aparelhos atendidos pelo data center da Oceania continuaram recebendo a versão duzentos e quarenta e quatro por mais de uma hora. Hong Kong e as outras regiões já entregavam a duzentos e quarenta e seis.",
+      "veredito": "correta",
+      "fonte": "https://github.com/Cap-go/capgo.app/pull/3797 (descrição e commits do PR): 'kept getting 1.0.244 for over an hour after 1.0.245 / 1.0.246 were published', HK e demais regiões com 1.0.246"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "Um cache de borda. E atrás dele, réplicas de leitura do Postgres. Quando alguém conferiu, a réplica da Oceania já respondia a versão nova. Quem estava preso no passado era a entrada do cache. Um purge manual resolveu na hora.",
+      "veredito": "correta",
+      "fonte": "https://github.com/Cap-go/capgo.app/pull/3797 (descrição e commits do PR): edge cache, réplicas PostgreSQL, réplica OC respondia 1.0.246 em cache miss, purge manual por tag resolveu"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "depois de uma mudança, o sistema limpava o cache algumas vezes, em intervalos. Se a réplica ainda estivesse atrasada depois da última limpeza, o próximo preenchimento guardava as linhas antigas pelo tempo de vida inteiro do cache, que podia ser de uma hora.",
+      "veredito": "correta",
+      "fonte": "https://github.com/Cap-go/capgo.app/pull/3797 (descrição e commits do PR): purges em +3s, +10s, +60s e +180s; refill de réplica atrasada mantinha linhas velhas pelo TTL cheio de 3600s"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "o próximo preenchimento guardava as linhas antigas pelo tempo de vida inteiro do cache, que podia ser de uma hora.",
+      "veredito": "correta",
+      "fonte": "https://github.com/Cap-go/capgo.app/pull/3797: TTL de 3600s para respostas do app (900s para snippets)"
+    },
+    {
+      "fala": 11,
+      "afirmacao": "A consulta que media o atraso só funcionava na réplica lógica da Europa. As réplicas da Oceania, de Hong Kong e da América do Norte são réplicas físicas, então o atraso delas aparecia sempre como unknown, desconhecido.",
+      "veredito": "correta",
+      "fonte": "https://github.com/Cap-go/capgo.app/pull/3797 (descrição e commits do PR): pg_stat_subscription 'only has rows on the EU logical subscriber'; 'regional replicas are physical standbys'; 'OC/HK/NA always answer unknown'"
+    },
+    {
+      "fala": 16,
+      "afirmacao": "Na síncrona, o líder espera a seguidora confirmar. Na assíncrona, ele confirma pro cliente e manda a mudança depois.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Synchronous Versus Asynchronous Replication'"
+    },
+    {
+      "fala": 16,
+      "afirmacao": "no modelo do Kleppmann, o banco principal é o líder e as réplicas são seguidoras.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Leaders and Followers'"
+    },
+    {
+      "fala": 20,
+      "afirmacao": "Na replicação assíncrona não existe um limite garantido pra esse atraso. Pode ser segundos, pode ser minutos. O livro chama isso de replication lag, o atraso de replicação.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Problems with Replication Lag'"
+    },
+    {
+      "fala": 20,
+      "afirmacao": "se as escritas pararem, as seguidoras chegam lá. Eventualmente. A palavra não promete quando.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, definição de eventual consistency ('eventually' é deliberadamente vago)"
+    },
+    {
+      "fala": 22,
+      "afirmacao": "Ele transformou um atraso de alguns segundos ou minutos numa hora inteira de resposta velha.",
+      "veredito": "correta",
+      "fonte": "https://github.com/Cap-go/capgo.app/pull/3797: purges até +180s e TTL de 3600s"
+    },
+    {
+      "fala": 24,
+      "afirmacao": "O Kleppmann descreve três que eu acho que todo mundo deveria saber de cor. A primeira é ler a própria escrita.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5: 'Reading Your Own Writes', 'Monotonic Reads', 'Consistent Prefix Reads'"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "A garantia que resolve isso se chama read-after-write consistency, ou read-your-writes: o usuário sempre enxerga o que ele mesmo escreveu. Repara que é sobre o próprio usuário. Os outros podem ver o nome antigo mais um pouco.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Reading Your Own Writes'"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "Ler do líder tudo o que o usuário pode ter editado, por exemplo o próprio perfil. Ou, por um tempo depois de uma escrita, mandar as leituras daquele usuário pro líder. Ou o cliente guardar a marca da última escrita e só aceitar uma réplica que já chegou nela.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, técnicas listadas em 'Reading Your Own Writes'"
+    },
+    {
+      "fala": 32,
+      "afirmacao": "A garantia aqui se chama monotonic reads, leituras monotônicas: depois de ver um estado, você não volta pra um mais antigo. Um jeito simples é cada usuário ler sempre da mesma réplica, escolhida por um hash do id dele.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Monotonic Reads'"
+    },
+    {
+      "fala": 32,
+      "afirmacao": "Até a réplica cair, claro.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Monotonic Reads' (se a réplica falhar, a leitura precisa ser redirecionada)"
+    },
+    {
+      "fala": 34,
+      "afirmacao": "A garantia se chama consistent prefix reads: se as escritas aconteceram numa ordem, quem lê vê essa ordem. Esse problema aparece principalmente quando o banco é particionado.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Consistent Prefix Reads' ('a particular problem in partitioned (sharded) databases')"
+    },
+    {
+      "fala": 38,
+      "afirmacao": "Ela existe e faz sentido em alguns casos: vários data centers, aplicativo que funciona offline, edição colaborativa.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Use Cases for Multi-Leader Replication'"
+    },
+    {
+      "fala": 40,
+      "afirmacao": "Essa estratégia tem nome, last write wins, a última escrita vence. Ela converge, todo mundo termina com o mesmo valor. Mas ela converge jogando fora escritas que o sistema já tinha confirmado pro usuário.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Converging toward a consistent state' e 'Last write wins (discarding concurrent writes)'"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "Evitar o conflito, mandando todas as escritas de um mesmo registro sempre pro mesmo líder, por exemplo o da região de origem do usuário. Guardar as duas versões e deixar a aplicação ou o usuário resolver. Ou usar estruturas de dados feitas pra fundir mudanças.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Handling Write Conflicts' (conflict avoidance, custom conflict resolution, CRDTs)"
+    },
+    {
+      "fala": 44,
+      "afirmacao": "o Kleppmann chama de leaderless, sem líder. É o estilo do Dynamo, da Amazon, que inspirou bancos como o Cassandra.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Leaderless Replication' (Riak, Cassandra e Voldemort inspirados no Dynamo)"
+    },
+    {
+      "fala": 44,
+      "afirmacao": "Se você tem n réplicas, exige w confirmações na escrita e consulta r réplicas na leitura, com w mais r maior que n. Aí pelo menos uma das réplicas lidas tem o valor mais novo. Isso se chama quórum.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Quorums for reading and writing'"
+    },
+    {
+      "fala": 45,
+      "afirmacao": "Com três réplicas, eu escrevo em duas e leio de duas. Como dois mais dois dá quatro, que é mais que três, pelo menos uma das que eu li recebeu a escrita.",
+      "veredito": "correta",
+      "fonte": "Aritmética e Designing Data-Intensive Applications, Martin Kleppmann, cap. 5 (exemplo n=3, w=2, r=2)"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "Isso é read repair. E um processo de fundo que compara as réplicas e copia o que falta é o anti-entropy. A vantagem é que não existe failover",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Read repair and anti-entropy' e 'Writing to the Database When a Node Is Down'"
+    },
+    {
+      "fala": 48,
+      "afirmacao": "O próprio livro discute casos de borda em que, mesmo com w mais r maior que n, uma leitura pode devolver um valor velho.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Limitations of Quorum Consistency'"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "Se a replicação era assíncrona, a seguidora promovida pode não ter as últimas escritas. Elas somem. E se o líder antigo voltar achando que ainda é líder, você tem dois líderes aceitando escrita. O livro chama isso de split brain.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Handling Node Outages: Leader failover'"
+    },
+    {
+      "fala": 52,
+      "afirmacao": "Se toda escrita espera todas as seguidoras, basta uma seguidora lenta pra travar todas as escritas. Por isso, o que o Kleppmann descreve como comum é ter uma seguidora síncrona e as outras assíncronas. Ele chama de semi-síncrono. Se a síncrona fica lenta, outra assume esse papel. Assim sempre existem pelo menos duas cópias atualizadas.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Synchronous Versus Asynchronous Replication' (semi-synchronous)"
+    },
+    {
+      "fala": 56,
+      "afirmacao": "Escrita perto do usuário e tolerância a um data center inteiro fora do ar.",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, cap. 5, 'Multi-datacenter operation'"
+    },
+    {
+      "fala": 62,
+      "afirmacao": "eles passaram a medir o atraso das réplicas físicas pelo tempo de replay. E quando uma réplica está mais de sessenta segundos atrás do líder, o que ela responde fica no cache só por trinta segundos, em vez do tempo cheio.",
+      "veredito": "correta",
+      "fonte": "https://github.com/Cap-go/capgo.app/pull/3797 (descrição e commits do PR): now() - pg_last_xact_replay_timestamp(); TTL de 30s só quando a réplica está medida mais de 60s atrás do primário"
+    },
+    {
+      "fala": 64,
+      "afirmacao": "Um ajuste posterior fez a verificação falhar aberta: se o atraso for desconhecido, o cache mantém o comportamento antigo.",
+      "veredito": "correta",
+      "fonte": "https://github.com/Cap-go/capgo.app/pull/3797 (descrição e commits do PR): commit 3578f1d 'fail open on unknown lag'; 'With unknown lag [...] the TTL is unchanged from main'"
+    },
+    {
+      "fala": 69,
+      "afirmacao": "E, pelo caso do Capgo, um cache na frente da réplica pode transformar alguns minutos de atraso em uma hora.",
+      "veredito": "correta",
+      "fonte": "https://github.com/Cap-go/capgo.app/pull/3797: purges em +3s, +10s, +60s e +180s; refill de réplica ainda atrasada após a última limpeza ficava no cache pelo TTL de 3600s"
+    },
+    {
+      "fala": 72,
+      "afirmacao": "abra o arquivo votos barra src barra index ponto js no repositório do Pebacast, que é aberto no GitHub, e descreva o que um ouvinte veria logo depois de votar se a contagem de votos fosse lida de uma cópia dez segundos atrasada.",
+      "veredito": "correta",
+      "fonte": "votos/src/index.js existe no repositório lucas-jdev/pebacast e expõe GET /votos (placar) e POST /votos (registrar); dá para fazer só lendo o código aberto"
+    }
+  ]
+}
