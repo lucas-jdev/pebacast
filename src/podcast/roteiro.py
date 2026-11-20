@@ -21,6 +21,7 @@ import yaml
 
 from podcast.curriculo import Episodio, Saga, carregar_sagas
 from podcast.validacao import (
+    ESPERA_DE_COTA,
     NOTICIA,
     PUBLICACAO,
     ROTEIRO,
@@ -35,6 +36,8 @@ DIAS_DA_SEMANA = ("segunda", "terca", "quarta", "quinta", "sexta", "sabado", "do
 
 PENDENTE = "pendente"
 AGUARDANDO_PUBLICACAO = "aguardando_publicacao"
+# Só para mostrar no site: para a seleção, quem aguarda a cota continua aguardando publicação.
+AGUARDANDO_COTA = "aguardando_cota"
 PUBLICADO = "publicado"
 
 SAIDA_SEM_EPISODIO = 3
@@ -224,7 +227,8 @@ def proximo_a_publicar(projeto: Projeto, data: date) -> Proximo | None:
     for saga in candidatas:
         for episodio in saga.episodios:
             if estados[episodio.id] == AGUARDANDO_PUBLICACAO:
-                return Proximo(saga, episodio, AGUARDANDO_PUBLICACAO)
+                aguardando_cota = (projeto.episodios / episodio.id / ESPERA_DE_COTA).exists()
+                return Proximo(saga, episodio, AGUARDANDO_COTA if aguardando_cota else AGUARDANDO_PUBLICACAO)
     try:
         saga, episodio = selecionar_na_fila(candidatas, estados, config["episodio"]["exigir_referencias_verificadas"])
     except SemEpisodio:

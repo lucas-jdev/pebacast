@@ -3,6 +3,7 @@
 - Status: Aceito em 2026-11-07, após o [teste cego de vozes](../../experimentos/teste-vozes/README.md)
 - Data: 2026-11-05
 - Revisado: 2026-11-06, troca do modelo preview pela família Gemini 3.8
+- Revisado: 2026-11-20, a cota diária esgotada espera a renovação em vez de cair no Kokoro ([ADR 0011](0011-cota-esgotada-espera.md))
 
 ## Contexto
 
