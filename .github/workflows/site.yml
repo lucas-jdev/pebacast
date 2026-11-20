@@ -36,7 +36,11 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
 
     steps:
+      # A ponta do branch, não o commit que disparou o run: um run que esperou a publicação na fila
+      # não pode pôr no ar um main de antes dela e apagar o episódio novo.
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref }}
 
       - uses: actions/setup-python@v7
         with:
