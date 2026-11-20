@@ -13,7 +13,7 @@ import logging
 import subprocess
 import sys
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from email.utils import format_datetime
 from pathlib import Path
@@ -26,6 +26,7 @@ from podcast.dominio import Fala, Persona
 from podcast.indexacao import escrever_chave
 from podcast.personas import carregar_personas
 from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
+from podcast.qualidade_audio import IncidentesDeAudio, Laudo, Limites, RegistroDeIncidentes, avaliar, medir
 from podcast.roteiro import Projeto, regras_para
 from podcast.site import caminho_do_episodio, escrever_pagina
 from podcast.tts.provedor import RequisicaoRecusada, TtsProvider
@@ -98,6 +99,7 @@ class Resultado:
     publicados: list[str]
     reprovados: dict[str, list[str]]
     avisos: list[str]
+    qualidade: dict[str, Laudo] = field(default_factory=dict)
 
 
 def episodios_pendentes(projeto: Projeto) -> list[str]:
@@ -165,11 +167,12 @@ def publicar_pendentes(
     criar_provedor: Callable[[str], TtsProvider],
     trabalho: Path,
     agora: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
+    incidentes: RegistroDeIncidentes | None = None,
 ) -> Resultado:
     config = projeto.config()
     personas = carregar_personas(projeto.raiz / "curriculum" / "personas")
     sagas = projeto.sagas()
-    publicados, reprovados, avisos = [], {}, []
+    publicados, reprovados, avisos, qualidade = [], {}, [], {}
 
     for episodio_id in episodios_pendentes(projeto):
         saga = saga_do_episodio(sagas, episodio_id)
@@ -200,7 +203,7 @@ def publicar_pendentes(
             avisos.append(f"{episodio_id}: publicado sem vinheta. {aviso_vinheta}")
 
         mp3 = trabalho / f"pebacast-{episodio_id}.mp3"
-        exportar_mp3(audio, mp3, config["audio"]["bitrate_kbps"], vinheta=vinheta)
+        trechos = exportar_mp3(audio, mp3, config["audio"]["bitrate_kbps"], vinheta=vinheta)
         episodio = saga.episodio(episodio_id)
         url = storage.publicar(episodio_id, episodio.titulo, mp3)
 
@@ -215,7 +218,17 @@ def publicar_pendentes(
         (pasta / PUBLICACAO).write_text(json.dumps(publicacao, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         publicados.append(episodio_id)
 
-    return Resultado(publicados, reprovados, avisos)
+        # Depois de publicar: o QA não segura o episódio, nem quando ele próprio quebra.
+        try:
+            limites = Limites.de_config(config["audio"])
+            qualidade[episodio_id] = avaliar(medir(mp3, trechos, limites), limites)
+            if incidentes is not None:
+                incidentes.registrar(episodio_id, qualidade[episodio_id])
+        except Exception as erro:
+            log.exception("O QA do áudio de %s falhou.", episodio_id)
+            avisos.append(f"{episodio_id}: publicado, mas o QA do áudio não rodou até o fim. {type(erro).__name__}: {erro}")
+
+    return Resultado(publicados, reprovados, avisos, qualidade)
 
 
 # Vai no fim da descrição do canal enquanto site.beta estiver ligado: quem acha o feed num app também fica sabendo.
@@ -378,6 +391,9 @@ def _criar_parser() -> argparse.ArgumentParser:
     publicar.add_argument("--trabalho", type=Path, default=Path("_trabalho"), help="Pasta temporária dos MP3.")
     publicar.add_argument("--relatorio", type=Path, default=Path("relatorio.json"), help="Publicados e reprovados, para as issues.")
     publicar.add_argument("--avisos", type=Path, default=Path("avisos.md"), help="Relatório gravado se houver fallback.")
+    publicar.add_argument("--qualidade", type=Path, default=Path("qualidade.md"),
+                          help="Medidas do QA do áudio, para o resumo da execução.")
+    publicar.add_argument("--execucao", help="URL da execução, citada nas issues de incidente.")
 
     comandos.add_parser("feed", help="Só regenera o feed.")
     return parser
@@ -396,11 +412,16 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     from podcast.tts.fabrica import criar_provedor
 
-    resultado = publicar_pendentes(projeto, GitHubReleases(args.repo), criar_provedor, args.trabalho)
+    incidentes = IncidentesDeAudio(args.repo, args.execucao)
+    resultado = publicar_pendentes(projeto, GitHubReleases(args.repo), criar_provedor, args.trabalho, incidentes=incidentes)
     escrever_site(projeto, args.site)
 
     print(f"Publicados: {', '.join(resultado.publicados) or 'nenhum'}")
     args.relatorio.write_text(json.dumps(relatorio(resultado), ensure_ascii=False, indent=2), encoding="utf-8")
+    if resultado.qualidade:
+        args.qualidade.write_text("\n".join(
+            laudo.markdown(f"Qualidade do áudio do {episodio_id}") for episodio_id, laudo in resultado.qualidade.items()
+        ), encoding="utf-8")
     if resultado.avisos:
         args.avisos.write_text("\n".join(f"- {aviso}" for aviso in resultado.avisos) + "\n", encoding="utf-8")
     if resultado.reprovados:

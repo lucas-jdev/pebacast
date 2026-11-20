@@ -1,8 +1,8 @@
 """Regravação do áudio de um episódio já publicado, em dois passos (ADR 0008).
 
 `regravar` narra de novo o mesmo roteiro e anexa uma candidata ao release do episódio,
-sem tocar no feed. Depois de ouvir, `substituir` troca o áudio publicado pela candidata:
-a URL, o GUID e a data de publicação continuam os mesmos.
+sem tocar no feed, com as medidas do QA do áudio ao lado. Depois de ouvir, `substituir` troca
+o áudio publicado pela candidata: a URL, o GUID e a data de publicação continuam os mesmos.
 
     python -m podcast.regravacao regravar sw-002 --repo dono/repo
     python -m podcast.regravacao --site _site substituir sw-002 --repo dono/repo
@@ -13,6 +13,7 @@ import json
 import logging
 import sys
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol
@@ -27,13 +28,37 @@ from podcast.publicacao import (
     medir_mp3,
     saga_do_episodio,
 )
+from podcast.qualidade_audio import (
+    IncidentesDeAudio,
+    Laudo,
+    Limites,
+    Medicao,
+    RegistroDeIncidentes,
+    avaliar,
+    medir,
+)
 from podcast.roteiro import Projeto, regras_para
 from podcast.tts.provedor import TtsProvider
 from podcast.validacao import PUBLICACAO, validar_episodio
 
 
+log = logging.getLogger(__name__)
+
+
 class RegravacaoInvalida(Exception):
     """O pedido não pode ser atendido: o motivo vai para quem disparou."""
+
+
+@dataclass(frozen=True)
+class Candidata:
+    url: str
+    laudo: Laudo
+
+
+@dataclass(frozen=True)
+class Substituicao:
+    publicacao: dict[str, Any]
+    laudo: Laudo | None
 
 
 class StorageDeRegravacao(Protocol):
@@ -54,14 +79,19 @@ def nome_candidata(episodio_id: str) -> str:
     return f"pebacast-{episodio_id}-candidata.mp3"
 
 
+def nome_medicao_candidata(episodio_id: str) -> str:
+    """As medidas viajam com a candidata: só a montagem sabe onde ficam as trocas de bloco."""
+    return f"pebacast-{episodio_id}-candidata.qualidade.json"
+
+
 def regravar(
     projeto: Projeto,
     episodio_id: str,
     storage: StorageDeRegravacao,
     criar_provedor: Callable[[str], TtsProvider],
     trabalho: Path,
-) -> str:
-    """Narra o episódio de novo e anexa a candidata. Devolve a URL para ouvir."""
+) -> Candidata:
+    """Narra o episódio de novo e anexa a candidata, com as medidas do QA. Devolve a URL para ouvir."""
     _exigir_publicado(projeto, episodio_id)
     config = projeto.config()
     pasta = projeto.episodios / episodio_id
@@ -81,8 +111,15 @@ def regravar(
     audio = provedor.sintetizar(falas_do_episodio(pasta, personas, config["tts"]))
 
     mp3 = trabalho / nome_candidata(episodio_id)
-    exportar_mp3(audio, mp3, config["audio"]["bitrate_kbps"], vinheta=vinheta)
-    return storage.anexar(episodio_id, mp3)
+    trechos = exportar_mp3(audio, mp3, config["audio"]["bitrate_kbps"], vinheta=vinheta)
+    url = storage.anexar(episodio_id, mp3)
+
+    limites = Limites.de_config(config["audio"])
+    medicao = medir(mp3, trechos, limites)
+    arquivo_medicao = trabalho / nome_medicao_candidata(episodio_id)
+    arquivo_medicao.write_text(medicao.para_json(), encoding="utf-8")
+    storage.anexar(episodio_id, arquivo_medicao)
+    return Candidata(url, avaliar(medicao, limites))
 
 
 def substituir(
@@ -91,17 +128,21 @@ def substituir(
     storage: StorageDeRegravacao,
     trabalho: Path,
     agora: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
-) -> dict[str, Any]:
-    """Troca o áudio publicado pela candidata e atualiza o `publicacao.json`."""
+    incidentes: RegistroDeIncidentes | None = None,
+) -> Substituicao:
+    """Troca o áudio publicado pela candidata, atualiza o `publicacao.json` e o incidente de QA do episódio."""
     arquivo = _exigir_publicado(projeto, episodio_id)
     publicacao = json.loads(arquivo.read_text(encoding="utf-8"))
     config = projeto.config()
 
     candidata = storage.baixar(episodio_id, nome_candidata(episodio_id), trabalho)
+    medicao = _baixar_medicao(storage, episodio_id, trabalho)
     definitivo = candidata.rename(candidata.with_name(nome_publicado(episodio_id)))
     # A candidata só sai depois de o definitivo subir: se o upload falhar, dá para tentar de novo.
     storage.anexar(episodio_id, definitivo)
     storage.remover(episodio_id, candidata.name)
+    if medicao is not None:
+        storage.remover(episodio_id, nome_medicao_candidata(episodio_id))
 
     publicacao.update(
         medir_mp3(definitivo),
@@ -110,7 +151,26 @@ def substituir(
         regravado_em=agora().isoformat(timespec="seconds"),
     )
     arquivo.write_text(json.dumps(publicacao, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return publicacao
+
+    limites = Limites.de_config(config["audio"])
+    laudo = avaliar(medicao, limites) if medicao is not None else None
+    if laudo is not None and incidentes is not None:
+        # O áudio já trocou: uma falha no GitHub não pode impedir o registro no repositório.
+        try:
+            incidentes.registrar(episodio_id, laudo)
+        except Exception:
+            log.exception("Não deu para atualizar a issue de QA de %s.", episodio_id)
+    return Substituicao(publicacao, laudo)
+
+
+def _baixar_medicao(storage: StorageDeRegravacao, episodio_id: str, trabalho: Path) -> Medicao | None:
+    try:
+        arquivo = storage.baixar(episodio_id, nome_medicao_candidata(episodio_id), trabalho)
+        return Medicao.de_json(arquivo.read_text(encoding="utf-8"))
+    except Exception:
+        # Candidata gerada antes do QA existir: substitui do mesmo jeito, só sem o laudo.
+        log.warning("A candidata de %s não tem as medidas do QA.", episodio_id, exc_info=True)
+        return None
 
 
 def _exigir_publicado(projeto: Projeto, episodio_id: str) -> Path:
@@ -127,6 +187,9 @@ def _criar_parser() -> argparse.ArgumentParser:
     parser.add_argument("--raiz", type=Path, default=Path.cwd())
     parser.add_argument("--site", type=Path, default=Path("_site"), help="Onde gravar o feed para o Pages.")
     parser.add_argument("--trabalho", type=Path, default=Path("_trabalho"), help="Pasta temporária dos MP3.")
+    parser.add_argument("--qualidade", type=Path, default=Path("qualidade.md"),
+                        help="Medidas do QA do áudio, para o resumo da execução.")
+    parser.add_argument("--execucao", help="URL da execução, citada nas issues de incidente.")
     comandos = parser.add_subparsers(dest="comando", required=True)
     for nome, ajuda in (
         ("regravar", "Narra de novo e anexa uma candidata ao release, sem mexer no feed."),
@@ -149,12 +212,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.comando == "regravar":
             from podcast.tts.fabrica import criar_provedor
 
-            url = regravar(projeto, args.episodio, storage, criar_provedor, args.trabalho)
-            print(f"Candidata para ouvir: {url}")
+            candidata = regravar(projeto, args.episodio, storage, criar_provedor, args.trabalho)
+            print(f"Candidata para ouvir: {candidata.url}")
+            args.qualidade.write_text(candidata.laudo.markdown(f"Qualidade da candidata do {args.episodio}"),
+                                      encoding="utf-8")
         else:
-            publicacao = substituir(projeto, args.episodio, storage, args.trabalho)
+            incidentes = IncidentesDeAudio(args.repo, args.execucao)
+            substituicao = substituir(projeto, args.episodio, storage, args.trabalho, incidentes=incidentes)
             escrever_site(projeto, args.site)
+            publicacao = substituicao.publicacao
             print(f"Áudio substituído: {publicacao['url_audio']} ({publicacao['duracao_segundos']} s)")
+            if substituicao.laudo is not None:
+                args.qualidade.write_text(substituicao.laudo.markdown(f"Qualidade do áudio do {args.episodio}"),
+                                          encoding="utf-8")
     except RegravacaoInvalida as erro:
         print(f"Não deu para {args.comando} {args.episodio}: {erro}", file=sys.stderr)
         return 1

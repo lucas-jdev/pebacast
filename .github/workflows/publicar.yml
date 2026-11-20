@@ -1,6 +1,8 @@
 # Voz, montagem e publicação (ADR 0006). Disparado pelo push da rotina do roteirista.
 # Valida o roteiro de novo antes de gastar TTS; reprovação, fallback ou erro viram issue,
 # e a issue de reprovação de um episódio é fechada quando ele é publicado.
+# O QA do áudio vai para o resumo da execução; reprovar abre (ou fecha) a issue de incidente
+# do episódio pelo próprio Python, sem segurar a publicação.
 name: Publicar episódio
 
 on:
@@ -65,7 +67,11 @@ jobs:
         continue-on-error: true
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python -m podcast.publicacao publicar --repo "$GITHUB_REPOSITORY"
+        run: python -m podcast.publicacao publicar --repo "$GITHUB_REPOSITORY" --execucao "$RUN_URL"
+
+      - name: Resumo do QA do áudio
+        if: ${{ always() && hashFiles('qualidade.md') != '' }}
+        run: cat qualidade.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Registrar a publicação no repositório
         run: |

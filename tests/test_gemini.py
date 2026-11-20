@@ -2,8 +2,10 @@ import base64
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
+from podcast.audio import Audio
 from podcast.dominio import Fala
 from podcast.personas import carregar_personas
 from podcast.tts.gemini import VOZES, GeminiTts, agrupar_em_blocos, montar_requisicao
@@ -81,6 +83,27 @@ def test_sintetizar_faz_uma_requisicao_por_bloco_e_concatena(davi, helena, bruno
 
     assert len(cliente.requisicoes) == 2
     assert audio.duracao_segundos == pytest.approx(0.5)
+
+
+class ClienteComBordas(ClienteFalso):
+    """Cada bloco vem com 400 ms de silêncio antes e depois de 1 s de fala."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        borda = np.zeros(24_000 * 400 // 1000)
+        fala = 0.3 * np.sin(2 * np.pi * 440 * np.arange(24_000) / 24_000)
+        pcm = Audio.de_float(np.concatenate([borda, fala, borda]), 24_000).pcm
+        self._resposta = SimpleNamespace(output_audio=SimpleNamespace(data=base64.b64encode(pcm).decode()))
+
+
+def test_sintetizar_apara_as_bordas_e_deixa_so_a_pausa_fixa_entre_blocos(davi, helena, bruno):
+    tts = GeminiTts("modelo", pausa_entre_blocos_ms=300, cliente=ClienteComBordas())
+
+    audio = tts.sintetizar([Fala(davi, "a"), Fala(helena, "b"), Fala(bruno, "c")])
+
+    folga = 0.03
+    assert audio.duracao_segundos == pytest.approx(2 * (1 + 2 * folga) + 0.3, abs=0.002)
+    assert audio.trocas_s == pytest.approx((1 + 2 * folga + 0.15,), abs=0.002)
 
 
 class ClienteInstavel(ClienteFalso):

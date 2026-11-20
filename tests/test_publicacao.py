@@ -5,8 +5,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
+import numpy as np
 import pytest
 
+from podcast.audio import Audio
 from podcast.publicacao import (
     GitHubReleases,
     Resultado,
@@ -16,8 +18,10 @@ from podcast.publicacao import (
     relatorio,
     sintetizar_com_fallback,
 )
+from podcast.qualidade_audio import IncidentesDeAudio
 from podcast.tts.provedor import RequisicaoRecusada
 from tests.conftest import ProvedorFalso, ProvedorQuebrado
+from tests.test_qualidade_audio import GhFalso
 from tests.test_roteiro import (  # noqa: F401 (fixture)
     CONFIG,
     _escrever_episodio,
@@ -302,3 +306,58 @@ def test_sem_beta_a_descricao_do_canal_fica_como_esta(projeto):
     descricao = ET.fromstring(gerar_feed(projeto)).find("channel/description").text
 
     assert "beta" not in descricao.lower()
+
+
+class ProvedorComPausaLonga:
+    """Dois blocos com 1 s de silêncio na troca: continua fora do limite depois da montagem."""
+
+    nome = "gemini-falso"
+
+    def sintetizar(self, falas):
+        tom = 0.3 * np.sin(2 * np.pi * 440 * np.arange(24_000) / 24_000)
+        audio = Audio.de_float(np.concatenate([tom, np.zeros(24_000), tom]), 24_000)
+        return Audio(audio.pcm, 24_000, trocas_s=(1.5,))
+
+
+@precisa_ffmpeg
+def test_audio_fora_do_padrao_e_publicado_mesmo_assim_e_abre_incidente(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    storage, gh = StorageFalso(), GhFalso()
+
+    resultado = publicar_pendentes(projeto, storage, lambda nome: ProvedorComPausaLonga(), tmp_path / "trabalho",
+                                   lambda: AGORA, IncidentesDeAudio("dono/repo", None, gh))
+
+    assert resultado.publicados == ["sw-001"] and storage.publicados == [("sw-001", "pebacast-sw-001.mp3")]
+    assert (projeto.episodios / "sw-001" / "publicacao.json").exists()
+    assert not resultado.qualidade["sw-001"].aprovado
+    [criar] = gh.acoes()
+    assert criar[:3] == ["gh", "issue", "create"] and criar[criar.index("--label") + 1] == "incidente"
+    assert "Pausa na troca de blocos" in criar[criar.index("--body") + 1]
+
+
+@precisa_ffmpeg
+def test_episodio_que_passa_no_qa_fecha_o_incidente_aberto(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    gh = GhFalso([{"number": 9, "title": "Áudio do sw-001 fora do padrão"}])
+
+    resultado = publicar_pendentes(projeto, StorageFalso(), _fabrica(), tmp_path / "trabalho", lambda: AGORA,
+                                   IncidentesDeAudio("dono/repo", None, gh))
+
+    assert resultado.qualidade["sw-001"].aprovado
+    assert [comando[:4] for comando in gh.acoes()] == [["gh", "issue", "close", "9"]]
+
+
+class IncidentesQuebrados:
+    def registrar(self, episodio_id, laudo):
+        raise subprocess.CalledProcessError(1, ["gh", "issue", "create"])
+
+
+@precisa_ffmpeg
+def test_falha_ao_registrar_o_incidente_nao_impede_a_publicacao(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+
+    resultado = publicar_pendentes(projeto, StorageFalso(), _fabrica(), tmp_path / "trabalho", lambda: AGORA,
+                                   IncidentesQuebrados())
+
+    assert resultado.publicados == ["sw-001"]
+    assert "QA do áudio" in resultado.avisos[0]

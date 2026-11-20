@@ -6,9 +6,11 @@ from pathlib import Path
 import pytest
 
 from podcast.publicacao import GitHubReleases, publicar_pendentes
+from podcast.qualidade_audio import IncidentesDeAudio, Medicao
 from podcast.regravacao import RegravacaoInvalida, main, regravar, substituir
 from tests.conftest import ProvedorFalso, ProvedorQuebrado
 from tests.test_publicacao import Gh, _configurar_vinheta
+from tests.test_qualidade_audio import GhFalso
 from tests.test_roteiro import _escrever_episodio, _gravar, projeto  # noqa: F401 (fixture)
 
 precisa_ffmpeg = pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="ffmpeg fora do PATH")
@@ -66,9 +68,9 @@ def test_regravar_anexa_candidata_sem_tocar_no_audio_publicado(projeto, tmp_path
     antes = _ja_publicado(projeto, tmp_path, releases)
     publicado = releases.assets["sw-001"]["pebacast-sw-001.mp3"]
 
-    url = regravar(projeto, "sw-001", releases, _fabrica(), tmp_path / "trabalho")
+    candidata = regravar(projeto, "sw-001", releases, _fabrica(), tmp_path / "trabalho")
 
-    assert url == "https://cdn/sw-001/pebacast-sw-001-candidata.mp3"
+    assert candidata.url == "https://cdn/sw-001/pebacast-sw-001-candidata.mp3"
     assert releases.assets["sw-001"]["pebacast-sw-001.mp3"] == publicado
     assert _ler_publicacao(projeto) == antes
 
@@ -80,7 +82,7 @@ def test_substituir_troca_o_audio_e_mantem_url_guid_e_data(projeto, tmp_path):
     regravar(projeto, "sw-001", releases, _fabrica(), tmp_path / "trabalho")
     candidata = releases.assets["sw-001"]["pebacast-sw-001-candidata.mp3"]
 
-    depois = substituir(projeto, "sw-001", releases, tmp_path / "troca", lambda: REGRAVADO)
+    depois = substituir(projeto, "sw-001", releases, tmp_path / "troca", lambda: REGRAVADO).publicacao
 
     assert releases.assets["sw-001"] == {"pebacast-sw-001.mp3": candidata}
     assert {chave: depois[chave] for chave in ("guid", "url_audio", "publicado_em")} == \
@@ -161,3 +163,60 @@ def test_releases_baixa_e_remove_pelo_nome_do_asset(tmp_path):
     assert gh.comandos[1][:5] == ["gh", "release", "delete-asset", "episodio-sw-002", "pebacast-sw-002-candidata.mp3"]
     assert "--yes" in gh.comandos[1]
 
+
+
+@precisa_ffmpeg
+def test_regravar_anexa_as_medidas_do_qa_ao_lado_da_candidata(projeto, tmp_path):
+    releases = ReleasesFalso()
+    _ja_publicado(projeto, tmp_path, releases)
+
+    candidata = regravar(projeto, "sw-001", releases, _fabrica(), tmp_path / "trabalho")
+
+    medicao = Medicao.de_json(releases.assets["sw-001"]["pebacast-sw-001-candidata.qualidade.json"].decode("utf-8"))
+    assert medicao.loudness_lufs == pytest.approx(-16, abs=1)
+    assert [medida.nome for medida in candidata.laudo.medidas] == [
+        "Pico real", "Loudness integrada", "Música (abertura e encerramento)", "Pausa na troca de blocos"]
+
+
+@precisa_ffmpeg
+def test_substituir_por_candidata_que_passa_no_qa_fecha_o_incidente(projeto, tmp_path):
+    releases = ReleasesFalso()
+    _ja_publicado(projeto, tmp_path, releases)
+    regravar(projeto, "sw-001", releases, _fabrica(), tmp_path / "trabalho")
+    gh = GhFalso([{"number": 31, "title": "Áudio do sw-001 fora do padrão"}])
+
+    substituicao = substituir(projeto, "sw-001", releases, tmp_path / "troca", lambda: REGRAVADO,
+                              IncidentesDeAudio("dono/repo", None, gh))
+
+    assert substituicao.laudo.aprovado
+    assert [comando[:4] for comando in gh.acoes()] == [["gh", "issue", "close", "31"]]
+    assert list(releases.assets["sw-001"]) == ["pebacast-sw-001.mp3"]
+
+
+@precisa_ffmpeg
+def test_substituir_por_candidata_reprovada_mantem_o_incidente_aberto(projeto, tmp_path):
+    releases = ReleasesFalso()
+    _ja_publicado(projeto, tmp_path, releases)
+    regravar(projeto, "sw-001", releases, _fabrica(), tmp_path / "trabalho")
+    fora = Medicao(0.3, -16.0, -16.0, None, None, 1.1, 3)
+    releases.assets["sw-001"]["pebacast-sw-001-candidata.qualidade.json"] = fora.para_json().encode("utf-8")
+    gh = GhFalso([{"number": 31, "title": "Áudio do sw-001 fora do padrão"}])
+
+    substituir(projeto, "sw-001", releases, tmp_path / "troca", lambda: REGRAVADO, IncidentesDeAudio("dono/repo", None, gh))
+
+    assert [comando[:4] for comando in gh.acoes()] == [["gh", "issue", "comment", "31"]]
+
+
+@precisa_ffmpeg
+def test_substituir_candidata_sem_medidas_troca_o_audio_sem_laudo(projeto, tmp_path):
+    releases = ReleasesFalso()
+    _ja_publicado(projeto, tmp_path, releases)
+    regravar(projeto, "sw-001", releases, _fabrica(), tmp_path / "trabalho")
+    del releases.assets["sw-001"]["pebacast-sw-001-candidata.qualidade.json"]
+    gh = GhFalso()
+
+    substituicao = substituir(projeto, "sw-001", releases, tmp_path / "troca", lambda: REGRAVADO,
+                              IncidentesDeAudio("dono/repo", None, gh))
+
+    assert substituicao.laudo is None and gh.comandos == []
+    assert list(releases.assets["sw-001"]) == ["pebacast-sw-001.mp3"]
