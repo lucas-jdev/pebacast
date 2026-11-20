@@ -1,6 +1,8 @@
 # Voz, montagem e publicação (ADR 0006). Disparado pelo push da rotina do roteirista.
 # Valida o roteiro de novo antes de gastar TTS; reprovação, fallback ou erro viram issue,
 # e a issue de reprovação de um episódio é fechada quando ele é publicado.
+# Com a cota diária do Gemini esgotada, o episódio aguarda (ADR 0011): o agendamento diário
+# tenta de novo depois da renovação da cota, e só passa da verificação se houver episódio pendente.
 # O QA do áudio vai para o resumo da execução; reprovar abre (ou fecha) a issue de incidente
 # do episódio pelo próprio Python, sem segurar a publicação.
 name: Publicar episódio
@@ -12,6 +14,9 @@ on:
       - "episodios/*/roteiro.json"
       - "episodios/*/noticia.json"
       - "episodios/*/revisoes/**"
+  # 08:15 UTC (5h15 em Natal): a cota diária renova à meia-noite do Pacífico, 07:00 ou 08:00 UTC.
+  schedule:
+    - cron: "15 8 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -25,7 +30,30 @@ permissions:
   id-token: write
 
 jobs:
+  # No agendamento, só segue se houver roteiro sem publicação: o caso comum é não ter nada a fazer.
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      pendentes: ${{ steps.pendentes.outputs.ids }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Listar episódios pendentes
+        id: pendentes
+        run: |
+          ids=""
+          for pasta in episodios/*/; do
+            if [ -f "${pasta}roteiro.json" ] && [ ! -f "${pasta}publicacao.json" ]; then
+              ids="$ids $(basename "$pasta")"
+            fi
+          done
+          echo "ids=${ids# }" >> "$GITHUB_OUTPUT"
+          echo "Pendentes: ${ids:- nenhum}"
+
   publicar:
+    needs: verificar
+    if: ${{ github.event_name != 'schedule' || needs.verificar.outputs.pendentes != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     environment:
@@ -73,16 +101,24 @@ jobs:
         if: ${{ always() && hashFiles('qualidade.md') != '' }}
         run: cat qualidade.md >> "$GITHUB_STEP_SUMMARY"
 
+      # Também registra a espera pela cota (aguardando_cota.json) e o fim dela, que apaga o arquivo.
       - name: Registrar a publicação no repositório
         run: |
-          git add episodios/*/publicacao.json 2>/dev/null || true
+          # Um pathspec sem nenhum arquivo derruba o git add inteiro: um por vez.
+          git add -A -- 'episodios/*/publicacao.json' 2>/dev/null || true
+          git add -A -- 'episodios/*/aguardando_cota.json' 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "Nada publicado."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Publica $(git diff --cached --name-only | cut -d/ -f2 | paste -sd, -)"
+          publicados="$(git diff --cached --name-only --diff-filter=A -- 'episodios/*/publicacao.json' | cut -d/ -f2 | paste -sd, -)"
+          if [ -n "$publicados" ]; then
+            git commit -m "Publica $publicados"
+          else
+            git commit -m "Aguarda a cota do Gemini: $(git diff --cached --name-only | cut -d/ -f2 | paste -sd, -)"
+          fi
           git pull --rebase origin main
           git push origin main
 
