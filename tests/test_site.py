@@ -109,6 +109,19 @@ def test_roteiro_aprovado_e_o_proximo_mesmo_fora_da_ordem(projeto):
     assert "Roteiro aprovado na revisão." in pagina
 
 
+
+def test_roteiro_aguardando_a_cota_avisa_que_sai_em_breve(projeto):
+    _escrever_episodio(projeto, "sw-001")
+    (projeto.episodios / "sw-001" / "aguardando_cota.json").write_text('{"desde": "2026-11-08T01:00:00+00:00"}\n',
+                                                                       encoding="utf-8")
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    assert 'class="proximo__titulo">Um<' in pagina
+    assert ("Tivemos um problema interno ao gravar a voz deste episódio. "
+            "O roteiro já está pronto, e ele sai em breve.") in pagina
+    assert "Roteiro aprovado na revisão." not in pagina
+
 def test_sem_episodio_elegivel_avisa_que_o_proximo_esta_sendo_cavado(projeto):
     _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
     _ja_publicado(projeto, "sw-002", "2026-11-09T15:00:00+00:00")

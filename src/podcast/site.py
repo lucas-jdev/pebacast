@@ -21,6 +21,7 @@ from typing import Any
 
 from podcast.curriculo import SAGAS
 from podcast.roteiro import (
+    AGUARDANDO_COTA,
     AGUARDANDO_PUBLICACAO,
     DIAS_DA_SEMANA,
     FUSO_BRASILIA,
@@ -846,6 +847,7 @@ def _links(item: Mapping[str, Any], link_permanente: str) -> str:
 
 _ESTADO_DO_PROXIMO = {
     AGUARDANDO_PUBLICACAO: "Roteiro aprovado na revisão. Falta só gravar a voz e publicar.",
+    AGUARDANDO_COTA: "Tivemos um problema interno ao gravar a voz deste episódio. O roteiro já está pronto, e ele sai em breve.",
 }
 _ESTADO_PADRAO = "Fontes conferidas. O roteiro é o próximo a ser escrito."
 

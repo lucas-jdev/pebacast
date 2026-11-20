@@ -16,6 +16,8 @@ ROTEIRO = "roteiro.json"
 NOTICIA = "noticia.json"
 PASTA_REVISOES = "revisoes"
 PUBLICACAO = "publicacao.json"
+# Episódio aprovado que aguarda a cota diária do Gemini renovar (ADR 0011).
+ESPERA_DE_COTA = "aguardando_cota.json"
 
 VEREDITOS = frozenset({"correta", "incorreta", "imprecisa", "nao_verificavel"})
 TIPOS_DE_CONTEXTO = frozenset({"noticia", "hipotetico"})
