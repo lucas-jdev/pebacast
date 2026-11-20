@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from podcast.audio import ALVO_LOUDNESS_LUFS, Loudness, Trechos, medir_loudness
+from podcast.issues import IssuesDeIncidente
 
 # Folga para o meio da pausa cair dentro do silêncio detectado mesmo com o atraso do limitador.
 TOLERANCIA_TROCA_S = 0.05
@@ -158,47 +159,35 @@ class RegistroDeIncidentes(Protocol):
 
 @dataclass(frozen=True)
 class IncidentesDeAudio:
-    """Uma issue `incidente` por episódio, no padrão das outras issues abertas pelos workflows."""
+    """Uma issue `incidente` por episódio reprovado, que fecha quando o áudio dele passa."""
 
     repositorio: str
     execucao: str | None = None
     executar: Callable[..., subprocess.CompletedProcess] = subprocess.run
 
     def registrar(self, episodio_id: str, laudo: Laudo) -> None:
-        abertas = self._abertas(episodio_id)
+        titulo = self.titulo(episodio_id)
         if laudo.aprovado:
-            for numero in abertas:
-                self._gh("issue", "close", str(numero), "--reason", "completed", "--comment",
-                         self._corpo(f"O áudio do {episodio_id} passou no QA.", episodio_id, laudo))
+            self._issues.fechar(titulo, self._corpo(f"O áudio do {episodio_id} passou no QA.", episodio_id, laudo))
             return
         corpo = self._corpo(f"O áudio do {episodio_id} foi publicado, mas não passou no QA.", episodio_id, laudo)
-        if abertas:
-            self._gh("issue", "comment", str(abertas[0]), "--body", corpo)
-        else:
-            self._gh("issue", "create", "--title", self.titulo(episodio_id), "--label", "incidente", "--body", corpo)
+        self._issues.abrir_ou_comentar(titulo, corpo, corpo)
 
     @staticmethod
     def titulo(episodio_id: str) -> str:
-        # Sem terminar em ": <id>": esse é o padrão das issues de roteiro, que a publicação fecha.
         return f"Áudio do {episodio_id} fora do padrão"
 
-    def _abertas(self, episodio_id: str) -> list[int]:
-        titulo = self.titulo(episodio_id)
-        saida = self._gh("issue", "list", "--state", "open", "--label", "incidente",
-                         "--search", f'"{titulo}" in:title', "--json", "number,title", capture_output=True, text=True)
-        return [issue["number"] for issue in json.loads(saida.stdout or "[]") if issue["title"] == titulo]
+    @property
+    def _issues(self) -> IssuesDeIncidente:
+        return IssuesDeIncidente(self.repositorio, self.execucao, self.executar)
 
-    def _corpo(self, abertura: str, episodio_id: str, laudo: Laudo) -> str:
+    @staticmethod
+    def _corpo(abertura: str, episodio_id: str, laudo: Laudo) -> str:
         partes = [abertura, "", laudo.markdown(f"Qualidade do áudio do {episodio_id}")]
         if not laudo.aprovado:
             partes.append("A issue fecha sozinha quando o áudio do episódio passar no QA, por exemplo depois de "
                           "regravar e substituir (`regravar.yml`).")
-        if self.execucao:
-            partes += ["", f"Execução: {self.execucao}"]
         return "\n".join(partes)
-
-    def _gh(self, *argumentos: str, **opcoes: Any) -> subprocess.CompletedProcess:
-        return self.executar(["gh", *argumentos, "--repo", self.repositorio], check=True, **opcoes)
 
 
 def _loudness(mp3: Path, trecho: tuple[float, float] | None = None) -> Loudness:
