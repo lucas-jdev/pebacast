@@ -10,3 +10,6 @@ assets/*
 !assets/og.svg
 experimentos/teste-vozes/vozes-piper/
 _site/
+# Pebamotion: intermediários e vídeos gerados (pebamotion/README.md).
+pebamotion/.cache/
+pebamotion/saida/

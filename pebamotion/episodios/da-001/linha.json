@@ -1,0 +1,741 @@
+{
+ "duracao": 45.0,
+ "clipes": [
+  {
+   "id": "forma",
+   "persona": "camila",
+   "entrada": 47.57,
+   "saida": 54.0,
+   "inicio": 0.45,
+   "fim": 6.88,
+   "texto": "porque o formato em que você guarda o dado decide quais perguntas ficam fáceis e quais viram sofrimento.",
+   "palavras": [
+    [
+     "porque",
+     0.42,
+     0.7
+    ],
+    [
+     "o",
+     0.7,
+     0.9
+    ],
+    [
+     "formato",
+     0.9,
+     1.48
+    ],
+    [
+     "em",
+     1.48,
+     1.62
+    ],
+    [
+     "que",
+     1.62,
+     1.72
+    ],
+    [
+     "você",
+     1.72,
+     1.94
+    ],
+    [
+     "guarda",
+     1.94,
+     2.32
+    ],
+    [
+     "o",
+     2.32,
+     2.4
+    ],
+    [
+     "dado",
+     2.4,
+     2.68
+    ],
+    [
+     "decide",
+     2.68,
+     3.14
+    ],
+    [
+     "quais",
+     3.14,
+     3.6
+    ],
+    [
+     "perguntas",
+     3.6,
+     4.16
+    ],
+    [
+     "ficam",
+     4.16,
+     4.4
+    ],
+    [
+     "fáceis",
+     4.4,
+     5.04
+    ],
+    [
+     "e",
+     5.04,
+     5.34
+    ],
+    [
+     "quais",
+     5.34,
+     5.56
+    ],
+    [
+     "viram",
+     5.56,
+     6.02
+    ],
+    [
+     "sofrimento.",
+     6.02,
+     6.58
+    ]
+   ]
+  },
+  {
+   "id": "caso",
+   "persona": "davi",
+   "entrada": 58.42,
+   "saida": 64.36,
+   "inicio": 6.98,
+   "fim": 12.92,
+   "texto": "Imagine uma rede de clínicas que guarda tudo num banco de documentos. Cada paciente é um documento só.",
+   "palavras": [
+    [
+     "Imagine",
+     7.04,
+     7.44
+    ],
+    [
+     "uma",
+     7.44,
+     7.58
+    ],
+    [
+     "rede",
+     7.58,
+     7.86
+    ],
+    [
+     "de",
+     7.86,
+     8.04
+    ],
+    [
+     "clínicas",
+     8.04,
+     8.42
+    ],
+    [
+     "que",
+     8.42,
+     8.64
+    ],
+    [
+     "guarda",
+     8.64,
+     8.94
+    ],
+    [
+     "tudo",
+     8.94,
+     9.32
+    ],
+    [
+     "num",
+     9.32,
+     9.56
+    ],
+    [
+     "banco",
+     9.56,
+     9.82
+    ],
+    [
+     "de",
+     9.82,
+     9.96
+    ],
+    [
+     "documentos.",
+     9.96,
+     10.52
+    ],
+    [
+     "Cada",
+     11.08,
+     11.34
+    ],
+    [
+     "paciente",
+     11.34,
+     11.86
+    ],
+    [
+     "é",
+     11.86,
+     12.02
+    ],
+    [
+     "um",
+     12.02,
+     12.12
+    ],
+    [
+     "documento",
+     12.12,
+     12.62
+    ],
+    [
+     "só.",
+     12.62,
+     12.76
+    ]
+   ]
+  },
+  {
+   "id": "copia",
+   "persona": "davi",
+   "entrada": 97.43,
+   "saida": 105.85,
+   "inicio": 13.02,
+   "fim": 21.44,
+   "texto": "Um médico mudou o nome no conselho, e o nome novo foi atualizado só em parte das fichas. O relatório mensal passou a contar o mesmo médico como se fossem dois.",
+   "palavras": [
+    [
+     "Um",
+     13.01,
+     13.21
+    ],
+    [
+     "médico",
+     13.21,
+     13.51
+    ],
+    [
+     "mudou",
+     13.51,
+     13.87
+    ],
+    [
+     "o",
+     13.87,
+     13.97
+    ],
+    [
+     "nome",
+     13.97,
+     14.11
+    ],
+    [
+     "no",
+     14.11,
+     14.23
+    ],
+    [
+     "conselho,",
+     14.23,
+     14.77
+    ],
+    [
+     "e",
+     15.09,
+     15.15
+    ],
+    [
+     "o",
+     15.15,
+     15.23
+    ],
+    [
+     "nome",
+     15.23,
+     15.43
+    ],
+    [
+     "novo",
+     15.43,
+     15.65
+    ],
+    [
+     "foi",
+     15.65,
+     15.89
+    ],
+    [
+     "atualizado",
+     15.89,
+     16.41
+    ],
+    [
+     "só",
+     16.41,
+     16.63
+    ],
+    [
+     "em",
+     16.63,
+     16.75
+    ],
+    [
+     "parte",
+     16.75,
+     17.07
+    ],
+    [
+     "das",
+     17.07,
+     17.29
+    ],
+    [
+     "fichas.",
+     17.29,
+     17.71
+    ],
+    [
+     "O",
+     18.19,
+     18.29
+    ],
+    [
+     "relatório",
+     18.29,
+     18.67
+    ],
+    [
+     "mensal",
+     18.67,
+     19.07
+    ],
+    [
+     "passou",
+     19.07,
+     19.31
+    ],
+    [
+     "a",
+     19.31,
+     19.47
+    ],
+    [
+     "contar",
+     19.47,
+     19.59
+    ],
+    [
+     "o",
+     19.59,
+     19.81
+    ],
+    [
+     "mesmo",
+     19.81,
+     20.01
+    ],
+    [
+     "médico",
+     20.01,
+     20.43
+    ],
+    [
+     "como",
+     20.43,
+     20.67
+    ],
+    [
+     "se",
+     20.67,
+     20.79
+    ],
+    [
+     "fossem",
+     20.79,
+     21.07
+    ],
+    [
+     "dois.",
+     21.07,
+     21.19
+    ]
+   ]
+  },
+  {
+   "id": "grafo",
+   "persona": "davi",
+   "entrada": 140.15,
+   "saida": 142.9,
+   "inicio": 21.59,
+   "fim": 24.34,
+   "texto": "Minha primeira ideia é migrar tudo pra um banco de grafo.",
+   "palavras": [
+    [
+     "Minha",
+     21.66,
+     21.84
+    ],
+    [
+     "primeira",
+     21.84,
+     22.14
+    ],
+    [
+     "ideia",
+     22.14,
+     22.44
+    ],
+    [
+     "é",
+     22.44,
+     22.62
+    ],
+    [
+     "migrar",
+     22.62,
+     22.82
+    ],
+    [
+     "tudo",
+     22.82,
+     23.12
+    ],
+    [
+     "pra",
+     23.12,
+     23.36
+    ],
+    [
+     "um",
+     23.36,
+     23.48
+    ],
+    [
+     "banco",
+     23.48,
+     23.66
+    ],
+    [
+     "de",
+     23.66,
+     23.78
+    ],
+    [
+     "grafo.",
+     23.78,
+     24.08
+    ]
+   ]
+  },
+  {
+   "id": "consultas",
+   "persona": "camila",
+   "entrada": 187.77,
+   "saida": 190.37,
+   "inicio": 24.39,
+   "fim": 26.99,
+   "texto": "Eu estou dizendo que você ainda não olhou para as consultas.",
+   "palavras": [
+    [
+     "Eu",
+     24.46,
+     24.62
+    ],
+    [
+     "estou",
+     24.62,
+     24.7
+    ],
+    [
+     "dizendo",
+     24.7,
+     24.98
+    ],
+    [
+     "que",
+     24.98,
+     25.18
+    ],
+    [
+     "você",
+     25.18,
+     25.36
+    ],
+    [
+     "ainda",
+     25.36,
+     25.56
+    ],
+    [
+     "não",
+     25.56,
+     25.86
+    ],
+    [
+     "olhou",
+     25.86,
+     26.08
+    ],
+    [
+     "para",
+     26.08,
+     26.22
+    ],
+    [
+     "as",
+     26.22,
+     26.32
+    ],
+    [
+     "consultas.",
+     26.32,
+     26.88
+    ]
+   ]
+  },
+  {
+   "id": "ferramenta",
+   "persona": "camila",
+   "entrada": 199.2,
+   "saida": 200.45,
+   "inicio": 27.04,
+   "fim": 28.29,
+   "texto": "Ferramenta vem depois.",
+   "palavras": [
+    [
+     "Ferramenta",
+     27.12,
+     27.62
+    ],
+    [
+     "vem",
+     27.62,
+     27.78
+    ],
+    [
+     "depois.",
+     27.78,
+     28.06
+    ]
+   ]
+  },
+  {
+   "id": "aceita",
+   "persona": "camila",
+   "entrada": 432.99,
+   "saida": 435.0,
+   "inicio": 28.49,
+   "fim": 30.5,
+   "texto": "O banco não reclama. Ele aceita tudo.",
+   "palavras": [
+    [
+     "O",
+     28.48,
+     28.6
+    ],
+    [
+     "banco",
+     28.6,
+     28.78
+    ],
+    [
+     "não",
+     28.78,
+     28.92
+    ],
+    [
+     "reclama.",
+     28.92,
+     29.3
+    ],
+    [
+     "Ele",
+     29.56,
+     29.7
+    ],
+    [
+     "aceita",
+     29.7,
+     29.98
+    ],
+    [
+     "tudo.",
+     29.98,
+     30.24
+    ]
+   ]
+  },
+  {
+   "id": "bug",
+   "persona": "davi",
+   "entrada": 856.55,
+   "saida": 860.62,
+   "inicio": 31.05,
+   "fim": 35.12,
+   "texto": "O bug não liga pro banco, ele liga pra onde o dado está copiado.",
+   "palavras": [
+    [
+     "O",
+     31.3,
+     31.62
+    ],
+    [
+     "bug",
+     31.62,
+     31.88
+    ],
+    [
+     "não",
+     31.88,
+     32.12
+    ],
+    [
+     "liga",
+     32.12,
+     32.3
+    ],
+    [
+     "pro",
+     32.3,
+     32.34
+    ],
+    [
+     "banco,",
+     32.34,
+     32.72
+    ],
+    [
+     "ele",
+     33.14,
+     33.32
+    ],
+    [
+     "liga",
+     33.32,
+     33.52
+    ],
+    [
+     "pra",
+     33.52,
+     33.7
+    ],
+    [
+     "onde",
+     33.7,
+     33.88
+    ],
+    [
+     "o",
+     33.88,
+     33.98
+    ],
+    [
+     "dado",
+     33.98,
+     34.16
+    ],
+    [
+     "está",
+     34.16,
+     34.36
+    ],
+    [
+     "copiado.",
+     34.36,
+     34.9
+    ]
+   ]
+  },
+  {
+   "id": "roubar",
+   "persona": "camila",
+   "entrada": 860.74,
+   "saida": 862.7,
+   "inicio": 35.17,
+   "fim": 37.13,
+   "texto": "Perfeito. Vou roubar essa frase.",
+   "palavras": [
+    [
+     "Perfeito.",
+     35.29,
+     35.77
+    ],
+    [
+     "Vou",
+     36.11,
+     36.23
+    ],
+    [
+     "roubar",
+     36.23,
+     36.43
+    ],
+    [
+     "essa",
+     36.43,
+     36.61
+    ],
+    [
+     "frase.",
+     36.61,
+     36.87
+    ]
+   ]
+  },
+  {
+   "id": "dono",
+   "persona": "camila",
+   "entrada": 931.8,
+   "saida": 934.1,
+   "inicio": 37.33,
+   "fim": 39.63,
+   "texto": "descobre quem é o dono do dado.",
+   "palavras": [
+    [
+     "descobre",
+     37.39,
+     37.93
+    ],
+    [
+     "quem",
+     37.93,
+     38.31
+    ],
+    [
+     "é",
+     38.31,
+     38.63
+    ],
+    [
+     "o",
+     38.63,
+     38.73
+    ],
+    [
+     "dono",
+     38.73,
+     39.01
+    ],
+    [
+     "do",
+     39.01,
+     39.11
+    ],
+    [
+     "dado.",
+     39.11,
+     39.41
+    ]
+   ]
+  }
+ ],
+ "fim_da_voz": 39.63
+}
