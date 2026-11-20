@@ -1,0 +1,370 @@
+{
+  "episodio": "in-002",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura de verdade, sem decoreba. Aviso de sempre: este episódio foi gerado por inteligência artificial e revisado por uma segunda IA, que confere as afirmações contra as fontes. O tema de hoje é SLO: quanta confiabilidade é suficiente pra um sistema."
+    },
+    {
+      "persona": "davi",
+      "texto": "E quem volta pra conversar comigo é o Jorge. O Jorge começou montando rack e passando cabo no datacenter de uma universidade, e hoje lidera o time de plataforma de um marketplace. Jorge, bem-vindo de volta!"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Obrigado, Davi. Oi, você que está ouvindo, bom te ver de novo por aqui."
+    },
+    {
+      "persona": "davi",
+      "texto": "Jorge, vou começar com um caso, e já aviso quem está ouvindo: o caso de hoje é hipotético. Imagine uma empresa que vende ingressos pra shows pela internet. No dia em que abre a venda da turnê mais esperada do ano, o checkout fica fora do ar por duas horas."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Duas horas no dia da turnê. Já consigo ouvir o telefone tocando."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tocou muito. O detalhe curioso é que o painel de monitoramento ficou verde o tempo todo. Os servidores respondiam ao health check, a CPU estava tranquila. Só que quem tentava pagar recebia erro."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Ah, esse é o meu tipo favorito de incidente. O painel diz que está tudo bem, e o cliente diz que não está. Adivinha quem tem razão."
+    },
+    {
+      "persona": "davi",
+      "texto": "O cliente, claro. E aí vem a parte que me pegou. No dia seguinte, a diretoria faz uma reunião e sai com uma decisão: a partir de agora, a meta é cem por cento de disponibilidade. Nunca mais cai. E ainda colocam no contrato com uma grande produtora parceira uma garantia de noventa e nove vírgula noventa e nove por cento, com multa se não cumprir."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Cem por cento internamente e quatro noves no contrato. Tá. E o que o time de engenharia fez com isso?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Congelou os deploys. Toda mudança agora passa por um comitê, e só sobe uma vez por mês. Plantão dobrado. Jorge, sinceramente? Eu acho que eu teria feito a mesma coisa. Se o problema é que caiu, a gente para de mexer e mira em nunca cair. Parece responsável.",
+      "estilo": "convicto"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Parece mesmo. E a intenção é boa. Deixa eu te fazer umas perguntas antes de dizer o que eu acho. Primeira: cem por cento de disponibilidade medido como?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Medido... pelo sistema estar no ar?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "E o que é estar no ar? Naquele dia, pelo painel, o sistema estava no ar. O health check respondia. Então pela régua que eles tinham, o dia da turnê foi um dia de cem por cento."
+    },
+    {
+      "persona": "davi",
+      "texto": "Nossa. É verdade. A régua dizia que estava tudo certo enquanto ninguém conseguia comprar."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Então antes de discutir a meta, a gente precisa discutir a régua. E é aí que entram três siglas que todo mundo confunde: SLI, SLO e SLA. As três aparecem no livro Site Reliability Engineering, aquele que a Betsy Beyer, o Chris Jones, a Jennifer Petoff e o Niall Richard Murphy organizaram sobre como o Google opera produção. Tem um capítulo inteiro sobre elas."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi já de cara. São três nomes pra mesma coisa?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "São três coisas diferentes, uma em cima da outra. Começa pelo SLI, o service level indicator, o indicador de nível de serviço. É uma medida quantitativa, definida com cuidado, de algum aspecto do serviço que importa pra quem usa. Latência das requisições, taxa de erro, vazão, disponibilidade."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então CPU não é um bom SLI?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "CPU é um sinal útil pra quem opera a máquina. Mas o cliente não compra ingresso com a CPU. Na venda de ingressos, um SLI muito melhor seria algo como: de todas as tentativas de pagamento que chegaram, qual proporção terminou com sucesso. Ou: qual proporção das páginas de checkout carregou em menos de um certo tempo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Entendi. O SLI olha pelo lado de quem usa, não pelo lado da máquina."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Essa é a ideia. Agora, o SLO, o service level objective. É a meta pro indicador. Um valor ou uma faixa que você quer atingir, medida numa janela de tempo. Por exemplo: noventa e nove vírgula nove por cento das tentativas de pagamento com sucesso, medido nos últimos trinta dias."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o SLA?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "O SLA, o service level agreement, é o acordo com o cliente, que diz o que acontece se você não cumprir. Multa, crédito, desconto na próxima fatura. O livro sugere um teste simples, que eu acho ótimo: pergunta o que acontece se a meta não for cumprida. Se não existe consequência combinada com alguém de fora, provavelmente você está falando de um SLO, não de um SLA."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o contrato com a produtora, com multa, é um SLA. E a meta de cem por cento da diretoria, sem consequência pra ninguém de fora, é um SLO. Um SLO bem ambicioso, mas é um SLO."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Isso. E repara numa coisa que costuma dar problema: o SLA de quatro noves foi assinado sem ninguém ter um SLI que meça o que o cliente sente. A empresa prometeu um número sobre uma coisa que ela nem sabe medir."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso é meio assustador, falando assim."
+    },
+    {
+      "persona": "jorge",
+      "texto": "É bem comum. Na minha experiência, o jeito saudável é o contrário: o SLO interno fica mais apertado que o SLA. Assim você tem uma margem. Quando o SLO começa a ser violado, você ainda tem tempo de reagir antes de pagar multa."
+    },
+    {
+      "persona": "davi",
+      "texto": "Faz sentido. O SLO é o alarme que toca antes do SLA doer no bolso."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Gostei. Agora vamos pro cem por cento. Segunda pergunta: o cliente que compra ingresso pelo celular, no ônibus, com o sinal oscilando. Ele consegue perceber a diferença entre o seu checkout estar cem por cento disponível ou noventa e nove vírgula noventa e nove?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Acho que não. Se a internet dele cai, pra ele o site caiu, não importa de quem foi a culpa."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Exatamente. Esse é um dos argumentos do livro: entre o usuário e o seu serviço tem o celular dele, o wi-fi, a operadora, um monte de coisa menos confiável que o seu sistema. Passado de um certo ponto, cada nove a mais que você conquista some no meio desse caminho. O usuário não sente."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então eu gasto pra subir de quatro pra cinco noves e ninguém percebe."
+    },
+    {
+      "persona": "jorge",
+      "texto": "E gasta muito. Essa é a terceira pergunta: quanto custa cada nove? Quando eu estava na empresa de mídia, na época da migração pra nuvem, a gente tinha um serviço que alguém decidiu que precisava ser à prova de tudo. Réplica em outra região, banco duplicado, plantão com duas pessoas. A fatura desse serviço era maior que a de todo o resto do produto junto. E ele era uma página de configurações que a maioria dos usuários abria uma vez por ano."
+    },
+    {
+      "persona": "davi",
+      "texto": "Rindo aqui, porque eu consigo imaginar a reunião em que isso foi aprovado.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Todo mundo concordou, porque ninguém quer ser a pessoa que defende menos confiabilidade. Mas o custo não sobe em linha reta. Cada nove a mais tende a custar bem mais que o anterior: mais redundância, mais gente, mais processo. E tem um custo que não aparece na fatura."
+    },
+    {
+      "persona": "davi",
+      "texto": "Qual?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Velocidade. Pensa no que o time de vocês fez: congelou os deploys. Isso é o que acontece quando a meta é cem por cento. Se nenhuma falha é aceitável, qualquer mudança é um risco inaceitável. E a mudança é justamente o que entrega valor. A funcionalidade nova, a correção de bug, a atualização de segurança, tudo isso para."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí. A atualização de segurança também fica presa no comitê mensal?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Fica. E aí a meta de nunca cair começa a aumentar a chance de cair, porque o sistema acumula mudanças paradas. Quando o deploy mensal finalmente sai, ele leva trinta mudanças de uma vez. Se der problema, boa sorte pra descobrir qual das trinta foi."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso eu já vivi. O deploy que derrubou a produção lá na empresa era exatamente um deploy gigante, depois de semanas parado. Ninguém sabia por onde começar."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Então você conhece a dor. Quanto isso custa às três da manhã? Custa um deploy de trinta mudanças e uma pessoa tentando adivinhar qual delas quebrou."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, Jorge, mas então qual é a alternativa? Eu não posso chegar pra diretoria e dizer: olha, vamos aceitar que caia. Vão me demitir."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Você não diz que vai aceitar que caia. Você diz exatamente quanto pode cair, e o que acontece quando passar disso. É aí que entra o orçamento de erro, o error budget. O livro trata dele no capítulo sobre abraçar o risco."
+    },
+    {
+      "persona": "davi",
+      "texto": "Orçamento de erro. Me explica como se eu fosse o financeiro."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Ótimo jeito de pensar. Se o seu SLO é noventa e nove vírgula nove por cento de pagamentos com sucesso no mês, então zero vírgula um por cento pode falhar. Esse zero vírgula um é o seu orçamento. É um dinheiro que você tem pra gastar com falha."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se eu pensar em tempo, em vez de requisições?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Dá pra fazer a conta. Um mês de trinta dias tem quarenta e três mil e duzentos minutos. Zero vírgula um por cento disso dá pouco mais de quarenta e três minutos. Esse é o tempo de indisponibilidade que um SLO de três noves permite no mês."
+    },
+    {
+      "persona": "davi",
+      "texto": "Quarenta e três minutos. E o contrato de quatro noves que eles assinaram?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Faz a conta comigo: divide por dez. Uns quatro minutos e vinte segundos por mês."
+    },
+    {
+      "persona": "davi",
+      "texto": "Quatro minutos?! O incidente do dia da turnê durou duas horas. Só esse dia já gastou o orçamento de mais de vinte e sete meses.",
+      "estilo": "surpreso, mais devagar"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Pois é. E repara que a conta é toda sua, de multiplicação e divisão. Mas ela muda a conversa. Antes, a pergunta era: a gente pode fazer deploy? E a resposta do comitê sempre tende ao não. Com o orçamento, a pergunta vira: quanto orçamento ainda sobra este mês?"
+    },
+    {
+      "persona": "davi",
+      "texto": "E se sobrar bastante?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Então o time pode arriscar. Pode lançar a funcionalidade nova, pode fazer o experimento, pode subir mudança mais vezes. O orçamento existe pra ser gasto. Um SLO que nunca chega perto de ser violado provavelmente está frouxo demais, ou o time está sendo cuidadoso demais e deixando de entregar."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se o orçamento acabar?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Aí o time muda de prioridade. A ideia que o livro descreve é que, enquanto o serviço está dentro do SLO, os lançamentos seguem. Quando o orçamento se esgota, os lançamentos de funcionalidade param e o esforço vai pra confiabilidade até o serviço voltar pra meta. É uma regra combinada antes, não uma briga no meio do incidente."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. Então o congelamento de deploy que o time fez não é errado em si. O errado é ele ser permanente e sem critério."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Boa. O congelamento vira uma consequência mensurável, e não um humor da diretoria. E o mais interessante é o que isso faz com as pessoas. Sem orçamento, o time de produto quer lançar e o time de operação quer que nada mude. Cada um puxa pro seu lado, e quem grita mais alto ganha."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso é literalmente a minha empresa."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Com o orçamento, os dois olham pro mesmo número. O pessoal de produto passa a se importar com estabilidade, porque instabilidade gasta o orçamento que eles queriam usar pra lançar coisa nova. E o pessoal de operação para de ser o departamento do não. Na minha opinião, essa é a maior virtude da ideia: ela troca uma discussão política por uma discussão com dados."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, agora vou fazer a pergunta que o ouvinte deve estar fazendo. Quem decide se é três noves ou quatro noves? A engenharia?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Não só ela. Essa é uma decisão de negócio, com a engenharia na mesa. A engenharia traz quanto custa cada nível, e o negócio diz quanto vale pra ele. Uma loja de ingressos no dia de abertura de venda talvez precise de uma meta mais alta que num dia comum. Um relatório interno que o financeiro roda no fim do mês pode viver com bem menos."
+    },
+    {
+      "persona": "davi",
+      "texto": "Espera. Então o mesmo sistema pode ter SLOs diferentes pra partes diferentes?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Deve ter. O checkout e a página de configurações da conta não valem a mesma coisa. Colocar tudo no mesmo nível é como pagar seguro de carro blindado pra bicicleta."
+    },
+    {
+      "persona": "davi",
+      "texto": "E como eu escolho o número, na prática? Eu chuto noventa e nove vírgula nove porque é bonito?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Tem gente que faz isso, e é por isso que eu desconfio de número bonito. O que eu costumo fazer é começar pelo que os usuários de fato toleram e pelo que o sistema entrega hoje. Se hoje você entrega noventa e nove e meio e ninguém reclama, prometer cinco noves amanhã é fantasia. E o livro dá um conselho que eu gosto: tenha poucos SLOs, que o time consiga explicar, em vez de dezenas de metas que ninguém olha."
+    },
+    {
+      "persona": "davi",
+      "texto": "E sobre medir? Voltando ao painel verde. Qual seria o SLI certo pro checkout?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Eu começaria pela proporção de tentativas de pagamento que terminam com sucesso, medida o mais perto possível do usuário. E uma de latência. Aqui tem um detalhe que o capítulo de SLOs explica bem: prefira percentis à média. A média esconde o pior caso."
+    },
+    {
+      "persona": "davi",
+      "texto": "Como assim esconde?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Imagina que a maioria das requisições responde rápido, mas uma parte pequena demora vários segundos. A média sai bonita, porque as rápidas puxam ela pra baixo. Mas quem está nessa parte lenta está desistindo da compra. Se você olha o percentil noventa e nove, você vê o que os usuários mais azarados estão vivendo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então a média é o health check da latência. Diz que está tudo bem enquanto alguém sofre."
+    },
+    {
+      "persona": "jorge",
+      "texto": "É uma boa comparação.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas agora eu quero entender o lado ruim. Se eu adoto tudo isso, SLI, SLO, orçamento de erro, o que eu perco?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Gosto da pergunta. Primeiro, dá trabalho. Medir do jeito certo, perto do usuário, exige instrumentação, e isso custa tempo do time. Segundo, o número vira alvo. Se o SLI for mal escolhido, o time otimiza o indicador e não o serviço. Você troca o painel verde por outro painel verde."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o terceiro?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "O terceiro é a disciplina. O orçamento só funciona se a regra for respeitada quando ele acaba. Se toda vez que esgota alguém da diretoria diz: só esse lançamento, é importante, então você tem um número decorativo. Aí é melhor nem ter."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o caminho dos cem por cento, o que ele dá em troca? Tem algum ganho?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Tem um ganho de curto prazo: a sensação de controle. E pra algumas partes muito críticas, investir pesado em confiabilidade faz sentido. Mas como meta pro sistema inteiro, você paga em fatura, em velocidade e em gente cansada, e mesmo assim o sistema vai cair, porque tudo cai. Só que você não vai ter combinado com ninguém o que fazer quando acontecer."
+    },
+    {
+      "persona": "davi",
+      "texto": "Essa última frase dói."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Infraestrutura boa é a que ninguém percebe. Mas ninguém perceber não significa nunca falhar. Significa falhar dentro de um limite que o usuário tolera, e se recuperar antes de ele notar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu tentar resumir com as minhas palavras, Jorge, e você me corrige. O SLI é a régua: um número que mede o serviço do jeito que o usuário sente, como a proporção de pagamentos com sucesso, e não a CPU do servidor. O SLO é a meta que eu coloco nessa régua, numa janela de tempo. E o SLA é o acordo com o cliente, que diz o que acontece se eu não cumprir, e o SLO interno deve ser mais apertado que ele."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Até aqui, perfeito."
+    },
+    {
+      "persona": "davi",
+      "texto": "Aí vem o orçamento de erro, que é o que sobra entre a meta e os cem por cento. Três noves dá uns quarenta e três minutos por mês. Enquanto sobra orçamento, o time lança e arrisca. Quando acaba, o foco vai pra confiabilidade. Isso coloca produto e operação olhando pro mesmo número. E cem por cento é a meta errada porque o usuário nem percebe a diferença depois de certo ponto, cada nove custa mais caro, e a meta de nunca falhar trava as mudanças, inclusive as que deixariam o sistema mais seguro."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Faltou só uma coisa, que você mesmo disse antes: o número de confiabilidade é uma decisão de negócio. Não é a engenharia sozinha que escolhe."
+    },
+    {
+      "persona": "davi",
+      "texto": "Verdade. Engenharia diz quanto custa, negócio diz quanto vale. Anotado."
+    },
+    {
+      "persona": "davi",
+      "texto": "Agora o desafio da semana. Escolha um serviço que você mantém, defina um SLI e um SLO para ele e calcule quantos minutos de indisponibilidade por mês esse SLO permite. E se você ainda não trabalha na área, faz assim: pega o site do Pebacast, que tem o código aberto em github.com barra lucas-jdev barra pebacast, defina como SLI a proporção de visitas à página inicial que carregam com sucesso, escolha um SLO e calcule os minutos que ele permite num mês de trinta dias."
+    },
+    {
+      "persona": "jorge",
+      "texto": "E uma dica: depois de calcular, pergunta se você aceitaria esse número se fosse o dono do site. Se a resposta for não, a meta está errada, não a conta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Boa. Jorge, muito obrigado por mais essa conversa."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Eu que agradeço, Davi. E pra quem está ouvindo: confiabilidade boa não é a que nunca falha, é a que sabe quanto pode falhar."
+    },
+    {
+      "persona": "davi",
+      "texto": "E é isso. Esse foi o Pebacast. Valeu por ouvir, e até o próximo episódio!"
+    }
+  ],
+  "desafio": "Escolha um serviço que você mantém, defina um SLI e um SLO para ele e calcule quantos minutos de indisponibilidade por mês esse SLO permite.",
+  "desafio_iniciante": "Pegue o site do Pebacast, cujo código está aberto em github.com/lucas-jdev/pebacast, defina como SLI a proporção de visitas à página inicial que carregam com sucesso, escolha um SLO e calcule quantos minutos de indisponibilidade ele permite num mês de trinta dias.",
+  "fontes": [
+    "Site Reliability Engineering: How Google Runs Production Systems, Betsy Beyer, Chris Jones, Jennifer Petoff e Niall Richard Murphy, caps. 1, 3 e 4"
+  ]
+}

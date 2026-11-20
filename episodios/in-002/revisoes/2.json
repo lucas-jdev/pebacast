@@ -1,0 +1,204 @@
+{
+  "aprovado": true,
+  "roteiro_sha256": "cc5788e6c04932e9ace352674265ec0d8aa06665810fd5c2eee7f4eb9cbc1166",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "o caso de hoje é hipotético",
+      "veredito": "correta",
+      "fonte": "noticia.json: tipo hipotetico; o roteiro anuncia o caso como hipotético"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "o painel de monitoramento ficou verde o tempo todo. Os servidores respondiam ao health check, a CPU estava tranquila. Só que quem tentava pagar recebia erro.",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário)"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "a meta é cem por cento de disponibilidade. [...] garantia de noventa e nove vírgula noventa e nove por cento, com multa se não cumprir.",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário)"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "Congelou os deploys. Toda mudança agora passa por um comitê, e só sobe uma vez por mês. Plantão dobrado.",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário)"
+    },
+    {
+      "fala": 14,
+      "afirmacao": "As três aparecem no livro Site Reliability Engineering, aquele que a Betsy Beyer, o Chris Jones, a Jennifer Petoff e o Niall Richard Murphy organizaram sobre como o Google opera produção. Tem um capítulo inteiro sobre elas.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016): os quatro são organizadores (editores); cap. 4, 'Service Level Objectives', 'Service Level Terminology'"
+    },
+    {
+      "fala": 16,
+      "afirmacao": "É uma medida quantitativa, definida com cuidado, de algum aspecto do serviço que importa pra quem usa. Latência das requisições, taxa de erro, vazão, disponibilidade.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 4, 'Indicators': 'a carefully defined quantitative measure of some aspect of the level of service', com latência, taxa de erro, vazão e disponibilidade como exemplos"
+    },
+    {
+      "fala": 18,
+      "afirmacao": "Na venda de ingressos, um SLI muito melhor seria algo como: de todas as tentativas de pagamento que chegaram, qual proporção terminou com sucesso.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 4 ('What Do You and Your Users Care About?'; disponibilidade como fração de requisições bem-sucedidas)"
+    },
+    {
+      "fala": 20,
+      "afirmacao": "É a meta pro indicador. Um valor ou uma faixa que você quer atingir, medida numa janela de tempo.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 4, 'Objectives': 'a target value or range of values for a service level that is measured by an SLI'; janela de tempo em 'Defining Objectives'"
+    },
+    {
+      "fala": 22,
+      "afirmacao": "O SLA, o service level agreement, é o acordo com o cliente, que diz o que acontece se você não cumprir. Multa, crédito, desconto na próxima fatura.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 4, 'Agreements': contrato com os usuários que inclui as consequências de cumprir ou não os SLOs, tipicamente financeiras (reembolso, multa)"
+    },
+    {
+      "fala": 22,
+      "afirmacao": "O livro sugere um teste simples, que eu acho ótimo: pergunta o que acontece se a meta não for cumprida. Se não existe consequência combinada com alguém de fora, provavelmente você está falando de um SLO, não de um SLA.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 4, 'Agreements': perguntar 'what happens if the SLOs aren't met?'; sem consequência explícita, quase certamente é um SLO"
+    },
+    {
+      "fala": 23,
+      "afirmacao": "Então o contrato com a produtora, com multa, é um SLA. E a meta de cem por cento da diretoria, sem consequência pra ninguém de fora, é um SLO.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 4, 'Agreements' (aplicação do teste ao cenário)"
+    },
+    {
+      "fala": 24,
+      "afirmacao": "o SLA de quatro noves foi assinado sem ninguém ter um SLI que meça o que o cliente sente.",
+      "veredito": "correta",
+      "fonte": "noticia.json: o monitoramento media health check e CPU e não percebeu o erro no pagamento; a inferência sobre o cenário é coerente"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "o SLO interno fica mais apertado que o SLA. Assim você tem uma margem.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 4, 'Keep a safety margin': SLO interno mais apertado que o anunciado aos usuários dá tempo de reagir"
+    },
+    {
+      "fala": 30,
+      "afirmacao": "Esse é um dos argumentos do livro: entre o usuário e o seu serviço tem o celular dele, o wi-fi, a operadora, um monte de coisa menos confiável que o seu sistema.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 1 e cap. 3: o usuário num smartphone 99% confiável não distingue 99,99% de 99,999%; a experiência é dominada por componentes menos confiáveis (rede, dispositivo)"
+    },
+    {
+      "fala": 34,
+      "afirmacao": "Cada nove a mais tende a custar bem mais que o anterior: mais redundância, mais gente, mais processo.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 3, 'Managing Risk': cada incremento de confiabilidade pode custar até 100x mais que o anterior (redundância, custo de oportunidade)"
+    },
+    {
+      "fala": 36,
+      "afirmacao": "Se nenhuma falha é aceitável, qualquer mudança é um risco inaceitável. E a mudança é justamente o que entrega valor.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 1 ('100% is the wrong reliability target') e cap. 3 (confiabilidade extrema reduz a velocidade de entrega de funcionalidades)"
+    },
+    {
+      "fala": 38,
+      "afirmacao": "o sistema acumula mudanças paradas. Quando o deploy mensal finalmente sai, ele leva trinta mudanças de uma vez. Se der problema, boa sorte pra descobrir qual das trinta foi.",
+      "veredito": "correta",
+      "fonte": "conhecimento consolidado: lotes grandes de mudança aumentam o risco e dificultam isolar a causa (ex.: Accelerate, Continuous Delivery); afirmação não atribuída a obra"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "É aí que entra o orçamento de erro, o error budget. O livro trata dele no capítulo sobre abraçar o risco.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 3, 'Embracing Risk', seções 'Motivation for Error Budgets' e 'Forming Your Error Budget'"
+    },
+    {
+      "fala": 44,
+      "afirmacao": "Se o seu SLO é noventa e nove vírgula nove por cento de pagamentos com sucesso no mês, então zero vírgula um por cento pode falhar. Esse zero vírgula um é o seu orçamento.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 3, 'Forming Your Error Budget' (orçamento = 1 - SLO)"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "Um mês de trinta dias tem quarenta e três mil e duzentos minutos. Zero vírgula um por cento disso dá pouco mais de quarenta e três minutos.",
+      "veredito": "correta",
+      "fonte": "aritmética: 30 x 1440 = 43.200 min; 0,1% = 43,2 min; Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), Apêndice A, 'Availability Table'"
+    },
+    {
+      "fala": 48,
+      "afirmacao": "Uns quatro minutos e vinte segundos por mês.",
+      "veredito": "correta",
+      "fonte": "aritmética: 0,01% de 43.200 min = 4,32 min = 4 min 19 s"
+    },
+    {
+      "fala": 49,
+      "afirmacao": "O incidente do dia da turnê durou duas horas. Só esse dia já gastou o orçamento de mais de vinte e sete meses.",
+      "veredito": "correta",
+      "fonte": "aritmética: 120 min / 4,32 min = 27,8 meses"
+    },
+    {
+      "fala": 52,
+      "afirmacao": "O orçamento existe pra ser gasto. Um SLO que nunca chega perto de ser violado provavelmente está frouxo demais, ou o time está sendo cuidadoso demais e deixando de entregar.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 3 (orçamento não gasto é velocidade desperdiçada) e cap. 4, caso do Chubby: o serviço deve cumprir, mas não exceder muito, o SLO. A direção corrigida desde a revisão 1 está certa"
+    },
+    {
+      "fala": 54,
+      "afirmacao": "A ideia que o livro descreve é que, enquanto o serviço está dentro do SLO, os lançamentos seguem. Quando o orçamento se esgota, os lançamentos de funcionalidade param e o esforço vai pra confiabilidade até o serviço voltar pra meta.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 3, 'Forming Your Error Budget': enquanto os SLOs são cumpridos, os lançamentos continuam; esgotado o orçamento, são suspensos e os recursos vão para testes e resiliência"
+    },
+    {
+      "fala": 56,
+      "afirmacao": "Sem orçamento, o time de produto quer lançar e o time de operação quer que nada mude.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 1 e cap. 3, 'Motivation for Error Budgets': tensão estrutural entre velocidade de desenvolvimento e estabilidade"
+    },
+    {
+      "fala": 58,
+      "afirmacao": "O pessoal de produto passa a se importar com estabilidade, porque instabilidade gasta o orçamento que eles queriam usar pra lançar coisa nova.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 3, 'Benefits': o orçamento dá incentivo comum e leva o desenvolvimento a se autorregular"
+    },
+    {
+      "fala": 60,
+      "afirmacao": "Essa é uma decisão de negócio, com a engenharia na mesa. A engenharia traz quanto custa cada nível, e o negócio diz quanto vale pra ele.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 1 e cap. 3 ('Measuring Service Risk', 'Target level of availability'): o nível de disponibilidade é uma questão de produto, ponderando custo e benefício"
+    },
+    {
+      "fala": 62,
+      "afirmacao": "O checkout e a página de configurações da conta não valem a mesma coisa.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 3 (metas de disponibilidade diferentes conforme o tipo de serviço e de falha)"
+    },
+    {
+      "fala": 64,
+      "afirmacao": "E o livro dá um conselho que eu gosto: tenha poucos SLOs, que o time consiga explicar, em vez de dezenas de metas que ninguém olha.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 4, 'Choosing Targets': 'Have as few SLOs as possible' e 'Keep it simple'"
+    },
+    {
+      "fala": 66,
+      "afirmacao": "Aqui tem um detalhe que o capítulo de SLOs explica bem: prefira percentis à média. A média esconde o pior caso.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 4, 'Aggregation': percentis mostram a forma da distribuição; a média esconde a cauda"
+    },
+    {
+      "fala": 68,
+      "afirmacao": "Se você olha o percentil noventa e nove, você vê o que os usuários mais azarados estão vivendo.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 4, 'Aggregation' (99º e 99,9º percentil mostram o pior caso plausível)"
+    },
+    {
+      "fala": 81,
+      "afirmacao": "Aí vem o orçamento de erro, que é o que sobra entre a meta e os cem por cento. Três noves dá uns quarenta e três minutos por mês.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 3 e Apêndice A (99,9% = 43,2 min em 30 dias)"
+    },
+    {
+      "fala": 84,
+      "afirmacao": "pega o site do Pebacast, que tem o código aberto em github.com barra lucas-jdev barra pebacast, defina como SLI a proporção de visitas à página inicial que carregam com sucesso, escolha um SLO e calcule os minutos que ele permite num mês de trinta dias.",
+      "veredito": "correta",
+      "fonte": "github.com/lucas-jdev/pebacast é público (API do GitHub, visibility: public) e tem o site em site/; a tarefa só pede definir SLI, escolher SLO e fazer a conta, sem emprego nem acesso privado"
+    }
+  ]
+}

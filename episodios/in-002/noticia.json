@@ -1,0 +1,4 @@
+{
+  "tipo": "hipotetico",
+  "cenario": "Uma empresa que vende ingressos para shows pela internet tem o checkout fora do ar por duas horas no dia em que abre a venda da turnê mais esperada do ano. O painel de monitoramento fica verde o tempo todo, porque os servidores respondem ao health check e a CPU está tranquila, mas quem tenta pagar recebe erro. No dia seguinte, a diretoria define como meta interna cem por cento de disponibilidade e assina com uma produtora parceira um contrato que garante noventa e nove vírgula noventa e nove por cento, com multa. O time de engenharia congela os deploys, passa a liberar mudanças uma vez por mês por um comitê e dobra o plantão."
+}
