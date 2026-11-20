@@ -163,6 +163,25 @@ As pausas no meio de um bloco são do TTS e não entram na conta. Os limites par
 
 O resultado vai para o resumo da execução no Actions (`qualidade.md`). **O QA não segura a publicação.** Se alguma medida reprovar, o episódio sai assim mesmo e o Python abre uma issue `incidente` com as medidas, com o título `Áudio do <id> fora do padrão`. Se já houver uma aberta para o episódio, comenta nela. Quando o áudio daquele episódio passar, a issue fecha sozinha. Uma falha do próprio QA também não segura a publicação: vira aviso.
 
+## QA de texto
+
+O QA do áudio não percebe quando o TTS fala outra coisa no lugar do roteiro ("a GPL" em vez de "a AGPL"). Depois do QA do áudio, `src/podcast/qualidade_texto.py` confere isso, em **modo aviso** (#69):
+
+1. Recorta só a fala do MP3 (`Trechos.fala`, sem a vinheta) e manda aos dois modelos de `qualidade_texto.modelos`. São 2 requisições por episódio, seja qual for o provedor de voz.
+2. Normaliza o roteiro **original** (não o texto do dicionário de pronúncia) e cada transcrição: minúsculas, sem acento, sem pontuação e com as equivalências de fala de `qualidade_texto.equivalencias` ("pra" = "para", "tá" = "está"). Um número por extenso transcrito como algarismo é ignorado.
+3. Alinha palavra por palavra (`difflib.SequenceMatcher`). Só conta a divergência que aparece **nas duas** transcrições, no mesmo trecho do roteiro: erro de um modelo só é ruído de transcrição. No teste do especial do Prumo, foi isso que separou erro real de ruído.
+
+O laudo vai para o resumo da execução (`qualidade.md`). Com divergência confirmada, o Python abre a issue `incidente` "Texto do <id> diverge do roteiro", ou comenta na aberta. O Lucas ouve cada trecho, marca na issue se o aviso acertou ou foi alarme falso e fecha à mão: é o que vai calibrar a regeneração automática (#70).
+
+A transcrição usa a mesma camada única de retentativa do TTS (`src/podcast/retentativa.py`): 429 e 5xx esperam e tentam de novo, e um pedido recusado (4xx) desiste na hora. Se os modelos continuarem indisponíveis, o resumo diz "QA de texto não rodou", o log ganha um `::warning::` e a publicação segue. Essa falha **não** entra nos avisos, porque o `avisos.md` vira a issue de fallback de voz.
+
+**Cota no free tier.** Os limites por dia ficam no painel do AI Studio, por modelo, e não em tabela pública (ADR 0001). A cota de cada modelo de transcrição é separada da do `gemini-3.8-flash-tts`, então o QA de texto não tira requisição da narração:
+
+| Modelo | Requisições por dia (free tier) | Uso por episódio |
+|---|---|---|
+| `gemini-3.6-flash` | _conferir no AI Studio_ | 1 |
+| `gemini-3.5-flash` | _conferir no AI Studio_ | 1 |
+
 ## Regravação do áudio
 
 Quando um áudio publicado sai ruim, `.github/workflows/regravar.yml` narra o mesmo roteiro de novo, disparado à mão no Actions com o id do episódio:

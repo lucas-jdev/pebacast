@@ -88,7 +88,7 @@ flowchart TB
     motion -- "baixa o MP3" --> audio
     repo -- "push dispara;<br/>agendamento diário retoma<br/>quem aguarda a cota" --> pipeline
     lucas -. "dispara a regravação<br/>de um áudio" .-> pipeline
-    pipeline -- "narra" --> gemini
+    pipeline -- "narra e transcreve<br/>para o QA de texto" --> gemini
     pipeline -- "sobe o MP3" --> audio
     pipeline -- "gera e publica" --> site
     pipeline -. "avisa as URLs que mudaram,<br/>sem bloquear" .-> indexnow

@@ -80,6 +80,21 @@ audio:
       fade_entrada_s: 1.0
       fade_saida_s: 0.5
 
+# QA de texto (#69, src/podcast/qualidade_texto.py): transcreve a fala do MP3 com dois modelos e
+# só avisa da divergência com o roteiro que os dois ouviram igual. Não segura a publicação.
+qualidade_texto:
+  modelos: [gemini-3.6-flash, gemini-3.5-flash]
+  timeout_s: 300
+  # Forma falada (uma palavra) → forma escrita: não é erro do TTS dizer "pra" onde o roteiro tem "para".
+  equivalencias:
+    pra: para
+    pro: para o
+    pros: para os
+    tá: está
+    tô: estou
+    tava: estava
+    cê: você
+
 publicacao:
   audio: github_releases
   feed: github_pages
