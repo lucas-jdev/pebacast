@@ -410,9 +410,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         escrever_site(projeto, args.site)
         return 0
 
-    from podcast.tts.fabrica import criar_provedor
+    from podcast.tts.fabrica import fabrica_da_config
 
     incidentes = IncidentesDeAudio(args.repo, args.execucao)
+    criar_provedor = fabrica_da_config(projeto.config()["tts"])
     resultado = publicar_pendentes(projeto, GitHubReleases(args.repo), criar_provedor, args.trabalho, incidentes=incidentes)
     escrever_site(projeto, args.site)
 

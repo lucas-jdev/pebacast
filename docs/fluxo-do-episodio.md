@@ -49,8 +49,8 @@ flowchart TD
         pronuncia[Aplica o dicionário de pronúncia]
         tts["Voz no Gemini TTS<br/>até 2 vozes por requisição"]
         erro_tts{Erro do Gemini?}
-        retry[429 / 5xx: espera e tenta de novo]
-        kokoro[Kokoro local, só se a API<br/>estiver fora ou sem acesso;<br/>publica e abre issue de aviso]
+        retry[429 por minuto / 5xx / timeout:<br/>espera e tenta de novo]
+        kokoro[Kokoro local, só se a API<br/>estiver fora, sem acesso<br/>ou sem cota no dia;<br/>publica e abre issue de aviso]
         mix["Apara o silêncio nas bordas dos blocos,<br/>nivela a vinheta pela fala, mixa,<br/>ganho único e limitador de pico → MP3"]
         release[Sobe o MP3 no GitHub Releases]
         registro["Grava <code>publicacao.json</code><br/>e commita"]
@@ -92,9 +92,9 @@ flowchart TD
     validar_ci -- reprovado --> issue
     validar_ci -- ok --> pronuncia --> tts --> erro_tts
     erro_tts -- não --> mix
-    erro_tts -- "429 / 5xx" --> retry --> tts
+    erro_tts -- "429 por minuto /<br/>5xx / timeout" --> retry --> tts
     erro_tts -- "4xx do pedido" --> issue
-    erro_tts -- "401 / 403 ou<br/>tentativas esgotadas" --> kokoro --> mix
+    erro_tts -- "401 / 403, cota diária<br/>esgotada ou tentativas<br/>esgotadas" --> kokoro --> mix
     mix --> release --> registro --> qa
     qa -- "passando ou não,<br/>publica" --> feed
     qa -. "não" .-> incidente

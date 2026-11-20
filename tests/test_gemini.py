@@ -1,4 +1,5 @@
 import base64
+import logging
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -9,7 +10,7 @@ from podcast.audio import Audio
 from podcast.dominio import Fala
 from podcast.personas import carregar_personas
 from podcast.tts.gemini import VOZES, GeminiTts, agrupar_em_blocos, montar_requisicao
-from podcast.tts.provedor import RequisicaoRecusada
+from podcast.tts.provedor import CotaDiariaEsgotada, RequisicaoRecusada
 
 
 class ClienteFalso:
@@ -137,18 +138,27 @@ def test_desiste_depois_do_limite_de_tentativas(davi):
 
 
 class ErroDaApi(Exception):
-    def __init__(self, status_code: int) -> None:
+    def __init__(self, status_code: int, body: object = None) -> None:
         super().__init__(f"Error code: {status_code}")
         self.status_code = status_code
+        self.body = body
+
+
+def _corpo_do_429(quota_id: str) -> dict:
+    return {"error": {"code": 429, "status": "RESOURCE_EXHAUSTED", "details": [
+        {"@type": "type.googleapis.com/google.rpc.QuotaFailure",
+         "violations": [{"quotaMetric": "generativelanguage.googleapis.com/generate_requests", "quotaId": quota_id}]},
+    ]}}
 
 
 class ClienteQueFalhaCom(ClienteFalso):
-    def __init__(self, status_code: int) -> None:
+    def __init__(self, status_code: int, body: object = None) -> None:
         super().__init__()
         self.status_code = status_code
+        self.body = body
 
     def create(self, **requisicao):
-        raise ErroDaApi(self.status_code)
+        raise ErroDaApi(self.status_code, self.body)
 
 
 def test_pedido_recusado_nao_tenta_de_novo(davi):
@@ -184,3 +194,72 @@ def test_toda_persona_do_curriculo_tem_voz_do_gemini_valida():
 
     invalidas = {p.id: p.voz.gemini for p in personas.values() if p.voz.gemini not in VOZES}
     assert invalidas == {}
+
+
+def test_cota_diaria_esgotada_desiste_na_primeira_tentativa_sem_esperar(davi):
+    esperas = []
+    cliente = ClienteQueFalhaCom(429, _corpo_do_429("GenerateRequestsPerDayPerProjectPerModel-FreeTier"))
+    tts = GeminiTts("gemini-3.8-flash-tts", cliente=cliente, dormir=esperas.append)
+
+    with pytest.raises(CotaDiariaEsgotada, match="Cota diária do Gemini esgotada"):
+        tts.sintetizar([Fala(davi, "Oi")])
+    assert esperas == []
+
+
+def test_cota_por_minuto_esgotada_continua_tentando_de_novo(davi):
+    esperas = []
+    cliente = ClienteQueFalhaCom(429, _corpo_do_429("GenerateRequestsPerMinutePerProjectPerModel-FreeTier"))
+    tts = GeminiTts("modelo", cliente=cliente, tentativas=3, espera_inicial_s=10, dormir=esperas.append)
+
+    with pytest.raises(ErroDaApi):
+        tts.sintetizar([Fala(davi, "Oi")])
+    assert esperas == [10, 20]
+
+
+class ClienteQueEstouraOTempo(ClienteFalso):
+    def __init__(self) -> None:
+        super().__init__()
+        self._estourou = False
+
+    def create(self, **requisicao):
+        if not self._estourou:
+            self._estourou = True
+            raise TimeoutError("Request timed out.")
+        return super().create(**requisicao)
+
+
+def test_timeout_aparece_no_log_e_entra_na_retentativa(davi, caplog):
+    esperas = []
+    tts = GeminiTts("modelo", cliente=ClienteQueEstouraOTempo(), espera_inicial_s=10, dormir=esperas.append)
+
+    with caplog.at_level(logging.WARNING, logger="podcast.tts.gemini"):
+        tts.sintetizar([Fala(davi, "Oi")])
+
+    assert esperas == [10]
+    assert "tentativa 1 de 4" in caplog.text and "timed out" in caplog.text
+
+
+def test_ultima_tentativa_tambem_fica_no_log(davi, caplog):
+    tts = GeminiTts("modelo", cliente=ClienteInstavel(falhas=9), tentativas=2, dormir=lambda _: None)
+
+    with caplog.at_level(logging.WARNING, logger="podcast.tts.gemini"), pytest.raises(RuntimeError):
+        tts.sintetizar([Fala(davi, "Oi")])
+
+    assert "tentativa 2 de 2" in caplog.text and "Sem nova tentativa" in caplog.text
+
+
+def test_cliente_desliga_a_retentativa_do_sdk_e_limita_o_tempo_da_requisicao(monkeypatch):
+    from google import genai
+
+    from podcast.tts import gemini
+
+    criados = []
+    monkeypatch.setattr(genai, "Client", lambda **opcoes: criados.append(opcoes))
+
+    gemini._criar_cliente(timeout_s=180)
+
+    [opcoes] = criados
+    http = opcoes["http_options"]
+    assert http.api_version == "v1beta"
+    assert http.timeout == 180_000
+    assert http.retry_options.attempts == 1

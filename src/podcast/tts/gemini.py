@@ -1,4 +1,5 @@
 import base64
+import json
 import logging
 import time
 from collections.abc import Callable, Sequence
@@ -6,7 +7,7 @@ from typing import Any
 
 from podcast.audio import Audio, concatenar
 from podcast.dominio import Fala, Persona
-from podcast.tts.provedor import RequisicaoRecusada
+from podcast.tts.provedor import CotaDiariaEsgotada, RequisicaoRecusada
 
 TAXA_AMOSTRAGEM = 24_000
 MAX_FALANTES_POR_REQUISICAO = 2
@@ -19,6 +20,7 @@ VOZES = frozenset({
 })
 STATUS_TRANSITORIOS = frozenset({408, 429})
 STATUS_DE_ACESSO = frozenset({401, 403})
+TIMEOUT_PADRAO_S = 180.0
 
 log = logging.getLogger(__name__)
 
@@ -33,6 +35,7 @@ class GeminiTts:
         cliente: Any = None,
         tentativas: int = 4,
         espera_inicial_s: float = 15.0,
+        timeout_s: float = TIMEOUT_PADRAO_S,
         dormir: Callable[[float], None] = time.sleep,
     ) -> None:
         self.nome = modelo
@@ -40,7 +43,7 @@ class GeminiTts:
         self._idioma = idioma
         self._max_caracteres = max_caracteres_por_bloco
         self._pausa_ms = pausa_entre_blocos_ms
-        self._cliente = cliente if cliente is not None else _criar_cliente()
+        self._cliente = cliente if cliente is not None else _criar_cliente(timeout_s)
         self._tentativas = tentativas
         self._espera_inicial_s = espera_inicial_s
         self._dormir = dormir
@@ -58,9 +61,13 @@ class GeminiTts:
             except Exception as erro:
                 if _recusa_do_pedido(erro):
                     raise RequisicaoRecusada(str(erro)) from erro
-                # O free tier devolve 429 com frequência; espera exponencial antes de desistir.
+                if _cota_diaria_esgotada(erro):
+                    raise CotaDiariaEsgotada(f"Cota diária do Gemini esgotada ({self._modelo}): {erro}") from erro
                 if tentativa == self._tentativas or _falha_de_acesso(erro):
+                    log.warning("Gemini falhou (tentativa %d de %d): %s. Sem nova tentativa.",
+                                tentativa, self._tentativas, erro)
                     raise
+                # O free tier devolve 429 por minuto com frequência; espera exponencial antes de desistir.
                 espera = self._espera_inicial_s * 2 ** (tentativa - 1)
                 log.warning("Gemini falhou (tentativa %d de %d): %s. Nova tentativa em %.0f s.",
                             tentativa, self._tentativas, erro, espera)
@@ -79,6 +86,14 @@ def _recusa_do_pedido(erro: Exception) -> bool:
 
 def _falha_de_acesso(erro: Exception) -> bool:
     return getattr(erro, "status_code", None) in STATUS_DE_ACESSO
+
+
+def _cota_diaria_esgotada(erro: Exception) -> bool:
+    """O 429 da cota por dia cita um quotaId com "PerDay"; o da cota por minuto, não."""
+    if getattr(erro, "status_code", None) != 429:
+        return False
+    corpo = getattr(erro, "body", None)
+    return "PerDay" in f"{erro} {json.dumps(corpo, default=str) if corpo is not None else ''}"
 
 
 def agrupar_em_blocos(falas: Sequence[Fala], max_caracteres: int) -> list[list[Fala]]:
@@ -129,8 +144,14 @@ def _montar_turno(fala: Fala) -> dict[str, Any]:
     return {"type": "text", "text": fala.texto, "annotations": [metadados]}
 
 
-def _criar_cliente() -> Any:
+def _criar_cliente(timeout_s: float) -> Any:
     from google import genai
+    from google.genai import types
 
-    # Os modelos de TTS só existem na v1beta; o padrão do SDK 3.x é a v1.
-    return genai.Client(http_options={"api_version": "v1beta"})
+    # Os modelos de TTS só existem na v1beta; o padrão do SDK 3.x é a v1. A retentativa do SDK fica
+    # desligada (attempts=1): repetir é papel do _sintetizar_bloco, que registra cada tentativa no log.
+    return genai.Client(http_options=types.HttpOptions(
+        api_version="v1beta",
+        timeout=round(timeout_s * 1000),
+        retry_options=types.HttpRetryOptions(attempts=1),
+    ))
