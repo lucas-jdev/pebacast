@@ -203,8 +203,9 @@ def publicar_pendentes(
             marcar_espera(pasta, agora())
             aguardando.append(episodio_id)
             if esperas is not None:
+                motivo = str(erro)
                 _avisar_sem_segurar(avisos, episodio_id, "a issue da cota esgotada não foi aberta",
-                                    lambda: esperas.registrar(episodio_id, str(erro)))
+                                    lambda: esperas.registrar(episodio_id, motivo))
             continue
         if erro_principal:
             avisos.append(f"{episodio_id}: sintetizado com o fallback {provedor}. Erro do principal: {erro_principal}")
