@@ -16,10 +16,12 @@ from podcast.publicacao import (
     gerar_feed,
     publicar_pendentes,
     relatorio,
+    resumo_da_qualidade,
     sintetizar_com_fallback,
 )
 from podcast.espera_de_cota import IncidentesDeCota
 from podcast.qualidade_audio import IncidentesDeAudio
+from podcast.qualidade_texto import QaDeTexto
 from podcast.tts.provedor import CotaDiariaEsgotada, RequisicaoRecusada
 from tests.conftest import ProvedorFalso, ProvedorQuebrado
 from tests.test_qualidade_audio import GhFalso
@@ -441,3 +443,44 @@ def test_falha_ao_registrar_o_incidente_nao_impede_a_publicacao(projeto, tmp_pat
 
     assert resultado.publicados == ["sw-001"]
     assert "QA do áudio" in resultado.avisos[0]
+
+
+class TranscritorQueRepete:
+    def __init__(self, nome):
+        self.nome = nome
+
+    def transcrever(self, audio_mp3):
+        assert audio_mp3, "o recorte da fala chegou vazio"
+        return "Transcrição que não bate com nada do roteiro."
+
+
+class TranscritorIndisponivel:
+    nome = "indisponivel"
+
+    def transcrever(self, audio_mp3):
+        raise ConnectionError("503 UNAVAILABLE")
+
+
+@precisa_ffmpeg
+def test_qa_de_texto_roda_depois_de_publicar_e_vai_para_o_resumo(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    qa = QaDeTexto((TranscritorQueRepete("a"), TranscritorQueRepete("b")), {})
+
+    resultado = publicar_pendentes(projeto, StorageFalso(), _fabrica(), tmp_path / "trabalho", lambda: AGORA, qa_texto=qa)
+
+    assert resultado.publicados == ["sw-001"]
+    assert not resultado.texto["sw-001"].aprovado
+    assert "### Texto do sw-001" in resumo_da_qualidade(resultado)
+
+
+@precisa_ffmpeg
+def test_qa_de_texto_que_nao_roda_nao_segura_a_publicacao_nem_vira_aviso_de_fallback(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    qa = QaDeTexto((TranscritorIndisponivel(), TranscritorIndisponivel()), {})
+
+    resultado = publicar_pendentes(projeto, StorageFalso(), _fabrica(), tmp_path / "trabalho", lambda: AGORA, qa_texto=qa)
+
+    assert resultado.publicados == ["sw-001"]
+    assert resultado.texto_nao_rodou["sw-001"].startswith("QA de texto não rodou")
+    assert resultado.avisos == []
+    assert "QA de texto não rodou" in resumo_da_qualidade(resultado)

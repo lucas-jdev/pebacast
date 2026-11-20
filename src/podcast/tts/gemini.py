@@ -1,12 +1,12 @@
 import base64
 import json
-import logging
 import time
 from collections.abc import Callable, Sequence
 from typing import Any
 
 from podcast.audio import Audio, concatenar
 from podcast.dominio import Fala, Persona
+from podcast.retentativa import tentar
 from podcast.tts.provedor import CotaDiariaEsgotada, RequisicaoRecusada
 
 TAXA_AMOSTRAGEM = 24_000
@@ -22,7 +22,6 @@ STATUS_TRANSITORIOS = frozenset({408, 429})
 STATUS_DE_ACESSO = frozenset({401, 403})
 TIMEOUT_PADRAO_S = 180.0
 
-log = logging.getLogger(__name__)
 
 
 class GeminiTts:
@@ -43,7 +42,7 @@ class GeminiTts:
         self._idioma = idioma
         self._max_caracteres = max_caracteres_por_bloco
         self._pausa_ms = pausa_entre_blocos_ms
-        self._cliente = cliente if cliente is not None else _criar_cliente(timeout_s)
+        self._cliente = cliente if cliente is not None else criar_cliente(timeout_s)
         self._tentativas = tentativas
         self._espera_inicial_s = espera_inicial_s
         self._dormir = dormir
@@ -54,25 +53,23 @@ class GeminiTts:
 
     def _sintetizar_bloco(self, bloco: Sequence[Fala]) -> Audio:
         requisicao = montar_requisicao(bloco, self._modelo, self._idioma)
-        for tentativa in range(1, self._tentativas + 1):
-            try:
-                interacao = self._cliente.interactions.create(**requisicao)
-                return Audio(base64.b64decode(interacao.output_audio.data), TAXA_AMOSTRAGEM)
-            except Exception as erro:
-                if _recusa_do_pedido(erro):
-                    raise RequisicaoRecusada(str(erro)) from erro
-                if _cota_diaria_esgotada(erro):
-                    raise CotaDiariaEsgotada(f"Cota diária do Gemini esgotada ({self._modelo}): {erro}") from erro
-                if tentativa == self._tentativas or _falha_de_acesso(erro):
-                    log.warning("Gemini falhou (tentativa %d de %d): %s. Sem nova tentativa.",
-                                tentativa, self._tentativas, erro)
-                    raise
-                # O free tier devolve 429 por minuto com frequência; espera exponencial antes de desistir.
-                espera = self._espera_inicial_s * 2 ** (tentativa - 1)
-                log.warning("Gemini falhou (tentativa %d de %d): %s. Nova tentativa em %.0f s.",
-                            tentativa, self._tentativas, erro, espera)
-                self._dormir(espera)
-        raise AssertionError("inalcançável")
+
+        def chamar() -> Audio:
+            interacao = self._cliente.interactions.create(**requisicao)
+            return Audio(base64.b64decode(interacao.output_audio.data), TAXA_AMOSTRAGEM)
+
+        # O free tier devolve 429 por minuto com frequência; o resto não melhora esperando.
+        return tentar(chamar, rotulo="Gemini", tentativas=self._tentativas,
+                      espera_inicial_s=self._espera_inicial_s, dormir=self._dormir, desistir=self._desistir)
+
+    def _desistir(self, erro: Exception) -> Exception | None:
+        if _recusa_do_pedido(erro):
+            return RequisicaoRecusada(str(erro))
+        if _cota_diaria_esgotada(erro):
+            return CotaDiariaEsgotada(f"Cota diária do Gemini esgotada ({self._modelo}): {erro}")
+        if _falha_de_acesso(erro):
+            return erro
+        return None
 
 
 def _recusa_do_pedido(erro: Exception) -> bool:
@@ -144,7 +141,7 @@ def _montar_turno(fala: Fala) -> dict[str, Any]:
     return {"type": "text", "text": fala.texto, "annotations": [metadados]}
 
 
-def _criar_cliente(timeout_s: float) -> Any:
+def criar_cliente(timeout_s: float) -> Any:
     from google import genai
     from google.genai import types
 
