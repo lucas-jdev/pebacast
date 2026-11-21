@@ -1,0 +1,152 @@
+{
+  "aprovado": false,
+  "roteiro_sha256": "82a631fbdcd063af2bb9135c2275453c4b3c984fbfb9a7a618d4ee6d13df0e29",
+  "afirmacoes": [
+    {
+      "fala": 5,
+      "afirmacao": "Duas versões, a um ponto vinte e seis ponto um e a um ponto vinte e seis ponto dois, foram publicadas no repositório oficial de pacotes do Python no dia dezessete de novembro com um ladrão de credenciais embutido.",
+      "veredito": "correta",
+      "fonte": "GitHub Advisory Database, GHSA-764m-3ppc-5m73 (https://github.com/advisories/GHSA-764m-3ppc-5m73): 1.26.1 e 1.26.2 publicadas no PyPI em 2026-11-17"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "É o pacote Python do framework de agentes de inteligência artificial da Microsoft.",
+      "veredito": "correta",
+      "fonte": "GitHub Advisory Database, GHSA-764m-3ppc-5m73 (https://github.com/advisories/GHSA-764m-3ppc-5m73): 'legitimate agent-framework package (Microsoft Agent Framework)'"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "o código malicioso roda quando o Python inicia, mesmo que ninguém importe o pacote.",
+      "veredito": "correta",
+      "fonte": "GitHub Advisory Database, GHSA-764m-3ppc-5m73 (https://github.com/advisories/GHSA-764m-3ppc-5m73): gancho .pth executado a cada início do interpretador"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "Ele junta variáveis de ambiente com nome de token, senha e chave, lê arquivos de credencial de nuvem, de Git, de Docker, e pede tokens de identidade temporários da nuvem.",
+      "veredito": "correta",
+      "fonte": "GitHub Advisory Database, GHSA-764m-3ppc-5m73 (https://github.com/advisories/GHSA-764m-3ppc-5m73): variáveis TOKEN/SECRET/PASSWORD/KEY, ~/.azure, .git-credentials, .docker/config.json, tokens de managed identity do Azure"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "A segunda versão também tentava pegar os tokens de identidade do GitHub Actions. Tudo isso era enviado pra um endereço externo.",
+      "veredito": "correta",
+      "fonte": "GitHub Advisory Database, GHSA-764m-3ppc-5m73 (https://github.com/advisories/GHSA-764m-3ppc-5m73): 1.26.2 também rouba tokens OIDC do GitHub Actions; POST para webhook.site"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "Tratar como comprometido qualquer ambiente onde uma dessas versões foi instalada, trocar todas as credenciais que esse ambiente alcançava, inclusive os segredos do pipeline, e voltar pra versão um ponto vinte e seis ponto zero.",
+      "veredito": "imprecisa",
+      "correcao": "O alerta recomenda tratar o ambiente como exposto e trocar as credenciais que ele alcançava, inclusive os segredos de CI e do GitHub Actions. Ele não manda voltar para a 1.26.0: diz só que a 1.26.0 e as anteriores não foram afetadas (e não há versão corrigida). Diga, por exemplo: 'O alerta também informa que a versão um ponto vinte e seis ponto zero e as anteriores não foram afetadas.'",
+      "fonte": "GitHub Advisory Database, GHSA-764m-3ppc-5m73 (https://github.com/advisories/GHSA-764m-3ppc-5m73)"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "As versões ruins já foram retiradas do repositório.",
+      "veredito": "correta",
+      "fonte": "GitHub Advisory Database, GHSA-764m-3ppc-5m73 (https://github.com/advisories/GHSA-764m-3ppc-5m73): ambas removidas do PyPI"
+    },
+    {
+      "fala": 10,
+      "afirmacao": "O alerta não diz como o invasor conseguiu publicar no lugar da Microsoft.",
+      "veredito": "correta",
+      "fonte": "GitHub Advisory Database, GHSA-764m-3ppc-5m73 (https://github.com/advisories/GHSA-764m-3ppc-5m73): não descreve o método de publicação"
+    },
+    {
+      "fala": 21,
+      "afirmacao": "No dia dezoito. As versões ruins foram publicadas no dia dezessete.",
+      "veredito": "correta",
+      "fonte": "GitHub Advisory Database, GHSA-764m-3ppc-5m73 (https://github.com/advisories/GHSA-764m-3ppc-5m73): alerta publicado em 2026-11-18; versões em 2026-11-17"
+    },
+    {
+      "fala": 34,
+      "afirmacao": "O STRIDE foi criado na Microsoft, e o Adam Shostack explica ele com calma no livro Threat Modeling: Designing for Security.",
+      "veredito": "correta",
+      "fonte": "Kohnfelder e Garg, Microsoft, 1999; Shostack (2014), cap. 3, que está nas referências do episódio"
+    },
+    {
+      "fala": 34,
+      "afirmacao": "cada letra é o contrário de uma propriedade de segurança. É a violação de alguma coisa que você queria garantir.",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 3, tabela de STRIDE com a propriedade violada; conhecimento consolidado"
+    },
+    {
+      "fala": 36,
+      "afirmacao": "S é de spoofing. É se passar por alguém ou por alguma coisa. A propriedade violada é a autenticação",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 3, tabela de STRIDE com a propriedade violada; conhecimento consolidado"
+    },
+    {
+      "fala": 40,
+      "afirmacao": "T é de tampering, adulteração. Alterar dado ou código sem permissão. A propriedade violada é a integridade.",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 3, tabela de STRIDE com a propriedade violada; conhecimento consolidado"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "R é de repudiation, repúdio. É alguém conseguir negar que fez uma coisa, porque não existe prova. A propriedade é o não repúdio.",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 3, tabela de STRIDE com a propriedade violada; conhecimento consolidado"
+    },
+    {
+      "fala": 48,
+      "afirmacao": "I é de information disclosure, vazamento de informação. A propriedade violada é a confidencialidade.",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 3, tabela de STRIDE com a propriedade violada; conhecimento consolidado"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "D é de denial of service, negação de serviço. A propriedade é a disponibilidade.",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 3, tabela de STRIDE com a propriedade violada; conhecimento consolidado"
+    },
+    {
+      "fala": 52,
+      "afirmacao": "E é de elevation of privilege, elevação de privilégio. A propriedade violada é a autorização.",
+      "veredito": "correta",
+      "fonte": "Shostack, Threat Modeling: Designing for Security (2014), cap. 3, tabela de STRIDE com a propriedade violada; conhecimento consolidado"
+    },
+    {
+      "fala": 58,
+      "afirmacao": "o Shostack descreve uma variação chamada STRIDE por elemento, em que você usa o tipo de elemento do diagrama pra saber quais letras olhar primeiro.",
+      "veredito": "correta",
+      "fonte": "Shostack (2014), cap. 3, seção 'STRIDE Variants: STRIDE-per-Element'"
+    },
+    {
+      "fala": 58,
+      "afirmacao": "Um fluxo de dados, por exemplo, não sai por aí se passando por alguém, mas pode ser adulterado ou vazar.",
+      "veredito": "correta",
+      "fonte": "Shostack (2014), cap. 3, tabela STRIDE-per-Element: fluxo de dados tem T, I e D, sem S"
+    },
+    {
+      "fala": 78,
+      "afirmacao": "Se você fixar justamente a versão envenenada, o hash vai conferir direitinho.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: o hash fixado confere integridade em relação ao arquivo fixado, não a sua legitimidade (pip --require-hashes)"
+    },
+    {
+      "fala": 82,
+      "afirmacao": "Aceita, desde que alguém com autoridade escreva isso e assine embaixo, como a gente falou no episódio passado.",
+      "veredito": "correta",
+      "fonte": "episodios/se-001/roteiro.json, falas 50 e 79: aceitar o risco com alguém com autoridade, registrado por escrito"
+    },
+    {
+      "fala": 99,
+      "afirmacao": "o estrago grande vem da elevação de privilégio, porque um código de teste herdou o poder de mexer em produção.",
+      "veredito": "imprecisa",
+      "correcao": "O agent-framework é uma biblioteca de execução para construir agentes, não código de teste. No caso real, o código malicioso rodava com os privilégios de qualquer ambiente onde o pacote fosse instalado. Diga, por exemplo: 'porque uma dependência instalada no pipeline herdou o poder de mexer em produção'. A mesma ressalva vale para 'pacote de teste' na fala 54 e 'código que devia só ajudar a rodar teste' na fala 56, a menos que fique claro que se trata do cenário do pipeline do Davi.",
+      "fonte": "GitHub Advisory Database, GHSA-764m-3ppc-5m73 (https://github.com/advisories/GHSA-764m-3ppc-5m73): descreve o pacote como o Microsoft Agent Framework"
+    },
+    {
+      "fala": 99,
+      "afirmacao": "A falta de registro de versão é repúdio, e piora a reação.",
+      "veredito": "correta",
+      "fonte": "Shostack (2014), cap. 3, 'Repudiation Threats': ameaças de repúdio incluem logs insuficientes ou ausentes"
+    },
+    {
+      "fala": 104,
+      "afirmacao": "abra o arquivo publicar ponto yml, na pasta de workflows do GitHub, no repositório aberto do Pebacast, que instala dependências e usa a chave da API de voz",
+      "veredito": "correta",
+      "fonte": ".github/workflows/publicar.yml existe, roda pip install e usa secrets.GEMINI_API_KEY; repositório lucas-jdev/pebacast é público (gh api)"
+    }
+  ]
+}

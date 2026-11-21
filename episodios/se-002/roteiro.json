@@ -1,0 +1,458 @@
+{
+  "episodio": "se-002",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura de verdade. Aviso de sempre: este episódio foi gerado por inteligência artificial e revisado por uma segunda inteligência artificial, que conferiu as afirmações contra as fontes. E o tema de hoje é STRIDE na prática, ou seja, como pegar uma lista enorme de coisas que podem dar errado e decidir por onde começar."
+    },
+    {
+      "persona": "davi",
+      "texto": "E quem volta pra conversar comigo é a Yasmin, que lidera segurança de aplicações num banco digital e começou a carreira em competições de CTF na faculdade. Yasmin, bem-vinda de volta!"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Valeu, Davi! Oi, você que está ouvindo. Hoje a gente vai classificar ameaça, e eu prometo que é mais divertido do que parece.",
+      "estilo": "sorrindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "No episódio passado a gente desenhou fluxo de dados e marcou fronteira de confiança. E aí você falou rapidinho do STRIDE, as seis categorias. Hoje eu quero ver isso funcionando num caso de verdade. E o caso é fresquinho."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Manda."
+    },
+    {
+      "persona": "davi",
+      "texto": "Na semana passada saiu um alerta no GitHub Advisory Database, o banco de alertas de segurança do GitHub. O título é código malicioso no agent-framework. É o pacote Python do framework de agentes de inteligência artificial da Microsoft. Duas versões, a um ponto vinte e seis ponto um e a um ponto vinte e seis ponto dois, foram publicadas no repositório oficial de pacotes do Python no dia dezessete de novembro com um ladrão de credenciais embutido."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Um pacote legítimo, de uma empresa grande, com nome certinho. Pode continuar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então. Segundo o alerta, o código malicioso roda quando o Python inicia, mesmo que ninguém importe o pacote. Ele junta variáveis de ambiente com nome de token, senha e chave, lê arquivos de credencial de nuvem, de Git, de Docker, e pede tokens de identidade temporários da nuvem. A segunda versão também tentava pegar os tokens de identidade do GitHub Actions. Tudo isso era enviado pra um endereço externo."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "E a recomendação do alerta?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tratar como comprometido qualquer ambiente onde uma dessas versões foi instalada, trocar todas as credenciais que esse ambiente alcançava, inclusive os segredos do pipeline. O alerta também informa que a versão um ponto vinte e seis ponto zero e as anteriores não foram afetadas. As versões ruins já foram retiradas do repositório."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Repara num detalhe. O alerta não diz como o invasor conseguiu publicar no lugar da Microsoft. E pra quem consome o pacote, isso nem muda muito a conversa de hoje. Do seu lado, você instalou uma coisa que parecia legítima e não era.",
+      "estilo": "séria"
+    },
+    {
+      "persona": "davi",
+      "texto": "E isso me assusta, porque eu me vejo totalmente nessa. Lá na empresa de logística a gente começou a brincar com agentes de inteligência artificial pra responder dúvida de rastreio de entrega. E o nosso pipeline de integração contínua instala dependência toda vez que roda."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Então vamos usar o seu pipeline como cobaia. Você desenhou o fluxo no desafio do episódio anterior?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Desenhei. Desenvolvedor faz push, o GitHub Actions dispara o pipeline, o pipeline baixa os pacotes do repositório público, roda os testes, e no fim faz deploy na nuvem com uma credencial que fica nos segredos do repositório."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Ótimo. E qual seria o seu plano depois de ler esse alerta?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Olha, eu acho que tenho uma resposta boa. Primeiro, coloco um scanner de dependências no pipeline, que bloqueia qualquer pacote com vulnerabilidade conhecida. Segundo, já que a gente vai fazer STRIDE, vou fazer completo. Cada elemento do diagrama, as seis letras, uma planilha bonita. E o pipeline só volta a rodar quando cada linha tiver uma mitigação. Zero ameaça aberta.",
+      "estilo": "empolgado"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Beleza. Agora finge que eu sou o atacante.",
+      "estilo": "animada"
+    },
+    {
+      "persona": "davi",
+      "texto": "Lá vem.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Primeira pergunta. O seu scanner bloqueia pacote com vulnerabilidade conhecida. Conhecida por quem, e a partir de quando?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Pelo banco de alertas, imagino. A partir do momento que alguém registra."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "E quando é que o alerta desse caso foi publicado?"
+    },
+    {
+      "persona": "davi",
+      "texto": "No dia dezoito. As versões ruins foram publicadas no dia dezessete."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Então durante aquela janela, o scanner olhou pro pacote e viu o quê?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Um pacote limpinho. Nome certo, empresa certa, nenhum alerta. Ah, droga. O scanner teria deixado passar."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Teria. Scanner é ótimo pra o que já foi descoberto. Ele não é ruim, só chega depois. Segunda pergunta. O seu plano de zerar a planilha. Quantas linhas ela vai ter?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Deixa eu contar. Uns oito elementos no diagrama, seis letras cada, dá umas quarenta e poucas linhas."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "E quanto tempo o pipeline fica parado enquanto o time escreve mitigação pra quarenta e poucas linhas?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Semanas, sendo otimista."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "E nessas semanas, o time faz deploy como?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Na mão, provavelmente. Com alguém copiando credencial pra máquina dele. Peraí, isso piora a segurança!",
+      "estilo": "surpreso"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Piora. Você trocou um risco que você conhece por um que ninguém desenhou. Terceira pergunta, e essa é a que eu mais gosto. Das quarenta linhas, quantas valem o mesmo?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Nenhuma, né? Algumas devem ser bem mais graves que outras."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Pois é. A planilha trata tudo igual, e o atacante não trata. Ele vai direto no que dá mais retorno com menos esforço. Então o problema do seu plano não é a intenção. É que ele confunde achar ameaça com resolver ameaça, e trata tudo com o mesmo peso."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, me convenceu. Mas então me ensina a usar o STRIDE direito, porque eu decorei as letras e só."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Vamos lá. O STRIDE foi criado na Microsoft, e o Adam Shostack explica ele com calma no livro Threat Modeling: Designing for Security. O que muita gente esquece é que cada letra é o contrário de uma propriedade de segurança. É a violação de alguma coisa que você queria garantir. Se você lembrar da propriedade, fica muito mais fácil classificar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Me dá uma por uma."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "S é de spoofing. É se passar por alguém ou por alguma coisa. A propriedade violada é a autenticação, que é a garantia de que quem está falando é quem diz ser."
+    },
+    {
+      "persona": "davi",
+      "texto": "E no caso do pacote?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Do ponto de vista do seu pipeline, o pacote chegou dizendo, eu sou o agent-framework da Microsoft. E o seu pipeline acreditou só pelo nome e pela origem. Não tinha nada além disso conferindo quem publicou."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá. T?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "T é de tampering, adulteração. Alterar dado ou código sem permissão. A propriedade violada é a integridade. E aqui é o coração do caso. O código do pacote foi alterado, e o que chegou não era o que o projeto de verdade tinha feito."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. Spoofing é mentir sobre quem é. Tampering é mexer no conteúdo."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Isso. E muitas vezes os dois andam juntos, como aqui. Tudo bem. O objetivo não é acertar a gaveta perfeita, é não esquecer de olhar. R é de repudiation, repúdio. É alguém conseguir negar que fez uma coisa, porque não existe prova. A propriedade é o não repúdio."
+    },
+    {
+      "persona": "davi",
+      "texto": "Essa eu nunca entendi direito. Onde é que entra no pipeline?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Me responde você. No seu pipeline, se amanhã alguém perguntar qual versão exata de cada pacote foi instalada no build da terça às dez da noite, e quem aprovou subir essa versão, você consegue provar?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Sinceramente? Não. O bot de atualização abre o pull request, alguém aprova correndo, e o log do build some depois de um tempo.",
+      "estilo": "sem graça"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Então se alguém disser, eu não aprovei isso, ou, essa versão nunca rodou aqui, você não tem como mostrar o contrário. Isso é repúdio. E no meio de um incidente como esse, é justamente o que você precisa saber pra decidir quais credenciais trocar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Faz sentido. I?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "I é de information disclosure, vazamento de informação. A propriedade violada é a confidencialidade. É o que o ladrão de credenciais fazia. Lia segredo e mandava pra fora."
+    },
+    {
+      "persona": "davi",
+      "texto": "D?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "D é de denial of service, negação de serviço. A propriedade é a disponibilidade. E nesse caso ela é a menos interessante. Um pacote malicioso poderia simplesmente quebrar o seu build, mas quem quer roubar credencial prefere que tudo continue funcionando, quietinho."
+    },
+    {
+      "persona": "davi",
+      "texto": "Interessante. A categoria existe, mas aqui ela não é a ameaça principal."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Exatamente. Guarda isso que a gente volta. E por último, E é de elevation of privilege, elevação de privilégio. A propriedade violada é a autorização. É alguém conseguir fazer o que não tinha permissão."
+    },
+    {
+      "persona": "davi",
+      "texto": "E no caso?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Pensa no que uma dependência deveria poder fazer no seu pipeline. Ajudar o seu código a funcionar e os testes a rodarem. Mas como ela é instalada e roda dentro do pipeline, ela herda tudo que o pipeline pode. E o seu pipeline pode fazer o quê?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Deploy em produção. Com a credencial da nuvem."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Pois é. Uma dependência que devia só ajudar o seu código a funcionar ganhou, de carona, a permissão de mexer na sua produção. O vazamento é o meio. A elevação de privilégio é o que torna isso grave.",
+      "estilo": "séria"
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu repetir as seis com as propriedades. Spoofing, autenticação. Tampering, integridade. Repudiation, não repúdio. Information disclosure, confidencialidade. Denial of service, disponibilidade. Elevation of privilege, autorização."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Perfeito. E o Shostack descreve uma variação chamada STRIDE por elemento, em que você usa o tipo de elemento do diagrama pra saber quais letras olhar primeiro. Na minha leitura, a lição prática é que nem toda letra faz sentido em todo lugar. Um fluxo de dados, por exemplo, não sai por aí se passando por alguém, mas pode ser adulterado ou vazar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então a minha planilha de quarenta linhas já tinha linha que nem fazia sentido."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Tinha. E agora vem a parte que o seu plano pulou. Você achou ameaça. Encontrar é a parte fácil. A pergunta difícil é qual você trata primeiro."
+    },
+    {
+      "persona": "davi",
+      "texto": "E como decide? Pela letra mais grave?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Não existe letra mais grave. Spoofing no login do banco é gravíssimo. Spoofing num formulário de sugestão, nem tanto. Eu olho pra duas coisas, e isso é jeito meu de trabalhar, não regra de livro. Probabilidade, que é a chance de isso acontecer. E impacto, que é o tamanho do estrago se acontecer."
+    },
+    {
+      "persona": "davi",
+      "texto": "Bora fazer no meu pipeline então."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Bora. Ameaça número um. Uma dependência adulterada rouba a credencial de deploy e usa pra mexer na produção. Probabilidade?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Depois dessa semana? Eu diria média. Não é todo dia, mas aconteceu com pacote de empresa grande. E a gente instala dependência a cada push."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Impacto?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Alto. Credencial de deploy é a chave da casa."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Ameaça número dois. Um pacote malicioso derruba o build e ninguém consegue fazer deploy por um dia."
+    },
+    {
+      "persona": "davi",
+      "texto": "Probabilidade baixa, porque o atacante prefere ficar quieto, como você falou. Impacto médio. Atrapalha, mas não vaza nada."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Ameaça número três. Ninguém consegue reconstruir qual versão rodou em qual build."
+    },
+    {
+      "persona": "davi",
+      "texto": "Essa a probabilidade é altíssima, porque já é a situação de hoje. O impacto sozinho é baixo, mas no dia do incidente vira enorme."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Gostei. Você acabou de perceber uma coisa importante. Tem ameaça que, sozinha, parece pequena, mas que multiplica o estrago de outra. Então qual você trata primeiro?"
+    },
+    {
+      "persona": "davi",
+      "texto": "A número um. Alta chance, estrago enorme."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Concordo. E repara que a gente não está tentando resolver a um com uma bala de prata. Qual é a mudança que mais reduz o impacto?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Tirar a credencial de deploy de perto da instalação de pacotes?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Isso. Menor privilégio. O passo que baixa e roda dependência de terceiros não precisa enxergar a credencial de produção. O deploy pode ser um passo separado, que só roda depois, só na branch principal, e com uma credencial que só pode fazer aquilo. Se um pacote ruim entrar, ele rouba pouco."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a probabilidade? Dá pra baixar também?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Dá. Fixar a versão exata de cada dependência, de preferência conferindo o hash do arquivo, e não aceitar atualização automática no minuto em que ela sai. Isso não impede tudo. Se você fixar justamente a versão envenenada, o hash vai conferir direitinho. Mas reduz bastante a janela em que você pega uma versão nova antes de alguém perceber que tem algo errado."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a número três vem logo atrás, porque é barata. Guardar o arquivo com as versões travadas no repositório e exigir revisão de verdade no pull request de atualização."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Isso. Barata e multiplica a sua capacidade de reagir. E a número dois?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Aceito o risco por enquanto?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Aceita, desde que alguém com autoridade escreva isso e assine embaixo, como a gente falou no episódio passado. Aceitar risco é uma decisão. Esquecer o risco não é."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas agora deixa eu defender o meu eu de dez minutos atrás. Se eu sei que a ameaça dois existe, não é irresponsável deixar ela aberta?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "É uma pergunta justa. Mas pensa no custo. O time tem energia limitada. Cada hora que vai pra ameaça dois é uma hora que não vai pra ameaça um. Tratar tudo ao mesmo tempo, na prática, é tratar tudo pela metade. Na minha experiência, a lista que tenta resolver tudo é a que não resolve nada."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se eu errar a prioridade?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Vai errar às vezes. Por isso a lista não é pra sempre. Mudou o sistema, mudou o cenário, saiu um alerta como esse da semana passada, você reabre e reavalia. Uma ameaça que era baixa pode subir de uma hora pra outra."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o modelo de ameaças é tipo um backlog. Vivo, priorizado, e sempre tem coisa no fim da fila."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Gostei da analogia. Com uma diferença. No backlog de funcionalidade, o que fica no fim da fila não te ataca enquanto espera.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Justo. E quais são os trade-offs aqui? Porque nada é de graça."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Separar o deploy em outro passo deixa o pipeline mais complexo e mais lento, e alguém vai reclamar. Fixar versão com hash significa que atualizar dá trabalho, e aí o time tende a adiar atualização. E adiar demais também é risco, porque você fica preso em versão com vulnerabilidade conhecida. É um equilíbrio. Esperar alguns dias pra adotar versão nova costuma ser razoável. Esperar um ano, não."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o scanner que eu queria colocar?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Coloca! Ele continua útil pra o que já foi descoberto. Só não é o único controle. E o STRIDE completo em cada elemento também tem valor, como ferramenta pra achar coisa. O erro é transformar a lista inteira em pré-requisito pra voltar a trabalhar."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se eu não fizer nada disso?"
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Aí a priorização é feita pelo atacante. Ele escolhe a sua ameaça mais grave e mais fácil, que é exatamente a que você deveria ter tratado primeiro. E quem paga muitas vezes não é o time. É o cliente cujo endereço de entrega estava naquele banco que a credencial alcançava.",
+      "estilo": "séria"
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu resumir com as minhas palavras, pra ver se eu entendi mesmo."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Vai."
+    },
+    {
+      "persona": "davi",
+      "texto": "O STRIDE é um mnemônico pra achar ameaça. Seis categorias, e cada uma é a violação de uma propriedade. Spoofing viola autenticação, tampering viola integridade, repudiation viola não repúdio, information disclosure viola confidencialidade, denial of service viola disponibilidade e elevation of privilege viola autorização."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Até aqui, perfeito."
+    },
+    {
+      "persona": "davi",
+      "texto": "No caso do pacote da Microsoft, a adulteração do pacote e a confiança só no nome abriram a porta. O vazamento das credenciais foi o meio, e o estrago grande vem da elevação de privilégio, porque uma dependência instalada no pipeline herdou o poder de mexer em produção. A falta de registro de versão é repúdio, e piora a reação."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Isso."
+    },
+    {
+      "persona": "davi",
+      "texto": "Classificar é só a primeira parte. Depois eu priorizo por probabilidade e impacto, trato primeiro o que tem as duas altas, procuro a mudança que mais reduz o estrago, que aqui é menor privilégio no pipeline, e aceito por escrito o que fica pra depois. E eu não paro o mundo pra zerar a planilha, porque isso até piora a segurança."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Davi, eu assinaria embaixo. E o detalhe que eu mais gostei foi você perceber sozinho que a ameaça três, pequena, multiplica a ameaça um.",
+      "estilo": "sorrindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Aprendi com a melhor. Agora o desafio de hoje. Aplique o STRIDE ao fluxo que você desenhou no desafio anterior e escolha a ameaça que trataria primeiro, justificando pela probabilidade e pelo impacto."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se você ainda não trabalha na área, abra o arquivo publicar ponto yml, na pasta de workflows do GitHub, no repositório aberto do Pebacast, que instala dependências e usa a chave da API de voz, aplique o STRIDE a esse fluxo e escolha a ameaça que trataria primeiro."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "E vale olhar o próprio Pebacast com olho de atacante. Se achar alguma coisa, conta pra gente.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Yasmin, muito obrigado. Eu nunca mais vou dar merge em atualização de pacote sem pensar duas vezes."
+    },
+    {
+      "persona": "yasmin",
+      "texto": "Eu que agradeço, Davi. E você que ouviu até aqui, escolhe uma ameaça só e trata ela bem."
+    },
+    {
+      "persona": "davi",
+      "texto": "Esse foi o Pebacast. Obrigado por ouvir, e até o próximo episódio!"
+    }
+  ],
+  "desafio": "Aplique o STRIDE ao fluxo que você desenhou no desafio anterior e escolha a ameaça que trataria primeiro, justificando pela probabilidade e pelo impacto.",
+  "desafio_iniciante": "Abra .github/workflows/publicar.yml no repositório do Pebacast, que instala dependências e usa a chave da API de voz, aplique o STRIDE a esse fluxo e escolha a ameaça que trataria primeiro, justificando pela probabilidade e pelo impacto.",
+  "fontes": [
+    "Threat Modeling: Designing for Security, Adam Shostack, 1ª edição, caps. 3, 9 e 12"
+  ]
+}
