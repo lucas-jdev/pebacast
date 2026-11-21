@@ -53,7 +53,7 @@ Saída: `noticia.json`, com a notícia e sua fonte, ou o cenário marcado como h
 
 ## 3. Roteiro
 
-O roteirista recebe o spec, as personas, o contexto de notícias e os feedbacks recentes e devolve o diálogo em JSON. O campo `estilo` de cada fala é opcional e vai para o TTS:
+O roteirista recebe o spec, as personas, o contexto de notícias e os feedbacks recentes e devolve o diálogo em JSON. O campo `estilo` de cada fala é opcional e vai para o TTS somado à instrução de voz da persona, sem substituí-la: o Gemini recebe a instrução da persona, depois `Nesta fala: <estilo>.` e, por fim, as instruções do dicionário de pronúncia, cada uma uma vez só (`Fala.estilo_efetivo`):
 
 ```json
 {

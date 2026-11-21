@@ -63,10 +63,10 @@ def test_requisicao_com_dois_falantes_usa_configuracao_multi_falante(davi, helen
     assert [falante["speaker"] for falante in falantes] == ["Davi", "Helena"]
 
 
-def test_estilo_da_fala_sobrescreve_o_estilo_da_persona(davi):
+def test_estilo_da_fala_se_soma_ao_estilo_da_persona(davi):
     requisicao = montar_requisicao([Fala(davi, "Hum", estilo="pensativo")], "modelo", "pt-BR")
 
-    assert requisicao["input"][0]["annotations"][0]["style"] == "pensativo"
+    assert requisicao["input"][0]["annotations"][0]["style"] == "estilo de Davi Nesta fala: pensativo."
 
 
 def test_requisicao_pede_pcm_bruto_e_nao_armazena_interacao(davi):
