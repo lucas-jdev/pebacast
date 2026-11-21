@@ -64,6 +64,13 @@ Regras:
   - Desafio "classifique a conascência entre dois módulos de um sistema que você mantém" → "Abra `src/podcast/site.py` e `src/podcast/publicacao.py` no repositório do Pebacast e classifique a conascência mais forte entre os dois."
   - Desafio "escreva um ADR para uma decisão recente do seu time" → "Escolha um ADR de `docs/adr/` no repositório do Pebacast e escreva a alternativa que ele descartou como se ela tivesse vencido."
 
+### Escrever para o ouvido
+
+O TTS erra palavras curtas e sons parecidos. O dicionário de pronúncia (`tts.pronuncia` em `config/pipeline.yaml`) corrige grafias conhecidas, mas não salva uma palavra certa que soa como outra. Isso fica com a escrita:
+
+- **Siglas e termos curtos que o TTS confunde:** escreva por extenso ou em português ("product owner" e não "PO"; "portão" e não "gate"; "otimização para busca" e não "SEO"). Uma interjeição isolada vira frase completa ("E aí?" e não "E?").
+- **Quase homófonos que mudam o sentido:** quando a frase admite as duas leituras ("o agente" / "a gente", "vende" / "vem de"), reescreva para que só uma faça sentido.
+
 Grave `$PASTA/roteiro.json`:
 
 ```json
