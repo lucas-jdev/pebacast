@@ -28,6 +28,7 @@ from podcast.indexacao import escrever_chave
 from podcast.personas import carregar_personas
 from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
 from podcast.qualidade_audio import IncidentesDeAudio, Laudo, Limites, RegistroDeIncidentes, avaliar, medir
+from podcast.qualidade_texto import IncidentesDeTexto, LaudoDeTexto, QaDeTexto
 from podcast.roteiro import Projeto, regras_para
 from podcast.site import caminho_do_episodio, escrever_pagina
 from podcast.tts.provedor import CotaDiariaEsgotada, RequisicaoRecusada, TtsProvider
@@ -102,6 +103,9 @@ class Resultado:
     avisos: list[str]
     qualidade: dict[str, Laudo] = field(default_factory=dict)
     aguardando: list[str] = field(default_factory=list)
+    texto: dict[str, LaudoDeTexto] = field(default_factory=dict)
+    # Fora dos avisos de propósito: o avisos.md vira a issue de fallback de voz, e 503 da transcrição é comum.
+    texto_nao_rodou: dict[str, str] = field(default_factory=dict)
 
 
 def episodios_pendentes(projeto: Projeto) -> list[str]:
@@ -171,11 +175,13 @@ def publicar_pendentes(
     agora: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
     incidentes: RegistroDeIncidentes | None = None,
     esperas: RegistroDeEspera | None = None,
+    qa_texto: QaDeTexto | None = None,
 ) -> Resultado:
     config = projeto.config()
     personas = carregar_personas(projeto.raiz / "curriculum" / "personas")
     sagas = projeto.sagas()
     publicados, reprovados, avisos, qualidade, aguardando = [], {}, [], {}, []
+    texto, texto_nao_rodou = {}, {}
 
     for episodio_id in episodios_pendentes(projeto):
         saga = saga_do_episodio(sagas, episodio_id)
@@ -243,7 +249,15 @@ def publicar_pendentes(
             log.exception("O QA do áudio de %s falhou.", episodio_id)
             avisos.append(f"{episodio_id}: publicado, mas o QA do áudio não rodou até o fim. {type(erro).__name__}: {erro}")
 
-    return Resultado(publicados, reprovados, avisos, qualidade, aguardando)
+        if qa_texto is not None:
+            try:
+                originais = carregar_falas(_ler_json(pasta / ROTEIRO), personas)
+                texto[episodio_id] = qa_texto.rodar(episodio_id, mp3, trechos.fala, originais)
+            except Exception as erro:
+                log.exception("O QA de texto de %s não rodou.", episodio_id)
+                texto_nao_rodou[episodio_id] = f"QA de texto não rodou. {type(erro).__name__}: {erro}"
+
+    return Resultado(publicados, reprovados, avisos, qualidade, aguardando, texto, texto_nao_rodou)
 
 
 def _avisar_sem_segurar(avisos: list[str], episodio_id: str, falha: str, acao: Callable[[], object]) -> None:
@@ -387,6 +401,14 @@ def _ler_json(arquivo: Path) -> Any:
     return json.loads(arquivo.read_text(encoding="utf-8"))
 
 
+def resumo_da_qualidade(resultado: Resultado) -> str:
+    """O QA do áudio e o de texto de cada episódio, para o resumo da execução no Actions."""
+    partes = [laudo.markdown(f"Qualidade do áudio do {episodio_id}") for episodio_id, laudo in resultado.qualidade.items()]
+    partes += [laudo.markdown(f"Texto do {episodio_id}") for episodio_id, laudo in resultado.texto.items()]
+    partes += [f"### Texto do {episodio_id}\n\n{motivo}\n" for episodio_id, motivo in resultado.texto_nao_rodou.items()]
+    return "\n".join(partes)
+
+
 def relatorio(resultado: Resultado) -> dict[str, Any]:
     """Uma entrada por episódio: o workflow abre (ou comenta) uma issue por reprovado e fecha as dos publicados."""
     return {
@@ -439,19 +461,23 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     incidentes = IncidentesDeAudio(args.repo, args.execucao)
     esperas = IncidentesDeCota(args.repo, args.execucao)
-    criar_provedor = fabrica_da_config(projeto.config()["tts"])
+    config = projeto.config()
+    criar_provedor = fabrica_da_config(config["tts"])
+    qa_texto = (QaDeTexto.de_config(config["qualidade_texto"], IncidentesDeTexto(args.repo, args.execucao))
+                if config.get("qualidade_texto") else None)
     resultado = publicar_pendentes(projeto, GitHubReleases(args.repo), criar_provedor, args.trabalho,
-                                   incidentes=incidentes, esperas=esperas)
+                                   incidentes=incidentes, esperas=esperas, qa_texto=qa_texto)
     escrever_site(projeto, args.site)
 
     print(f"Publicados: {', '.join(resultado.publicados) or 'nenhum'}")
     if resultado.aguardando:
         print(f"Aguardando a cota do Gemini: {', '.join(resultado.aguardando)}")
     args.relatorio.write_text(json.dumps(relatorio(resultado), ensure_ascii=False, indent=2), encoding="utf-8")
-    if resultado.qualidade:
-        args.qualidade.write_text("\n".join(
-            laudo.markdown(f"Qualidade do áudio do {episodio_id}") for episodio_id, laudo in resultado.qualidade.items()
-        ), encoding="utf-8")
+    resumo = resumo_da_qualidade(resultado)
+    if resumo:
+        args.qualidade.write_text(resumo, encoding="utf-8")
+    for episodio_id, motivo in resultado.texto_nao_rodou.items():
+        print(f"::warning::{episodio_id}: {motivo}")
     if resultado.avisos:
         args.avisos.write_text("\n".join(f"- {aviso}" for aviso in resultado.avisos) + "\n", encoding="utf-8")
     if resultado.reprovados:

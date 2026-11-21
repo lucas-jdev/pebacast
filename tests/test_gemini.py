@@ -232,7 +232,7 @@ def test_timeout_aparece_no_log_e_entra_na_retentativa(davi, caplog):
     esperas = []
     tts = GeminiTts("modelo", cliente=ClienteQueEstouraOTempo(), espera_inicial_s=10, dormir=esperas.append)
 
-    with caplog.at_level(logging.WARNING, logger="podcast.tts.gemini"):
+    with caplog.at_level(logging.WARNING, logger="podcast.retentativa"):
         tts.sintetizar([Fala(davi, "Oi")])
 
     assert esperas == [10]
@@ -242,7 +242,7 @@ def test_timeout_aparece_no_log_e_entra_na_retentativa(davi, caplog):
 def test_ultima_tentativa_tambem_fica_no_log(davi, caplog):
     tts = GeminiTts("modelo", cliente=ClienteInstavel(falhas=9), tentativas=2, dormir=lambda _: None)
 
-    with caplog.at_level(logging.WARNING, logger="podcast.tts.gemini"), pytest.raises(RuntimeError):
+    with caplog.at_level(logging.WARNING, logger="podcast.retentativa"), pytest.raises(RuntimeError):
         tts.sintetizar([Fala(davi, "Oi")])
 
     assert "tentativa 2 de 2" in caplog.text and "Sem nova tentativa" in caplog.text
@@ -256,7 +256,7 @@ def test_cliente_desliga_a_retentativa_do_sdk_e_limita_o_tempo_da_requisicao(mon
     criados = []
     monkeypatch.setattr(genai, "Client", lambda **opcoes: criados.append(opcoes))
 
-    gemini._criar_cliente(timeout_s=180)
+    gemini.criar_cliente(timeout_s=180)
 
     [opcoes] = criados
     http = opcoes["http_options"]

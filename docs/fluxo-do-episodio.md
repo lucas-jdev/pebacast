@@ -58,6 +58,8 @@ flowchart TD
         registro["Grava <code>publicacao.json</code><br/>e commita"]
         qa{"QA do áudio: pico real, loudness,<br/>música × fala, pausa entre blocos.<br/>Passou?"}
         incidente(["Issue incidente do episódio<br/>(Áudio do &lt;id&gt; fora do padrão)<br/>reprovar de novo só comenta"]):::falha
+        qa_texto{"QA de texto: dois modelos<br/>transcrevem a fala. Divergência<br/>do roteiro nos dois?"}
+        incidente_texto(["Issue incidente do episódio<br/>(Texto do &lt;id&gt; diverge do roteiro)<br/>o Lucas ouve e fecha"]):::falha
         feed["Gera feed.xml e o site,<br/>com uma página por episódio"]
         pages[Publica no GitHub Pages]
         indexnow["Avisa o IndexNow das URLs<br/>que mudaram; falha só vira aviso"]
@@ -102,7 +104,10 @@ flowchart TD
     espera --> feed
     espera -. "no dia seguinte" .-> agendado
     mix --> release --> registro --> qa
-    qa -- "passando ou não,<br/>publica" --> feed
+    qa -- "passando ou não,<br/>publica" --> qa_texto
+    qa_texto -- "com ou sem divergência,<br/>e mesmo se não rodar" --> feed
+    qa_texto -. sim .-> incidente_texto
+    incidente_texto --> ouvir
     qa -. "não" .-> incidente
     qa -. "sim: fecha a issue<br/>de áudio do episódio" .-> incidente
     feed --> pages
@@ -117,7 +122,7 @@ flowchart TD
     ouvir -. "regravar.yml: candidata,<br/>depois substituir" .-> release
 
     class aguardando,selecao,elegivel,noticia,relevante,hipotetico,roteiro,revisao,aprovado,limite,correcao,validar_local,commit rotina
-    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,espera,agendado,mix,release,registro,qa,feed,pages,indexnow actions
+    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,espera,agendado,mix,release,registro,qa,qa_texto,feed,pages,indexnow actions
 ```
 
 ## QA do áudio
@@ -132,6 +137,10 @@ Depois de subir o MP3, o código mede o áudio montado, sem ouvir ([pipeline.md]
 | Pausa na troca de blocos | ≤ 0,6 s |
 
 As quatro medidas, com aprovado ou reprovado, vão para o resumo da execução no Actions. **O QA não segura a publicação**: o ritmo diário pesa mais. Se alguma medida reprovar, o episódio sai assim mesmo e abre uma issue `incidente` com as medidas, uma por episódio (reprovar de novo só comenta). Ela fecha sozinha quando o áudio daquele episódio passar no QA, por exemplo depois de uma regravação substituída. Os limites ficam em `audio.qualidade`, em `config/pipeline.yaml`.
+
+## QA de texto
+
+Depois do QA do áudio, dois modelos transcrevem a fala do MP3 e o código compara com o roteiro, palavra por palavra. Só conta a divergência que os dois ouviram igual. Em modo aviso: abre a issue `incidente` "Texto do &lt;id&gt; diverge do roteiro" e nunca segura a publicação, nem quando a transcrição está fora do ar ([pipeline.md](pipeline.md#qa-de-texto)).
 
 ## Cota diária esgotada
 
