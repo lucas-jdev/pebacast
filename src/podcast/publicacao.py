@@ -33,7 +33,7 @@ from podcast.qualidade_texto import IncidentesDeTexto, LaudoDeTexto, QaDeTexto
 from podcast.roteiro import Projeto, regras_para
 from podcast.site import caminho_do_episodio, escrever_pagina
 from podcast.tts.provedor import CotaDiariaEsgotada, RequisicaoRecusada, TtsProvider
-from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, validar_episodio
+from podcast.validacao import ESPERA_DE_COTA, NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, validar_episodio
 
 log = logging.getLogger(__name__)
 
@@ -117,6 +117,21 @@ def episodios_pendentes(projeto: Projeto) -> list[str]:
         pasta.name
         for pasta in projeto.episodios.iterdir()
         if (pasta / ROTEIRO).exists() and not (pasta / PUBLICACAO).exists()
+    )
+
+
+def episodios_aguardando_cota(projeto: Projeto) -> list[str]:
+    """O que o agendamento diário existe para resolver (ADR 0011): episódio que espera a cota e não saiu.
+
+    Um roteiro reprovado parado na pasta fica de fora: tentar de novo todo dia só repetiria o comentário
+    na issue dele e publicaria o site sem nada novo.
+    """
+    if not projeto.episodios.is_dir():
+        return []
+    return sorted(
+        pasta.name
+        for pasta in projeto.episodios.iterdir()
+        if (pasta / ESPERA_DE_COTA).exists() and not (pasta / PUBLICACAO).exists()
     )
 
 
@@ -450,6 +465,7 @@ def _criar_parser() -> argparse.ArgumentParser:
     publicar.add_argument("--execucao", help="URL da execução, citada nas issues de incidente.")
 
     comandos.add_parser("feed", help="Só regenera o feed.")
+    comandos.add_parser("aguardando", help="Lista, separados por espaço, os episódios que aguardam a cota do Gemini.")
     return parser
 
 
@@ -462,6 +478,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.comando == "feed":
         escrever_site(projeto, args.site)
+        return 0
+    if args.comando == "aguardando":
+        print(" ".join(episodios_aguardando_cota(projeto)))
         return 0
 
     from podcast.tts.fabrica import fabrica_da_config

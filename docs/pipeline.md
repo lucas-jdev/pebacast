@@ -145,7 +145,7 @@ A issue de avisos é uma por episódio: um novo aviso no mesmo episódio só com
 
 Com a cota do dia esgotada, o episódio não é publicado nem vai para o Kokoro ([ADR 0011](adr/0011-cota-esgotada-espera.md)). `src/podcast/espera_de_cota.py` grava `episodios/<id>/aguardando_cota.json` (`{"desde": ...}`, que não muda numa nova falha) e abre a issue `incidente` "Cota do Gemini esgotada: <id> aguardando", ou comenta na que já está aberta. O workflow commita o arquivo, e o site é publicado com o card "Próximo" avisando que o episódio sai em breve (o estado `AGUARDANDO_COTA` vale só para o site: para a seleção da rotina, o episódio continua aguardando publicação).
 
-O `publicar.yml` também roda agendado, às 08:15 UTC, depois da renovação da cota. Um job `verificar` lista os roteiros sem `publicacao.json` e, no agendamento, a publicação só roda se houver algum. Quando o episódio sai, o arquivo é apagado no mesmo commit do `publicacao.json`, e a issue fecha. Falhar ao abrir ou fechar a issue vira aviso e não segura nada.
+O `publicar.yml` também roda agendado, às 08:15 UTC, depois da renovação da cota. No agendamento, um job `verificar` roda `python -m podcast.publicacao aguardando`, que lista os episódios com `aguardando_cota.json` e sem `publicacao.json`, e a publicação só roda se houver algum. Um roteiro reprovado parado na pasta fica de fora: ele é tratado pelo push da rotina, e tentar de novo todo dia só repetiria o comentário na issue dele e publicaria o site sem nada novo. O `push` e o `workflow_dispatch` não passam pela verificação. Quando o episódio sai, o arquivo é apagado no mesmo commit do `publicacao.json`, e a issue fecha. Falhar ao abrir ou fechar a issue vira aviso e não segura nada.
 
 ### Entrar no índice dos buscadores
 

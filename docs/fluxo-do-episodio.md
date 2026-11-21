@@ -52,7 +52,7 @@ flowchart TD
         retry[429 por minuto / 5xx / timeout:<br/>espera e tenta de novo]
         kokoro[Kokoro local, só se a API<br/>estiver fora ou sem acesso;<br/>publica e abre a issue<br/>de fallback de voz]
         espera["Cota do dia esgotada: não publica.<br/>Grava <code>aguardando_cota.json</code>,<br/>abre issue incidente e o site<br/>avisa que sai em breve"]
-        agendado([Agendamento 08:15 UTC,<br/>depois da renovação da cota:<br/>só roda se houver pendente])
+        agendado([Agendamento 08:15 UTC,<br/>depois da renovação da cota:<br/>só roda se houver episódio<br/>aguardando a cota])
         mix["Apara o silêncio nas bordas dos blocos,<br/>nivela a vinheta pela fala, mixa,<br/>ganho único e limitador de pico → MP3"]
         release[Sobe o MP3 no GitHub Releases]
         registro["Grava <code>publicacao.json</code><br/>e commita"]

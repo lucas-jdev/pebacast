@@ -18,7 +18,7 @@ Enquanto o pebacast estiver em beta e no free tier, um episódio que encontra a 
 
 - a pipeline grava `episodios/<id>/aguardando_cota.json` e abre a issue `incidente` "Cota do Gemini esgotada: &lt;id&gt; aguardando";
 - o card "Próximo" do site avisa que houve um problema interno e que o episódio sai em breve, sem prometer hora;
-- o `publicar.yml` ganha um agendamento às 08:15 UTC, depois da renovação em qualquer época do ano, que só passa da verificação se houver episódio pendente;
+- o `publicar.yml` ganha um agendamento às 08:15 UTC, depois da renovação em qualquer época do ano, que só passa da verificação se houver episódio **aguardando a cota** (pasta com `aguardando_cota.json` e sem `publicacao.json`). Um roteiro reprovado parado na pasta não conta, senão ganharia o mesmo comentário na issue todo dia (#77);
 - ao publicar, o arquivo é apagado e a issue fecha.
 
 As outras falhas do principal (401/403, indisponibilidade depois das tentativas) continuam indo para o Kokoro, como no ADR 0001.
@@ -37,7 +37,7 @@ Negativas:
 
 - A fila anda um dia. Com um roteiro aprovado sem publicar, a rotina não escreve outro ("Nada a escrever hoje").
 - Se a cota continuar esgotada às 08:15, o episódio segue aguardando sem limite de dias. A issue aberta é o alarme.
-- Um run diário a mais no Actions, que termina em segundos quando não há pendente.
+- Um run diário a mais no Actions, que termina em segundos quando não há episódio aguardando a cota.
 
 ## Quando revisar
 
