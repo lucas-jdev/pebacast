@@ -15,9 +15,18 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from segmentacao import TAXA, decodificar, turnos_do_roteiro  # noqa: E402
+from segmentacao import turnos_do_roteiro  # noqa: E402
 
+# Na taxa do MP3 publicado (24 kHz): emendar e recodificar a 16 kHz cortava agudos e mudava o canal do
+# episódio inteiro, o que a impressão de voz acusava como troca de voz até nos turnos intactos.
+TAXA = 24_000
 FADE = int(0.02 * TAXA)
+
+
+def decodificar(mp3: Path) -> np.ndarray:
+    saida = subprocess.run(["ffmpeg", "-v", "error", "-i", str(mp3), "-ac", "1", "-ar", str(TAXA), "-f", "f32le", "-"],
+                           check=True, capture_output=True).stdout
+    return np.frombuffer(saida, dtype=np.float32).copy()
 
 # (nome, episódio base, persona trocada, blocos trocados ou None para todos, (episódio doador, persona doadora))
 DEFEITOS = [
@@ -28,6 +37,9 @@ DEFEITOS = [
     ("confusao-helena-vira-puck", "sw-002", "helena", None, ("sl-002", "davi")),
     ("confusao-jorge-vira-puck", "in-001", "jorge", None, ("co-001", "davi")),
     ("confusao-helena-vira-camila", "sw-002", "helena", None, ("da-001", "camila")),
+    # Controle: o mesmo caminho de decodificar e recodificar, sem trocar nada. Não pode disparar.
+    ("controle-sw-002", "sw-002", None, None, None),
+    ("controle-in-001", "in-001", None, None, None),
 ]
 
 
@@ -54,14 +66,15 @@ def encaixar(destino: np.ndarray, a: int, b: int, fonte: np.ndarray, cursor: int
 
 
 def gerar(raiz: Path, audio: Path, saida: Path, destino: Path) -> None:
-    for nome, base, persona, blocos, (doador_ep, doador_persona) in DEFEITOS:
+    for nome, base, persona, blocos, doador in DEFEITOS:
         x = decodificar(audio / f"pebacast-{base}.mp3")
         ref = intervalos(saida, base)
         bloco_do_turno = {t.indice: t.bloco for t in turnos_do_roteiro(raiz, base)}
-        fonte = fala_da_persona(decodificar(audio / f"pebacast-{doador_ep}.mp3"), intervalos(saida, doador_ep),
-                                doador_persona)
         cursor, trocados = 0, 0
-        for t in ref:
+        if doador:
+            fonte = fala_da_persona(decodificar(audio / f"pebacast-{doador[0]}.mp3"), intervalos(saida, doador[0]),
+                                    doador[1])
+        for t in ref if doador else []:
             if t["persona"] != persona or t["inicio"] is None or t["indice"] == 0:
                 continue
             if blocos is not None and bloco_do_turno[t["indice"]] not in blocos:
@@ -74,7 +87,7 @@ def gerar(raiz: Path, audio: Path, saida: Path, destino: Path) -> None:
                         "-b:a", "64k", str(pasta / f"pebacast-{base}.mp3")], input=x.astype(np.float32).tobytes(),
                        check=True)
         (pasta / "defeito.json").write_text(json.dumps({"base": base, "persona": persona, "blocos": blocos,
-                                                        "doador": [doador_ep, doador_persona],
+                                                        "doador": doador,
                                                         "turnos_trocados": trocados}), encoding="utf-8")
         print(nome, "turnos trocados:", trocados)
 
