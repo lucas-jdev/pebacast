@@ -86,7 +86,7 @@ flowchart TB
     lucas -. "gera o trailer<br/>de um episódio" .-> motion
     motion -- "lê roteiro, cenas<br/>e a identidade do site" --> repo
     motion -- "baixa o MP3" --> audio
-    repo -- "push dispara" --> pipeline
+    repo -- "push dispara;<br/>agendamento diário retoma<br/>quem aguarda a cota" --> pipeline
     lucas -. "dispara a regravação<br/>de um áudio" .-> pipeline
     pipeline -- "narra" --> gemini
     pipeline -- "sobe o MP3" --> audio
