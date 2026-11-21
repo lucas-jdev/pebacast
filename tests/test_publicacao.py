@@ -114,7 +114,8 @@ def test_fallback_gera_aviso_e_fica_registrado(projeto, tmp_path):
     resultado = _publicar(projeto, tmp_path, _fabrica(quebrar={"gemini-falso"}))
 
     assert resultado.publicados == ["sw-001"]
-    assert "fallback kokoro-falso" in resultado.avisos[0]
+    [aviso] = resultado.avisos
+    assert aviso.fallback and aviso.episodio_id == "sw-001" and "fallback kokoro-falso" in aviso.texto
     publicacao = json.loads((projeto.episodios / "sw-001" / "publicacao.json").read_text(encoding="utf-8"))
     assert publicacao["tts"] == {"provedor": "kokoro-falso", "fallback": True}
 
@@ -203,7 +204,8 @@ def test_falha_ao_abrir_a_issue_da_cota_vira_aviso_e_o_episodio_aguarda_mesmo_as
                                    lambda: AGORA, esperas=EsperasQuebradas())
 
     assert resultado.aguardando == ["sw-001"]
-    assert "a issue da cota esgotada não foi aberta" in resultado.avisos[0]
+    [aviso] = resultado.avisos
+    assert not aviso.fallback and "a issue da cota esgotada não foi aberta" in aviso.texto
 
 
 class ProvedorQueRecusa:
@@ -356,7 +358,8 @@ def test_sem_o_arquivo_decifrado_publica_sem_vinheta_e_avisa(projeto, tmp_path):
     resultado = _publicar(projeto, tmp_path)
 
     assert resultado.publicados == ["sw-001"]
-    assert "publicado sem vinheta" in resultado.avisos[0] and "VINHETA_SENHA" in resultado.avisos[0]
+    [aviso] = resultado.avisos
+    assert not aviso.fallback and "publicado sem vinheta" in aviso.texto and "VINHETA_SENHA" in aviso.texto
     assert "Vinheta de Fulano" not in gerar_feed(projeto)  # sem vinheta no áudio, sem crédito
 
 
@@ -442,7 +445,8 @@ def test_falha_ao_registrar_o_incidente_nao_impede_a_publicacao(projeto, tmp_pat
                                    IncidentesQuebrados())
 
     assert resultado.publicados == ["sw-001"]
-    assert "QA do áudio" in resultado.avisos[0]
+    [aviso] = resultado.avisos
+    assert not aviso.fallback and "QA do áudio" in aviso.texto
 
 
 class TranscritorQueRepete:

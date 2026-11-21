@@ -1,5 +1,6 @@
 # Voz, montagem e publicação (ADR 0006). Disparado pelo push da rotina do roteirista.
-# Valida o roteiro de novo antes de gastar TTS; reprovação, fallback ou erro viram issue,
+# Valida o roteiro de novo antes de gastar TTS; reprovação, fallback ou erro viram issue (os outros
+# avisos, como vinheta ausente, abrem pelo Python a issue "Avisos na publicação do <id>"),
 # e a issue de reprovação de um episódio é fechada quando ele é publicado.
 # Com a cota diária do Gemini esgotada, o episódio aguarda (ADR 0011): o agendamento diário
 # tenta de novo depois da renovação da cota, e só passa da verificação se houver episódio pendente.
@@ -172,6 +173,7 @@ jobs:
             gh issue create --title "Falha na publicação ($(date -u +%F))" --label incidente \
               --body "A publicação quebrou antes de terminar. Veja o log: $RUN_URL"
           fi
+          # O avisos.md só tem fallback de voz; os outros avisos já abriram a issue deles no passo de publicar.
           if [ -f avisos.md ]; then
             printf 'O episódio saiu com o TTS de fallback, sem emoção e com menos vozes.\n\n%s\n\nExecução: %s\n' \
               "$(cat avisos.md)" "$RUN_URL" > corpo.md

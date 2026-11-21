@@ -21,6 +21,7 @@ from typing import Any, Protocol
 from xml.etree import ElementTree as ET
 
 from podcast.audio import Audio, Vinheta, duracao_mp3, exportar_mp3
+from podcast.avisos import Aviso, IncidentesDeAvisos, encaminhar_avisos
 from podcast.curriculo import Saga
 from podcast.dominio import Fala, Persona
 from podcast.espera_de_cota import IncidentesDeCota, RegistroDeEspera, encerrar_espera, marcar_espera
@@ -100,11 +101,11 @@ class GitHubReleases:
 class Resultado:
     publicados: list[str]
     reprovados: dict[str, list[str]]
-    avisos: list[str]
+    avisos: list[Aviso]
     qualidade: dict[str, Laudo] = field(default_factory=dict)
     aguardando: list[str] = field(default_factory=list)
     texto: dict[str, LaudoDeTexto] = field(default_factory=dict)
-    # Fora dos avisos de propósito: o avisos.md vira a issue de fallback de voz, e 503 da transcrição é comum.
+    # Fora dos avisos de propósito: 503 da transcrição é comum e abriria issue demais. Fica no resumo e no ::warning::.
     texto_nao_rodou: dict[str, str] = field(default_factory=dict)
 
 
@@ -214,11 +215,12 @@ def publicar_pendentes(
                                     lambda: esperas.registrar(episodio_id, motivo))
             continue
         if erro_principal:
-            avisos.append(f"{episodio_id}: sintetizado com o fallback {provedor}. Erro do principal: {erro_principal}")
+            avisos.append(Aviso(episodio_id, f"sintetizado com o fallback {provedor}. Erro do principal: {erro_principal}",
+                                fallback=True))
 
         vinheta, aviso_vinheta = carregar_vinheta(projeto, config["audio"])
         if aviso_vinheta:
-            avisos.append(f"{episodio_id}: publicado sem vinheta. {aviso_vinheta}")
+            avisos.append(Aviso(episodio_id, f"publicado sem vinheta. {aviso_vinheta}"))
 
         mp3 = trabalho / f"pebacast-{episodio_id}.mp3"
         trechos = exportar_mp3(audio, mp3, config["audio"]["bitrate_kbps"], vinheta=vinheta)
@@ -247,7 +249,7 @@ def publicar_pendentes(
                 incidentes.registrar(episodio_id, qualidade[episodio_id])
         except Exception as erro:
             log.exception("O QA do áudio de %s falhou.", episodio_id)
-            avisos.append(f"{episodio_id}: publicado, mas o QA do áudio não rodou até o fim. {type(erro).__name__}: {erro}")
+            avisos.append(Aviso(episodio_id, f"publicado, mas o QA do áudio não rodou até o fim. {type(erro).__name__}: {erro}"))
 
         if qa_texto is not None:
             try:
@@ -260,13 +262,13 @@ def publicar_pendentes(
     return Resultado(publicados, reprovados, avisos, qualidade, aguardando, texto, texto_nao_rodou)
 
 
-def _avisar_sem_segurar(avisos: list[str], episodio_id: str, falha: str, acao: Callable[[], object]) -> None:
+def _avisar_sem_segurar(avisos: list[Aviso], episodio_id: str, falha: str, acao: Callable[[], object]) -> None:
     """Roda uma ação acessória da publicação; se ela quebrar, vira aviso e a publicação segue."""
     try:
         acao()
     except Exception as erro:
         log.exception("%s: %s.", episodio_id, falha)
-        avisos.append(f"{episodio_id}: {falha}. {type(erro).__name__}: {erro}")
+        avisos.append(Aviso(episodio_id, f"{falha}. {type(erro).__name__}: {erro}"))
 
 
 # Vai no fim da descrição do canal enquanto site.beta estiver ligado: quem acha o feed num app também fica sabendo.
@@ -414,6 +416,10 @@ def relatorio(resultado: Resultado) -> dict[str, Any]:
     return {
         "publicados": resultado.publicados,
         "aguardando_cota": resultado.aguardando,
+        "avisos": {
+            "fallback": [str(aviso) for aviso in resultado.avisos if aviso.fallback],
+            "outros": [str(aviso) for aviso in resultado.avisos if not aviso.fallback],
+        },
         "reprovados": {
             episodio_id: "\n".join([
                 "O roteiro não passou na validação e o episódio não foi publicado.",
@@ -437,7 +443,8 @@ def _criar_parser() -> argparse.ArgumentParser:
     publicar.add_argument("--repo", required=True, help="dono/repositorio do GitHub Releases.")
     publicar.add_argument("--trabalho", type=Path, default=Path("_trabalho"), help="Pasta temporária dos MP3.")
     publicar.add_argument("--relatorio", type=Path, default=Path("relatorio.json"), help="Publicados e reprovados, para as issues.")
-    publicar.add_argument("--avisos", type=Path, default=Path("avisos.md"), help="Relatório gravado se houver fallback.")
+    publicar.add_argument("--avisos", type=Path, default=Path("avisos.md"),
+                          help="Avisos de fallback de voz, para a issue de fallback. Os outros abrem a issue de avisos.")
     publicar.add_argument("--qualidade", type=Path, default=Path("qualidade.md"),
                           help="Medidas do QA do áudio, para o resumo da execução.")
     publicar.add_argument("--execucao", help="URL da execução, citada nas issues de incidente.")
@@ -478,8 +485,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.qualidade.write_text(resumo, encoding="utf-8")
     for episodio_id, motivo in resultado.texto_nao_rodou.items():
         print(f"::warning::{episodio_id}: {motivo}")
-    if resultado.avisos:
-        args.avisos.write_text("\n".join(f"- {aviso}" for aviso in resultado.avisos) + "\n", encoding="utf-8")
+    encaminhar_avisos(resultado.avisos, args.avisos, IncidentesDeAvisos(args.repo, args.execucao))
     if resultado.reprovados:
         print(f"Reprovados: {', '.join(resultado.reprovados)}")
         return 1
