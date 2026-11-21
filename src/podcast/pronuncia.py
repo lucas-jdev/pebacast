@@ -1,8 +1,9 @@
 """Dicionário de pronúncia aplicado só ao texto que vai para o TTS.
 
 O roteiro, as show notes e o feed continuam com a grafia original. Cada termo pode ter uma
-grafia alternativa (útil para qualquer provedor) e uma instrução em linguagem natural, que vai
-junto com o estilo da fala (só o Gemini interpreta).
+grafia alternativa (útil para qualquer provedor) e uma instrução em linguagem natural, que entra
+em `Fala.instrucoes_de_pronuncia` e é somada à instrução de voz pelo `Fala.estilo_efetivo` (só o
+Gemini interpreta). `fala.estilo` continua sendo o que o roteiro escreveu.
 """
 
 import re
@@ -44,5 +45,4 @@ def _aplicar(fala: Fala, pronuncias: Sequence[Pronuncia]) -> Fala:
 
     if texto == fala.texto and not instrucoes:
         return fala
-    estilo = " ".join([fala.estilo_efetivo, *instrucoes]) if instrucoes else fala.estilo
-    return replace(fala, texto=texto, estilo=estilo)
+    return replace(fala, texto=texto, instrucoes_de_pronuncia=(*fala.instrucoes_de_pronuncia, *instrucoes))
