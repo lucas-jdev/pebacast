@@ -19,7 +19,7 @@ from podcast.publicacao import (
     sintetizar_com_fallback,
 )
 from podcast.qualidade_audio import IncidentesDeAudio
-from podcast.tts.provedor import RequisicaoRecusada
+from podcast.tts.provedor import CotaDiariaEsgotada, RequisicaoRecusada
 from tests.conftest import ProvedorFalso, ProvedorQuebrado
 from tests.test_qualidade_audio import GhFalso
 from tests.test_roteiro import (  # noqa: F401 (fixture)
@@ -122,6 +122,26 @@ def test_fallback_tambem_cobre_falha_ao_criar_o_principal(davi):
 
     _, provedor, erro = sintetizar_com_fallback([], sem_chave, lambda: ProvedorFalso("kokoro"))
     assert provedor == "kokoro" and "GEMINI_API_KEY" in erro
+
+
+class ProvedorSemCota:
+    nome = "gemini-falso"
+
+    def sintetizar(self, falas):
+        raise CotaDiariaEsgotada("Cota diária do Gemini esgotada (gemini-falso): 429 RESOURCE_EXHAUSTED")
+
+
+@precisa_ffmpeg
+def test_cota_diaria_esgotada_cai_no_fallback_e_o_aviso_diz_o_motivo(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+
+    def fabrica(nome):
+        return ProvedorSemCota() if nome == "gemini-falso" else ProvedorFalso(nome)
+
+    resultado = _publicar(projeto, tmp_path, fabrica)
+
+    assert resultado.publicados == ["sw-001"]
+    assert "cota diária do gemini esgotada" in resultado.avisos[0].lower()
 
 
 class ProvedorQueRecusa:

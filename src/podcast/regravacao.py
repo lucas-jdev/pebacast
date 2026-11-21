@@ -210,8 +210,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         if args.comando == "regravar":
-            from podcast.tts.fabrica import criar_provedor
+            from podcast.tts.fabrica import fabrica_da_config
 
+            criar_provedor = fabrica_da_config(projeto.config()["tts"])
             candidata = regravar(projeto, args.episodio, storage, criar_provedor, args.trabalho)
             print(f"Candidata para ouvir: {candidata.url}")
             args.qualidade.write_text(candidata.laudo.markdown(f"Qualidade da candidata do {args.episodio}"),

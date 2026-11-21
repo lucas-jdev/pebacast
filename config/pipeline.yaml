@@ -37,6 +37,8 @@ tts:
   fallback: kokoro
   idioma: pt-BR
   max_caracteres_por_bloco: 4000
+  gemini:
+    timeout_s: 180   # teto por requisição; um bloco de 4.000 caracteres leva bem menos
   # Só para o TTS: o roteiro e o feed mantêm a grafia original (src/podcast/pronuncia.py).
   pronuncia:
     - termo: Pebacast

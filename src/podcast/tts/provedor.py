@@ -12,6 +12,13 @@ class RequisicaoRecusada(Exception):
     """
 
 
+class CotaDiariaEsgotada(Exception):
+    """A cota diária de requisições do provedor acabou.
+
+    Só renova no dia seguinte: repetir com espera de segundos gasta tempo sem chance de passar.
+    """
+
+
 class TtsProvider(Protocol):
     nome: str
 
