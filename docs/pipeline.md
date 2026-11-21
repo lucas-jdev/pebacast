@@ -112,7 +112,7 @@ O ffmpeg mistura a fala com a vinheta e exporta em MP3 mono a 64 kbps, com cerca
 
 - **Música nivelada pela fala.** A loudness de cada recorte da vinheta é medida e ajustada para ficar `audio.vinheta.abaixo_da_fala_lu` (2 LU) abaixo da loudness da fala do episódio, seja qual for o volume da faixa.
 - **Ganho único até −16 LUFS.** O episódio inteiro recebe um só ganho, calculado pela loudness medida. O loudnorm, usado antes, é dinâmico: puxava a música do encerramento, mais baixa que a fala, para o alvo.
-- **Pico real limitado.** Depois do ganho, um limitador com a taxa quadruplicada (para enxergar o pico entre amostras) segura o pico real em −1,5 dBTP. O codificador MP3 ainda sobe o pico e tira alguns décimos de LU, então a montagem mede o MP3 e, se precisar, codifica de novo com o teto mais baixo e o ganho corrigido (até 3 passadas).
+- **Pico real limitado.** Depois do ganho, um limitador com a taxa quadruplicada (para enxergar o pico entre amostras) segura o pico real em −1,5 dBTP. O codificador MP3 ainda sobe o pico e tira alguns décimos de LU, então a montagem mede o MP3 e, se precisar, codifica de novo com o teto mais baixo e o ganho corrigido (até 5 passadas). Três não bastavam: no se-002, cada correção da loudness empurrou o pico de volta, o codificador sobe mais o pico quanto mais baixo fica o teto, e o episódio saiu com −0,7 dBTP.
 
 ## 8. Publicação
 

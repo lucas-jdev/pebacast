@@ -166,6 +166,34 @@ def test_exportar_mp3_limita_o_pico_real_e_acerta_a_loudness(tmp_path):
     assert medida.integrada_lufs == pytest.approx(-16, abs=0.5)
 
 
+
+def test_montagem_insiste_no_teto_enquanto_o_codificador_empurra_o_pico(tmp_path, monkeypatch):
+    # O se-002 (21/11) saiu com -0,7 dBTP: corrigir a loudness empurrava o pico de volta, e o
+    # codificador sobe mais o pico quanto mais baixo o teto. Três passadas não bastavam.
+    import podcast.audio as modulo
+
+    passadas = []
+
+    def codificar(entradas, grafo, taxa, ganho_db, teto_dbtp, destino, *resto):
+        passadas.append((ganho_db, teto_dbtp))
+
+    def mp3_simulado(ganho_db, teto_dbtp):
+        pico = teto_dbtp + 1.5 * (ganho_db - 0.2) + 0.6 * (-1.5 - teto_dbtp)
+        return modulo.Loudness(-16.4 + (ganho_db - 0.2), pico)
+
+    def medir(entradas, grafo):
+        return mp3_simulado(*passadas[-1]) if passadas else modulo.Loudness(-16.2, -3.0)
+
+    monkeypatch.setattr(modulo, "_codificar", codificar)
+    monkeypatch.setattr(modulo, "medir_loudness", medir)
+
+    exportar_mp3(Audio.de_float(np.zeros(24_000), 24_000), tmp_path / "e.mp3", bitrate_kbps=64)
+
+    final = mp3_simulado(*passadas[-1])
+    assert len(passadas) > 3
+    assert final.pico_real_dbtp <= modulo.ALVO_PICO_DBTP
+    assert final.integrada_lufs == pytest.approx(-16, abs=0.2)
+
 def test_exportar_mp3_sem_vinheta_devolve_a_fala_e_as_trocas(tmp_path):
     fala = concatenar([_fala_de(1), _fala_de(1)], pausa_ms=300)
 
