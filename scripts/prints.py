@@ -40,9 +40,28 @@ MARCADOR = "<!-- pebacast-prints -->"
 MANIFESTO = "manifesto.json"
 SEM_MUDANCA = "Nenhuma mudança visual nas páginas capturadas"
 
-# Antes e depois são renderizados no mesmo runner, com o mesmo Chromium e as mesmas fontes;
-# a tolerância só absorve ruído de antialiasing (ver ADR 0009).
+# Texto sempre em tons de cinza, sem hinting e com o glifo no pixel inteiro. No #72 o mesmo parágrafo
+# saiu com antialiasing subpixel (franja colorida) num lado e em tons de cinza no outro: o Chromium
+# liga ou desliga o subpixel conforme a camada em que o texto é pintado, e um PR que mexe em outra
+# parte da página muda essas camadas.
+ARGS_CHROMIUM = ("--disable-lcd-text", "--font-render-hinting=none", "--disable-font-subpixel-positioning")
+
+# Comparação (ver ADR 0009). Um pixel conta como diferente quando:
+# - está numa região lisa nos dois lados (nenhum canal varia mais que AMPLITUDE_LISA entre ele e os
+#   8 vizinhos) e algum canal varia mais que LIMIAR_CANAL: fundo de card, faixa, área de cor;
+# - ou, em qualquer lugar, a média 3x3 da diferença passa de LIMIAR_TRACO em algum canal: letra,
+#   traço ou imagem que mudou.
+# A seção é alterada quando mais de MAX_PIXELS_DIFERENTES pixels diferem, ou quando o tamanho muda.
+# O antialiasing só redistribui a tinta entre vizinhos na borda das letras, que nunca é lisa, e a
+# média 3x3 desfaz a redistribuição. Medido nas seções do #72 (subpixel contra tons de cinza): a
+# regra antiga, só com LIMIAR_CANAL, marcava 21.920 pixels em index·inicio e 244.750 em
+# episodios·arquivo; esta marca 0, com média 3x3 de no máximo 43, abaixo dos 48. Nos testes, uma
+# palavra trocada num parágrafo dá de 229 a 620 pixels com média acima de 48 (chega a 168), e o
+# fundo de um card trocado pelo tom vizinho da paleta (#efe4c8 para #f3ead2, 10 no canal que mais
+# muda) dá 28 mil na região lisa. Passa o que é fino e de pouco contraste, como uma borda de 1 px.
 LIMIAR_CANAL = 8
+AMPLITUDE_LISA = 6
+LIMIAR_TRACO = 48
 MAX_PIXELS_DIFERENTES = 16
 ESPERA_MS = 500
 
@@ -197,7 +216,7 @@ def capturar(site: Path, saida: Path, paginas: Iterable[str] = PAGINAS) -> list[
     gerados: list[Path] = []
     try:
         with sync_playwright() as p:
-            navegador = p.chromium.launch()
+            navegador = p.chromium.launch(args=list(ARGS_CHROMIUM))
             for tela, (largura, altura) in TELAS.items():
                 celular = tela == "celular"
                 contexto = navegador.new_context(
@@ -235,19 +254,41 @@ def capturar(site: Path, saida: Path, paginas: Iterable[str] = PAGINAS) -> list[
 
 # ---------------------------------------------------------------- comparação
 
-def imagens_diferentes(antes: Any, depois: Any, limiar_canal: int = LIMIAR_CANAL,
-                       max_pixels: int = MAX_PIXELS_DIFERENTES) -> bool:
-    """Tamanhos diferentes contam como mudança; senão, mais de `max_pixels` pixels com algum canal
-    variando mais que `limiar_canal` (0-255)."""
+def _vizinhanca(x: Any, juntar: Callable[[Any, Any], Any]) -> Any:
+    """`juntar` (np.maximum, np.minimum ou np.add) de cada pixel com os 8 vizinhos; a borda se repete."""
+    import numpy as np
+
+    p = np.pad(x, ((1, 1), (1, 1), (0, 0)), mode="edge")
+    linhas = juntar(juntar(p[:, :-2], p[:, 1:-1]), p[:, 2:])
+    return juntar(juntar(linhas[:-2], linhas[1:-1]), linhas[2:])
+
+
+def imagens_diferentes(antes: Any, depois: Any) -> bool:
+    """Tamanhos diferentes contam como mudança; senão, a regra do cabeçalho (canais de 0 a 255)."""
     import numpy as np
 
     a, b = np.asarray(antes), np.asarray(depois)
     if a.shape != b.shape:
         return True
-    diferenca = np.abs(a.astype(np.int16) - b.astype(np.int16))
-    if diferenca.ndim == 3:
-        diferenca = diferenca.max(axis=2)
-    return int((diferenca > limiar_canal).sum()) > max_pixels
+    if a.ndim == 2:
+        a, b = a[..., None], b[..., None]
+    a, b = a.astype(np.int16), b.astype(np.int16)
+    linhas, colunas = np.nonzero((np.abs(a - b) > LIMIAR_CANAL).any(axis=2))
+    if not len(linhas):
+        return False
+    # Todo pixel que pode contar fica a até 1 px de um que passa de LIMIAR_CANAL, e a vizinhança dele
+    # a até 2 px: basta esse retângulo, e a página de episódios inteira tem mais de 11 milhões de pixels.
+    y0, y1 = max(linhas.min() - 2, 0), linhas.max() + 3
+    x0, x1 = max(colunas.min() - 2, 0), colunas.max() + 3
+    a, b = a[y0:y1, x0:x1], b[y0:y1, x0:x1]
+    diferenca = a - b
+
+    def lisa(x: Any) -> Any:
+        return (_vizinhanca(x, np.maximum) - _vizinhanca(x, np.minimum)).max(axis=2) <= AMPLITUDE_LISA
+
+    na_area_lisa = lisa(a) & lisa(b) & (np.abs(diferenca).max(axis=2) > LIMIAR_CANAL)
+    no_traco = (np.abs(_vizinhanca(diferenca, np.add)) > 9 * LIMIAR_TRACO).any(axis=2)
+    return int((na_area_lisa | no_traco).sum()) > MAX_PIXELS_DIFERENTES
 
 
 def _carregar_png(arquivo: Path) -> Any:

@@ -95,13 +95,76 @@ class TestComparacao:
         depois[1:, :] = 100 + prints.LIMIAR_CANAL
         assert not prints.imagens_diferentes(_imagem(100), depois)
 
-    def test_poucos_pixels_alem_da_tolerancia_mudaram(self):
+    def test_mancha_de_cor_pequena_mudou(self):
+        # 7x7 px: o miolo 5x5 é liso nos dois lados, 25 pixels acima do limite de 16.
         depois = _imagem(100)
-        depois[0, :prints.MAX_PIXELS_DIFERENTES + 1] = 140
+        depois[10:17, 10:17] = 140
+        assert prints.imagens_diferentes(_imagem(100), depois)
+
+    def test_linha_de_1_px_com_pouco_contraste_passa(self):
+        # Decisão do #75: fina e de pouco contraste é indistinguível de antialiasing.
+        depois = _imagem(100)
+        depois[20, 5:55] = 140
+        assert not prints.imagens_diferentes(_imagem(100), depois)
+
+    def test_linha_de_1_px_com_contraste_forte_mudou(self):
+        depois = _imagem(100)
+        depois[20, 5:55] = 255
         assert prints.imagens_diferentes(_imagem(100), depois)
 
     def test_tamanho_diferente_mudou(self):
         assert prints.imagens_diferentes(_imagem(100), _imagem(100, altura=41))
+
+
+def _trocar_fundo(imagem: np.ndarray, cor: tuple[int, int, int]) -> np.ndarray:
+    """Troca a cor do fundo e mantém o texto: cada pixel é tinta misturada ao fundo, e só a parte
+    de fundo da mistura muda de cor."""
+    pixels = imagem.astype(np.float64)
+    brilho = pixels.mean(axis=2)
+    fundo = np.median(pixels.reshape(-1, 3), axis=0)
+    tinta, claro = brilho.min(), fundo.mean()
+    parte_de_fundo = np.clip((brilho - tinta) / (claro - tinta), 0, 1)[..., None]
+    return np.clip(pixels + parte_de_fundo * (np.array(cor) - fundo), 0, 255).round().astype(np.uint8)
+
+
+@pytest.fixture(scope="module")
+def recorte() -> tuple[np.ndarray, np.ndarray]:
+    """Recorte de 400x110 px do parágrafo de index·inicio no desktop, das capturas do PR #72 (branch
+    `prints`, pr-72/index--inicio--desktop--{antes,depois}.png, caixa 615,415 a 1015,525). O texto é o
+    mesmo; o antes saiu com antialiasing subpixel e o depois em tons de cinza. Em .npz para o teste não
+    depender do Pillow, que fica no extra `prints`."""
+    with np.load(Path(__file__).parent / "fixtures" / "prints" / "recorte-pr72.npz") as dados:
+        return dados["antes"], dados["depois"]
+
+
+class TestRuidoDeRenderizacao:
+    def test_a_regra_antiga_marcava_o_recorte_como_alterado(self, recorte):
+        antes, depois = recorte
+        diferenca = np.abs(antes.astype(np.int16) - depois.astype(np.int16)).max(axis=2)
+        assert (diferenca > prints.LIMIAR_CANAL).sum() == 8440
+
+    def test_so_antialiasing_diferente_nao_mudou(self, recorte):
+        assert not prints.imagens_diferentes(*recorte)
+
+    @pytest.mark.parametrize("destino,origem", [
+        # "minutos", na 1ª linha, vira "episódio", copiado da 2ª linha.
+        ((slice(4, 34), slice(238, 324)), (slice(39, 69), slice(284, 370))),
+        # "de", na 1ª linha, vira "há", copiado da 3ª linha.
+        ((slice(4, 34), slice(148, 172)), (slice(73, 103), slice(136, 160))),
+    ], ids=["minutos-por-episodio", "de-por-ha"])
+    def test_palavra_trocada_num_paragrafo_mudou(self, recorte, destino, origem):
+        antes, depois = recorte
+        trocado = depois.copy()
+        trocado[destino] = depois[origem]
+        assert prints.imagens_diferentes(antes, trocado)
+        assert prints.imagens_diferentes(depois, trocado)
+
+    # O recorte é do tamanho de um card. O fundo dele é o --fundo do tema (#efe4c8); as trocas vão
+    # para o --fundo-2 do tema e para o fundo da seção alternada, o tom mais próximo da paleta.
+    @pytest.mark.parametrize("cor", [(0xe6, 0xd6, 0xb0), (0xf3, 0xea, 0xd2)], ids=["e6d6b0", "f3ead2"])
+    def test_fundo_do_card_trocado_mudou(self, recorte, cor):
+        antes, depois = recorte
+        assert prints.imagens_diferentes(antes, _trocar_fundo(depois, cor))
 
 
 class TestManifesto:
