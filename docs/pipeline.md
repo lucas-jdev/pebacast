@@ -128,6 +128,19 @@ O site ganha uma página por episódio publicado em `episodios/<id>/`, e o `<lin
 
 Decisão de hospedagem em [ADR 0002](adr/0002-hospedagem-pages-releases.md).
 
+### Avisos da publicação
+
+O que sai diferente do normal sem segurar o episódio vira um aviso (`src/podcast/avisos.py`), e cada aviso diz se é de fallback de voz:
+
+| Aviso | Vai para |
+|---|---|
+| Sintetizado com o fallback (Kokoro) | `avisos.md` → o `publicar.yml` abre "Episódio publicado com fallback de voz (<data>)" |
+| Publicado sem vinheta | issue `incidente` "Avisos na publicação do <id>" |
+| QA do áudio não rodou até o fim | idem |
+| Issue da cota esgotada não foi aberta ou fechada | idem |
+
+A issue de avisos é uma por episódio: um novo aviso no mesmo episódio só comenta nela. O título não termina em ": <id>" de propósito, para o passo "Atualizar issues" não fechá-la quando o episódio sai; quem fecha é o Lucas. O `relatorio.json` também separa os dois tipos (`avisos.fallback` e `avisos.outros`). O "QA de texto não rodou" fica fora dos avisos: vai só para o resumo e para um `::warning::`.
+
 ### Cota diária do Gemini esgotada
 
 Com a cota do dia esgotada, o episódio não é publicado nem vai para o Kokoro ([ADR 0011](adr/0011-cota-esgotada-espera.md)). `src/podcast/espera_de_cota.py` grava `episodios/<id>/aguardando_cota.json` (`{"desde": ...}`, que não muda numa nova falha) e abre a issue `incidente` "Cota do Gemini esgotada: <id> aguardando", ou comenta na que já está aberta. O workflow commita o arquivo, e o site é publicado com o card "Próximo" avisando que o episódio sai em breve (o estado `AGUARDANDO_COTA` vale só para o site: para a seleção da rotina, o episódio continua aguardando publicação).
@@ -173,7 +186,7 @@ O QA do áudio não percebe quando o TTS fala outra coisa no lugar do roteiro ("
 
 O laudo vai para o resumo da execução (`qualidade.md`). Com divergência confirmada, o Python abre a issue `incidente` "Texto do <id> diverge do roteiro", ou comenta na aberta. O Lucas ouve cada trecho, marca na issue se o aviso acertou ou foi alarme falso e fecha à mão: é o que vai calibrar a regeneração automática (#70).
 
-A transcrição usa a mesma camada única de retentativa do TTS (`src/podcast/retentativa.py`): 429 e 5xx esperam e tentam de novo, e um pedido recusado (4xx) desiste na hora. Se os modelos continuarem indisponíveis, o resumo diz "QA de texto não rodou", o log ganha um `::warning::` e a publicação segue. Essa falha **não** entra nos avisos, porque o `avisos.md` vira a issue de fallback de voz.
+A transcrição usa a mesma camada única de retentativa do TTS (`src/podcast/retentativa.py`): 429 e 5xx esperam e tentam de novo, e um pedido recusado (4xx) desiste na hora. Se os modelos continuarem indisponíveis, o resumo diz "QA de texto não rodou", o log ganha um `::warning::` e a publicação segue. Essa falha **não** entra nos avisos: os modelos de áudio dão 503 com frequência, e ela abriria issue demais.
 
 **Cota no free tier.** Os limites por dia ficam no painel do AI Studio, por modelo, e não em tabela pública (ADR 0001). A cota de cada modelo de transcrição é separada da do `gemini-3.8-flash-tts`, então o QA de texto não tira requisição da narração:
 

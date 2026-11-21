@@ -50,7 +50,7 @@ flowchart TD
         tts["Voz no Gemini TTS<br/>até 2 vozes por requisição"]
         erro_tts{Erro do Gemini?}
         retry[429 por minuto / 5xx / timeout:<br/>espera e tenta de novo]
-        kokoro[Kokoro local, só se a API<br/>estiver fora ou sem acesso;<br/>publica e abre issue de aviso]
+        kokoro[Kokoro local, só se a API<br/>estiver fora ou sem acesso;<br/>publica e abre a issue<br/>de fallback de voz]
         espera["Cota do dia esgotada: não publica.<br/>Grava <code>aguardando_cota.json</code>,<br/>abre issue incidente e o site<br/>avisa que sai em breve"]
         agendado([Agendamento 08:15 UTC,<br/>depois da renovação da cota:<br/>só roda se houver pendente])
         mix["Apara o silêncio nas bordas dos blocos,<br/>nivela a vinheta pela fala, mixa,<br/>ganho único e limitador de pico → MP3"]
@@ -64,6 +64,7 @@ flowchart TD
         pages[Publica no GitHub Pages]
         indexnow["Avisa o IndexNow das URLs<br/>que mudaram; falha só vira aviso"]
         issue(["Issue do episódio<br/>(Roteiro reprovado: &lt;id&gt;)<br/>reprovar de novo só comenta"]):::falha
+        avisos(["Issue do episódio<br/>(Avisos na publicação do &lt;id&gt;):<br/>sem vinheta, QA do áudio que não rodou,<br/>issue da cota que não abriu ou fechou.<br/>Novo aviso só comenta"]):::falha
     end
     app([App de podcast baixa o episódio]):::saida
     site([Site mostra o episódio,<br/>com voto e recado]):::saida
@@ -104,6 +105,8 @@ flowchart TD
     espera --> feed
     espera -. "no dia seguinte" .-> agendado
     mix --> release --> registro --> qa
+    registro -. "aviso que não<br/>é fallback" .-> avisos
+    avisos --> triagem
     qa -- "passando ou não,<br/>publica" --> qa_texto
     qa_texto -- "com ou sem divergência,<br/>e mesmo se não rodar" --> feed
     qa_texto -. sim .-> incidente_texto
