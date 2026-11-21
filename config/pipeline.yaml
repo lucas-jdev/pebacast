@@ -105,6 +105,11 @@ audio:
 qualidade_texto:
   modelos: [gemini-3.6-flash, gemini-3.5-flash]
   timeout_s: 300
+  # O episódio inteiro numa requisição saía cortado (se-002: os dois modelos pararam em 69%).
+  # Cada modelo transcreve janelas de até 5 min, cortadas nas trocas de bloco.
+  janela_maxima_s: 300
+  # Transcrição com menos palavras que isso, em relação ao roteiro, conta como "não rodou".
+  cobertura_minima: 0.85
   # Forma falada (uma palavra) → forma escrita: não é erro do TTS dizer "pra" onde o roteiro tem "para".
   equivalencias:
     pra: para

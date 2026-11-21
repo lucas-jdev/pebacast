@@ -5,12 +5,14 @@ import numpy as np
 import pytest
 import yaml
 
-from podcast.audio import Audio, duracao_mp3, exportar_mp3
+from podcast.audio import Audio, Trechos, duracao_mp3, exportar_mp3
 from podcast.dominio import Fala
 from podcast.qualidade_texto import (
     GeminiTranscritor,
     IncidentesDeTexto,
     QaDeTexto,
+    TranscricaoIncompleta,
+    janelas,
     normalizar,
     recortar_mp3,
 )
@@ -61,7 +63,7 @@ def _qa(primeira: str, segunda: str, incidentes=None) -> QaDeTexto:
 
 
 def test_os_cinco_erros_do_prumo_ouvidos_pelos_dois_modelos_sao_confirmados(davi, helena):
-    laudo = _qa(OUVIDO_NO_PRUMO, OUVIDO_NO_PRUMO).rodar("especial", Path("x.mp3"), (0, 1), _falas_do_prumo(davi, helena))
+    laudo = _qa(OUVIDO_NO_PRUMO, OUVIDO_NO_PRUMO).rodar("especial", Path("x.mp3"), Trechos(fala=(0, 1)), _falas_do_prumo(davi, helena))
 
     assert not laudo.aprovado
     assert [(d.persona, d.trecho.split("[")[1].split("]")[0]) for d in laudo.divergencias] == [
@@ -79,7 +81,7 @@ def test_divergencia_de_um_modelo_so_e_ruido_e_nao_conta(davi):
     fiel = "Tudo, Helena? Hoje a gente fala de licenças."
     ruidoso = "Tudo, Helena? Hoje a gente falou de licença."
 
-    laudo = _qa(ruidoso, fiel).rodar("sw-001", Path("x"), (0, 1), [Fala(davi, fiel)])
+    laudo = _qa(ruidoso, fiel).rodar("sw-001", Path("x"), Trechos(fala=(0, 1)), [Fala(davi, fiel)])
 
     assert laudo.aprovado
 
@@ -109,7 +111,7 @@ def test_laudo_em_markdown_mostra_o_trecho_do_roteiro_e_o_que_cada_modelo_ouviu(
 def test_divergencia_confirmada_abre_a_issue_uma_vez_e_depois_so_comenta(davi, helena):
     falas = _falas_do_prumo(davi, helena)
     gh = GhFalso()
-    _qa(OUVIDO_NO_PRUMO, OUVIDO_NO_PRUMO, IncidentesDeTexto("dono/repo", None, gh)).rodar("sw-004", Path("x"), (0, 1), falas)
+    _qa(OUVIDO_NO_PRUMO, OUVIDO_NO_PRUMO, IncidentesDeTexto("dono/repo", None, gh)).rodar("sw-004", Path("x"), Trechos(fala=(0, 1)), falas)
 
     [criar] = gh.acoes()
     assert criar[:3] == ["gh", "issue", "create"]
@@ -118,7 +120,7 @@ def test_divergencia_confirmada_abre_a_issue_uma_vez_e_depois_so_comenta(davi, h
     assert "alarme falso" in criar[criar.index("--body") + 1]
 
     gh = GhFalso([{"number": 5, "title": "Texto do sw-004 diverge do roteiro"}])
-    _qa(OUVIDO_NO_PRUMO, OUVIDO_NO_PRUMO, IncidentesDeTexto("dono/repo", None, gh)).rodar("sw-004", Path("x"), (0, 1), falas)
+    _qa(OUVIDO_NO_PRUMO, OUVIDO_NO_PRUMO, IncidentesDeTexto("dono/repo", None, gh)).rodar("sw-004", Path("x"), Trechos(fala=(0, 1)), falas)
 
     assert [comando[:4] for comando in gh.acoes()] == [["gh", "issue", "comment", "5"]]
 
@@ -127,7 +129,7 @@ def test_sem_divergencia_nao_mexe_em_issue(davi):
     gh = GhFalso()
     fiel = "Hoje a gente fala de licenças."
 
-    _qa(fiel, fiel, IncidentesDeTexto("dono/repo", None, gh)).rodar("sw-004", Path("x"), (0, 1), [Fala(davi, fiel)])
+    _qa(fiel, fiel, IncidentesDeTexto("dono/repo", None, gh)).rodar("sw-004", Path("x"), Trechos(fala=(0, 1)), [Fala(davi, fiel)])
 
     assert gh.comandos == []
 
@@ -194,4 +196,85 @@ def test_transcritor_quebrado_sobe_o_erro_para_a_publicacao_tratar(davi):
     qa = QaDeTexto((TranscritorQuebrado(), TranscritorQuebrado()), {}, recortar=lambda mp3, trecho: b"mp3")
 
     with pytest.raises(ConnectionError):
-        qa.rodar("sw-001", Path("x"), (0, 1), [Fala(davi, "Oi")])
+        qa.rodar("sw-001", Path("x"), Trechos(fala=(0, 1)), [Fala(davi, "Oi")])
+
+
+def test_janelas_cortam_na_troca_de_bloco_mais_tardia_que_cabe():
+    assert janelas((10.0, 990.0), (250.0, 300.0, 560.0, 800.0), 300.0) == [
+        (10.0, 300.0), (300.0, 560.0), (560.0, 800.0), (800.0, 990.0)]
+
+
+def test_janela_sem_troca_por_perto_corta_no_maximo():
+    assert janelas((0.0, 700.0), (), 300.0) == [(0.0, 300.0), (300.0, 600.0), (600.0, 700.0)]
+
+
+def test_cada_modelo_transcreve_janela_por_janela_e_as_partes_sao_juntadas(davi):
+    partes = iter(["Hoje a gente", "fala de licenças.", "Hoje a gente", "fala de licenças."])
+
+    class Transcritor:
+        def __init__(self, nome):
+            self.nome, self.audios = nome, []
+
+        def transcrever(self, audio):
+            self.audios.append(audio)
+            return next(partes)
+
+    a, b = Transcritor("a"), Transcritor("b")
+    recortes = []
+    qa = QaDeTexto((a, b), {}, recortar=lambda mp3, trecho: recortes.append(trecho) or repr(trecho).encode(),
+                   janela_maxima_s=300)
+
+    laudo = qa.rodar("sw-001", Path("x"), Trechos(fala=(0.0, 500.0), trocas_s=(240.0,)),
+                     [Fala(davi, "Hoje a gente fala de licenças.")])
+
+    assert recortes == [(0.0, 240.0), (240.0, 500.0)]
+    assert len(a.audios) == len(b.audios) == 2
+    assert laudo.aprovado
+
+
+def test_transcricao_cortada_no_meio_nao_vira_divergencia_e_sim_erro(davi, helena):
+    # No se-002, os dois modelos pararam em 69% do roteiro, e o resto do episódio virou "divergência".
+    falas = _falas_do_prumo(davi, helena)
+    cortada = "Tudo, Helena? Hoje a gente fala de licenças. Quem ia escrever a especificação"
+    gh = GhFalso()
+
+    with pytest.raises(TranscricaoIncompleta, match="mínimo 85%"):
+        _qa(cortada, cortada, IncidentesDeTexto("dono/repo", None, gh)).rodar("se-002", Path("x"), Trechos(fala=(0, 1)), falas)
+    assert gh.comandos == []
+
+
+def test_trechos_do_mesmo_ponto_do_roteiro_viram_uma_linha_so_e_trecho_longo_e_resumido(davi):
+    roteiro = "um dois tres quatro cinco seis sete oito nove dez onze doze treze quatorze quinze dezesseis fim"
+    # O modelo a ouve palavras soltas no lugar; o b não ouve nada: todas caem no mesmo trecho do b.
+    ouvido_a = "um x tres x cinco x sete x nove x onze x treze x quinze x fim"
+    ouvido_b = "um fim"
+    qa = QaDeTexto((TranscritorFalso("a", ""), TranscritorFalso("b", "")), {}, cobertura_minima=0)
+
+    laudo = qa.comparar([Fala(davi, roteiro)], [ouvido_a, ouvido_b])
+
+    [divergencia] = laudo.divergencias
+    assert "… (+3 palavras)" in divergencia.trecho
+    assert divergencia.ouvido["b"] == ""
+
+
+class RespostaCortada:
+    text = "Tudo, Helena? Hoje a gente"
+    candidates = [type("Candidato", (), {"finish_reason": "FinishReason.MAX_TOKENS"})()]
+
+
+def test_resposta_parada_no_limite_de_tokens_nao_e_repetida():
+    pytest.importorskip("google.genai")
+    esperas = []
+
+    class Modelos:
+        chamadas = 0
+
+        def generate_content(self, model, contents):
+            Modelos.chamadas += 1
+            return RespostaCortada()
+
+    cliente = type("Cliente", (), {"models": Modelos()})()
+
+    with pytest.raises(TranscricaoIncompleta, match="limite de tokens"):
+        GeminiTranscritor("modelo", cliente, dormir=esperas.append).transcrever(b"mp3")
+    assert Modelos.chamadas == 1 and esperas == []

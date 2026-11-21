@@ -455,7 +455,7 @@ class TranscritorQueRepete:
 
     def transcrever(self, audio_mp3):
         assert audio_mp3, "o recorte da fala chegou vazio"
-        return "Transcrição que não bate com nada do roteiro."
+        return "palavra que não bate com o roteiro " * 200
 
 
 class TranscritorIndisponivel:

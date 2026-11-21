@@ -269,7 +269,7 @@ def publicar_pendentes(
         if qa_texto is not None:
             try:
                 originais = carregar_falas(_ler_json(pasta / ROTEIRO), personas)
-                texto[episodio_id] = qa_texto.rodar(episodio_id, mp3, trechos.fala, originais)
+                texto[episodio_id] = qa_texto.rodar(episodio_id, mp3, trechos, originais)
             except Exception as erro:
                 log.exception("O QA de texto de %s não rodou.", episodio_id)
                 texto_nao_rodou[episodio_id] = f"QA de texto não rodou. {type(erro).__name__}: {erro}"
