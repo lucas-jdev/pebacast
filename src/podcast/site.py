@@ -8,6 +8,8 @@ copia os arquivos estáticos de site/. O feed continua saindo de podcast.publica
     python -m podcast.publicacao --site _site feed
 """
 
+# PR de teste da #75: este comentário não muda o HTML gerado. Não mergear.
+
 import hashlib
 import json
 import re
