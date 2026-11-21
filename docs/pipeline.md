@@ -104,7 +104,7 @@ A rotina commita a pasta do episódio, aprovada ou não. O Actions roda `python 
 
 Roda no GitHub Actions (`.github/workflows/publicar.yml`), com `python -m podcast.publicacao publicar`, só depois de o `validar` aprovar o roteiro de novo.
 
-Cada fala é sintetizada pelo `TtsProvider` configurado, com no máximo dois falantes por requisição. O silêncio que o TTS deixa nas bordas de cada bloco é aparado (abaixo de −50 dBFS, com 30 ms de folga) antes de os blocos serem emendados com a pausa fixa de 300 ms; sem isso, a troca de bloco chegava a 1,1 s de silêncio. A montagem guarda onde fica cada troca, para o QA medir. Cada bloco do Gemini tem até 4 tentativas, com espera exponencial a partir de 15 s, porque o free tier devolve 429 por minuto com frequência. Essa é a única camada de retentativa: o cliente do SDK é criado com a retentativa própria desligada (`HttpRetryOptions(attempts=1)`), para que cada tentativa apareça no log, e com um teto de tempo por requisição (`tts.gemini.timeout_s`, 180 s). Um 429 de cota **diária** esgotada (o `quotaId` cita `PerDay`; no free tier, 10 requisições por dia, e um episódio usa de 4 a 5) não é repetido, porque só renova no dia seguinte: vira `CotaDiariaEsgotada` e vai direto para o fallback. Se o provedor principal ainda assim falhar, a pipeline usa o fallback e abre uma issue avisando. A decisão está em [ADR 0001](adr/0001-tts-gemini-com-fallback-kokoro.md).
+Cada fala é sintetizada pelo `TtsProvider` configurado, com no máximo dois falantes por requisição. O silêncio que o TTS deixa nas bordas de cada bloco é aparado (abaixo de −50 dBFS, com 30 ms de folga) antes de os blocos serem emendados com a pausa fixa de 300 ms; sem isso, a troca de bloco chegava a 1,1 s de silêncio. A montagem guarda onde fica cada troca, para o QA medir. Cada bloco do Gemini tem até 4 tentativas, com espera exponencial a partir de 15 s, porque o free tier devolve 429 por minuto com frequência. Essa é a única camada de retentativa: o cliente do SDK é criado com a retentativa própria desligada (`HttpRetryOptions(attempts=1)`), para que cada tentativa apareça no log, e com um teto de tempo por requisição (`tts.gemini.timeout_s`, 180 s). Um 429 de cota **diária** esgotada (o `quotaId` cita `PerDay`; no free tier, 10 requisições por dia, e um episódio usa de 4 a 5) não é repetido, porque só renova no dia seguinte: vira `CotaDiariaEsgotada`, e o episódio aguarda a renovação em vez de ir para o fallback ([ADR 0011](adr/0011-cota-esgotada-espera.md)). Se o provedor principal ainda assim falhar, a pipeline usa o fallback e abre uma issue avisando. A decisão está em [ADR 0001](adr/0001-tts-gemini-com-fallback-kokoro.md).
 
 ## 7. Montagem
 
@@ -127,6 +127,12 @@ Mudanças que só afetam o site ou o feed (`site/`, `src/podcast/site.py`, `src/
 O site ganha uma página por episódio publicado em `episodios/<id>/`, e o `<link>` de cada item do feed aponta para ela. Essa URL não muda, e o id do episódio não é renomeado depois de publicado ([ADR 0010](adr/0010-url-permanente-do-episodio.md)).
 
 Decisão de hospedagem em [ADR 0002](adr/0002-hospedagem-pages-releases.md).
+
+### Cota diária do Gemini esgotada
+
+Com a cota do dia esgotada, o episódio não é publicado nem vai para o Kokoro ([ADR 0011](adr/0011-cota-esgotada-espera.md)). `src/podcast/espera_de_cota.py` grava `episodios/<id>/aguardando_cota.json` (`{"desde": ...}`, que não muda numa nova falha) e abre a issue `incidente` "Cota do Gemini esgotada: <id> aguardando", ou comenta na que já está aberta. O workflow commita o arquivo, e o site é publicado com o card "Próximo" avisando que o episódio sai em breve (o estado `AGUARDANDO_COTA` vale só para o site: para a seleção da rotina, o episódio continua aguardando publicação).
+
+O `publicar.yml` também roda agendado, às 08:15 UTC, depois da renovação da cota. Um job `verificar` lista os roteiros sem `publicacao.json` e, no agendamento, a publicação só roda se houver algum. Quando o episódio sai, o arquivo é apagado no mesmo commit do `publicacao.json`, e a issue fecha. Falhar ao abrir ou fechar a issue vira aviso e não segura nada.
 
 ### Entrar no índice dos buscadores
 
@@ -156,6 +162,25 @@ Depois de publicar, `src/podcast/qualidade_audio.py` mede o MP3 final com o ffmp
 As pausas no meio de um bloco são do TTS e não entram na conta. Os limites partem do alvo da montagem e ficam em `audio.qualidade`, em `config/pipeline.yaml`.
 
 O resultado vai para o resumo da execução no Actions (`qualidade.md`). **O QA não segura a publicação.** Se alguma medida reprovar, o episódio sai assim mesmo e o Python abre uma issue `incidente` com as medidas, com o título `Áudio do <id> fora do padrão`. Se já houver uma aberta para o episódio, comenta nela. Quando o áudio daquele episódio passar, a issue fecha sozinha. Uma falha do próprio QA também não segura a publicação: vira aviso.
+
+## QA de texto
+
+O QA do áudio não percebe quando o TTS fala outra coisa no lugar do roteiro ("a GPL" em vez de "a AGPL"). Depois do QA do áudio, `src/podcast/qualidade_texto.py` confere isso, em **modo aviso** (#69):
+
+1. Recorta só a fala do MP3 (`Trechos.fala`, sem a vinheta) e manda aos dois modelos de `qualidade_texto.modelos`. São 2 requisições por episódio, seja qual for o provedor de voz.
+2. Normaliza o roteiro **original** (não o texto do dicionário de pronúncia) e cada transcrição: minúsculas, sem acento, sem pontuação e com as equivalências de fala de `qualidade_texto.equivalencias` ("pra" = "para", "tá" = "está"). Um número por extenso transcrito como algarismo é ignorado.
+3. Alinha palavra por palavra (`difflib.SequenceMatcher`). Só conta a divergência que aparece **nas duas** transcrições, no mesmo trecho do roteiro: erro de um modelo só é ruído de transcrição. No teste do especial do Prumo, foi isso que separou erro real de ruído.
+
+O laudo vai para o resumo da execução (`qualidade.md`). Com divergência confirmada, o Python abre a issue `incidente` "Texto do <id> diverge do roteiro", ou comenta na aberta. O Lucas ouve cada trecho, marca na issue se o aviso acertou ou foi alarme falso e fecha à mão: é o que vai calibrar a regeneração automática (#70).
+
+A transcrição usa a mesma camada única de retentativa do TTS (`src/podcast/retentativa.py`): 429 e 5xx esperam e tentam de novo, e um pedido recusado (4xx) desiste na hora. Se os modelos continuarem indisponíveis, o resumo diz "QA de texto não rodou", o log ganha um `::warning::` e a publicação segue. Essa falha **não** entra nos avisos, porque o `avisos.md` vira a issue de fallback de voz.
+
+**Cota no free tier.** Os limites por dia ficam no painel do AI Studio, por modelo, e não em tabela pública (ADR 0001). A cota de cada modelo de transcrição é separada da do `gemini-3.8-flash-tts`, então o QA de texto não tira requisição da narração:
+
+| Modelo | Requisições por dia (free tier) | Uso por episódio |
+|---|---|---|
+| `gemini-3.6-flash` | _conferir no AI Studio_ | 1 |
+| `gemini-3.5-flash` | _conferir no AI Studio_ | 1 |
 
 ## Regravação do áudio
 

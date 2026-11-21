@@ -194,6 +194,16 @@ def test_nao_escreve_novo_roteiro_enquanto_outro_aguarda_publicacao(projeto):
         montar_contexto(projeto, date(2026, 11, 8))
 
 
+
+def test_episodio_aguardando_a_cota_tambem_segura_a_fila_da_rotina(projeto):
+    _escrever_episodio(projeto, "sw-001")
+    (projeto.episodios / "sw-001" / "aguardando_cota.json").write_text('{"desde": "2026-11-08T01:00:00+00:00"}\n',
+                                                                       encoding="utf-8")
+
+    assert estado_do_episodio(projeto, projeto.sagas()["software"], "sw-001") == AGUARDANDO_PUBLICACAO
+    with pytest.raises(SemEpisodio, match="sw-001 já tem roteiro aprovado"):
+        montar_contexto(projeto, date(2026, 11, 8))
+
 def test_ordem_da_fila_poe_saga_nunca_publicada_antes_e_respeita_a_fila_nos_empates():
     ultimas = {"software": "2026-11-09T22:00:00+00:00", "solucoes": "2026-11-07T15:00:00+00:00"}
     assert ordem_da_fila(["software", "solucoes", "dados", "seguranca"], ultimas) == [

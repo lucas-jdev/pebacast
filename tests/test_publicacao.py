@@ -16,9 +16,12 @@ from podcast.publicacao import (
     gerar_feed,
     publicar_pendentes,
     relatorio,
+    resumo_da_qualidade,
     sintetizar_com_fallback,
 )
+from podcast.espera_de_cota import IncidentesDeCota
 from podcast.qualidade_audio import IncidentesDeAudio
+from podcast.qualidade_texto import QaDeTexto
 from podcast.tts.provedor import CotaDiariaEsgotada, RequisicaoRecusada
 from tests.conftest import ProvedorFalso, ProvedorQuebrado
 from tests.test_qualidade_audio import GhFalso
@@ -131,17 +134,76 @@ class ProvedorSemCota:
         raise CotaDiariaEsgotada("Cota diária do Gemini esgotada (gemini-falso): 429 RESOURCE_EXHAUSTED")
 
 
+def _fabrica_sem_cota(criados=None):
+    def fabrica(nome):
+        if criados is not None:
+            criados.append(nome)
+        return ProvedorSemCota() if nome == "gemini-falso" else ProvedorFalso(nome)
+    return fabrica
+
+
+def test_cota_diaria_esgotada_nao_publica_nem_cai_no_fallback_e_aguarda(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    criados, gh = [], GhFalso()
+
+    resultado = publicar_pendentes(projeto, StorageFalso(), _fabrica_sem_cota(criados), tmp_path / "trabalho",
+                                   lambda: AGORA, esperas=IncidentesDeCota("dono/repo", None, gh))
+
+    pasta = projeto.episodios / "sw-001"
+    assert resultado.publicados == [] and resultado.aguardando == ["sw-001"]
+    assert criados == ["gemini-falso"]
+    assert not (pasta / "publicacao.json").exists()
+    assert json.loads((pasta / "aguardando_cota.json").read_text(encoding="utf-8")) == {"desde": AGORA.isoformat()}
+    [criar] = gh.acoes()
+    assert criar[:3] == ["gh", "issue", "create"] and criar[criar.index("--label") + 1] == "incidente"
+    assert criar[criar.index("--title") + 1] == "Cota do Gemini esgotada: sw-001 aguardando"
+    assert relatorio(resultado)["aguardando_cota"] == ["sw-001"]
+
+
+def test_cota_ainda_esgotada_comenta_na_issue_e_mantem_o_inicio_da_espera(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    pasta = projeto.episodios / "sw-001"
+    (pasta / "aguardando_cota.json").write_text('{"desde": "2026-11-07T08:00:00+00:00"}\n', encoding="utf-8")
+    gh = GhFalso([{"number": 7, "title": "Cota do Gemini esgotada: sw-001 aguardando"}])
+
+    publicar_pendentes(projeto, StorageFalso(), _fabrica_sem_cota(), tmp_path / "trabalho", lambda: AGORA,
+                       esperas=IncidentesDeCota("dono/repo", None, gh))
+
+    assert [comando[:4] for comando in gh.acoes()] == [["gh", "issue", "comment", "7"]]
+    assert "2026-11-07T08:00:00" in (pasta / "aguardando_cota.json").read_text(encoding="utf-8")
+
+
 @precisa_ffmpeg
-def test_cota_diaria_esgotada_cai_no_fallback_e_o_aviso_diz_o_motivo(projeto, tmp_path):
+def test_episodio_que_aguardava_e_publicado_encerra_a_espera_e_fecha_a_issue(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    pasta = projeto.episodios / "sw-001"
+    (pasta / "aguardando_cota.json").write_text('{"desde": "2026-11-07T08:00:00+00:00"}\n', encoding="utf-8")
+    gh = GhFalso([{"number": 7, "title": "Cota do Gemini esgotada: sw-001 aguardando"}])
+
+    resultado = publicar_pendentes(projeto, StorageFalso(), _fabrica(), tmp_path / "trabalho", lambda: AGORA,
+                                   esperas=IncidentesDeCota("dono/repo", None, gh))
+
+    assert resultado.publicados == ["sw-001"] and resultado.aguardando == []
+    assert (pasta / "publicacao.json").exists() and not (pasta / "aguardando_cota.json").exists()
+    assert [comando[:4] for comando in gh.acoes()] == [["gh", "issue", "close", "7"]]
+
+
+class EsperasQuebradas:
+    def registrar(self, episodio_id, erro):
+        raise subprocess.CalledProcessError(1, ["gh", "issue", "create"])
+
+    def resolver(self, episodio_id):
+        raise subprocess.CalledProcessError(1, ["gh", "issue", "close"])
+
+
+def test_falha_ao_abrir_a_issue_da_cota_vira_aviso_e_o_episodio_aguarda_mesmo_assim(projeto, tmp_path):
     _escrever_episodio(projeto, "sw-001")
 
-    def fabrica(nome):
-        return ProvedorSemCota() if nome == "gemini-falso" else ProvedorFalso(nome)
+    resultado = publicar_pendentes(projeto, StorageFalso(), _fabrica_sem_cota(), tmp_path / "trabalho",
+                                   lambda: AGORA, esperas=EsperasQuebradas())
 
-    resultado = _publicar(projeto, tmp_path, fabrica)
-
-    assert resultado.publicados == ["sw-001"]
-    assert "cota diária do gemini esgotada" in resultado.avisos[0].lower()
+    assert resultado.aguardando == ["sw-001"]
+    assert "a issue da cota esgotada não foi aberta" in resultado.avisos[0]
 
 
 class ProvedorQueRecusa:
@@ -381,3 +443,44 @@ def test_falha_ao_registrar_o_incidente_nao_impede_a_publicacao(projeto, tmp_pat
 
     assert resultado.publicados == ["sw-001"]
     assert "QA do áudio" in resultado.avisos[0]
+
+
+class TranscritorQueRepete:
+    def __init__(self, nome):
+        self.nome = nome
+
+    def transcrever(self, audio_mp3):
+        assert audio_mp3, "o recorte da fala chegou vazio"
+        return "Transcrição que não bate com nada do roteiro."
+
+
+class TranscritorIndisponivel:
+    nome = "indisponivel"
+
+    def transcrever(self, audio_mp3):
+        raise ConnectionError("503 UNAVAILABLE")
+
+
+@precisa_ffmpeg
+def test_qa_de_texto_roda_depois_de_publicar_e_vai_para_o_resumo(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    qa = QaDeTexto((TranscritorQueRepete("a"), TranscritorQueRepete("b")), {})
+
+    resultado = publicar_pendentes(projeto, StorageFalso(), _fabrica(), tmp_path / "trabalho", lambda: AGORA, qa_texto=qa)
+
+    assert resultado.publicados == ["sw-001"]
+    assert not resultado.texto["sw-001"].aprovado
+    assert "### Texto do sw-001" in resumo_da_qualidade(resultado)
+
+
+@precisa_ffmpeg
+def test_qa_de_texto_que_nao_roda_nao_segura_a_publicacao_nem_vira_aviso_de_fallback(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    qa = QaDeTexto((TranscritorIndisponivel(), TranscritorIndisponivel()), {})
+
+    resultado = publicar_pendentes(projeto, StorageFalso(), _fabrica(), tmp_path / "trabalho", lambda: AGORA, qa_texto=qa)
+
+    assert resultado.publicados == ["sw-001"]
+    assert resultado.texto_nao_rodou["sw-001"].startswith("QA de texto não rodou")
+    assert resultado.avisos == []
+    assert "QA de texto não rodou" in resumo_da_qualidade(resultado)

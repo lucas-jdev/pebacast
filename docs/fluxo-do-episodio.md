@@ -50,12 +50,16 @@ flowchart TD
         tts["Voz no Gemini TTS<br/>até 2 vozes por requisição"]
         erro_tts{Erro do Gemini?}
         retry[429 por minuto / 5xx / timeout:<br/>espera e tenta de novo]
-        kokoro[Kokoro local, só se a API<br/>estiver fora, sem acesso<br/>ou sem cota no dia;<br/>publica e abre issue de aviso]
+        kokoro[Kokoro local, só se a API<br/>estiver fora ou sem acesso;<br/>publica e abre issue de aviso]
+        espera["Cota do dia esgotada: não publica.<br/>Grava <code>aguardando_cota.json</code>,<br/>abre issue incidente e o site<br/>avisa que sai em breve"]
+        agendado([Agendamento 08:15 UTC,<br/>depois da renovação da cota:<br/>só roda se houver pendente])
         mix["Apara o silêncio nas bordas dos blocos,<br/>nivela a vinheta pela fala, mixa,<br/>ganho único e limitador de pico → MP3"]
         release[Sobe o MP3 no GitHub Releases]
         registro["Grava <code>publicacao.json</code><br/>e commita"]
         qa{"QA do áudio: pico real, loudness,<br/>música × fala, pausa entre blocos.<br/>Passou?"}
         incidente(["Issue incidente do episódio<br/>(Áudio do &lt;id&gt; fora do padrão)<br/>reprovar de novo só comenta"]):::falha
+        qa_texto{"QA de texto: dois modelos<br/>transcrevem a fala. Divergência<br/>do roteiro nos dois?"}
+        incidente_texto(["Issue incidente do episódio<br/>(Texto do &lt;id&gt; diverge do roteiro)<br/>o Lucas ouve e fecha"]):::falha
         feed["Gera feed.xml e o site,<br/>com uma página por episódio"]
         pages[Publica no GitHub Pages]
         indexnow["Avisa o IndexNow das URLs<br/>que mudaram; falha só vira aviso"]
@@ -89,14 +93,21 @@ flowchart TD
 
     commit -- "push dispara publicar.yml" --> validar_ci
     reprovado_rotina -- push --> validar_ci
+    agendado --> validar_ci
     validar_ci -- reprovado --> issue
     validar_ci -- ok --> pronuncia --> tts --> erro_tts
     erro_tts -- não --> mix
     erro_tts -- "429 por minuto /<br/>5xx / timeout" --> retry --> tts
     erro_tts -- "4xx do pedido" --> issue
-    erro_tts -- "401 / 403, cota diária<br/>esgotada ou tentativas<br/>esgotadas" --> kokoro --> mix
+    erro_tts -- "401 / 403 ou<br/>tentativas esgotadas" --> kokoro --> mix
+    erro_tts -- "cota diária<br/>esgotada" --> espera
+    espera --> feed
+    espera -. "no dia seguinte" .-> agendado
     mix --> release --> registro --> qa
-    qa -- "passando ou não,<br/>publica" --> feed
+    qa -- "passando ou não,<br/>publica" --> qa_texto
+    qa_texto -- "com ou sem divergência,<br/>e mesmo se não rodar" --> feed
+    qa_texto -. sim .-> incidente_texto
+    incidente_texto --> ouvir
     qa -. "não" .-> incidente
     qa -. "sim: fecha a issue<br/>de áudio do episódio" .-> incidente
     feed --> pages
@@ -111,7 +122,7 @@ flowchart TD
     ouvir -. "regravar.yml: candidata,<br/>depois substituir" .-> release
 
     class aguardando,selecao,elegivel,noticia,relevante,hipotetico,roteiro,revisao,aprovado,limite,correcao,validar_local,commit rotina
-    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,mix,release,registro,qa,feed,pages,indexnow actions
+    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,espera,agendado,mix,release,registro,qa,qa_texto,feed,pages,indexnow actions
 ```
 
 ## QA do áudio
@@ -126,6 +137,14 @@ Depois de subir o MP3, o código mede o áudio montado, sem ouvir ([pipeline.md]
 | Pausa na troca de blocos | ≤ 0,6 s |
 
 As quatro medidas, com aprovado ou reprovado, vão para o resumo da execução no Actions. **O QA não segura a publicação**: o ritmo diário pesa mais. Se alguma medida reprovar, o episódio sai assim mesmo e abre uma issue `incidente` com as medidas, uma por episódio (reprovar de novo só comenta). Ela fecha sozinha quando o áudio daquele episódio passar no QA, por exemplo depois de uma regravação substituída. Os limites ficam em `audio.qualidade`, em `config/pipeline.yaml`.
+
+## QA de texto
+
+Depois do QA do áudio, dois modelos transcrevem a fala do MP3 e o código compara com o roteiro, palavra por palavra. Só conta a divergência que os dois ouviram igual. Em modo aviso: abre a issue `incidente` "Texto do &lt;id&gt; diverge do roteiro" e nunca segura a publicação, nem quando a transcrição está fora do ar ([pipeline.md](pipeline.md#qa-de-texto)).
+
+## Cota diária esgotada
+
+No free tier, o Gemini TTS aceita 10 requisições por dia, e um episódio usa de 4 a 5. Se a cota do dia acabar, o episódio **não** vai para o Kokoro ([ADR 0011](adr/0011-cota-esgotada-espera.md)): voz ruim fica para sempre no feed, e um dia de atraso some no dia seguinte. Ele ganha um `aguardando_cota.json`, a issue `incidente` "Cota do Gemini esgotada: &lt;id&gt; aguardando" é aberta e o card "Próximo" do site avisa que houve um problema interno e que o episódio sai em breve. O `publicar.yml` agendado às 08:15 UTC (5h15 em Natal), depois da renovação, tenta de novo. Quando o episódio sai, o arquivo é apagado e a issue fecha. Enquanto ele aguarda, a rotina não escreve outro roteiro, então a fila inteira anda um dia.
 
 ## Fora do caminho principal
 
