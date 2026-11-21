@@ -85,3 +85,52 @@ def test_config_real_tem_a_pronuncia_do_pebacast():
     config = yaml.safe_load((RAIZ / "config" / "pipeline.yaml").read_text(encoding="utf-8"))
     termos = {pronuncia.termo: pronuncia for pronuncia in carregar_pronuncias(config["tts"])}
     assert "tatu-peba" in termos["Pebacast"].instrucao
+
+
+# Maiúsculas e entradas do especial do Prumo (#41).
+
+FLUXO_A = Pronuncia("fluxo A", escrever_como="fluxo Á", diferenciar_maiusculas=True)
+
+
+def _config_real():
+    config = yaml.safe_load((RAIZ / "config" / "pipeline.yaml").read_text(encoding="utf-8"))
+    return carregar_pronuncias(config["tts"])
+
+
+def test_diferenciando_maiusculas_troca_a_letra_e_deixa_o_artigo(davi):
+    [letra] = aplicar_pronuncias([Fala(davi, "Primeiro vem o fluxo A.")], [FLUXO_A])
+    artigo = Fala(davi, "O fluxo a gente decide depois.")
+
+    assert letra.texto == "Primeiro vem o fluxo Á."
+    assert aplicar_pronuncias([artigo], [FLUXO_A]) == [artigo]
+
+
+def test_sem_o_campo_a_entrada_continua_ignorando_maiusculas(davi):
+    assert PEBACAST.diferenciar_maiusculas is False
+    [fala] = aplicar_pronuncias([Fala(davi, "Até o próximo PEBACAST.")], [PEBACAST])
+
+    assert fala.texto == "Até o próximo Pébacast."
+
+
+def test_config_real_le_o_campo_de_maiusculas():
+    termos = {pronuncia.termo: pronuncia for pronuncia in _config_real()}
+
+    assert termos["Pebacast"].diferenciar_maiusculas is False
+    for termo in ("fluxo A", "fluxo B", "fluxo C", "fluxos A, B e C"):
+        assert termos[termo].diferenciar_maiusculas is True, termo
+
+
+def test_config_real_corrige_a_agpl_e_os_fluxos(davi):
+    pronuncias = _config_real()
+
+    agpl, fluxos, boehm, artigo = aplicar_pronuncias([
+        Fala(davi, "A licença é a AGPL."),
+        Fala(davi, "Compare os fluxos A, B e C."),
+        Fala(davi, "Boehm mediu o custo do defeito."),
+        Fala(davi, "O fluxo a gente decide depois."),
+    ], pronuncias)
+
+    assert agpl.texto == "A licença é a, á-gê-pê-éle."
+    assert fluxos.texto == "Compare os fluxos Á, Bê e Cê."
+    assert boehm.texto == "Bím mediu o custo do defeito."
+    assert artigo.texto == "O fluxo a gente decide depois."

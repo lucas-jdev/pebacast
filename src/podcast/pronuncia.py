@@ -4,6 +4,9 @@ O roteiro, as show notes e o feed continuam com a grafia original. Cada termo po
 grafia alternativa (útil para qualquer provedor) e uma instrução em linguagem natural, que entra
 em `Fala.instrucoes_de_pronuncia` e é somada à instrução de voz pelo `Fala.estilo_efetivo` (só o
 Gemini interpreta). `fala.estilo` continua sendo o que o roteiro escreveu.
+
+O termo casa ignorando maiúsculas. Com `diferenciar_maiusculas: true`, casa só com a grafia
+exata: é o que permite trocar "fluxo A" sem transformar "o fluxo a gente decide" em "fluxo Á".
 """
 
 import re
@@ -19,10 +22,11 @@ class Pronuncia:
     termo: str
     escrever_como: str | None = None
     instrucao: str | None = None
+    diferenciar_maiusculas: bool = False
 
     @property
     def padrao(self) -> re.Pattern[str]:
-        return re.compile(rf"\b{re.escape(self.termo)}\b", re.IGNORECASE)
+        return re.compile(rf"\b{re.escape(self.termo)}\b", 0 if self.diferenciar_maiusculas else re.IGNORECASE)
 
 
 def carregar_pronuncias(config_tts: Mapping[str, Any]) -> list[Pronuncia]:

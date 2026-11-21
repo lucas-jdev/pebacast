@@ -46,6 +46,26 @@ tts:
       # instrução soou melhor que sem ajuste e que com a grafia "Pébacast".
       instrucao: >-
         Pronuncie "Pebacast" com o E aberto, como em "tatu-peba": PÉ-ba-cast.
+    # Especial do Prumo, 2026-11-17: o artigo emendava na letra A e a transcrição ouvia "a GPL".
+    # Com a vírgula de respiro, os dois modelos acertaram.
+    - termo: a AGPL
+      escrever_como: a, á-gê-pê-éle
+    # Sobrenome em inglês (Barry Boehm).
+    - termo: Boehm
+      escrever_como: Bím
+    # A letra isolada virava artigo ou sumia. Só com maiúscula, para "o fluxo a gente decide" ficar intacto.
+    - termo: fluxos A, B e C
+      escrever_como: fluxos Á, Bê e Cê
+      diferenciar_maiusculas: true
+    - termo: fluxo A
+      escrever_como: fluxo Á
+      diferenciar_maiusculas: true
+    - termo: fluxo B
+      escrever_como: fluxo Bê
+      diferenciar_maiusculas: true
+    - termo: fluxo C
+      escrever_como: fluxo Cê
+      diferenciar_maiusculas: true
 
 audio:
   formato: mp3
