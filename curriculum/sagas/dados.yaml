@@ -105,8 +105,16 @@ episodios:
     pre_requisitos: [da-001]
     referencias:
       - fonte: fde
-        capitulos: [2]
-    referencias_verificadas: false
+        capitulos: [2, 7, 8]
+    # Conferido em 2026-11-22 pelo sumário e pela prévia da O'Reilly, e não no livro. Cap. 2:
+    # Generation, Storage, Ingestion, Transformation e Serving Data, base do objetivo 1; "Major
+    # Undercurrents Across the Data Engineering Lifecycle" (security, data management, DataOps,
+    # data architecture, orchestration, software engineering), base do objetivo 3. Lote e fluxo
+    # não aparecem nos títulos do cap. 2: incluí o cap. 7 ("Bounded Versus Unbounded Data") e o
+    # cap. 8 ("Batch Transformations", "Streaming Transformations and Processing"), base do
+    # objetivo 2, conferidos só pelos títulos. O livro chama a última etapa de serving, não de
+    # consumo.
+    referencias_verificadas: true
     desafio: >-
       Desenhe o caminho de um dado da sua empresa, do momento em que é gerado
       até o painel em que alguém o consome. Marque a etapa em que um erro
