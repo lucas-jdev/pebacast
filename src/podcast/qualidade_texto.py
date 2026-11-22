@@ -10,12 +10,13 @@ import re
 import subprocess
 import time
 import unicodedata
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, Protocol
 
+from podcast.audio import Trechos
 from podcast.dominio import Fala
 from podcast.issues import IssuesDeIncidente
 from podcast.retentativa import tentar
@@ -26,6 +27,15 @@ PROMPT = (
     "Devolva só o texto."
 )
 CONTEXTO_PALAVRAS = 3
+# Trecho divergente maior que isso aparece resumido no laudo: uma transcrição cortada no meio
+# virava uma linha com o resto do episódio inteiro (se-002, 21/11).
+MAXIMO_PALAVRAS_NO_TRECHO = 12
+JANELA_MAXIMA_PADRAO_S = 300.0
+COBERTURA_MINIMA_PADRAO = 0.85
+
+
+class TranscricaoIncompleta(Exception):
+    """A transcrição cobre pouco do roteiro: comparar daria um alarme falso do tamanho do que faltou."""
 STATUS_TRANSITORIOS = frozenset({408, 429})
 PALAVRA = re.compile(r"\w+")
 
@@ -63,14 +73,42 @@ class GeminiTranscritor:
         parte = types.Part.from_bytes(data=audio_mp3, mime_type="audio/mpeg")
 
         def chamar() -> str:
-            return self._cliente.models.generate_content(model=self.nome, contents=[parte, PROMPT]).text or ""
+            resposta = self._cliente.models.generate_content(model=self.nome, contents=[parte, PROMPT])
+            if _cortada_por_limite(resposta):
+                raise TranscricaoIncompleta(f"{self.nome} parou no limite de tokens de saída")
+            return resposta.text or ""
 
         # Os modelos que entendem áudio deram 503 em série no teste do Prumo: 5xx e 429 esperam e tentam de novo.
         return tentar(chamar, rotulo=f"Transcrição ({self.nome})", tentativas=self._tentativas,
                       espera_inicial_s=self._espera_inicial_s, dormir=self._dormir, desistir=_desistir)
 
 
+def _cortada_por_limite(resposta: Any) -> bool:
+    candidatos = getattr(resposta, "candidates", None) or []
+    return any("MAX_TOKENS" in str(getattr(candidato, "finish_reason", "")) for candidato in candidatos)
+
+
+def janelas(trecho_fala: tuple[float, float], trocas_s: Sequence[float], maximo_s: float) -> list[tuple[float, float]]:
+    """Corta a fala em janelas de até `maximo_s`, sempre numa troca de bloco quando dá.
+
+    Cortar no meio de uma palavra faz os dois modelos errarem igual na borda, e isso seria
+    confirmado como divergência. Só corta fora de uma troca quando não há nenhuma na janela.
+    """
+    inicio, fim = trecho_fala
+    cortes = sorted(troca for troca in trocas_s if inicio < troca < fim)
+    resultado = []
+    while fim - inicio > maximo_s:
+        candidatas = [troca for troca in cortes if inicio < troca <= inicio + maximo_s]
+        corte = candidatas[-1] if candidatas else inicio + maximo_s
+        resultado.append((inicio, corte))
+        inicio = corte
+    resultado.append((inicio, fim))
+    return resultado
+
+
 def _desistir(erro: Exception) -> Exception | None:
+    if isinstance(erro, TranscricaoIncompleta):
+        return erro  # mesmo áudio, mesmo limite: repetir só gasta cota
     status = getattr(erro, "code", None) or getattr(erro, "status_code", None)
     pedido_errado = isinstance(status, int) and 400 <= status < 500 and status not in STATUS_TRANSITORIOS
     return erro if pedido_errado else None
@@ -195,6 +233,8 @@ class QaDeTexto:
     equivalencias: Mapping[str, str]
     incidentes: RegistroDeTexto | None = None
     recortar: Callable[[Path, tuple[float, float]], bytes] = lambda mp3, trecho: recortar_mp3(mp3, trecho)
+    janela_maxima_s: float = JANELA_MAXIMA_PADRAO_S
+    cobertura_minima: float = COBERTURA_MINIMA_PADRAO
 
     @classmethod
     def de_config(cls, config: Mapping[str, Any], incidentes: RegistroDeTexto | None = None,
@@ -205,11 +245,15 @@ class QaDeTexto:
         for forma, escrita in (config.get("equivalencias") or {}).items():
             [palavra] = normalizar(forma)  # a forma falada é uma palavra só; a escrita pode ter várias
             equivalencias[palavra] = " ".join(normalizar(escrita))
-        return cls((criar(primeiro), criar(segundo)), equivalencias, incidentes)
+        return cls((criar(primeiro), criar(segundo)), equivalencias, incidentes,
+                   janela_maxima_s=config.get("janela_maxima_s", JANELA_MAXIMA_PADRAO_S),
+                   cobertura_minima=config.get("cobertura_minima", COBERTURA_MINIMA_PADRAO))
 
-    def rodar(self, episodio_id: str, mp3: Path, trecho_fala: tuple[float, float], falas: Sequence[Fala]) -> LaudoDeTexto:
-        audio = self.recortar(mp3, trecho_fala)
-        laudo = self.comparar(falas, [transcritor.transcrever(audio) for transcritor in self.transcritores])
+    def rodar(self, episodio_id: str, mp3: Path, trechos: Trechos, falas: Sequence[Fala]) -> LaudoDeTexto:
+        # Episódio inteiro numa requisição só saía cortado: no se-002, os dois modelos pararam em 69% do roteiro.
+        audios = [self.recortar(mp3, janela) for janela in janelas(trechos.fala, trechos.trocas_s, self.janela_maxima_s)]
+        transcricoes = [" ".join(transcritor.transcrever(audio) for audio in audios) for transcritor in self.transcritores]
+        laudo = self.comparar(falas, transcricoes)
         if self.incidentes is not None:
             self.incidentes.registrar(episodio_id, laudo)
         return laudo
@@ -221,21 +265,51 @@ class QaDeTexto:
             palavras += normalizadas
             fala_da_palavra += [indice] * len(normalizadas)
 
-        primeira, segunda = (divergencias(palavras, normalizar(t, self.equivalencias)) for t in transcricoes)
+        transcritas = [normalizar(transcricao, self.equivalencias) for transcricao in transcricoes]
         modelos = tuple(transcritor.nome for transcritor in self.transcritores)
+        for modelo, palavras_transcritas in zip(modelos, transcritas):
+            cobertura = len(palavras_transcritas) / max(len(palavras), 1)
+            if cobertura < self.cobertura_minima:
+                raise TranscricaoIncompleta(
+                    f"{modelo} transcreveu {len(palavras_transcritas)} palavras para {len(palavras)} do roteiro "
+                    f"({cobertura:.0%}, mínimo {self.cobertura_minima:.0%})")
+
+        primeira, segunda = (divergencias(palavras, transcrita) for transcrita in transcritas)
         achadas = []
-        for a, b in confirmadas(primeira, segunda):
-            inicio, fim = min(a.inicio, b.inicio), max(a.fim, b.fim)
+        for inicio, fim, ouvidos in _juntar(confirmadas(primeira, segunda)):
             fala = falas[fala_da_palavra[min(inicio, len(palavras) - 1)]]
             achadas.append(Divergencia(fala.persona.nome, fala.texto, _contexto(palavras, inicio, fim),
-                                       dict(zip(modelos, (a.ouvido, b.ouvido)))))
+                                       dict(zip(modelos, ouvidos))))
         return LaudoDeTexto(modelos, tuple(achadas))
+
+
+def _juntar(pares: Sequence[tuple[Trecho, Trecho]]) -> list[tuple[int, int, tuple[str, str]]]:
+    """Pares que se sobrepõem no roteiro viram uma divergência só, com o que cada modelo ouviu ali."""
+    grupos: list[list[tuple[Trecho, Trecho]]] = []
+    for a, b in pares:
+        if grupos and min(a.inicio, b.inicio) <= max(max(x.fim, y.fim) for x, y in grupos[-1]):
+            grupos[-1].append((a, b))
+        else:
+            grupos.append([(a, b)])
+    return [
+        (min(min(a.inicio, b.inicio) for a, b in grupo), max(max(a.fim, b.fim) for a, b in grupo),
+         (_ouvido(a for a, _ in grupo), _ouvido(b for _, b in grupo)))
+        for grupo in grupos
+    ]
+
+
+def _ouvido(trechos: Iterable[Trecho]) -> str:
+    # O mesmo trecho de um modelo pode casar com vários do outro: entra uma vez só.
+    return " ".join(trecho.ouvido for trecho in dict.fromkeys(trechos) if trecho.ouvido)
 
 
 def _contexto(palavras: Sequence[str], inicio: int, fim: int) -> str:
     antes = palavras[max(0, inicio - CONTEXTO_PALAVRAS):inicio]
     depois = palavras[fim:fim + CONTEXTO_PALAVRAS]
-    return " ".join([*antes, f"[{' '.join(palavras[inicio:fim])}]", *depois])
+    trecho = list(palavras[inicio:fim])
+    if len(trecho) > MAXIMO_PALAVRAS_NO_TRECHO:
+        trecho = [*trecho[:MAXIMO_PALAVRAS_NO_TRECHO], f"… (+{len(trecho) - MAXIMO_PALAVRAS_NO_TRECHO} palavras)"]
+    return " ".join([*antes, f"[{' '.join(trecho)}]", *depois])
 
 
 def recortar_mp3(mp3: Path, trecho: tuple[float, float]) -> bytes:
