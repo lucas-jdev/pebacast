@@ -77,7 +77,13 @@ episodios:
     referencias:
       - fonte: ddia
         capitulos: [6]
-    referencias_verificadas: false
+    # Conferido em 2026-11-22 pelo sumário e pela prévia da O'Reilly, e não no livro. Cap. 6:
+    # "Partitioning by Key Range" e "Partitioning by Hash of Key", base do objetivo 1. "Skewed
+    # Workloads and Relieving Hot Spots", base do objetivo 2. "Rebalancing Partitions" e
+    # "Partitioning Secondary Indexes by Document" e "...by Term", base do objetivo 3. A
+    # profundidade com que o livro trata o custo de cada estratégia e o termo "scatter/gather" não
+    # foram conferidos. A 2ª edição (2026) renumera os capítulos: usar a 1ª.
+    referencias_verificadas: true
     desafio: >-
       Escolha a maior tabela de um sistema que você mantém e proponha uma
       chave de particionamento. Aponte qual consulta ficaria mais cara com

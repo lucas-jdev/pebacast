@@ -76,7 +76,12 @@ episodios:
     referencias:
       - fonte: sre
         capitulos: [6]
-    referencias_verificadas: false
+    # Conferido em 2026-11-22 no livro, publicado gratuitamente pelo Google em sre.google. Cap. 6:
+    # "The Four Golden Signals", base do objetivo 1. A distinção entre page, ticket, painel e log,
+    # "toda página deve exigir ação" e sintoma contra causa, base do objetivo 2 e do desafio.
+    # "As Simple as Possible, No Simpler", a resolução por segundo cara de coletar, guardar e
+    # analisar, e a remoção de coleta e alerta pouco usados, base do objetivo 3.
+    referencias_verificadas: true
     desafio: >-
       Revise os alertas de um serviço que você mantém e marque os que
       exigem que alguém faça algo agora. Proponha o que fazer com os outros.
