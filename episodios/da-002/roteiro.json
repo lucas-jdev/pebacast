@@ -1,0 +1,317 @@
+{
+  "episodio": "da-002",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura sem decoreba. Aviso de sempre: este episódio foi gerado por inteligência artificial e revisado por uma segunda IA, que conferiu as afirmações contra as fontes. Hoje a gente volta pra saga de dados com uma pergunta que parece simples e quase nunca tem resposta: quem é o dono desse número?"
+    },
+    {
+      "persona": "davi",
+      "texto": "E quem volta comigo é a Camila. Arquiteta de dados há treze anos, começou como DBA numa operadora de telecom e hoje cuida da governança de dados numa healthtech. Camila, bem-vinda de volta!"
+    },
+    {
+      "persona": "camila",
+      "texto": "Obrigada, Davi! Oi, você que está ouvindo. Hoje é o meu assunto favorito, então segura que eu vou me empolgar.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Bora pro caso, que dessa vez é notícia de verdade. No dia dezoito de novembro, o Tribunal de Contas da União divulgou a terceira edição da Lista de Alto Risco da administração federal. A TeleSíntese publicou uma matéria sobre o capítulo de governança e gestão de dados do governo."
+    },
+    {
+      "persona": "camila",
+      "texto": "E o que diz esse capítulo?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Que o tema ficou sem progresso suficiente no ciclo de avaliação de 2025 a 2026. O tribunal listou as falhas: órgãos sem estrutura específica pra gestão de dados, informação cadastral de baixa qualidade, dificuldade de compartilhar dado entre órgãos, interoperabilidade limitada, falta de controle de qualidade e dificuldade de cumprir a LGPD."
+    },
+    {
+      "persona": "camila",
+      "texto": "Até aqui é a lista que qualquer empresa grande reconheceria. Tem mais?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Tem um item que me chamou a atenção. Segundo a matéria, o TCU apontou que a responsabilidade pelo ciclo de vida da informação não é clara. E a recomendação foi que cada órgão monte os próprios mecanismos de governança, com responsabilidades definidas pela qualidade, pela atualização, pela proteção e pelo compartilhamento dos dados."
+    },
+    {
+      "persona": "camila",
+      "texto": "Pronto. Esse é o episódio inteiro numa frase. Tá, mas quem é o dono desse dado? O tribunal olhou pra administração federal e a resposta foi: não está claro."
+    },
+    {
+      "persona": "davi",
+      "texto": "E tem um detalhe curioso sobre a Anatel. No subíndice de governança de dados do índice de governança de TI usado pelo governo federal, o iGovSisp, a nota da agência caiu de zero vírgula sessenta e seis em 2024 pra zero vírgula cinquenta e três em 2025. Já no índice de maturidade em governança de dados feito pelo próprio TCU, o iGovDados, a Anatel aparece com zero vírgula cinquenta e três em 2024."
+    },
+    {
+      "persona": "camila",
+      "texto": "Dois zero vírgula cinquenta e três. Mesma agência, mesmo número."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a matéria avisa que os dois não são necessariamente medições equivalentes, porque vêm de metodologias diferentes. E repara que também são de anos diferentes: um é de 2025 e o outro, de 2024."
+    },
+    {
+      "persona": "camila",
+      "texto": "Guarda esse detalhe, que ele vai voltar. Dois números iguais com definições diferentes é exatamente o tipo de armadilha que a governança existe pra desarmar. E o TCU ainda disse que ferramentas de autoavaliação podem superestimar a maturidade dos órgãos, e pediu comprovação documental e métricas objetivas."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, então deixa eu fazer o papel de quem chega com a solução. Se o problema é dado bagunçado, a gente compra uma plataforma de catálogo de dados, coloca todo mundo dentro, e o time de dados da TI vira o responsável por tudo. Tudo centralizado, um lugar só, problema resolvido.",
+      "estilo": "empolgado"
+    },
+    {
+      "persona": "camila",
+      "texto": "Adoro. Vamos testar a sua proposta com uma pergunta. Pensa num indicador de qualquer empresa, sei lá, cliente ativo. Quem decide o que é um cliente ativo?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Ah, o time de dados, ué. Eles que montam o painel."
+    },
+    {
+      "persona": "camila",
+      "texto": "Então o time de dados decide que cliente ativo é quem comprou nos últimos noventa dias. Aí o comercial diz que pra eles é quem tem contrato vigente, e o marketing diz que é quem abriu um e-mail no mês. Quem tem autoridade pra dizer qual definição vale pra empresa?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. O time de dados não tem, né? Eles não mandam no comercial."
+    },
+    {
+      "persona": "camila",
+      "texto": "Exatamente. E aí a sua plataforma vai catalogar três definições de cliente ativo, todas com o mesmo nome, todas bem documentadas. Você terá um catálogo lindo do desacordo.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. A ferramenta organiza o que existe, mas não decide nada."
+    },
+    {
+      "persona": "camila",
+      "texto": "Isso. E é aqui que entra a primeira distinção do episódio, entre gestão de dados e governança de dados. A referência que a gente usa hoje é o DAMA-DMBOK, o corpo de conhecimento de gestão de dados da DAMA International, na segunda edição, de 2017. É uma espécie de manual de referência da área."
+    },
+    {
+      "persona": "davi",
+      "texto": "E como ele separa as duas coisas?"
+    },
+    {
+      "persona": "camila",
+      "texto": "O DMBOK organiza a gestão de dados em várias áreas de conhecimento: arquitetura, modelagem, armazenamento, segurança, integração, qualidade, metadados e por aí vai. E coloca a governança no centro dessas áreas, guiando todas as outras. A definição de governança é o exercício de autoridade e controle, com planejamento, monitoramento e aplicação, sobre a gestão dos ativos de dados."
+    },
+    {
+      "persona": "davi",
+      "texto": "Autoridade e controle sobre a gestão. Então a gestão é fazer, e a governança é decidir e cobrar?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Essa é a leitura que eu uso no dia a dia. Gestão é o trabalho de modelar, mover, guardar, proteger e corrigir o dado. Governança é quem decide as regras desse trabalho, quem responde quando dá errado e como se confere que a regra foi seguida. Eu comparo com contabilidade e auditoria: a contabilidade faz o lançamento, a auditoria confere se o lançamento seguiu a regra. Se a mesma pessoa faz e confere, a conferência perde força."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o escopo da governança é o quê, na prática?"
+    },
+    {
+      "persona": "camila",
+      "texto": "O DMBOK lista coisas como estratégia de dados, políticas, padrões, supervisão, conformidade e gestão de problemas. Repara que nenhuma dessas é um software. São decisões e responsabilidades."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então quando o TCU fala que falta estrutura específica e responsabilidade definida, ele não está dizendo que falta ferramenta."
+    },
+    {
+      "persona": "camila",
+      "texto": "Eu leio assim. A recomendação, do jeito que a matéria conta, é sobre responsabilidade pela qualidade, pela atualização, pela proteção e pelo compartilhamento. Isso é governança. Ferramenta ajuda depois, quando alguém já decidiu o que ela vai registrar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Beleza. Mas aí vem a minha dúvida de dev. Quem é esse alguém? Porque se eu sou o dev que criou a tabela, eu sou o dono?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Essa é a confusão mais comum que eu vejo, e eu vou corrigir com carinho: quem criou a tabela não é automaticamente o dono do dado. Você é quem cuida de onde ele mora. O dono é quem responde pelo significado e pelo uso dele no negócio."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o que o DMBOK chama de dono?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Aqui tem uma sutileza boa. A palavra que atravessa o livro é stewardship, que é a responsabilidade por cuidar dos dados e dos processos em nome da organização. Às vezes ela vira cargo, às vezes não. Quem exerce esse papel é o data steward. Em português às vezes aparece como curador ou administrador de dados, mas eu prefiro manter data steward, porque a tradução muda conforme a empresa. E o dono do dado, no DMBOK da segunda edição, não é um cargo à parte. Ele é descrito como um data steward do negócio que tem autoridade de aprovação sobre as decisões dos dados do seu domínio."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ah, então o dono é um steward com caneta na mão.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "camila",
+      "texto": "Gostei, posso roubar? É isso. O steward cuida da definição, acompanha a qualidade, resolve dúvida de quem usa. O dono é quem bate o martelo quando há conflito ou quando uma regra precisa mudar. Muita empresa coloca as duas coisas na mesma pessoa, e tudo bem, desde que a autoridade esteja clara."
+    },
+    {
+      "persona": "davi",
+      "texto": "E esse steward é alguém de TI ou do negócio?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Na minha experiência, quem responde pelo significado tem que vir do negócio. Pensa no cliente ativo: quem sabe o que isso significa pra estratégia é quem vende e quem atende. Mas quase sempre você precisa também de alguém técnico do lado, que sabe em qual tabela, em qual pipeline e em qual transformação aquela definição vira número. Um sem o outro não fecha a conta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Faz sentido. E onde fica o time de dados centralizado da minha proposta?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Ele continua existindo, e é importante. Ele opera a plataforma, implementa as regras, mede a qualidade, avisa quando um número sai do padrão. Ele faz gestão. O que não dá é pedir que ele também invente a definição de cada indicador da empresa e responda sozinho por ela. Aí ele vira o dono de tudo, o que na prática quer dizer dono de nada."
+    },
+    {
+      "persona": "davi",
+      "texto": "Dono de tudo é dono de nada. Essa vai pro resumo."
+    },
+    {
+      "persona": "camila",
+      "texto": "E deixa eu contar um caso meu, porque ele mostra o estrago. Numa empresa em que eu trabalhei, dois relatórios oficiais mostravam números diferentes pra mesma coisa. Os dois eram apresentados pra diretoria, cada um por uma área."
+    },
+    {
+      "persona": "davi",
+      "texto": "E qual estava certo?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Os dois, cada um com a sua definição. Um contava o que tinha sido pedido, o outro contava o que tinha sido entregue. A gente perdeu semanas de reunião discutindo qual sistema estava com defeito, quando o defeito era que ninguém tinha decidido qual era o número da empresa."
+    },
+    {
+      "persona": "davi",
+      "texto": "Igual aos dois zero vírgula cinquenta e três da Anatel. Mesmo valor, perguntas diferentes."
+    },
+    {
+      "persona": "camila",
+      "texto": "Lá é ao contrário, e por isso é tão bom de exemplo: o valor coincide e a pergunta não. No meu caso a pergunta tinha o mesmo nome e o valor não. Nos dois, se você não sabe a definição por trás, você tira conclusão errada. Quem lê só a manchete pode achar que os dois índices concordam."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, e como eu percebo que um dado está sem dono? Porque ninguém vai chegar e falar: oi, eu sou um dado órfão."
+    },
+    {
+      "persona": "camila",
+      "texto": "Isso não é capítulo do livro, é cicatriz minha. O primeiro sinal é a pergunta que ninguém responde: se eu pergunto quem pode mudar essa definição e o silêncio dura mais que dez segundos, já sei. O segundo é o mesmo indicador com valores diferentes em reuniões diferentes. O terceiro é a correção que sempre volta: alguém arruma o dado na planilha, o erro reaparece no mês seguinte, porque ninguém tinha autoridade pra mudar o processo que gera o erro."
+    },
+    {
+      "persona": "davi",
+      "texto": "Esse terceiro eu conheço. O famoso script de correção que roda toda segunda-feira.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "camila",
+      "texto": "Esse script é um monumento ao dado sem dono. O quarto sinal é o acesso concedido por amizade: a pessoa pede acesso e quem libera é quem estiver mais perto, porque não existe ninguém com autoridade pra dizer sim ou não. E com dado pessoal isso é grave. Lembra que o TCU colocou a dificuldade de cumprir a LGPD na lista de falhas? Na minha experiência, é no dado pessoal sem dono que essa dificuldade aparece primeiro."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o quinto?"
+    },
+    {
+      "persona": "camila",
+      "texto": "O quinto é o painel que todo mundo usa e ninguém sabe quando foi atualizado. O número está lá, bonito, e ninguém consegue dizer de onde ele vem nem se a definição ainda vale."
+    },
+    {
+      "persona": "davi",
+      "texto": "Beleza, mas agora a parte do depende. Porque se eu sair amanhã nomeando dono pra cada coluna do banco, eu crio um comitê que ninguém aguenta."
+    },
+    {
+      "persona": "camila",
+      "texto": "Esse é o trade-off de verdade. De um lado, governança leve demais: ninguém responde por nada e você vive de reconciliar planilha. Do outro, governança pesada demais: todo campo novo precisa de aprovação, o time de produto passa a contornar o processo e cria dado por fora, o que é pior do que antes."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então onde é o meio-termo?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Na minha opinião, começa pelos dados que doem. Os indicadores que vão pra diretoria, os dados pessoais, os cadastros que vários sistemas consomem. Esses ganham dono, steward e definição escrita primeiro. O resto entra conforme vira problema ou conforme ganha importância. Governança que tenta cobrir tudo no primeiro dia costuma morrer no segundo."
+    },
+    {
+      "persona": "davi",
+      "texto": "E quando o dono sai da empresa? Porque isso acontece toda hora."
+    },
+    {
+      "persona": "camila",
+      "texto": "Ótima pergunta, e é onde muita governança morre em silêncio. Se o dono está escrito como uma pessoa, no dia em que ela vai embora o dado fica órfão de novo e ninguém percebe. Por isso eu gosto de registrar o dono como um papel ligado a uma área, por exemplo quem lidera o atendimento, e o nome de quem ocupa o papel hoje. Trocou a pessoa, o papel continua, e alguém tem a obrigação de passar o bastão."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tipo o dono de um serviço no time de plataforma. O serviço é do time, não do fulano que escreveu o primeiro commit."
+    },
+    {
+      "persona": "camila",
+      "texto": "Exatamente essa ideia. E vale revisar a lista de donos de tempos em tempos. Na minha experiência, uma revisão curta a cada trimestre pega quase todos os casos de dono que já saiu, mudou de área ou nem lembra que era dono."
+    },
+    {
+      "persona": "davi",
+      "texto": "E centralizar ou espalhar a responsabilidade pelas áreas?"
+    },
+    {
+      "persona": "camila",
+      "texto": "Também depende. Centralizar dá consistência: uma regra só, um lugar só pra decidir. Mas cria fila, porque tudo passa pelo mesmo grupo. Espalhar pelas áreas dá velocidade e põe a decisão perto de quem entende do assunto, mas exige padrões comuns, senão cada área inventa o próprio dialeto. Na minha experiência, muita empresa acaba num modelo misto, com regras gerais no centro e decisões de domínio nas áreas."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a ferramenta, coitada, fica onde?",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "camila",
+      "texto": "Fica no lugar dela, que é importante. Um catálogo é ótimo pra deixar visível quem é o dono, qual é a definição e de onde o dado vem. Mas ele registra decisões; não substitui quem decide. E repara no recado do TCU sobre autoavaliação: uma planilha dizendo que somos maduros não prova maturidade. É preciso evidência."
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu tentar resumir com as minhas palavras. Gestão de dados é o trabalho de fazer o dado existir, se mover e ficar protegido. Governança é a autoridade e o controle sobre esse trabalho: quem decide a regra, quem responde e como se confere. O DMBOK coloca a governança no centro das outras áreas."
+    },
+    {
+      "persona": "camila",
+      "texto": "Perfeito até aqui."
+    },
+    {
+      "persona": "davi",
+      "texto": "Aí vêm os papéis. O data steward cuida da definição e da qualidade em nome da organização. O dono, no DMBOK, é um steward do negócio com autoridade de aprovação no seu domínio. Quem criou a tabela não é dono automaticamente. E o time de dados central faz gestão, mas não pode ser dono de tudo, porque dono de tudo é dono de nada."
+    },
+    {
+      "persona": "camila",
+      "texto": "Isso."
+    },
+    {
+      "persona": "davi",
+      "texto": "E os sinais de dado sem dono, que você trouxe da sua experiência: pergunta sem resposta, mesmo indicador com valores diferentes, correção que volta todo mês, acesso liberado por quem estiver perto e painel que ninguém sabe quando foi atualizado. O trade-off é entre governança leve demais, que vira bagunça, e pesada demais, que vira burocracia e empurra o pessoal pra fora do processo. E começa pelos dados que doem."
+    },
+    {
+      "persona": "camila",
+      "texto": "Davi, eu não teria resumido melhor. Só acrescento uma coisa: definição escrita. Sem ela, todo o resto é opinião."
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado. Então vamos pro desafio da semana. Escolha um indicador que a sua empresa acompanha e descubra quem é o dono da definição dele. Se ninguém souber responder, escreva a definição e proponha um dono."
+    },
+    {
+      "persona": "davi",
+      "texto": "E pra quem ainda não trabalha na área: abra o repositório aberto do Pebacast no GitHub, leia o arquivo docs barra votos ponto md, que explica o curti e o não curti do site, e escreva a definição do indicador curti: o que conta como voto, onde essa regra está escrita e quem poderia mudá-la. Se não achar o dono, proponha um."
+    },
+    {
+      "persona": "camila",
+      "texto": "Esse eu quero ver respondido, hein.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Camila, muito obrigado por mais essa. Você me fez desistir de comprar uma ferramenta antes de decidir quem decide."
+    },
+    {
+      "persona": "camila",
+      "texto": "Missão cumprida! Obrigada, Davi. Até a próxima, pessoal!"
+    },
+    {
+      "persona": "davi",
+      "texto": "E você que ouviu até aqui, valeu pela companhia. Este foi o Pebacast. Até o próximo episódio!"
+    }
+  ],
+  "desafio": "Escolha um indicador que a sua empresa acompanha e descubra quem é o dono da definição dele. Se ninguém souber responder, escreva a definição e proponha um dono.",
+  "desafio_iniciante": "Abra docs/votos.md no repositório do Pebacast, github.com/lucas-jdev/pebacast, e escreva a definição do indicador curti: o que conta como voto, onde a regra está escrita e quem poderia mudá-la. Se não achar o dono, proponha um.",
+  "fontes": [
+    "DAMA-DMBOK: Data Management Body of Knowledge, DAMA International, 2ª edição, caps. 1 e 3"
+  ]
+}

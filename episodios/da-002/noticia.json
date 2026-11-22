@@ -1,0 +1,9 @@
+{
+  "tipo": "noticia",
+  "titulo": "Indicador de governança de dados da Anatel recua de 0,66 para 0,53",
+  "url": "https://telesintese.com.br/indicador-de-governanca-de-dados-da-anatel-recua-de-066-para-053/",
+  "fonte": "TeleSíntese",
+  "data": "2026-11-18",
+  "nota_relevancia": 8,
+  "justificativa": "A Lista de Alto Risco do TCU diz que a governança de dados do governo federal ficou sem progresso suficiente e aponta, entre as falhas, responsabilidade pouco clara pelo ciclo de vida da informação e falta de controles de qualidade, recomendando mecanismos de governança com responsabilidades definidas. Isso ilustra o objetivo 1, governança como quem decide e responde pelo dado, e o objetivo 2, os papéis de dono e de data steward. Os dois 0,53 da Anatel, que vêm de metodologias diferentes e não medem a mesma coisa, ilustram o objetivo 3: o mesmo número com definições diferentes."
+}
