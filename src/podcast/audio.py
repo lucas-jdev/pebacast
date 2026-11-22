@@ -13,7 +13,7 @@ ALVO_LOUDNESS_LUFS = -16.0
 ALVO_PICO_DBTP = -1.5
 # O limitador roda com a taxa quadruplicada para enxergar o pico entre amostras (true peak, BS.1770).
 SOBREAMOSTRAGEM = 4
-PASSADAS_DE_CODIFICACAO = 3
+PASSADAS_DE_CODIFICACAO = 5
 TOLERANCIA_DE_LOUDNESS_LU = 0.2
 FOLGA_DO_TETO_DB = 0.2
 TETO_MINIMO_DBTP = -12.0
