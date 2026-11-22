@@ -118,4 +118,4 @@ jobs:
 
       - name: Publicar o feed no Pages
         id: deploy
-        uses: actions/deploy-pages@v5
+        uses: ./.github/actions/deploy-pages-com-retentativa

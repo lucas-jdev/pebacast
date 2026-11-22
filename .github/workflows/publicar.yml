@@ -146,7 +146,7 @@ jobs:
       - name: Publicar o feed no Pages
         id: deploy
         if: ${{ hashFiles('_site/feed.xml') != '' }}
-        uses: actions/deploy-pages@v5
+        uses: ./.github/actions/deploy-pages-com-retentativa
 
       # Só depois do deploy: o IndexNow confere a chave no site já publicado. Nunca derruba a publicação.
       - name: Avisar os buscadores (IndexNow)

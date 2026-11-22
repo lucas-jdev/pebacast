@@ -61,7 +61,7 @@ flowchart TD
         qa_texto{"QA de texto: dois modelos<br/>transcrevem a fala. Divergência<br/>do roteiro nos dois?"}
         incidente_texto(["Issue incidente do episódio<br/>(Texto do &lt;id&gt; diverge do roteiro)<br/>o Lucas ouve e fecha"]):::falha
         feed["Gera feed.xml e o site,<br/>com uma página por episódio"]
-        pages[Publica no GitHub Pages]
+        pages[Publica no GitHub Pages;<br/>se o GitHub não achar o pacote,<br/>tenta de novo depois de 60 s]
         indexnow["Avisa o IndexNow das URLs<br/>que mudaram; falha só vira aviso"]
         issue(["Issue do episódio<br/>(Roteiro reprovado: &lt;id&gt;)<br/>reprovar de novo só comenta"]):::falha
         avisos(["Issue do episódio<br/>(Avisos na publicação do &lt;id&gt;):<br/>sem vinheta, QA do áudio que não rodou,<br/>issue da cota que não abriu ou fechou.<br/>Novo aviso só comenta"]):::falha
