@@ -55,8 +55,14 @@ episodios:
     pre_requisitos: [co-001]
     referencias:
       - fonte: ea-strategy
-        capitulos: [2]
-    referencias_verificadas: false
+        capitulos: [2, 3]
+    # Conferido em 2026-11-22 pelo sumário do livro, pelas prévias da O'Reilly, por um research
+    # briefing do MIT CISR da Jeanne Ross e por notas de leitura, e não no livro. Cap. 2: os quatro
+    # modelos (diversificação, coordenação, replicação e unificação) nos eixos de integração e
+    # padronização, base do objetivo 1. Cap. 3 (incluído agora): a arquitetura como lógica que
+    # reflete o modelo operacional e o core diagram, base do objetivo 2, conferido pelo título e
+    # por notas. O objetivo 3 não foi encontrado como tema do livro e entra como opinião do expert.
+    referencias_verificadas: true
     desafio: >-
       Classifique a sua empresa num dos quatro modelos operacionais e aponte
       um sistema que reforça essa escolha e outro que a contradiz.

@@ -83,7 +83,15 @@ episodios:
     pre_requisitos: [se-001]
     referencias:
       - fonte: nist-zt
-    referencias_verificadas: false
+        secoes: [1, 2, 3]
+    # Conferido em 2026-11-22 no documento, aberto em csrc.nist.gov. Seção 2.1: os sete princípios
+    # ("tenets"), base do objetivo 1. Seção 1 e 2.2: o perímetro não basta porque quem entra se
+    # move lateralmente, e a rede privada inteira não é zona de confiança implícita, base do
+    # objetivo 2. Princípios 3 e 4, com menor privilégio por sessão e identidade de serviço, e a
+    # seção 3, com os componentes lógicos, base do objetivo 3. "Identidade é o novo perímetro" é
+    # bordão do mercado, não do NIST: a política combina identidade com estado do dispositivo e
+    # outros atributos, e o documento ainda fala em microperímetros.
+    referencias_verificadas: true
     desafio: >-
       Escolha um serviço interno que você mantém e liste quem consegue
       chamá-lo hoje. Proponha como restringir o acesso só a quem precisa.

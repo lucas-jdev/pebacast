@@ -65,7 +65,16 @@ episodios:
     referencias:
       - fonte: dmbok
         capitulos: [1, 3]
-    referencias_verificadas: false
+    # Conferido em 2026-11-22 pelas notas de figuras do cap. 3 publicadas pelo DAMA Rocky Mountain
+    # Chapter, pela lista de mudanças da edição revisada em dama.org e por análises que citam o
+    # livro com página, e não no livro. Cap. 1: o framework em que a governança fica no centro das
+    # outras áreas. Cap. 3: a definição (autoridade e controle sobre a gestão dos ativos de dados)
+    # e o escopo, base do objetivo 1; stewardship e o dono do dado, base do objetivo 2. No DMBOK2,
+    # o dono do dado é um business data steward com autoridade de aprovação no seu domínio (p. 77),
+    # e não um papel à parte; guias de certificação que o descrevem como executivo não são o livro.
+    # "Curador" é tradução nossa: usar "data steward". O objetivo 3 não é seção do livro e entra
+    # como experiência da expert.
+    referencias_verificadas: true
     desafio: >-
       Escolha um indicador que a sua empresa acompanha e descubra quem é o
       dono da definição dele. Se ninguém souber responder, escreva a
@@ -96,8 +105,16 @@ episodios:
     pre_requisitos: [da-001]
     referencias:
       - fonte: fde
-        capitulos: [2]
-    referencias_verificadas: false
+        capitulos: [2, 7, 8]
+    # Conferido em 2026-11-22 pelo sumário e pela prévia da O'Reilly, e não no livro. Cap. 2:
+    # Generation, Storage, Ingestion, Transformation e Serving Data, base do objetivo 1; "Major
+    # Undercurrents Across the Data Engineering Lifecycle" (security, data management, DataOps,
+    # data architecture, orchestration, software engineering), base do objetivo 3. Lote e fluxo
+    # não aparecem nos títulos do cap. 2: incluí o cap. 7 ("Bounded Versus Unbounded Data") e o
+    # cap. 8 ("Batch Transformations", "Streaming Transformations and Processing"), base do
+    # objetivo 2, conferidos só pelos títulos. O livro chama a última etapa de serving, não de
+    # consumo.
+    referencias_verificadas: true
     desafio: >-
       Desenhe o caminho de um dado da sua empresa, do momento em que é gerado
       até o painel em que alguém o consome. Marque a etapa em que um erro

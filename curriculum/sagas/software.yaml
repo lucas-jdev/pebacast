@@ -87,7 +87,16 @@ episodios:
       - fonte: fosa
         capitulos: [19]
       - fonte: nygard-adr
-    referencias_verificadas: false
+    # Conferido em 2026-11-22 pelo sumário e pela prévia da O'Reilly do cap. 19 e no artigo do
+    # Nygard, que está aberto no blog da Cognitect. Cap. 19: "Architecture Decision Records" e
+    # "Basic Structure", com o artigo (Title, Status, Context, Decision, Consequences), base do
+    # objetivo 1. "Architecturally Significant" e a definição do Nygard (estrutura, características
+    # não funcionais, dependências, interfaces, técnicas de construção), base do objetivo 2. Os três
+    # antipadrões do cap. e o "aceitar ou reverter às cegas" do Nygard, base do objetivo 3. Só
+    # Groundhog Day e Email-Driven Architecture falam de decisão sem justificativa ou sem registro;
+    # Covering Your Assets é adiar a decisão por medo. As seções extras do livro (Compliance e
+    # Notes) foram conferidas só por notas de leitura. Na 2ª edição o tema é o cap. 21.
+    referencias_verificadas: true
     desafio: >-
       Escreva um ADR de uma decisão que o seu time já tomou e nunca
       registrou, incluindo as alternativas que foram descartadas.
