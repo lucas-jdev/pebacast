@@ -116,7 +116,7 @@ O ffmpeg mistura a fala com a vinheta e exporta em MP3 mono a 64 kbps, com cerca
 
 ## 8. Publicação
 
-O MP3 vai para o `AudioStorage` (um release `episodio-<id>` por episódio) e o Actions commita `publicacao.json`. O `feed.xml` é regenerado inteiro a partir de `episodios/` e publicado no GitHub Pages, em https://lucas-jdev.github.io/pebacast/feed.xml. Ele traz:
+O MP3 vai para o `AudioStorage` (um release `episodio-<id>` por episódio) e o Actions commita `publicacao.json`. O `feed.xml` é regenerado inteiro a partir de `episodios/` e publicado no GitHub Pages, em https://lucas-jdev.github.io/pebacast/feed.xml. O deploy passa pela action local `.github/actions/deploy-pages-com-retentativa`, usada pelos três workflows que publicam no Pages: às vezes o GitHub ainda não lista o pacote do site recém-enviado ("No artifacts named github-pages", 2 vezes em 14 deploys em nov/2026, uma delas deixando o se-002 fora do feed), então ela espera 60 s e tenta mais uma vez com o mesmo pacote (#89). Ele traz:
 
 - GUID imutável do episódio;
 - show notes com as fontes, o desafio e o resumo do relatório de revisão;

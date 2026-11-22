@@ -1,0 +1,32 @@
+name: Publicar no Pages com uma nova tentativa
+description: >
+  Publica o pacote github-pages já enviado neste job. Às vezes o GitHub ainda não lista o pacote
+  recém-enviado ("No artifacts named github-pages"): espera e tenta mais uma vez, reaproveitando o
+  mesmo pacote, porque subir de novo daria conflito de nome (#89).
+inputs:
+  espera_s:
+    description: Segundos de espera antes da nova tentativa.
+    default: "60"
+outputs:
+  page_url:
+    description: URL do site publicado, da tentativa que passou.
+    value: ${{ steps.primeira.outputs.page_url || steps.segunda.outputs.page_url }}
+runs:
+  using: composite
+  steps:
+    - id: primeira
+      uses: actions/deploy-pages@v5
+      continue-on-error: true
+
+    - name: Esperar a API de artifacts
+      if: ${{ steps.primeira.outcome == 'failure' }}
+      shell: bash
+      env:
+        ESPERA_S: ${{ inputs.espera_s }}
+      run: |
+        echo "::warning::O deploy do Pages falhou; nova tentativa em ${ESPERA_S} s (#89)."
+        sleep "$ESPERA_S"
+
+    - id: segunda
+      if: ${{ steps.primeira.outcome == 'failure' }}
+      uses: actions/deploy-pages@v5

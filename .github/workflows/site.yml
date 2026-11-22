@@ -60,7 +60,7 @@ jobs:
 
       - name: Publicar no Pages
         id: deploy
-        uses: actions/deploy-pages@v5
+        uses: ./.github/actions/deploy-pages-com-retentativa
 
       # Só depois do deploy: o IndexNow confere a chave no site já publicado. Nunca derruba o job.
       - name: Avisar os buscadores (IndexNow)
