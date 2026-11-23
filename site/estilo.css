@@ -342,7 +342,6 @@ button { font: inherit; }
 /* vozes */
 .vozes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 1.5rem; }
 .voz { position: relative; background: var(--fundo); border: var(--borda) solid var(--linha); border-radius: var(--raio); padding: 1.8rem; box-shadow: var(--sombra); }
-.voz__inicial { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; font-family: var(--fonte-titulo); font-size: 2rem; font-weight: 800; background: var(--destaque); color: var(--texto-sobre-destaque, #1d1814); margin-bottom: 1.1rem; }
 .voz h3 { font-size: 1.7rem; }
 .voz__papel { font-size: 0.95rem; font-weight: 600; color: var(--acento); margin: 0.2rem 0 0.9rem; }
 .voz > p:not(.voz__papel) { color: var(--texto-suave); }
@@ -594,8 +593,6 @@ body { line-height: 1.7; }
 /* A voz convidada veste a cor da saga dela ([data-saga] mais abaixo); o apresentador, que está em todas, fica no papel cru. */
 .voz { --chapa: #fffaf0; }
 .voz[data-saga] { --chapa: var(--capa-fundo); }
-.voz[data-saga] .voz__inicial { background: var(--texto); color: var(--capa-fundo); }
-.voz__inicial { border-radius: 2px; border: 3px solid var(--texto); font-weight: 400; }
 .voz__papel { color: var(--texto); font-style: italic; }
 
 .sagas { row-gap: 3rem; padding-top: 30px; }
@@ -887,3 +884,16 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 .desafio .desafio__iniciante { margin-top: 0.9rem; padding-top: 0.8rem; border-top: 2px dashed currentColor; font-family: var(--fonte-texto);
   font-size: 0.98rem; font-weight: 500; line-height: 1.55; }
 .desafio__iniciante strong { display: block; font-weight: 700; }
+
+/* Retratos em xilogravura (experimentos/avatares-cordel): no card de cada voz e ao lado de quem fala na transcrição. */
+.voz__retrato { display: block; width: 132px; height: 132px; margin-bottom: 1.1rem; }
+.fala__quem { display: flex; align-items: center; gap: 0.55rem; }
+.fala__quem::before { content: ""; flex: none; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--texto); background: center / cover no-repeat var(--fundo); }
+.fala__quem--davi::before { background-image: url("avatares/cabeca/davi.svg"); }
+.fala__quem--helena::before { background-image: url("avatares/cabeca/helena.svg"); }
+.fala__quem--beatriz::before { background-image: url("avatares/cabeca/beatriz.svg"); }
+.fala__quem--rafael::before { background-image: url("avatares/cabeca/rafael.svg"); }
+.fala__quem--camila::before { background-image: url("avatares/cabeca/camila.svg"); }
+.fala__quem--jorge::before { background-image: url("avatares/cabeca/jorge.svg"); }
+.fala__quem--yasmin::before { background-image: url("avatares/cabeca/yasmin.svg"); }
+.fala__quem--otavio::before { background-image: url("avatares/cabeca/otavio.svg"); }

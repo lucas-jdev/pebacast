@@ -962,7 +962,7 @@ def _secao_vozes(personas: Mapping[str, Any]) -> str:
             cor = f' data-saga="{escape(sagas_da_voz[0])}"' if sagas_da_voz else ""
         bordao = (persona.get("bordoes") or [""])[0]
         cartoes.append(f"""<article class="voz voz--{escape(persona['id'])}"{cor}>
-  <div class="voz__inicial" aria-hidden="true">{escape(persona['nome'][0])}</div>
+  <img class="voz__retrato" src="avatares/cartao/{escape(persona['id'])}.svg" alt="" width="400" height="400" loading="lazy">
   <h3>{escape(persona['nome'])}</h3>
   <p class="voz__papel">{escape(papel)}</p>
   <p class="voz__historico" id="historico-{escape(persona['id'])}">{escape(' '.join(persona.get('historico', '').split()))}</p>
