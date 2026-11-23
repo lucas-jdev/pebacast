@@ -416,7 +416,7 @@ def _com_modo(projeto, modo):
 
 
 def _passo_da_ordem(pagina):
-    inicio = pagina.index("<h3>A vez de cada saga</h3>")
+    inicio = pagina.index(" A vez de cada saga</h3>")
     return pagina[inicio:pagina.index("</li>", inicio)]
 
 
@@ -797,12 +797,26 @@ def test_como_mostra_as_duas_etapas_humanas_e_quem_faz_cada_uma(projeto):
 
     pagina = gerar_index(projeto, "feed.xml")
 
-    passos = re.findall(r'<span class="passo__quem passo__quem--(\w+)">([^<]+)</span><h3>([^<]+)</h3>', pagina)
-    assert [(papel, titulo) for papel, _, titulo in passos] == [
-        ("humano", "Currículo"), ("codigo", "A vez de cada saga"), ("ia", "Caso"), ("ia", "Roteiro"),
-        ("ia", "Revisão"), ("codigo", "Voz e feed"), ("humano", "Escuta")]
-    assert {quem for papel, quem, _ in passos if papel == "humano"} == {"Humano"}
+    passos = re.findall(r'<li class="passo passo--(\w+)"><h3><span class="passo__num">(\d)</span> ([^<]+)</h3>'
+                        r'<span class="passo__quem passo__quem--\1"><span class="so-leitor">Quem faz: </span>([^<]+)</span>',
+                        pagina)
+    assert [(papel, int(n), titulo) for papel, n, titulo, _ in passos] == [
+        ("humano", 1, "Currículo"), ("codigo", 2, "A vez de cada saga"), ("ia", 3, "Caso"), ("ia", 4, "Roteiro"),
+        ("ia", 5, "Revisão"), ("codigo", 6, "Voz e feed"), ("humano", 7, "Escuta")]
+    assert {quem for papel, _, _, quem in passos if papel == "humano"} == {"Humano"}
     assert "depois de publicado" in _texto(pagina).lower()
+
+
+def test_a_regra_da_revisao_e_carimbada_no_proprio_passo(projeto):
+    _com_criador(projeto)
+
+    pagina = gerar_index(projeto, "feed.xml")
+
+    revisao = re.search(r'<li class="passo passo--ia"><h3><span class="passo__num">5</span> Revisão</h3>.*?</li>',
+                        pagina, re.DOTALL).group(0)
+    assert '<p class="carimbo-regra"><strong class="so-leitor">Regra: </strong>Reprovou' in revisao
+    assert pagina.count('class="carimbo-regra"') == 1
+    assert '<ol class="cordao" role="list">' in pagina and "não vira episódio" not in pagina
 
 
 def test_o_processo_diz_que_ha_gente_mas_nao_quem(projeto):
@@ -819,7 +833,8 @@ def test_o_processo_diz_que_ha_gente_mas_nao_quem(projeto):
 def test_numero_de_revisoes_vem_da_configuracao(projeto):
     _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "revisao": {**CONFIG["revisao"], "max_ciclos": 4}})
 
-    assert "São até 5 revisões; se não aprovar, o episódio não sai." in _texto(gerar_index(projeto, "feed.xml"))
+    texto = _texto(gerar_index(projeto, "feed.xml"))
+    assert "São até 5 revisões." in texto and "Reprovou 5 vezes? Não sai hoje." in texto
 
 
 def test_selo_diz_quem_revisou_e_leva_ao_relatorio_da_ultima_revisao(projeto):
