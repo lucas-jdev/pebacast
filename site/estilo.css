@@ -213,15 +213,17 @@ button { font: inherit; }
 .player__velocidade:hover { border-color: var(--texto); }
 
 /* detalhes */
-.episodio__detalhes { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.8rem; }
-@media (max-width: 900px) { .episodio__detalhes { grid-template-columns: 1fr; } }
+/* minmax(0, 1fr): com 1fr a coluna não encolhe abaixo da palavra mais longa, e um caminho de arquivo
+   no desafio empurrava o bloco para fora do card no celular. */
+.episodio__detalhes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; margin-top: 1.8rem; }
+@media (max-width: 900px) { .episodio__detalhes { grid-template-columns: minmax(0, 1fr); } }
 .detalhes__titulo { font-family: var(--fonte-texto); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--texto-suave); margin-bottom: 0.7rem; text-transform: none; }
 .lista-marcada { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
 .lista-marcada li { position: relative; padding-left: 1.5rem; }
 .lista-marcada li::before { content: ""; position: absolute; left: 0.1rem; top: 0.55em; width: 9px; height: 9px; background: var(--destaque); transform: rotate(45deg); }
 .desafio { background: var(--fundo); border: var(--borda) solid var(--linha); border-left: 5px solid var(--acento); border-radius: calc(var(--raio) * 0.66); padding: 1.1rem 1.25rem; }
 .desafio .detalhes__titulo { color: var(--acento); }
-.desafio p { font-family: var(--fonte-titulo); font-size: 1.12rem; line-height: 1.45; }
+.desafio p { font-family: var(--fonte-titulo); font-size: 1.12rem; line-height: 1.45; overflow-wrap: anywhere; }
 .selo { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.5rem; padding: 0.45rem 0.9rem 0.45rem 0.6rem; border-radius: var(--raio-botao); font-size: 0.92rem; font-weight: 550; background: color-mix(in srgb, var(--verde) 16%, transparent); color: color-mix(in srgb, var(--verde) 55%, var(--texto)); }
 .selo svg { width: 18px; height: 18px; flex: none; }
 
