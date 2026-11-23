@@ -308,8 +308,10 @@ button { font: inherit; }
 .item__capa { justify-content: flex-end; }
 #proximo .largura { padding-top: 4.6rem; }
 @media (max-width: 760px) {
-  .etiqueta__papel { font-size: 0.9rem; padding-right: 0.8rem; }
-  .etiqueta__posicao { font-size: 0.8rem; }
+  /* Encolhe com a tela abaixo de ~380 px: a etiqueta não quebra linha e "Dados e Informação" passava da
+     borda em 320 e 340 px. A posição não muda, porque o furo tem de casar com o cordão (.amarracao). */
+  .etiqueta__papel { font-size: min(0.9rem, 3.75vw); padding-right: 0.8rem; }
+  .etiqueta__posicao { font-size: min(0.8rem, 3.4vw); }
   .etiqueta__longo { display: none; }
   .etiqueta__curto { display: inline; }
   .episodio__capa, .item__capa, .proximo__capa { padding-top: 3.6rem; }
@@ -796,7 +798,8 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 .voz__mais { display: none; align-items: center; min-height: 44px; margin: -0.4rem 0 0.6rem; padding: 0; border: 0;
   background: none; color: var(--texto); font: inherit; font-weight: 700; text-decoration: underline 2px; cursor: pointer; }
 
-/* Desafio para quem ainda não trabalha na área (#58), dentro do bloco amarelo do desafio. */
-.desafio__iniciante { margin-top: 0.9rem; padding-top: 0.8rem; border-top: 2px dashed currentColor; font-family: var(--fonte-texto);
+/* Desafio para quem ainda não trabalha na área (#58), dentro do bloco amarelo do desafio. O seletor leva
+   .desafio para vencer .desafio p, que antes impunha a fonte de título a este parágrafo. */
+.desafio .desafio__iniciante { margin-top: 0.9rem; padding-top: 0.8rem; border-top: 2px dashed currentColor; font-family: var(--fonte-texto);
   font-size: 0.98rem; font-weight: 500; line-height: 1.55; }
 .desafio__iniciante strong { display: block; font-weight: 700; }
