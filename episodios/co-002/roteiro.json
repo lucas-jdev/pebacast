@@ -1,0 +1,342 @@
+{
+  "episodio": "co-002",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem estuda arquitetura de software. O aviso de sempre: este episódio foi gerado por inteligência artificial e revisado por uma segunda inteligência artificial antes de chegar até você. Hoje o tema é o modelo operacional, a escolha estratégica que a arquitetura de uma empresa existe pra sustentar."
+    },
+    {
+      "persona": "davi",
+      "texto": "E na saga de arquitetura corporativa, quem me acompanha é o Otávio. O Otávio tem vinte e cinco anos de carreira, foi gerente de TI de uma seguradora e coordenou a arquitetura de um órgão público na digitalização de serviços. Otávio, bem-vindo de volta!"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Obrigado, Davi. Olá, você que está ouvindo. Hoje a gente vai falar de qual cidade uma empresa quer ser, antes de discutir como pavimentar as ruas."
+    },
+    {
+      "persona": "davi",
+      "texto": "Gostei. Então bora pro caso, e já aviso que ele é hipotético. Imagine um grupo educacional que comprou quarenta escolas particulares em dez anos, em cidades diferentes. Cada escola ficou com o próprio sistema acadêmico, o próprio jeito de fazer matrícula e o próprio financeiro."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Até aqui, nada de anormal. Quem cresce comprando costuma herdar a casa com a mobília."
+    },
+    {
+      "persona": "davi",
+      "texto": "Pois é. Aí chega uma diretoria nova e anuncia a estratégia: uma só marca, o mesmo material didático, o mesmo calendário de avaliações e a mesma experiência pra família em qualquer escola da rede. E a equipe de tecnologia responde com um projetão de integração: um banco de dados central que junta os alunos, as notas e os pagamentos das quarenta escolas."
+    },
+    {
+      "persona": "otavio",
+      "texto": "E um ano depois?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Um ano depois o banco central existe. Mas cada escola continua matriculando, avaliando e cobrando do seu jeito. E as famílias percebem que a experiência muda de uma unidade pra outra. Exatamente o que a estratégia queria evitar."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Antes de eu dar palpite, quero ouvir o seu. Se você fosse o arquiteto, o que teria feito?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Sinceramente? Eu teria feito parecido, só que mais moderno. Ia propor um data lake na nuvem, com eventos saindo de cada sistema acadêmico, tudo integrado em tempo real. E por cima, um app único pras famílias, lendo desse lago. Integração total. Se a estratégia fala em uma rede só, eu entendo que os dados têm que estar todos juntos."
+    },
+    {
+      "persona": "otavio",
+      "texto": "É uma proposta bem montada, e a tecnologia não tem nada de errado. Mas deixa eu te fazer umas perguntas. Uma família que tem o filho numa escola em Curitiba precisa enxergar os dados de uma escola em Recife?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Não, né? O filho estuda numa escola só."
+    },
+    {
+      "persona": "otavio",
+      "texto": "E um professor de Recife precisa consultar as notas dos alunos de Curitiba pra dar aula?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Também não."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Então qual é o problema que a diretoria descreveu? Releia comigo: o mesmo material, o mesmo calendário, a mesma experiência. Isso é sobre as escolas compartilharem dados entre si, ou sobre as escolas fazerem as coisas do mesmo jeito?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. A estratégia não pede que as escolas conversem. Pede que elas sejam parecidas."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Exatamente. E essa diferença é o coração do episódio de hoje. Ela tem nome. No livro Enterprise Architecture as Strategy, de Jeanne Ross, Peter Weill e David Robertson, os autores chamam de modelo operacional o nível de integração e de padronização dos processos de negócio que a empresa precisa pra entregar o que vende ao cliente."
+    },
+    {
+      "persona": "davi",
+      "texto": "Integração e padronização. Pra mim, sempre foi quase a mesma coisa. Qual é a diferença?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Integração é compartilhar dados entre as unidades do negócio. Quando uma área depende da informação de outra pra atender o cliente, você tem integração alta. Padronização é executar os processos do mesmo jeito, em todo lugar. Quando a matrícula em Curitiba segue os mesmos passos da matrícula em Recife, você tem padronização alta. Uma coisa não implica a outra."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então dá pra ter uma sem a outra?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Dá, e é por isso que o livro cruza os dois eixos e chega a quatro modelos. Pensa numa cidade. Integração é o quanto os bairros dependem uns dos outros, as ruas, o transporte, a água que vem do mesmo reservatório. Padronização é o quanto as casas seguem a mesma planta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, me dá os quatro."
+    },
+    {
+      "persona": "otavio",
+      "texto": "O primeiro é a diversificação: pouca integração e pouca padronização. As unidades têm clientes diferentes, processos diferentes, e quase não dependem umas das outras. É um grupo com negócios independentes, um hotel, uma fábrica, uma transportadora, cada um com sua lógica. Na cidade, são bairros autônomos, cada um com seu estilo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Faz sentido. E o segundo?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "O segundo é a coordenação: muita integração e pouca padronização. As unidades compartilham clientes, produtos ou fornecedores, mas cada uma trabalha do seu jeito. Pensa num banco em que o mesmo cliente tem conta, seguro e investimento, e cada área tem um processo próprio. O que precisa ser comum é a visão do cliente. Na cidade, são bairros diferentes ligados por um bom metrô."
+    },
+    {
+      "persona": "davi",
+      "texto": "O terceiro, então, deve ser o contrário."
+    },
+    {
+      "persona": "otavio",
+      "texto": "É. A replicação tem muita padronização e pouca integração. As unidades são independentes, os clientes de uma não são os da outra, mas todas operam do mesmo jeito, porque o jeito de operar é o que dá valor à marca. Pensa numa rede de franquias. A unidade de um shopping não precisa saber quem comprou na outra, mas a receita, o atendimento e o caixa são iguais. Na cidade, é um loteamento em que todas as casas seguem a mesma planta, mas cada família vive a sua vida."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o quarto é tudo alto."
+    },
+    {
+      "persona": "otavio",
+      "texto": "A unificação. Muita integração e muita padronização. A empresa funciona como uma operação só, com processos padronizados e dados compartilhados de ponta a ponta. Pensa numa companhia aérea: a reserva, o check-in, o embarque e a bagagem precisam seguir o mesmo processo e enxergar os mesmos dados em todo aeroporto. Na cidade, é um condomínio planejado, com a mesma planta e a mesma infraestrutura pra todo mundo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, então vamos classificar o nosso grupo de escolas. A família não precisa dos dados de outra escola. O professor também não. Mas a diretoria quer o mesmo processo em todas. Isso é replicação!"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Na minha leitura, a estratégia declarada é de replicação, sim. E agora olha os sistemas que existem hoje. Quarenta sistemas acadêmicos, quarenta jeitos de matricular, quarenta financeiros. Qual modelo esses sistemas contam?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Diversificação. Cada escola é um bairro independente, com a própria planta."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Pois é. A diretoria declarou uma cidade, e o portfólio de sistemas descreve outra. Isso é o terceiro ponto que eu queria trazer, e aqui eu falo pela minha experiência, não pelo livro: o desalinhamento entre a estratégia declarada e os sistemas existentes é muito comum, e quase nunca aparece num slide. Ele aparece na operação, quando a família muda de cidade e descobre que a escola nova cobra, avalia e se comunica de outro jeito."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o projeto de integração que a equipe fez, onde entra nisso?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Essa é a parte mais dolorida. A equipe investiu pesado no eixo da integração, que a estratégia quase não pedia, e deixou parado o eixo da padronização, que era o que a estratégia pedia. Gastou dinheiro de coordenação pra resolver um problema de replicação."
+    },
+    {
+      "persona": "davi",
+      "texto": "Caramba. É tipo construir um metrô ligando quarenta bairros, quando o que a prefeitura queria era que as casas seguissem a mesma planta."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Você pegou a ideia melhor do que eu ia explicar. E repara que o metrô até funciona. O banco central está lá, os dados chegam. Só que ninguém precisava ir de um bairro pro outro."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas deixa eu defender um pouco a minha proposta. A diretoria não vai querer um relatório consolidado? Quantos alunos a rede tem, quanto cada escola fatura?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Boa pergunta, e ela mostra que um modelo operacional não é uma regra absoluta. Algum dado sempre precisa subir. O financeiro consolidado do grupo é um exemplo. Mas isso é um fluxo estreito, de poucos números, uma vez por mês. É diferente de colocar o coração da operação, a matrícula, a nota, a cobrança, dependendo de um banco central em tempo real."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o relatório da diretoria não justifica o data lake inteiro."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Justifica uma rua, não um sistema de metrô. A pergunta que eu sempre faço é: isso serve a qual capacidade do negócio? Se a resposta for enxergar o resultado do grupo, você precisa de uma rua. Se for atender a família igual em qualquer escola, você precisa de outra coisa."
+    },
+    {
+      "persona": "davi",
+      "texto": "De quê, então? Como seria a arquitetura de uma replicação?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Aqui entra o segundo objetivo, ligar o modelo à arquitetura. O livro trata a arquitetura corporativa como a lógica que organiza os processos de negócio e a infraestrutura de tecnologia, refletindo as exigências de integração e de padronização do modelo operacional. E propõe uma ferramenta pra deixar isso visível: o core diagram, um desenho de uma página com o que é central pra operação."
+    },
+    {
+      "persona": "davi",
+      "texto": "Um diagrama de uma página só? Eu tenho diagrama de arquitetura com quarenta caixinhas."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Por isso ele é útil. Ele não mostra cada sistema. Mostra o núcleo que o modelo exige. Na minha leitura, o que entra nesse desenho muda com o modelo. Na unificação, entram os processos centrais, os dados compartilhados e as tecnologias que ligam tudo. Na coordenação, o destaque são os dados compartilhados e as tecnologias que dão acesso a eles. Na replicação, são os processos padronizados e os sistemas que automatizam esses processos. Na diversificação, sobra pouca coisa em comum, normalmente uma infraestrutura de tecnologia compartilhada."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então no grupo de escolas, o core diagram teria a matrícula, a avaliação e a cobrança padronizadas, e um sistema acadêmico igual em todas as escolas."
+    },
+    {
+      "persona": "otavio",
+      "texto": "É uma boa leitura. Um sistema acadêmico só, instalado do mesmo jeito em cada escola, com o processo padronizado embutido nele. Cada escola pode até ter a sua base, separada das outras. O que precisa ser comum é a planta, não o reservatório de água."
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Isso vira de ponta-cabeça o que eu acho de arquitetura bonita. Eu ia achar que uma base por escola é atraso."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Na replicação, pode ser o desenho mais coerente. Escolas independentes e parecidas. Se uma base tiver problema, as outras seguem funcionando. E abrir a escola número quarenta e um vira copiar a planta, em vez de integrar mais um sistema diferente."
+    },
+    {
+      "persona": "davi",
+      "texto": "Faz sentido. Agora, e se a diretoria mudar de ideia? E se amanhã ela quiser que o aluno faça o primeiro ano numa escola e o segundo em outra, com o histórico seguindo junto?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Aí a estratégia está pedindo mais integração. O modelo se aproxima da unificação, e a arquitetura vai ter que acompanhar. É por isso que eu insisto: o modelo operacional é uma escolha da direção, e não um rótulo técnico. Quem escolhe a cidade é a direção. A arquitetura constrói a cidade escolhida."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se a direção não escolher?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Aí cada equipe escolhe sozinha, sem saber que está escolhendo. É assim que se chega a quarenta sistemas. Ninguém decidiu ter diversificação. Ela aconteceu, aquisição por aquisição. Na minha experiência na seguradora, foi parecido: ninguém nunca votou pra ter quatro cadastros de clientes. Eles foram se acumulando."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então a primeira entrega de um arquiteto corporativo, nesse caso, nem é um sistema. É uma pergunta pra diretoria."
+    },
+    {
+      "persona": "otavio",
+      "texto": "É uma pergunta, e de preferência com as consequências do lado. Se vocês querem replicação, a conta é padronizar o processo, e isso significa que cada diretor de escola vai abrir mão do seu jeito de matricular. Se querem unificação, a conta é maior, porque padronizar e integrar ao mesmo tempo custa mais."
+    },
+    {
+      "persona": "davi",
+      "texto": "Vamos falar de trade-offs, então. O que se ganha e o que se perde em cada modelo?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "Vamos lá, e isso aqui é a minha síntese, tá? A diversificação dá autonomia e velocidade local. Cada unidade decide rápido. O que se perde é escala: cada um paga sozinho pelo próprio sistema, e quase nada se reaproveita."
+    },
+    {
+      "persona": "davi",
+      "texto": "Certo."
+    },
+    {
+      "persona": "otavio",
+      "texto": "A coordenação dá uma visão única do cliente sem obrigar as áreas a trabalharem igual. O que se perde é simplicidade: você precisa manter dados compartilhados de boa qualidade, com dono, com definição. E se o cadastro comum for ruim, todo mundo sofre junto."
+    },
+    {
+      "persona": "davi",
+      "texto": "É o famoso cadastro que ninguém quer ser dono."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Esse mesmo. A replicação dá escala e previsibilidade: abrir uma unidade nova é rápido, e a experiência é igual. O que se perde é a liberdade local. A escola de uma cidade pequena, com uma realidade diferente, vai ter dificuldade de fugir do padrão. E mudar o padrão vira uma decisão central, mais lenta."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a unificação?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "A unificação dá eficiência e uma visão de ponta a ponta. É a que mais promete. E é a mais cara e a mais difícil de mudar, porque tudo depende de tudo. Um erro de processo se espalha pela operação inteira. Na cidade, é o condomínio planejado: lindo, mas pra mudar a planta você precisa de assembleia."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então não existe modelo melhor."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Não existe. Existe o modelo coerente com o que a empresa quer entregar ao cliente. E existe um custo alto em declarar um e construir outro, que foi o que aconteceu nas escolas."
+    },
+    {
+      "persona": "davi",
+      "texto": "E qual seria o trade-off da minha solução lá do começo? O data lake com eventos."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Ela entrega integração, que é cara de construir e de manter. Num grupo que precisasse de coordenação, poderia ser uma ótima escolha. Mas aqui ela consome orçamento e atenção de um time sem mexer no eixo que importava. E tem um custo mais escondido: ela dá a sensação de que o problema foi resolvido. Tem painel, tem dado chegando, tem demonstração bonita. E a família continua tendo uma experiência diferente em cada escola."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso dói, porque eu já vi projeto assim. Entrega no prazo, apresentação linda, e o problema de negócio igualzinho."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Por isso o modelo operacional serve como filtro. Antes de aprovar um projeto, você pergunta: ele reforça o modelo que a gente escolheu, ou reforça outro? Se reforça outro, não quer dizer que está proibido. Quer dizer que alguém precisa explicar por quê."
+    },
+    {
+      "persona": "davi",
+      "texto": "E como eu descubro o desalinhamento numa empresa real, sem ler a cabeça da diretoria?"
+    },
+    {
+      "persona": "otavio",
+      "texto": "De novo, isso é experiência minha. Eu começo pelo que a empresa promete ao cliente, porque é ali que a estratégia aparece de verdade. Depois olho três sinais nos sistemas. Primeiro, quantos sistemas diferentes fazem a mesma coisa. Muitos sistemas pra mesma função contam uma história de diversificação. Segundo, quais dados atravessam as unidades, e se alguém de fato usa esses dados. Terceiro, quanto um processo varia de uma unidade pra outra. Quando a promessa diz uma coisa e os três sinais dizem outra, você achou o desalinhamento."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, deixa eu tentar resumir com as minhas palavras. O modelo operacional é a escolha de quanto a empresa precisa integrar e quanto precisa padronizar os processos pra entregar ao cliente. São dois eixos diferentes. Integrar é compartilhar dados. Padronizar é fazer igual."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Isso."
+    },
+    {
+      "persona": "davi",
+      "texto": "Cruzando os dois, o livro da Jeanne Ross, do Peter Weill e do David Robertson chega a quatro modelos. Diversificação, com pouca integração e pouca padronização. Coordenação, com dados compartilhados e processos diferentes. Replicação, com processos iguais e unidades independentes. E unificação, com os dois no alto."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Perfeito."
+    },
+    {
+      "persona": "davi",
+      "texto": "Segundo, a arquitetura existe pra sustentar o modelo escolhido. Na replicação, o investimento vai pra padronizar e automatizar o processo. Na coordenação, vai pros dados compartilhados. E o core diagram é o desenho de uma página que mostra esse núcleo. E terceiro: o modelo declarado pela diretoria e o modelo que os sistemas contam podem ser diferentes. No caso das escolas, a diretoria declarou replicação, os sistemas contavam diversificação, e o projeto investiu em integração, que é o eixo errado."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Resumiu muito bem. Só acrescento uma coisa: integração e padronização não são virtudes. São custos que a empresa aceita pagar porque o modelo pede. Pagar pelo eixo que o modelo não pede é desperdício, por mais moderna que seja a tecnologia."
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado. E agora o desafio do episódio. Classifique a sua empresa num dos quatro modelos operacionais e aponte um sistema que reforça essa escolha e outro que a contradiz."
+    },
+    {
+      "persona": "otavio",
+      "texto": "E vale começar pela promessa ao cliente, não pelo organograma."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se você ainda não trabalha na área, escolha uma rede que você conhece como cliente, como uma franquia ou um banco, e, só com o que é público no site, no app e nas notícias, classifique a rede num dos quatro modelos e aponte um sinal que reforça a escolha e outro que a contradiz."
+    },
+    {
+      "persona": "davi",
+      "texto": "Otávio, muito obrigado. Saio daqui olhando pra planta das casas antes de olhar pro metrô."
+    },
+    {
+      "persona": "otavio",
+      "texto": "Eu que agradeço, Davi. Foi um prazer. Até a próxima."
+    },
+    {
+      "persona": "davi",
+      "texto": "E você que ouviu até aqui, obrigado pela companhia. Este foi o Pebacast. Até o próximo episódio!"
+    }
+  ],
+  "desafio": "Classifique a sua empresa num dos quatro modelos operacionais e aponte um sistema que reforça essa escolha e outro que a contradiz.",
+  "desafio_iniciante": "Escolha uma rede que você conhece como cliente, como uma franquia ou um banco, e, só com o que é público no site, no app e nas notícias, classifique a rede num dos quatro modelos e aponte um sinal que reforça a escolha e outro que a contradiz.",
+  "fontes": [
+    "Enterprise Architecture as Strategy: Creating a Foundation for Business Execution, Jeanne W. Ross, Peter Weill e David C. Robertson, caps. 2 e 3"
+  ]
+}

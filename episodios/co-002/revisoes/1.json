@@ -1,0 +1,186 @@
+{
+  "aprovado": true,
+  "roteiro_sha256": "a43ec4693eafc248a964cb755170870ffa20c6879e58806314c20bcd4edd3e07",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "já aviso que ele é hipotético. Imagine um grupo educacional que comprou quarenta escolas particulares em dez anos, em cidades diferentes.",
+      "veredito": "correta",
+      "fonte": "episodios/co-002/noticia.json (tipo hipotetico)"
+    },
+    {
+      "fala": 3,
+      "afirmacao": "Cada escola ficou com o próprio sistema acadêmico, o próprio jeito de fazer matrícula e o próprio financeiro.",
+      "veredito": "correta",
+      "fonte": "episodios/co-002/noticia.json (tipo hipotetico)"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "uma só marca, o mesmo material didático, o mesmo calendário de avaliações e a mesma experiência pra família em qualquer escola da rede.",
+      "veredito": "correta",
+      "fonte": "episodios/co-002/noticia.json (tipo hipotetico)"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "um banco de dados central que junta os alunos, as notas e os pagamentos das quarenta escolas.",
+      "veredito": "correta",
+      "fonte": "episodios/co-002/noticia.json (tipo hipotetico)"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "Um ano depois o banco central existe. Mas cada escola continua matriculando, avaliando e cobrando do seu jeito.",
+      "veredito": "correta",
+      "fonte": "episodios/co-002/noticia.json (tipo hipotetico)"
+    },
+    {
+      "fala": 16,
+      "afirmacao": "No livro Enterprise Architecture as Strategy, de Jeanne Ross, Peter Weill e David Robertson, os autores chamam de modelo operacional o nível de integração e de padronização dos processos de negócio que a empresa precisa pra entregar o que vende ao cliente.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2: 'the necessary level of business process integration and standardization for delivering goods and services to customers'"
+    },
+    {
+      "fala": 18,
+      "afirmacao": "Integração é compartilhar dados entre as unidades do negócio.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2: integração liga as unidades por meio de dados compartilhados"
+    },
+    {
+      "fala": 18,
+      "afirmacao": "Padronização é executar os processos do mesmo jeito, em todo lugar.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2: padronização define como o processo é executado independentemente de quem ou onde"
+    },
+    {
+      "fala": 18,
+      "afirmacao": "Uma coisa não implica a outra.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2: os eixos são independentes"
+    },
+    {
+      "fala": 20,
+      "afirmacao": "o livro cruza os dois eixos e chega a quatro modelos.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2"
+    },
+    {
+      "fala": 22,
+      "afirmacao": "O primeiro é a diversificação: pouca integração e pouca padronização.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2"
+    },
+    {
+      "fala": 22,
+      "afirmacao": "As unidades têm clientes diferentes, processos diferentes, e quase não dependem umas das outras.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2"
+    },
+    {
+      "fala": 24,
+      "afirmacao": "O segundo é a coordenação: muita integração e pouca padronização. As unidades compartilham clientes, produtos ou fornecedores, mas cada uma trabalha do seu jeito.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2"
+    },
+    {
+      "fala": 24,
+      "afirmacao": "O que precisa ser comum é a visão do cliente.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "A replicação tem muita padronização e pouca integração. As unidades são independentes, os clientes de uma não são os da outra, mas todas operam do mesmo jeito",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "A unificação. Muita integração e muita padronização.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "Pensa numa companhia aérea: a reserva, o check-in, o embarque e a bagagem precisam seguir o mesmo processo e enxergar os mesmos dados em todo aeroporto.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2 (Delta Air Lines é exemplo de unificação no livro)"
+    },
+    {
+      "fala": 30,
+      "afirmacao": "Na minha leitura, a estratégia declarada é de replicação, sim.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2: mesma experiência e processos iguais em unidades com clientes próprios correspondem à replicação"
+    },
+    {
+      "fala": 34,
+      "afirmacao": "Gastou dinheiro de coordenação pra resolver um problema de replicação.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2: integração sem padronização é o eixo da coordenação"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "O livro trata a arquitetura corporativa como a lógica que organiza os processos de negócio e a infraestrutura de tecnologia, refletindo as exigências de integração e de padronização do modelo operacional.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 3: 'the organizing logic for business processes and IT infrastructure reflecting the integration and standardization requirements of the company's operating model'"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "o core diagram, um desenho de uma página com o que é central pra operação.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 3: core diagram como 'one-page picture' dos processos, dados e tecnologias da base de execução"
+    },
+    {
+      "fala": 44,
+      "afirmacao": "Na unificação, entram os processos centrais, os dados compartilhados e as tecnologias que ligam tudo.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 3"
+    },
+    {
+      "fala": 44,
+      "afirmacao": "Na coordenação, o destaque são os dados compartilhados e as tecnologias que dão acesso a eles.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 3"
+    },
+    {
+      "fala": 44,
+      "afirmacao": "Na replicação, são os processos padronizados e os sistemas que automatizam esses processos.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 3"
+    },
+    {
+      "fala": 44,
+      "afirmacao": "Na diversificação, sobra pouca coisa em comum, normalmente uma infraestrutura de tecnologia compartilhada.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 3"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "Aí a estratégia está pedindo mais integração. O modelo se aproxima da unificação",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2: alta padronização com alta integração é unificação"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "o modelo operacional é uma escolha da direção, e não um rótulo técnico.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2: o modelo operacional é uma decisão da alta direção"
+    },
+    {
+      "fala": 73,
+      "afirmacao": "Cruzando os dois, o livro da Jeanne Ross, do Peter Weill e do David Robertson chega a quatro modelos. Diversificação, com pouca integração e pouca padronização. Coordenação, com dados compartilhados e processos diferentes. Replicação, com processos iguais e unidades independentes. E unificação, com os dois no alto.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 2"
+    },
+    {
+      "fala": 75,
+      "afirmacao": "Na replicação, o investimento vai pra padronizar e automatizar o processo. Na coordenação, vai pros dados compartilhados. E o core diagram é o desenho de uma página que mostra esse núcleo.",
+      "veredito": "correta",
+      "fonte": "Enterprise Architecture as Strategy (Ross, Weill e Robertson, 2006), cap. 3"
+    },
+    {
+      "fala": 79,
+      "afirmacao": "escolha uma rede que você conhece como cliente, como uma franquia ou um banco, e, só com o que é público no site, no app e nas notícias, classifique a rede num dos quatro modelos",
+      "veredito": "correta",
+      "fonte": "Desafio iniciante: viável sem trabalhar na área, só com material público; não cita arquivo nem projeto"
+    }
+  ]
+}
