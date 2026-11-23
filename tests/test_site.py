@@ -971,6 +971,18 @@ def test_cada_player_tem_o_nome_do_episodio(projeto):
         assert 'data-player-aviso' in pagina
 
 
+def test_volume_de_cada_player_controla_o_proprio_painel(projeto):
+    _tres_publicados(projeto)
+
+    for pagina in (gerar_index(projeto, "feed.xml"), gerar_pagina_episodios(projeto, "feed.xml"),
+                   gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")):
+        paineis = re.findall(r'aria-controls="(volume-[\w-]+)"', pagina)
+        assert paineis and len(paineis) == len(set(paineis))
+        for painel in paineis:
+            assert re.search(rf'id="{painel}" hidden>\s*<input class="player__nivel" type="range"', pagina)
+        assert 'id="i-volume"' in pagina and 'id="i-mudo"' in pagina
+
+
 # ---------------------------------------------------------------- transcrição e acabamento (#55, #57)
 
 

@@ -10,6 +10,35 @@
 
   const players = [...document.querySelectorAll(".player")];
 
+  // Volume: um só para o site, lembrado entre visitas. No iOS o audio.volume é só leitura (manda o botão físico),
+  // então lá o botão vira "Silenciar" em vez de abrir uma barra que não faria nada.
+  const CHAVE_DO_VOLUME = "pebacast:volume";
+  const volumeAjustavel = (() => { const teste = new Audio(); teste.volume = 0.5; return teste.volume === 0.5; })();
+  const lerVolume = () => {
+    try {
+      const guardado = localStorage.getItem(CHAVE_DO_VOLUME);
+      const valor = Number(guardado);
+      return guardado !== null && valor >= 0 && valor <= 1 ? valor : 1;
+    } catch { return 1; }
+  };
+  const gravarVolume = (valor) => { try { localStorage.setItem(CHAVE_DO_VOLUME, String(valor)); } catch { /* modo privado */ } };
+  const estadoDoVolume = (valor) => (valor === 0 ? "mudo" : valor < 0.5 ? "baixo" : "alto");
+
+  const aplicarVolume = (valor) => players.forEach((player) => {
+    const nivel = player.querySelector(".player__nivel");
+    player.querySelector("audio").volume = valor;
+    player.dataset.volume = estadoDoVolume(valor);
+    nivel.value = Math.round(valor * 100);
+    nivel.style.setProperty("--nivel", `${nivel.value}%`);
+    nivel.setAttribute("aria-valuetext", valor === 0 ? "Mudo" : `${nivel.value}%`);
+  });
+
+  const aplicarMudo = (mudo) => players.forEach((player) => {
+    player.querySelector("audio").muted = mudo;
+    player.dataset.volume = mudo ? "mudo" : "alto";
+    player.querySelector(".player__volume-botao").setAttribute("aria-pressed", String(mudo));
+  });
+
   players.forEach((player) => {
     const audio = player.querySelector("audio");
     const play = player.querySelector(".player__play");
@@ -94,7 +123,51 @@
       audio.playbackRate = proxima;
       valorDaVelocidade.textContent = `${String(proxima).replace(".", ",")}×`;
     });
+
+    const volume = player.querySelector(".player__volume");
+    const botaoDoVolume = volume.querySelector(".player__volume-botao");
+    const painel = volume.querySelector(".player__volume-painel");
+    const nivel = painel.querySelector(".player__nivel");
+
+    if (!volumeAjustavel) {
+      botaoDoVolume.removeAttribute("aria-expanded");
+      botaoDoVolume.removeAttribute("aria-controls");
+      botaoDoVolume.setAttribute("aria-label", "Silenciar");
+      botaoDoVolume.setAttribute("aria-pressed", "false");
+      botaoDoVolume.addEventListener("click", () => aplicarMudo(!audio.muted));
+      return;
+    }
+
+    const abrirVolume = (aberto) => {
+      painel.hidden = !aberto;
+      botaoDoVolume.setAttribute("aria-expanded", String(aberto));
+    };
+    botaoDoVolume.addEventListener("click", () => {
+      const abrir = painel.hidden;
+      abrirVolume(abrir);
+      if (abrir) nivel.focus();
+    });
+    nivel.addEventListener("input", () => {
+      const valor = Number(nivel.value) / 100;
+      aplicarVolume(valor);
+      gravarVolume(valor);
+    });
+    volume.addEventListener("keydown", (evento) => {
+      if (evento.key !== "Escape" || painel.hidden) return;
+      abrirVolume(false);
+      botaoDoVolume.focus();
+    });
+    // Fecha ao sair com Tab ou ao tocar fora. O Safari não dá foco a botão clicado, por isso o focusout
+    // sem destino é ignorado: quem cuida do clique fora é o pointerdown.
+    volume.addEventListener("focusout", (evento) => {
+      if (evento.relatedTarget && !volume.contains(evento.relatedTarget)) abrirVolume(false);
+    });
+    document.addEventListener("pointerdown", (evento) => {
+      if (!painel.hidden && !volume.contains(evento.target)) abrirVolume(false);
+    });
   });
+
+  if (volumeAjustavel) aplicarVolume(lerVolume());
 
   const chamadaParaOuvir = document.querySelector('.hero__acoes a[href="#episodios"]');
   const playDoMaisRecente = document.querySelector("#episodios .player__play");

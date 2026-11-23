@@ -751,6 +751,16 @@ def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
         <div class="player__tempos"><span class="player__atual">0:00</span><span><span class="so-leitor">de </span>{escape(_duracao(duracao))}</span></div>
       </div>
       <button class="player__velocidade" type="button"><span class="so-leitor">Velocidade de reprodução: </span><span class="player__velocidade-valor">1×</span></button>
+      <div class="player__volume">
+        <button class="player__volume-botao" type="button" aria-label="Volume" aria-expanded="false" aria-controls="volume-{escape(episodio_id)}">
+          <svg class="player__icone-volume" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-volume"/></svg>
+          <svg class="player__icone-volume-baixo" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-volume-baixo"/></svg>
+          <svg class="player__icone-mudo" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-mudo"/></svg>
+        </button>
+        <div class="player__volume-painel" id="volume-{escape(episodio_id)}" hidden>
+          <input class="player__nivel" type="range" min="0" max="100" step="5" value="100" aria-label="Volume" aria-orientation="vertical">
+        </div>
+      </div>
       <p class="player__aviso" role="status" data-player-aviso></p>
     </div>"""
 
@@ -1278,6 +1288,9 @@ _SIMBOLOS = """<svg width="0" height="0" style="position:absolute" aria-hidden="
   </symbol>
   <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></symbol>
   <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M6 4h4v16H6zm8 0h4v16h-4z"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9.5v5h4l5.5 4.5v-14L7 9.5z"/><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M15.5 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+  <symbol id="i-volume-baixo" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9.5v5h4l5.5 4.5v-14L7 9.5z"/><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M15.5 9a4 4 0 0 1 0 6"/></symbol>
+  <symbol id="i-mudo" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9.5v5h4l5.5 4.5v-14L7 9.5z"/><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="m16 9.5 5 5m0-5-5 5"/></symbol>
   <symbol id="i-curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
   <symbol id="i-nao_curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" transform="rotate(180 12 12)" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
   <symbol id="i-fora" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6m0-6-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
