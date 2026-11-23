@@ -1026,7 +1026,7 @@ def _secao_sagas(sagas: Mapping[str, Any], publicados: Sequence[Mapping[str, Any
 
 
 def _secao_como(config: Mapping[str, Any]) -> str:
-    """As etapas com quem faz cada uma (humano, IA ou código), nas mesmas cores de docs/fluxo-do-episodio.md.
+    """As etapas num cordão, com quem faz cada uma (humano, IA ou código): gente nas duas pontas, máquina no meio.
     O processo diz que há gente, e não quem: a autoria do projeto fica na Sobre."""
     revisoes = max_revisoes(config["revisao"]["max_ciclos"])
     quem = {"humano": "Humano", "ia": "IA", "codigo": "Código"}
@@ -1037,16 +1037,20 @@ def _secao_como(config: Mapping[str, Any]) -> str:
         ("ia", "Caso", "Busca uma notícia recente que ilustre o tema. Se nenhuma servir, usa um cenário hipotético "
                        "e avisa."),
         ("ia", "Roteiro", "Uma IA escreve o diálogo seguindo a história e o jeito de falar de cada personagem."),
-        ("ia", "Revisão", f"Outra IA, sem ver como o roteiro foi feito, revisa cada afirmação com o que sabe e, na "
-                          f"dúvida, com uma busca. São até {revisoes} revisões; se não aprovar, o episódio não sai."),
+        ("ia", "Revisão", f"Uma nova sessão da IA, que não viu como o roteiro foi feito, revisa cada afirmação com o que "
+                          f"sabe e, na dúvida, com uma busca. São até {revisoes} revisões."),
         ("codigo", "Voz e feed", "O áudio é sintetizado, montado com a vinheta e publicado no feed, com as fontes "
                                  "nas notas."),
         ("humano", "Escuta", "Depois de publicado, o episódio é ouvido por uma pessoa, que registra o que achou e "
                              "manda regravar se o áudio saiu ruim."),
     ]
+    # O "reprovou" diz "não sai hoje" porque o episódio volta à fila depois de corrigido (docs/fluxo-do-episodio.md).
+    carimbos = {"Revisão": f'<p class="carimbo-regra"><strong class="so-leitor">Regra: </strong>'
+                           f"Reprovou {revisoes} vezes?<br>Não sai hoje.</p>"}
     itens = "\n".join(
-        f'<li><span class="passo__num">{i}</span><span class="passo__quem passo__quem--{papel}">{escape(quem[papel])}</span>'
-        f"<h3>{escape(t)}</h3><p>{escape(d)}</p></li>"
+        f'<li class="passo passo--{papel}"><h3><span class="passo__num">{i}</span> {escape(t)}</h3>'
+        f'<span class="passo__quem passo__quem--{papel}"><span class="so-leitor">Quem faz: </span>{escape(quem[papel])}</span>'
+        f"<p>{escape(d)}</p>{carimbos.get(t, '')}</li>"
         for i, (papel, t, d) in enumerate(passos, start=1)
     )
     return f"""<section class="secao secao--escura" id="como">
@@ -1056,9 +1060,9 @@ def _secao_como(config: Mapping[str, Any]) -> str:
       <h2 class="secao__titulo">Feito por IA, com gente nas duas pontas</h2>
       <p class="secao__lead">Ninguém grava: as vozes são sintéticas. Mas tem curadoria humana das fontes antes e
         escuta humana depois, e cada etapa fica registrada no repositório, com uma regra simples: roteiro que a
-        revisão reprova não vira episódio.</p>
+        revisão reprova não vai ao ar.</p>
     </div>
-    <ol class="passos">{itens}</ol>
+    <ol class="cordao" role="list">{itens}</ol>
   </div>
 </section>"""
 
