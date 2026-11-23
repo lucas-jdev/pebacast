@@ -897,3 +897,13 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 .fala__quem--jorge::before { background-image: url("avatares/cabeca/jorge.svg"); }
 .fala__quem--yasmin::before { background-image: url("avatares/cabeca/yasmin.svg"); }
 .fala__quem--otavio::before { background-image: url("avatares/cabeca/otavio.svg"); }
+
+/* Barra de rolagem de folheto: trilho de papel hachurado e cursor em tinta, que acende no amarelo ao passar o mouse.
+   O Chromium e o Safari usam os pseudo-elementos; o Firefox, que não os tem, fica com scrollbar-color. */
+@supports not selector(::-webkit-scrollbar) { html { scrollbar-color: var(--texto) var(--fundo-2); } }
+::-webkit-scrollbar { width: 16px; height: 16px; }
+::-webkit-scrollbar-track { background: repeating-linear-gradient(-45deg, transparent 0 6px, rgba(21, 17, 12, 0.16) 6px 7px), var(--fundo-2); border-left: 3px solid var(--texto); }
+::-webkit-scrollbar-track:horizontal { border-left: 0; border-top: 3px solid var(--texto); }
+::-webkit-scrollbar-thumb { background: var(--texto); border: 3px solid var(--fundo-2); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--destaque); border-color: var(--texto); }
+::-webkit-scrollbar-corner { background: var(--fundo-2); }
