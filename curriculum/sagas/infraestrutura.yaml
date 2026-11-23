@@ -115,3 +115,117 @@ episodios:
     desafio: >-
       Encontre os três maiores itens de custo de infraestrutura do seu time
       e, para cada um, aponte a decisão de arquitetura que o explica.
+
+  - id: in-006
+    titulo: "Toil: o trabalho que não deveria existir"
+    objetivos:
+      - Definir toil e diferenciá-lo de trabalho operacional útil
+      - Medir quanto tempo o time gasta com toil
+      - Priorizar a automação pelo retorno
+    pre_requisitos: [in-002]
+    referencias:
+      - fonte: sre
+        capitulos: [5]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Anote por uma semana as tarefas manuais e repetitivas que você faz em
+      produção e calcule quantas horas por mês elas custam.
+
+  - id: in-007
+    titulo: "Incidentes: quem comanda quando tudo pega fogo"
+    objetivos:
+      - Separar os papéis de comando, operação e comunicação num incidente
+      - Reconhecer os sinais de um incidente sem comando
+      - Decidir quando declarar um incidente
+    pre_requisitos: [in-003]
+    referencias:
+      - fonte: sre
+        capitulos: [13, 14]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Relembre o último problema sério em produção do seu time e diga quem
+      comandou, quem operou e quem comunicou. Se foi a mesma pessoa, proponha
+      a divisão.
+
+  - id: in-008
+    titulo: "Postmortem sem culpados"
+    objetivos:
+      - Escrever um postmortem focado em causas sistêmicas
+      - Diferenciar responsabilização de culpa
+      - Transformar ações do postmortem em mudanças que acontecem de fato
+    pre_requisitos: [in-007]
+    referencias:
+      - fonte: sre
+        capitulos: [15]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Pegue um incidente recente e escreva o postmortem em uma página, sem
+      citar nomes. Verifique se cada ação tem dono e prazo.
+
+  - id: in-009
+    titulo: "Release engineering: deploy como processo, não como evento"
+    objetivos:
+      - Explicar builds herméticos e reprodutíveis
+      - Aplicar implantação gradual com critério de reversão
+      - Reconhecer o deploy que depende de uma pessoa específica
+    pre_requisitos: [in-001]
+    referencias:
+      - fonte: sre
+        capitulos: [8]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Descreva o caminho de uma mudança do seu time, do merge até a produção,
+      e marque cada passo que depende de alguém lembrar de fazer algo.
+
+  - id: in-010
+    titulo: "Testar infraestrutura como código"
+    objetivos:
+      - Aplicar a pirâmide de testes à infraestrutura
+      - Diferenciar testes offline, online e de ponta a ponta para pilhas de infraestrutura
+      - Reconhecer o custo e o tempo de testar infraestrutura real
+    pre_requisitos: [in-001]
+    referencias:
+      - fonte: iac
+        capitulos: [8, 9]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um trecho de infraestrutura como código que você mantém e
+      escreva o primeiro teste que pegaria o erro mais caro que ele pode
+      causar.
+
+  - id: in-011
+    titulo: "Contêineres e orquestração: o que o cluster resolve e o que ele cobra"
+    objetivos:
+      - Explicar o que a orquestração de contêineres oferece à aplicação
+      - Comparar plataformas de execução de aplicações
+      - Reconhecer o custo operacional de manter um cluster
+    pre_requisitos: [in-001]
+    referencias:
+      - fonte: iac
+        capitulos: [10, 14]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Liste o que o seu time precisaria operar sozinho se trocasse a
+      plataforma atual por um cluster próprio, ou o contrário.
+
+  - id: in-012
+    titulo: "Balanceamento de carga: do DNS ao servidor"
+    objetivos:
+      - Explicar o balanceamento no DNS e na borda
+      - Comparar políticas de balanceamento dentro do datacenter
+      - Reconhecer o servidor que recebe carga demais por causa da política
+    pre_requisitos: [in-002]
+    referencias:
+      - fonte: sre
+        capitulos: [19, 20]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Desenhe o caminho de uma requisição até o seu serviço e marque cada
+      ponto de balanceamento e a política que ele usa.

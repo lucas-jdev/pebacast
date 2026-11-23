@@ -19,6 +19,26 @@ referencias_base:
     autores: [Arnon Rotem-Gal-Oz]
     ano: 2006
     tipo: artigo
+  - id: hard-parts
+    titulo: "Software Architecture: The Hard Parts"
+    autores: [Neal Ford, Mark Richards, Pramod Sadalage, Zhamak Dehghani]
+    edicao: 1ª edição (2021)
+    tipo: livro
+  - id: sre
+    titulo: "Site Reliability Engineering: How Google Runs Production Systems"
+    autores: [Betsy Beyer, Chris Jones, Jennifer Petoff, Niall Richard Murphy]
+    edicao: 1ª edição (2016)
+    tipo: livro
+  - id: memcache-fb
+    titulo: Scaling Memcache at Facebook
+    autores: [Rajesh Nishtala et al.]
+    ano: 2013
+    tipo: artigo
+  - id: mqtt5
+    titulo: MQTT Version 5.0
+    autores: [OASIS]
+    ano: 2019
+    tipo: norma
 
 episodios:
   - id: si-001
@@ -120,3 +140,120 @@ episodios:
       Escolha uma integração de um sistema que você mantém e confira o
       timeout, a política de retentativa e o que acontece quando o outro
       lado fica fora do ar por dez minutos.
+
+  - id: si-006
+    titulo: "Transações e níveis de isolamento"
+    objetivos:
+      - Explicar as garantias de atomicidade, consistência, isolamento e durabilidade
+      - Comparar níveis de isolamento pelas anomalias que eles permitem
+      - Reconhecer a anomalia de escrita enviesada num caso real
+    pre_requisitos: [si-002]
+    referencias:
+      - fonte: ddia
+        capitulos: [7]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Descubra o nível de isolamento padrão do banco que você usa e escreva
+      uma operação do seu sistema que poderia sofrer com ele.
+
+  - id: si-007
+    titulo: "Relógios mentem: tempo em sistemas distribuídos"
+    objetivos:
+      - Diferenciar relógio de parede de relógio monotônico
+      - Reconhecer o risco de ordenar eventos pelo horário da máquina
+      - Explicar pausas de processo e por que um nó pode achar que ainda é líder
+    pre_requisitos: [si-001]
+    referencias:
+      - fonte: ddia
+        capitulos: [8]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Procure no seu sistema uma lógica que compara horários de máquinas
+      diferentes e descreva o que aconteceria com um relógio dois segundos
+      adiantado.
+
+  - id: si-008
+    titulo: "Exatamente uma vez? Idempotência e ordenação de mensagens"
+    objetivos:
+      - Comparar as garantias de no máximo uma, ao menos uma e exatamente uma vez
+      - Projetar consumidores idempotentes
+      - Reconhecer quando a ordem das mensagens importa e como preservá-la
+    pre_requisitos: [si-005]
+    referencias:
+      - fonte: ddia
+        capitulos: [11]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um consumidor de mensagens do seu sistema e descreva o que
+      acontece se a mesma mensagem chegar duas vezes. Proponha a chave de
+      idempotência.
+
+  - id: si-009
+    titulo: "Transações distribuídas e sagas"
+    objetivos:
+      - Explicar o commit em duas fases e por que ele trava sob falha
+      - Comparar sagas orquestradas e coreografadas
+      - Projetar compensações para os passos de uma saga
+    pre_requisitos: [si-004, si-006]
+    referencias:
+      - fonte: ddia
+        capitulos: [9]
+      - fonte: hard-parts
+        capitulos: [9, 12]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um processo que atravessa dois serviços ou dois bancos e escreva
+      a compensação de cada passo. Aponte o passo que não tem como desfazer.
+
+  - id: si-010
+    titulo: "Cache distribuído: invalidação e consistência"
+    objetivos:
+      - Comparar estratégias de invalidação de cache
+      - Reconhecer a debandada quando um item popular expira
+      - Avaliar quanto dado velho o negócio tolera
+    pre_requisitos: [si-002]
+    referencias:
+      - fonte: memcache-fb
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um dado cacheado no seu sistema e diga quanto tempo ele pode
+      ficar velho sem causar problema. Confira se a configuração respeita
+      isso.
+
+  - id: si-011
+    titulo: "Falhas em cascata e sobrecarga"
+    objetivos:
+      - Explicar como uma falha local se espalha pelo sistema
+      - Aplicar descarte de carga e degradação controlada
+      - Reconhecer retentativas que transformam lentidão em queda
+    pre_requisitos: [si-005]
+    referencias:
+      - fonte: sre
+        capitulos: [21, 22]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Desenhe a cadeia de chamadas de uma requisição do seu sistema e marque
+      onde uma lentidão de dez segundos viraria fila. Proponha onde descartar
+      carga.
+
+  - id: si-012
+    titulo: "IoT com rede instável: MQTT e níveis de QoS"
+    objetivos:
+      - Comparar os níveis de QoS 0, 1 e 2 do MQTT
+      - Usar mensagens retidas e a última vontade para saber o estado de um dispositivo
+      - Projetar o armazenamento local para quando a rede some
+    pre_requisitos: [si-008]
+    referencias:
+      - fonte: mqtt5
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um dado que sai de um equipamento de campo ou de um app no
+      celular e diga qual QoS usaria e o que acontece com ele numa queda de
+      rede de uma hora.

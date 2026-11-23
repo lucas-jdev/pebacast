@@ -20,6 +20,11 @@ referencias_base:
     edicao: 10ª edição (2022)
     url: https://www.opengroup.org/togaf
     tipo: norma
+  - id: team-topologies
+    titulo: "Team Topologies: Organizing Business and Technology Teams for Fast Flow"
+    autores: [Matthew Skelton, Manuel Pais]
+    edicao: 1ª edição (2019)
+    tipo: livro
 
 episodios:
   - id: co-001
@@ -96,3 +101,113 @@ episodios:
       Escreva três princípios de arquitetura para o seu time, cada um com
       uma justificativa e uma implicação concreta. Teste cada um contra uma
       decisão recente.
+
+  - id: co-005
+    titulo: "Os estágios de maturidade da arquitetura corporativa"
+    objetivos:
+      - Descrever os estágios de silos de negócio até a modularidade de negócio
+      - Identificar em que estágio uma empresa está
+      - Reconhecer o risco de pular estágios
+    pre_requisitos: [co-002]
+    referencias:
+      - fonte: ea-strategy
+        capitulos: [4]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Classifique a sua empresa num dos estágios de maturidade e liste duas
+      evidências. Diga qual seria o próximo passo realista.
+
+  - id: co-006
+    titulo: "Portfólio de aplicações: manter, migrar ou aposentar"
+    objetivos:
+      - Montar um inventário de aplicações útil para decisão
+      - Classificar aplicações pelo valor de negócio e pela saúde técnica
+      - Reconhecer o custo de nunca aposentar nada
+    pre_requisitos: [co-003]
+    referencias:
+      - fonte: elevator
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Liste cinco aplicações da sua empresa e classifique cada uma em manter,
+      investir, migrar ou aposentar. Justifique a que você aposentaria.
+
+  - id: co-007
+    titulo: "Lei de Conway: a arquitetura copia o organograma"
+    objetivos:
+      - Explicar a lei de Conway e a manobra inversa
+      - Relacionar a estrutura dos times com as fronteiras do sistema
+      - Reconhecer a carga cognitiva como limite do que um time consegue manter
+    pre_requisitos: [co-001]
+    referencias:
+      - fonte: team-topologies
+        capitulos: [2, 3]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Desenhe os times da sua área e os sistemas que cada um mantém. Aponte
+      onde o sistema copia uma divisão de times que não faz mais sentido.
+
+  - id: co-008
+    titulo: "Topologias de times e modos de interação"
+    objetivos:
+      - Descrever os quatro tipos fundamentais de time
+      - Comparar os três modos de interação entre times
+      - Escolher o modo de interação pela fase do trabalho
+    pre_requisitos: [co-007]
+    referencias:
+      - fonte: team-topologies
+        capitulos: [5, 7]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Classifique o seu time num dos quatro tipos e liste as interações dele
+      com outros times, dizendo qual modo cada uma usa.
+
+  - id: co-009
+    titulo: "Roadmap de arquitetura: do estado atual ao desejado"
+    objetivos:
+      - Descrever as arquiteturas de referência atual e alvo
+      - Planejar arquiteturas de transição entre as duas
+      - Priorizar as etapas pelo valor e pela dependência
+    pre_requisitos: [co-003]
+    referencias:
+      - fonte: togaf
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escreva em três linhas o estado atual e o desejado de um sistema da sua
+      empresa e proponha uma etapa intermediária que já entregue valor.
+
+  - id: co-010
+    titulo: "Governança de arquitetura que ninguém contorna"
+    objetivos:
+      - Explicar o papel de um conselho de arquitetura
+      - Diferenciar governança por controle de governança por plataforma e exemplo
+      - Reconhecer a governança que vira fila de aprovação
+    pre_requisitos: [co-004]
+    referencias:
+      - fonte: togaf
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Descreva como uma decisão de arquitetura é aprovada na sua empresa e
+      conte quantos dias ela leva. Proponha uma regra que dispense aprovação.
+
+  - id: co-011
+    titulo: "Modelo de engajamento de TI: a fundação cresce projeto a projeto"
+    objetivos:
+      - Explicar o modelo de engajamento entre TI e negócio
+      - Relacionar cada projeto com a fundação de execução
+      - Reconhecer o projeto que resolve o problema local e enfraquece a fundação
+    pre_requisitos: [co-005]
+    referencias:
+      - fonte: ea-strategy
+        capitulos: [6]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um projeto recente da sua empresa e diga o que ele deixou de
+      reutilizável para os próximos. Se não deixou nada, diga o que poderia
+      ter deixado.

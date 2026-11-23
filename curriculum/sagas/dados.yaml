@@ -30,6 +30,11 @@ referencias_base:
     ano: 2018
     url: https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm
     tipo: lei
+  - id: kimball
+    titulo: "The Data Warehouse Toolkit: The Definitive Guide to Dimensional Modeling"
+    autores: [Ralph Kimball, Margy Ross]
+    edicao: 3ª edição (2013)
+    tipo: livro
 
 episodios:
   - id: da-001
@@ -151,3 +156,119 @@ episodios:
       Pegue uma tabela com dados pessoais de um sistema que você mantém e
       marque, coluna por coluna, para que ela serve. Aponte uma coluna que
       poderia ser removida, anonimizada ou guardada por menos tempo.
+
+  - id: da-007
+    titulo: "Armazenamento analítico: warehouse, lake e lakehouse"
+    objetivos:
+      - Comparar data warehouse, data lake e lakehouse
+      - Separar armazenamento de processamento e entender o custo de cada um
+      - Reconhecer o lake que virou depósito sem dono
+    pre_requisitos: [da-004]
+    referencias:
+      - fonte: fde
+        capitulos: [6]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Descreva onde a sua empresa guarda o dado analítico e classifique a
+      solução. Aponte um conjunto de dados que ninguém sabe se ainda é usado.
+
+  - id: da-008
+    titulo: "Modelagem dimensional: fatos, dimensões e o esquema estrela"
+    objetivos:
+      - Diferenciar tabelas de fatos e de dimensões
+      - Definir a granularidade de uma tabela de fatos
+      - Reconhecer o custo de misturar granularidades
+    pre_requisitos: [da-007]
+    referencias:
+      - fonte: kimball
+        capitulos: [1, 3]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Pegue um relatório que você usa e modele-o como esquema estrela. Declare
+      a granularidade em uma frase.
+
+  - id: da-009
+    titulo: "Dados mestres: um cliente, muitas versões"
+    objetivos:
+      - Diferenciar dado mestre, dado de referência e dado transacional
+      - Comparar estilos de gestão de dados mestres
+      - Identificar a fonte de verdade de uma entidade compartilhada
+    pre_requisitos: [da-002]
+    referencias:
+      - fonte: dmbok
+        capitulos: [10]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma entidade que aparece em vários sistemas da sua empresa, como
+      cliente ou produto, e diga qual deles é a fonte de verdade. Se não
+      houver, proponha um.
+
+  - id: da-010
+    titulo: "Mudança na origem: CDC e evolução de esquema"
+    objetivos:
+      - Explicar a captura de mudanças na origem e quando ela substitui a carga completa
+      - Aplicar compatibilidade para frente e para trás na evolução de esquema
+      - Reconhecer o pipeline que quebra quando alguém renomeia uma coluna
+    pre_requisitos: [da-004]
+    referencias:
+      - fonte: fde
+        capitulos: [5, 7]
+      - fonte: ddia
+        capitulos: [4]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma tabela que alimenta um relatório e descreva o que acontece
+      com o pipeline se uma coluna for renomeada amanhã.
+
+  - id: da-011
+    titulo: "Ética no uso de dados: pode não é o mesmo que deve"
+    objetivos:
+      - Diferenciar o que é legal do que é ético no uso de dados
+      - Reconhecer vieses que entram pela coleta e pelo modelo
+      - Aplicar perguntas éticas antes de reaproveitar um dado para outro fim
+    pre_requisitos: [da-006]
+    referencias:
+      - fonte: dmbok
+        capitulos: [2]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um dado que a sua empresa coleta para um fim e foi reaproveitado
+      para outro. Escreva as perguntas que alguém deveria ter feito antes.
+
+  - id: da-012
+    titulo: "Servir dados: analytics, machine learning e reverse ETL"
+    objetivos:
+      - Comparar formas de servir dados para análise e para modelos
+      - Definir o que torna um conjunto de dados confiável para consumo
+      - Reconhecer o risco de devolver dado analítico para os sistemas operacionais
+    pre_requisitos: [da-007]
+    referencias:
+      - fonte: fde
+        capitulos: [9]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um painel ou modelo que consome dados da sua empresa e liste o
+      que o consumidor precisa saber para confiar no dado. Confira se está
+      escrito em algum lugar.
+
+  - id: da-013
+    titulo: "Maturidade em gestão de dados: medir sem se enganar"
+    objetivos:
+      - Explicar o que um modelo de maturidade mede e o que ele não mede
+      - Planejar uma avaliação com evidência, e não só autoavaliação
+      - Transformar o resultado da avaliação em prioridades
+    pre_requisitos: [da-002]
+    referencias:
+      - fonte: dmbok
+        capitulos: [15]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Avalie de um a cinco a gestão de um conjunto de dados da sua empresa e
+      anote a evidência de cada nota. Descarte as notas sem evidência.
