@@ -791,7 +791,7 @@ def _objetivos_e_desafio(episodio: Mapping[str, Any], roteiro: Mapping[str, Any]
       </div>
       <div class="desafio">
         <{nivel} class="detalhes__titulo">Desafio do episódio</{nivel}>
-        <p>{escape(roteiro.get('desafio', ''))}</p>
+        <p>{_texto_quebravel(roteiro.get('desafio', ''))}</p>
         {_desafio_iniciante(roteiro)}
       </div>
     </div>"""
@@ -802,7 +802,13 @@ def _desafio_iniciante(roteiro: Mapping[str, Any]) -> str:
     texto = " ".join(str(roteiro.get("desafio_iniciante") or "").split())
     if not texto:
         return ""
-    return f'<p class="desafio__iniciante"><strong>Ainda não trabalha na área?</strong> {escape(texto)}</p>'
+    return f'<p class="desafio__iniciante"><strong>Ainda não trabalha na área?</strong> {_texto_quebravel(texto)}</p>'
+
+
+def _texto_quebravel(texto: str) -> str:
+    """O texto escapado, com ponto de quebra depois de cada barra: um caminho como .github/workflows/x.yml
+    quebra entre as pastas em tela estreita, em vez de no meio do nome."""
+    return "/<wbr>".join(escape(parte) for parte in str(texto).split("/"))
 
 
 def _selo(item: Mapping[str, Any]) -> str:
