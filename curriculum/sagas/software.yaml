@@ -14,6 +14,21 @@ referencias_base:
     autores: [Michael Nygard]
     ano: 2011
     tipo: artigo
+  - id: hard-parts
+    titulo: "Software Architecture: The Hard Parts"
+    autores: [Neal Ford, Mark Richards, Pramod Sadalage, Zhamak Dehghani]
+    edicao: 1ª edição (2021)
+    tipo: livro
+  - id: khononov-ddd
+    titulo: Learning Domain-Driven Design
+    autores: [Vlad Khononov]
+    edicao: 1ª edição (2021)
+    tipo: livro
+  - id: fowler-divida
+    titulo: Technical Debt Quadrant
+    autores: [Martin Fowler]
+    ano: 2009
+    tipo: artigo
 
 episodios:
   - id: sw-001
@@ -100,3 +115,121 @@ episodios:
     desafio: >-
       Escreva um ADR de uma decisão que o seu time já tomou e nunca
       registrou, incluindo as alternativas que foram descartadas.
+
+  - id: sw-005
+    titulo: "Componentes: do requisito às peças da arquitetura"
+    objetivos:
+      - Identificar componentes a partir dos requisitos e dos papéis do sistema
+      - Diferenciar particionamento técnico de particionamento por domínio
+      - Reconhecer a armadilha de modelar componentes como entidades do banco
+    pre_requisitos: [sw-003]
+    referencias:
+      - fonte: fosa
+        capitulos: [8]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Liste os componentes de um sistema que você mantém e diga se ele está
+      particionado por camada técnica ou por domínio. Aponte um componente que
+      é só uma tabela com outro nome.
+
+  - id: sw-006
+    titulo: "Arquitetura em camadas: quando o simples vira armadilha"
+    objetivos:
+      - Explicar camadas abertas e fechadas e o isolamento entre elas
+      - Reconhecer o antipadrão do sumidouro, a requisição que só atravessa camadas
+      - Decidir quando o estilo em camadas ainda é a melhor escolha
+    pre_requisitos: [sw-005]
+    referencias:
+      - fonte: fosa
+        capitulos: [10]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma funcionalidade de um sistema em camadas que você mantém e
+      conte quantas camadas só repassam a chamada sem acrescentar nada.
+
+  - id: sw-007
+    titulo: "Bounded contexts: onde um modelo termina e outro começa"
+    objetivos:
+      - Distinguir subdomínios centrais, de suporte e genéricos
+      - Delimitar um bounded context pela linguagem do negócio
+      - Escolher um padrão de integração entre contextos
+    pre_requisitos: [sw-005]
+    referencias:
+      - fonte: khononov-ddd
+        capitulos: [1, 3, 4]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Pegue uma palavra que muda de sentido entre duas áreas da sua empresa,
+      como cliente ou pedido, e desenhe os dois contextos e a tradução entre
+      eles.
+
+  - id: sw-008
+    titulo: "Agregados: a fronteira da consistência dentro do domínio"
+    objetivos:
+      - Explicar agregado, entidade e objeto de valor
+      - Definir a fronteira de consistência de um agregado
+      - Reconhecer agregados grandes demais e o custo que eles trazem
+    pre_requisitos: [sw-007]
+    referencias:
+      - fonte: khononov-ddd
+        capitulos: [5, 6]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma regra de negócio que precisa ser sempre verdadeira no seu
+      sistema e diga qual agregado a protege. Se nenhum proteger, proponha um.
+
+  - id: sw-009
+    titulo: "Event-driven: broker, mediator e o código que reage"
+    objetivos:
+      - Comparar as topologias broker e mediator
+      - Organizar o código em torno de eventos em vez de chamadas
+      - Reconhecer o custo de depurar um fluxo que ninguém orquestra
+    pre_requisitos: [sw-006]
+    referencias:
+      - fonte: fosa
+        capitulos: [14]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um fluxo de um sistema que você mantém e redesenhe-o como
+      eventos. Diga qual topologia usaria e o que ficaria mais difícil de
+      acompanhar.
+
+  - id: sw-010
+    titulo: "Microsserviços: fronteiras, granularidade e quando não usar"
+    objetivos:
+      - Delimitar a fronteira de um serviço pelo domínio e pelos dados
+      - Avaliar a granularidade pelas forças que separam e que juntam serviços
+      - Decidir quando um sistema distribuído não compensa o custo
+    pre_requisitos: [sw-007, sw-009]
+    referencias:
+      - fonte: fosa
+        capitulos: [17, 18]
+      - fonte: hard-parts
+        capitulos: [7]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha dois serviços, ou dois módulos, que você mantém e diga se
+      deveriam ser um só ou continuar separados, usando pelo menos uma força
+      de cada lado.
+
+  - id: sw-011
+    titulo: "Débito técnico: a dívida que você escolhe e a que te escolhe"
+    objetivos:
+      - Classificar o débito técnico pelos quadrantes de deliberado ou inadvertido e prudente ou imprudente
+      - Explicar o débito como juros pagos em cada mudança futura
+      - Decidir qual débito pagar primeiro pelo custo de conviver com ele
+    pre_requisitos: [sw-004]
+    referencias:
+      - fonte: fowler-divida
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Liste três débitos técnicos de um sistema que você mantém, classifique
+      cada um num quadrante e escolha qual pagaria primeiro, justificando
+      pelos juros.

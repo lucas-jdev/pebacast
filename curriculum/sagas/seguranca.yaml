@@ -26,6 +26,39 @@ referencias_base:
     edicao: 2021
     url: https://owasp.org/Top10/
     tipo: site
+  - id: nist-800-63b
+    titulo: "NIST SP 800-63B: Digital Identity Guidelines, Authentication and Lifecycle Management"
+    autores: [NIST]
+    ano: a conferir (rev. 4)
+    tipo: norma
+  - id: rfc6749
+    titulo: "RFC 6749: The OAuth 2.0 Authorization Framework"
+    autores: [Dick Hardt]
+    ano: 2012
+    tipo: norma
+  - id: rfc9700
+    titulo: "RFC 9700: Best Current Practice for OAuth 2.0 Security"
+    autores: [Torsten Lodderstedt, John Bradley, Andrey Labunets, Daniel Fett]
+    ano: 2025
+    tipo: norma
+  - id: owasp-cripto
+    titulo: OWASP Cryptographic Storage Cheat Sheet
+    autores: [OWASP]
+    tipo: artigo
+  - id: owasp-chaves
+    titulo: OWASP Key Management Cheat Sheet
+    autores: [OWASP]
+    tipo: artigo
+  - id: slsa
+    titulo: "SLSA: Supply-chain Levels for Software Artifacts"
+    autores: [OpenSSF]
+    edicao: versão 1.0 (2023)
+    tipo: norma
+  - id: owasp-asvs
+    titulo: OWASP Application Security Verification Standard
+    autores: [OWASP]
+    edicao: a conferir
+    tipo: norma
 
 episodios:
   - id: se-001
@@ -125,3 +158,115 @@ episodios:
       Escolha três categorias do OWASP Top 10 e confira se o pipeline do seu
       time detecta alguma delas automaticamente. Proponha uma verificação
       para a que não é detectada.
+
+  - id: se-006
+    titulo: "Árvores de ataque: pensar no objetivo do atacante"
+    objetivos:
+      - Construir uma árvore de ataque a partir de um objetivo
+      - Usar a árvore para encontrar o caminho mais barato para o atacante
+      - Combinar árvores de ataque com STRIDE
+    pre_requisitos: [se-002]
+    referencias:
+      - fonte: shostack
+        capitulos: [4]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um objetivo de atacante contra um sistema seu, como ler os dados
+      de outro cliente, e desenhe a árvore até três níveis. Marque o galho
+      mais barato.
+
+  - id: se-007
+    titulo: "Autenticação: senha, MFA e passkeys"
+    objetivos:
+      - Comparar fatores de autenticação pela resistência a ataques
+      - Aplicar as recomendações atuais para senhas
+      - Explicar por que autenticadores resistentes a phishing mudam o jogo
+    pre_requisitos: [se-003]
+    referencias:
+      - fonte: nist-800-63b
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Revise a tela de login de um sistema que você mantém contra as
+      recomendações de senha da norma e liste o que mudaria.
+
+  - id: se-008
+    titulo: "OAuth e OpenID Connect: delegar sem entregar a senha"
+    objetivos:
+      - Explicar papéis e fluxos do OAuth 2.0
+      - Diferenciar autorização de autenticação e o papel do OpenID Connect
+      - Reconhecer configurações inseguras apontadas pelas boas práticas atuais
+    pre_requisitos: [se-007]
+    referencias:
+      - fonte: rfc6749
+      - fonte: rfc9700
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma integração que usa OAuth no seu sistema e descubra qual
+      fluxo ela usa. Confira-a contra as boas práticas atuais.
+
+  - id: se-009
+    titulo: "Criptografia aplicada: o que proteger e com qual chave"
+    objetivos:
+      - "Escolher onde cifrar: em trânsito, em repouso e no campo"
+      - Explicar a hierarquia de chaves e por que separar a chave do dado
+      - Reconhecer erros comuns, como criptografia feita em casa
+    pre_requisitos: [se-004]
+    referencias:
+      - fonte: owasp-cripto
+      - fonte: owasp-chaves
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Liste os dados sensíveis de um sistema que você mantém, diga onde cada
+      um é cifrado e onde fica a chave. Marque o que está em claro.
+
+  - id: se-010
+    titulo: "Cadeia de suprimentos de software"
+    objetivos:
+      - Explicar as ameaças entre o código-fonte e o artefato publicado
+      - Aplicar os níveis de proveniência do SLSA
+      - Reconhecer dependências e pipelines como superfície de ataque
+    pre_requisitos: [se-005]
+    referencias:
+      - fonte: slsa
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Descreva como um artefato do seu time é gerado e publicado e diga em que
+      nível do SLSA ele estaria. Aponte o primeiro passo para subir um nível.
+
+  - id: se-011
+    titulo: "Ameaças à privacidade"
+    objetivos:
+      - Diferenciar ameaça de segurança de ameaça à privacidade
+      - Aplicar uma ferramenta de privacidade ao modelar ameaças
+      - Reconhecer a vinculação e a identificação como danos mesmo sem vazamento
+    pre_requisitos: [se-002]
+    referencias:
+      - fonte: shostack
+        capitulos: [6]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um fluxo com dado pessoal no seu sistema e liste como alguém
+      poderia identificar ou vincular uma pessoa sem invadir nada.
+
+  - id: se-012
+    titulo: "Requisitos de segurança verificáveis"
+    objetivos:
+      - Escrever requisitos de segurança que podem ser testados
+      - Usar um padrão de verificação para definir o nível de exigência
+      - Reconhecer a conformidade de fachada, que passa na auditoria e não protege
+    pre_requisitos: [se-005]
+    referencias:
+      - fonte: shostack
+        capitulos: [12]
+      - fonte: owasp-asvs
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma seção do padrão de verificação que se aplica a um sistema
+      seu e marque o que você consegue provar que atende.

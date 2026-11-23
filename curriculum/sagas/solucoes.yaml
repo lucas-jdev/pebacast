@@ -29,6 +29,11 @@ referencias_base:
     autores: [Saurabh Shrivastava, Neelanjali Srivastav]
     edicao: 1ª edição (2020)
     tipo: livro
+  - id: fowler-strangler
+    titulo: Strangler Fig Application
+    autores: [Martin Fowler]
+    ano: 2004
+    tipo: artigo
 
 episodios:
   - id: sl-001
@@ -120,3 +125,116 @@ episodios:
       Desenhe o diagrama de contexto de um sistema que você mantém, com os
       usuários e os sistemas externos, e mostre para alguém de fora do time.
       Anote o que precisou explicar em voz alta.
+
+  - id: sl-005
+    titulo: "Cenários de qualidade: requisitos não funcionais que o negócio entende"
+    objetivos:
+      - Transformar um requisito vago como rápido em cenário mensurável
+      - Usar cenários para conversar com stakeholders de negócio
+      - Priorizar cenários quando eles entram em conflito
+    pre_requisitos: [sl-001]
+    referencias:
+      - fonte: rozanski
+        capitulos: [10]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Pegue um requisito não funcional vago de um projeto seu e reescreva-o
+      como cenário com estímulo, ambiente e resposta mensurável.
+
+  - id: sl-006
+    titulo: "O documento de solução: o que precisa estar lá"
+    objetivos:
+      - Organizar a descrição da solução em visões e pontos de vista
+      - Escolher o que documentar pelo público de cada parte
+      - Reconhecer o documento que ninguém lê e por quê
+    pre_requisitos: [sl-004]
+    referencias:
+      - fonte: rozanski
+        capitulos: [3, 13]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um documento de solução do seu time e diga para quem cada seção
+      foi escrita. Corte uma seção que não tem leitor.
+
+  - id: sl-007
+    titulo: "Cada sistema fala uma língua: tradutores e modelo canônico"
+    objetivos:
+      - Aplicar o tradutor de mensagens entre sistemas com formatos diferentes
+      - Avaliar quando um modelo canônico reduz e quando aumenta o acoplamento
+      - Reconhecer o custo de manter o modelo canônico vivo
+    pre_requisitos: [sl-003]
+    referencias:
+      - fonte: eip
+        capitulos: [8]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma integração de um sistema que você mantém e descreva a
+      tradução que acontece entre os dois lados. Diga onde ela mora hoje e
+      onde deveria morar.
+
+  - id: sl-008
+    titulo: "Migrar sem big bang: o padrão strangler fig"
+    objetivos:
+      - Planejar a substituição gradual de um sistema legado
+      - Escolher por onde começar a interceptar o tráfego
+      - Reconhecer o risco de a migração parar no meio para sempre
+    pre_requisitos: [sl-003]
+    referencias:
+      - fonte: fowler-strangler
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha um sistema legado que você conhece e proponha a primeira fatia a
+      ser substituída, com o ponto de interceptação e o critério para desligar
+      o antigo.
+
+  - id: sl-009
+    titulo: "Disponibilidade como requisito da solução"
+    objetivos:
+      - Traduzir a necessidade do negócio em meta de disponibilidade
+      - Identificar os pontos únicos de falha da solução
+      - Ponderar o custo de cada nove a mais
+    pre_requisitos: [sl-005]
+    referencias:
+      - fonte: rozanski
+        capitulos: [27]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Desenhe a solução de um projeto seu, marque os pontos únicos de falha e
+      diga quanto o negócio perde por hora com cada um parado.
+
+  - id: sl-010
+    titulo: "Performance e escalabilidade desde o desenho"
+    objetivos:
+      - Estimar a carga esperada a partir dos números do negócio
+      - Identificar o gargalo provável antes de construir
+      - Diferenciar escalar para cima de escalar para fora no contexto da solução
+    pre_requisitos: [sl-005]
+    referencias:
+      - fonte: rozanski
+        capitulos: [26]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Pegue um fluxo crítico de um projeto seu, estime as requisições no pico
+      a partir de um número do negócio e aponte onde ele quebraria primeiro.
+
+  - id: sl-011
+    titulo: "Avaliar a arquitetura antes de construir"
+    objetivos:
+      - Comparar formas de avaliar uma arquitetura, da revisão informal ao método estruturado
+      - Usar cenários para encontrar riscos e trade-offs
+      - Decidir quanto investir na avaliação pelo risco do projeto
+    pre_requisitos: [sl-005, sl-006]
+    referencias:
+      - fonte: rozanski
+        capitulos: [14]
+    # Rascunho de 2026-11-22: título, objetivos e fontes a conferir na curadoria.
+    referencias_verificadas: false
+    desafio: >-
+      Escolha uma decisão de um projeto seu, rode dois cenários de qualidade
+      contra ela e registre um risco que você não tinha visto.
