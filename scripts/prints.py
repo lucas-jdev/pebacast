@@ -18,6 +18,7 @@ senão `secao-<posição>`. O nome é normalizado para [a-z0-9-]; repetido ganha
 from __future__ import annotations
 
 import argparse
+import faulthandler
 import json
 import re
 import shutil
@@ -216,11 +217,14 @@ def capturar(site: Path, saida: Path, paginas: Iterable[str] = PAGINAS) -> list[
     from playwright.sync_api import sync_playwright
 
     saida.mkdir(parents=True, exist_ok=True)
+    # Se travar, a pilha do Python vai para o stderr a cada minuto: o log do job mostra em que chamada parou.
+    faulthandler.dump_traceback_later(60, repeat=True, file=sys.stderr)
     servidor = _servidor(site)
     base = f"http://127.0.0.1:{servidor.server_address[1]}/"
     gerados: list[Path] = []
     try:
         with sync_playwright() as p:
+            print("abrindo o Chromium", file=sys.stderr, flush=True)
             navegador = p.chromium.launch(args=list(ARGS_CHROMIUM))
             for tela, (largura, altura) in TELAS.items():
                 celular = tela == "celular"
@@ -236,9 +240,10 @@ def capturar(site: Path, saida: Path, paginas: Iterable[str] = PAGINAS) -> list[
                     caminho = caminho_da_pagina(site, pagina)
                     if caminho is None:
                         continue
+                    print(f"{tela}: carregando {caminho}", file=sys.stderr, flush=True)
                     pagina_web.goto(f"{base}{caminho}", wait_until="networkidle")
                     pagina_web.add_style_tag(content=_CSS_OCULTOS)
-                    print(f"{tela}: {caminho}", file=sys.stderr, flush=True)
+                    print(f"{tela}: preparando {caminho}", file=sys.stderr, flush=True)
                     pagina_web.evaluate(_JS_PREPARAR, [TETO_QUADRO_MS, TETO_CARGA_MS])
                     pagina_web.wait_for_timeout(ESPERA_MS)
                     elementos = pagina_web.evaluate(_JS_ELEMENTOS, SELETOR)
@@ -254,6 +259,7 @@ def capturar(site: Path, saida: Path, paginas: Iterable[str] = PAGINAS) -> list[
                 contexto.close()
             navegador.close()
     finally:
+        faulthandler.cancel_dump_traceback_later()
         servidor.shutdown()
     return gerados
 
