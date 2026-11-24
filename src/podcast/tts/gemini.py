@@ -1,5 +1,6 @@
 import base64
 import json
+import math
 import time
 from collections.abc import Callable, Sequence
 from typing import Any
@@ -94,6 +95,40 @@ def _cota_diaria_esgotada(erro: Exception) -> bool:
 
 
 def agrupar_em_blocos(falas: Sequence[Fala], max_caracteres: int) -> list[list[Fala]]:
+    """Divide as falas no menor número de blocos que o limite permite, com tamanhos parecidos.
+
+    Encher um bloco de cada vez deixava a despedida sozinha num bloco de poucas centenas de
+    caracteres (co-002: 518), e o Gemini, sem contexto para firmar as vozes, mudava o timbre na
+    última troca. Entre as divisões com o mínimo de blocos, fica a de menor soma dos quadrados
+    dos tamanhos, que é a mais equilibrada.
+    """
+    if not falas:
+        return []
+    quantidade = len(_encher_em_ordem(falas, max_caracteres))
+    custo = [[math.inf] * (len(falas) + 1) for _ in range(quantidade + 1)]
+    corte = [[0] * (len(falas) + 1) for _ in range(quantidade + 1)]
+    custo[0][0] = 0
+    for bloco in range(1, quantidade + 1):
+        for fim in range(1, len(falas) + 1):
+            caracteres, falantes = 0, set()
+            for inicio in range(fim - 1, -1, -1):
+                caracteres += len(falas[inicio].texto)
+                falantes.add(falas[inicio].persona.id)
+                if inicio < fim - 1 and (caracteres > max_caracteres or len(falantes) > MAX_FALANTES_POR_REQUISICAO):
+                    break
+                candidato = custo[bloco - 1][inicio] + caracteres**2
+                if candidato < custo[bloco][fim]:
+                    custo[bloco][fim], corte[bloco][fim] = candidato, inicio
+
+    blocos, fim = [], len(falas)
+    for bloco in range(quantidade, 0, -1):
+        inicio = corte[bloco][fim]
+        blocos.append(list(falas[inicio:fim]))
+        fim = inicio
+    return blocos[::-1]
+
+
+def _encher_em_ordem(falas: Sequence[Fala], max_caracteres: int) -> list[list[Fala]]:
     blocos: list[list[Fala]] = []
     atual: list[Fala] = []
     for fala in falas:
