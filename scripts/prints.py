@@ -171,11 +171,14 @@ _JS_RECORTE = """([seletor, indice]) => {
 
 # Imagens de fundo e máscaras (as cenas das seções) só são decodificadas quando pintadas: rolar a
 # página inteira antes garante que nenhuma seção sai sem a cena por chegar antes da imagem.
-_JS_PREPARAR = """async () => {
-  const quadro = () => new Promise(ok => requestAnimationFrame(() => requestAnimationFrame(ok)));
+# Toda espera tem teto: o evaluate do Playwright não tem timeout, e uma promessa que nunca resolve
+# (um quadro que o runner não pinta, uma imagem que não decodifica) travava o job até os 20 minutos.
+_JS_PREPARAR = """async ([tetoQuadroMs, tetoCargaMs]) => {
+  const comTeto = (promessa, ms) => Promise.race([promessa, new Promise(ok => setTimeout(ok, ms))]);
+  const quadro = () => comTeto(new Promise(ok => requestAnimationFrame(() => requestAnimationFrame(ok))), tetoQuadroMs);
   document.querySelectorAll("img[loading=lazy]").forEach(img => { img.loading = "eager"; });
-  await Promise.all(Array.from(document.images).map(img => img.decode().catch(() => null)));
-  await document.fonts.ready;
+  await comTeto(Promise.all(Array.from(document.images).map(img => img.decode().catch(() => null))), tetoCargaMs);
+  await comTeto(document.fonts.ready, tetoCargaMs);
   for (let y = 0; y < document.documentElement.scrollHeight; y += window.innerHeight) {
     window.scrollTo({top: y, behavior: "instant"});
     await quadro();
@@ -183,6 +186,8 @@ _JS_PREPARAR = """async () => {
   window.scrollTo({top: 0, behavior: "instant"});
   await quadro();
 }"""
+TETO_QUADRO_MS = 1_000
+TETO_CARGA_MS = 10_000
 
 
 def _servidor(site: Path):
@@ -233,7 +238,8 @@ def capturar(site: Path, saida: Path, paginas: Iterable[str] = PAGINAS) -> list[
                         continue
                     pagina_web.goto(f"{base}{caminho}", wait_until="networkidle")
                     pagina_web.add_style_tag(content=_CSS_OCULTOS)
-                    pagina_web.evaluate(_JS_PREPARAR)
+                    print(f"{tela}: {caminho}", file=sys.stderr, flush=True)
+                    pagina_web.evaluate(_JS_PREPARAR, [TETO_QUADRO_MS, TETO_CARGA_MS])
                     pagina_web.wait_for_timeout(ESPERA_MS)
                     elementos = pagina_web.evaluate(_JS_ELEMENTOS, SELETOR)
                     for indice, secao in nomear_secoes(elementos):
