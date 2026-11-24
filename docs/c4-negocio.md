@@ -61,6 +61,7 @@ flowchart TB
     watchdog["<b>Watchdog</b><br/>[GitHub Actions, a cada 6 h]<br/>avisa se a rotina parar"]:::conteiner
     capturar["<b>Capturar prints</b><br/>[GitHub Actions, PR que muda o site]<br/>fotografa as seções do main e do PR,<br/>só com leitura"]:::conteiner
     comentar["<b>Comentar prints</b><br/>[GitHub Actions, código do main]<br/>valida o artefato e comenta<br/>antes e depois no PR"]:::conteiner
+    pronuncia["<b>Teste de pronúncia</b><br/>[GitHub Actions, manual]<br/>amostras cegas, num pré-release,<br/>das variantes de pronúncia"]:::conteiner
     motion["<b>Pebamotion</b><br/>[CLI local: Python + Chromium + ffmpeg]<br/>trailers animados dos episódios<br/>para as redes"]:::conteiner
 
     repo[("<b>Repositório</b><br/>[GitHub]<br/>currículo, personas, roteiros,<br/>revisões e publicações")]:::dados
@@ -88,6 +89,8 @@ flowchart TB
     motion -- "baixa o MP3" --> audio
     repo -- "push dispara;<br/>agendamento diário retoma<br/>quem aguarda a cota" --> pipeline
     lucas -. "dispara a regravação<br/>de um áudio" .-> pipeline
+    lucas -. "dispara e ouve<br/>às cegas" .-> pronuncia
+    pronuncia -- "narra cada variante" --> gemini
     pipeline -- "narra e transcreve<br/>para o QA de texto" --> gemini
     pipeline -- "sobe o MP3" --> audio
     pipeline -- "gera e publica" --> site
