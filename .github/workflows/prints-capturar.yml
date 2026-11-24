@@ -51,6 +51,8 @@ jobs:
       - name: Fotografar as seções
         # Normal: menos de 2 minutos. Passou disso, travou: falhar logo, com a última página no log.
         timeout-minutes: 6
+        env:
+          DEBUG: pw:api
         run: |
           for lado in antes depois; do
             python depois/scripts/prints.py capturar --site "$RUNNER_TEMP/site-$lado" --saida "$RUNNER_TEMP/capturas-$lado" >/dev/null
