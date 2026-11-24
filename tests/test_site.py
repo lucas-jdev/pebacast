@@ -3,6 +3,7 @@ import re
 from datetime import date
 from pathlib import Path
 
+import pytest
 import yaml
 
 from podcast.site import (
@@ -897,6 +898,36 @@ def test_beta_explica_na_sobre_e_avisa_do_spotify(projeto):
     assert "Ainda é beta" in sobre and "O que já é firme" in sobre and "Ainda não está no Spotify" in sobre
     assert "as fontes de cada episódio são escolhidas e conferidas à mão" in sobre
     assert "No Spotify em breve; por enquanto, pelo feed." in _texto(gerar_index(projeto, "feed.xml"))
+
+
+def _com_spotify(projeto, url, beta=True):
+    _gravar(projeto.raiz / "config" / "pipeline.yaml",
+            {**CONFIG, "site": {"beta": beta, "votos_api": "https://votos.x.dev", "spotify": url}})
+
+
+def test_com_o_spotify_a_assinatura_comeca_por_ele_e_o_em_breve_some(projeto):
+    _com_spotify(projeto, "https://open.spotify.com/show/5EMHP24shu7Y7fhfRbLkUz")
+
+    index = gerar_index(projeto, "feed.xml")
+    assert '<a class="botao" href="https://open.spotify.com/show/5EMHP24shu7Y7fhfRbLkUz">Ouvir no Spotify</a>' in index
+    assert "Spotify em breve" not in _texto(index)
+    assert "Ainda não está no Spotify" not in _texto(gerar_pagina_sobre(projeto, "feed.xml"))
+
+
+def test_com_o_spotify_a_serie_aponta_para_ele_no_sameas(projeto):
+    _com_spotify(projeto, "https://open.spotify.com/show/5EMHP24shu7Y7fhfRbLkUz?si=abc")
+
+    assert '"sameAs":["https://open.spotify.com/show/5EMHP24shu7Y7fhfRbLkUz"]' in gerar_index(projeto, "feed.xml")
+
+
+@pytest.mark.parametrize("url", ["http://open.spotify.com/show/abc", "https://evil.example/show/abc",
+                                 'https://open.spotify.com/show/abc"onmouseover=x', "https://open.spotify.com/episode/abc"])
+def test_link_do_spotify_fora_do_formato_e_ignorado(projeto, url):
+    _com_spotify(projeto, url)
+
+    index = gerar_index(projeto, "feed.xml")
+    assert "Ouvir no Spotify" not in index and "open.spotify.com" not in index
+    assert "No Spotify em breve; por enquanto, pelo feed." in _texto(index)
 
 
 def test_sem_beta_nada_fala_em_beta_mas_o_fala_comigo_fica(projeto, tmp_path):

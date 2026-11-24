@@ -441,6 +441,7 @@ button { font: inherit; }
 .assinar { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; }
 @media (max-width: 860px) { .assinar { grid-template-columns: 1fr; } }
 .feed { background: var(--fundo-2); border: var(--borda) solid var(--linha); border-radius: var(--raio); padding: 1.6rem; }
+.assinar__acoes { margin-top: 1.5rem; }
 .feed__rotulo { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--texto-suave); margin-bottom: 0.6rem; }
 .feed__linha { display: flex; gap: 0.5rem; }
 .feed__url { flex: 1; min-width: 0; min-height: 48px; display: flex; align-items: center; padding: 0.55rem 1rem; line-height: 1.45; overflow-wrap: anywhere; user-select: all; border: var(--borda) solid var(--linha); border-radius: calc(var(--raio) * 0.66); background: var(--fundo); color: var(--texto); font: 0.95rem var(--fonte-mono); }
