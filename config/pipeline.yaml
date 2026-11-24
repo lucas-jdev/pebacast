@@ -168,6 +168,9 @@ site:
   # Liga o carimbo "beta" no cabeçalho, a seção "Ainda é beta" na Sobre, o "No Spotify em breve" e o aviso
   # no fim da descrição do feed. No lançamento, é só desligar.
   beta: true
+  # Página do programa no Spotify, que lê este mesmo feed. Preenchida, a seção de assinar ganha o botão
+  # "Ouvir no Spotify" e a série ganha o sameAs; o "em breve" some. Só aceita https://open.spotify.com/show/<id>.
+  spotify: https://open.spotify.com/show/5EMHP24shu7Y7fhfRbLkUz
   # Quem faz o podcast, na página sobre/ e no JSON-LD de todas as páginas (Person com o mesmo @id).
   # A bio é do Lucas e pode ser reescrita sem mexer no código; vazia, a página mostra só nome e links.
   # Os links viram o sameAs da Person: só https.

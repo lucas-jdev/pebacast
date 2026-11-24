@@ -85,7 +85,8 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
         _secao_vozes(personas),
         _secao_sagas(sagas, publicados),
         _secao_como(config),
-        _secao_assinar(_url_feed(meta, arquivo_feed), meta, beta=_config_do_site(config)["beta"]),
+        _secao_assinar(_url_feed(meta, arquivo_feed), meta, beta=_config_do_site(config)["beta"],
+                       spotify=_config_do_site(config)["spotify"]),
     ]
     return _documento(
         config, arquivo_feed,
@@ -153,7 +154,7 @@ def gerar_pagina_sobre(projeto: Projeto, arquivo_feed: str) -> str:
             _sobre_proposta(),
             _sobre_como(meta),
             _sobre_quem_faz(_config_do_site(config)["criador"]),
-            _sobre_beta(meta) if _config_do_site(config)["beta"] else "",
+            _sobre_beta(meta, no_spotify=bool(_config_do_site(config)["spotify"])) if _config_do_site(config)["beta"] else "",
             _sobre_fala_comigo(meta),
             _sobre_nome(meta),
         ]),
@@ -290,6 +291,7 @@ def _config_do_site(config: Mapping[str, Any]) -> dict[str, Any]:
         "goatcounter": site.get("goatcounter") or "",
         "votos": _api_de_votos(site.get("votos_api") or ""),
         "beta": bool(site.get("beta", False)),
+        "spotify": _programa_no_spotify(site.get("spotify") or ""),
         "criador": _config_do_criador(site.get("criador") or {}, config["feed"]["autor"]),
     }
 
@@ -322,9 +324,16 @@ def _api_de_votos(url: str) -> str:
     return url if re.fullmatch(r"https://[a-z0-9.-]+(?:/[a-z0-9._-]+)*", url) else ""
 
 
+def _programa_no_spotify(url: str) -> str:
+    """Só a página de um programa no Spotify: o endereço vai parar num href e no sameAs da série."""
+    url = url.strip().split("?")[0].rstrip("/")
+    return url if re.fullmatch(r"https://open\.spotify\.com/show/[A-Za-z0-9]+", url) else ""
+
+
 def _serie(config: Mapping[str, Any], arquivo_feed: str) -> dict[str, Any]:
     meta = config["feed"]
-    return {
+    spotify = _config_do_site(config)["spotify"]
+    serie = {
         "@context": "https://schema.org",
         "@type": "PodcastSeries",
         "@id": _url(meta, "#podcast"),
@@ -336,6 +345,9 @@ def _serie(config: Mapping[str, Any], arquivo_feed: str) -> dict[str, Any]:
         "inLanguage": "pt-BR",
         "author": _criador(config),
     }
+    if spotify:
+        serie["sameAs"] = [spotify]
+    return serie
 
 
 def _criador(config: Mapping[str, Any]) -> dict[str, Any]:
@@ -1075,15 +1087,25 @@ def _quebravel(url: str) -> str:
     return escape(esquema + separador) + "/<wbr>".join(escape(parte) for parte in resto.split("/"))
 
 
-def _secao_assinar(url_feed: str, meta: Mapping[str, Any], beta: bool = False) -> str:
-    spotify = " No Spotify em breve; por enquanto, pelo feed." if beta else ""
+def _secao_assinar(url_feed: str, meta: Mapping[str, Any], beta: bool = False, spotify: str = "") -> str:
+    """Com o programa no Spotify, ele vem primeiro: é o único caminho que não pede saber o que é RSS."""
+    if spotify:
+        titulo = "Assine no Spotify ou pelo feed"
+        lead = ("No Spotify é um toque. Em qualquer outro app de podcast que aceite RSS, como AntennaPod, Pocket Casts,\n"
+                "        Apple Podcasts ou Overcast, cole o endereço do feed. Episódio novo chega sozinho.")
+        acao = (f'\n      <p class="assinar__acoes"><a class="botao" href="{escape(spotify)}">Ouvir no Spotify</a></p>')
+    else:
+        titulo = "Assine pelo feed"
+        em_breve = " No Spotify em breve; por enquanto, pelo feed." if beta else ""
+        lead = ("Cole o endereço em qualquer app de podcast que aceite RSS, como AntennaPod, Pocket Casts,\n"
+                f"        Apple Podcasts ou Overcast. Episódio novo chega sozinho.{em_breve}")
+        acao = ""
     return f"""<section class="secao" id="assinar">
   <div class="largura assinar">
     <div>
       <p class="sobretitulo">Ouça no seu app</p>
-      <h2 class="secao__titulo">Assine pelo feed</h2>
-      <p class="secao__lead">Cole o endereço em qualquer app de podcast que aceite RSS, como AntennaPod, Pocket Casts,
-        Apple Podcasts ou Overcast. Episódio novo chega sozinho.{spotify}</p>
+      <h2 class="secao__titulo">{titulo}</h2>
+      <p class="secao__lead">{lead}</p>{acao}
     </div>
     <div class="feed">
       <p class="feed__rotulo">Endereço do feed</p>
@@ -1191,8 +1213,9 @@ def _sobre_quem_faz(criador: Mapping[str, Any]) -> str:
 </section>"""
 
 
-def _sobre_beta(meta: Mapping[str, Any]) -> str:
+def _sobre_beta(meta: Mapping[str, Any], no_spotify: bool = False) -> str:
     """Recado do criador, em primeira pessoa: o que já é firme, o que pode mudar e como avisar um erro."""
+    ainda_fora = "" if no_spotify else " Ainda não está no\n        Spotify."
     return f"""<section class="secao secao--sem-topo" id="beta">
   <div class="largura sobre__bloco">
     <h2 class="secao__titulo secao__titulo--menor">Ainda é beta</h2>
@@ -1201,8 +1224,7 @@ def _sobre_beta(meta: Mapping[str, Any]) -> str:
         pesa agora mais do que vai pesar depois.</p>
       <p><strong>O que já é firme:</strong> as fontes de cada episódio são escolhidas e conferidas à mão, nenhum
         roteiro sai sem passar na revisão, e o link de cada episódio não muda.</p>
-      <p><strong>O que pode mudar:</strong> as vozes, o visual, a numeração e a ordem das sagas. Ainda não está no
-        Spotify.</p>
+      <p><strong>O que pode mudar:</strong> as vozes, o visual, a numeração e a ordem das sagas.{ainda_fora}</p>
       <p><strong>O que pode dar errado:</strong> uma voz que tropeça, um dia sem episódio, um erro que passou na
         revisão. Achou um? Me conta. Eu corrijo e, se precisar, regravo.</p>
     </div>
