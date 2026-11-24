@@ -25,3 +25,13 @@ python -m podcast.teste_pronuncia --saida <pasta> revelar A=4 B=1 C=3
 ```
 
 A variante que acertar mais entra no `config/pipeline.yaml`, com a data do teste no comentário. Depois de revelar, apague o pré-release.
+
+## Resultados
+
+| Data | Experimento | Variante | Acertos |
+|---|---|---|---|
+| 2026-11-24 | `pebacast.yaml` | `instrucao` (a de produção) | 4 de 4 |
+| 2026-11-24 | `pebacast.yaml` | `grafia` ("Péba-cast") | 4 de 4 |
+| 2026-11-24 | `pebacast.yaml` | `grafia_e_instrucao` | 4 de 4 |
+
+Empate: nenhuma variante foi melhor que a de produção, que ficou como estava. O erro do co-002 aconteceu numa fala de abertura longa, e este teste usa frases curtas. Se o QA de pronúncia (#107) voltar a pegar o "Pebacast" errado, o próximo teste deve usar a fala de abertura inteira.
