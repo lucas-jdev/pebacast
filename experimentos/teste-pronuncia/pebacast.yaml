@@ -1,0 +1,20 @@
+# Teste cego da pronúncia de "Pebacast" (E aberto, como em tatu-peba: PÉ-ba-cast).
+# No co-002 (2026-11-23), o Davi errou na abertura mesmo com a instrução do dicionário.
+# Cada variante é uma requisição ao Gemini com as quatro frases.
+persona: davi
+termo: Pebacast
+frases:
+  - Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem estuda arquitetura de software.
+  - No Pebacast de hoje, a conversa é sobre modelo operacional.
+  - Se gostou, manda o Pebacast pra alguém que está começando na área.
+  - E você que ouviu até aqui, obrigado pela companhia. Este foi o Pebacast. Até o próximo episódio!
+variantes:
+  instrucao:
+    instrucao: >-
+      Pronuncie "Pebacast" com o E aberto, como em "tatu-peba": PÉ-ba-cast.
+  grafia:
+    escrever_como: Péba-cast
+  grafia_e_instrucao:
+    escrever_como: Péba-cast
+    instrucao: >-
+      Pronuncie "Péba-cast" com o E aberto, como em "tatu-peba", e numa palavra só.
