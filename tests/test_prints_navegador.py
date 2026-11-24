@@ -2,6 +2,7 @@
 Abre um Chromium de verdade: sem Playwright ou sem o navegador instalado, os testes são pulados."""
 
 import importlib.util
+import math
 import sys
 import time
 from pathlib import Path
@@ -43,7 +44,22 @@ def test_preparar_termina_mesmo_com_espera_que_nunca_resolve(navegador, trava):
     pagina.goto("http://prints.teste/")
 
     inicio = time.monotonic()
-    pagina.evaluate(prints._JS_PREPARAR, [50, 200])
+    pagina.evaluate(prints._JS_PREPARAR, [50, 200, 3_000])
 
     assert time.monotonic() - inicio < 5
+    pagina.close()
+
+
+def test_preparar_termina_mesmo_com_a_pagina_crescendo_enquanto_rola(navegador):
+    pagina = navegador.new_page(viewport={"width": 400, "height": 300})
+    html = ('<div id="d" style="height:900px"></div><script>addEventListener("scroll", () => '
+            '{ d.style.height = (d.offsetHeight + 600) + "px"; });</script>')
+    pagina.route("http://prints.teste/", lambda rota: rota.fulfill(content_type="text/html", body=html))
+    pagina.goto("http://prints.teste/")
+
+    inicio = time.monotonic()
+    preparo = pagina.evaluate(prints._JS_PREPARAR, [50, 200, 3_000])
+
+    assert time.monotonic() - inicio < 5
+    assert preparo["quadros"] == math.ceil(preparo["altura"] / preparo["passo"])
     pagina.close()
