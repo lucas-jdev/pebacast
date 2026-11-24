@@ -48,6 +48,33 @@ def test_fala_maior_que_o_limite_vai_sozinha_num_bloco(davi):
     assert len(blocos) == 1
 
 
+def test_despedida_curta_nao_fica_sozinha_no_ultimo_bloco(davi, helena):
+    falas = [Fala(davi if i % 2 == 0 else helena, "x" * 50) for i in range(8)] + [Fala(davi, "x" * 20)]
+
+    blocos = agrupar_em_blocos(falas, max_caracteres=100)
+
+    tamanhos = [sum(len(fala.texto) for fala in bloco) for bloco in blocos]
+    assert len(blocos) == 5
+    assert min(tamanhos) >= 50
+    assert max(tamanhos) <= 100
+    assert [fala for bloco in blocos for fala in bloco] == falas
+
+
+def test_equilibrar_nao_aumenta_o_numero_de_blocos(davi, helena):
+    tamanhos = [120, 340, 80, 410, 260, 90, 300, 150, 30, 220, 60, 15]
+    falas = [Fala(davi if i % 2 == 0 else helena, "x" * tamanho) for i, tamanho in enumerate(tamanhos)]
+
+    blocos = agrupar_em_blocos(falas, max_caracteres=700)
+
+    assert len(blocos) == 4
+    assert all(sum(len(fala.texto) for fala in bloco) <= 700 for bloco in blocos)
+    assert [fala for bloco in blocos for fala in bloco] == falas
+
+
+def test_sem_falas_nao_ha_blocos():
+    assert agrupar_em_blocos([], max_caracteres=100) == []
+
+
 def test_requisicao_com_um_falante_usa_lista_de_vozes(davi):
     requisicao = montar_requisicao([Fala(davi, "Oi")], "gemini-3.8-flash-tts", "pt-BR")
 
