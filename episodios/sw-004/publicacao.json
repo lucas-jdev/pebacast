@@ -1,0 +1,12 @@
+{
+  "guid": "pebacast-sw-004",
+  "url_audio": "https://github.com/lucas-jdev/pebacast/releases/download/episodio-sw-004/pebacast-sw-004.mp3",
+  "tamanho_bytes": 8895404,
+  "duracao_segundos": 1112,
+  "publicado_em": "2026-11-24T22:25:37+00:00",
+  "tts": {
+    "provedor": "gemini-3.8-flash-tts",
+    "fallback": false
+  },
+  "vinheta": true
+}

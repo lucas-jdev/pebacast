@@ -1,0 +1,201 @@
+{
+  "aprovado": false,
+  "roteiro_sha256": "e68999c1d6312ae90d9df5f7cc7595aff3812cfea508aa742c6c8728b29e5b76",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "No dia vinte e quatro de novembro, um mantenedor abriu uma issue no GitHub, no repositório público da NVIDIA chamado NodeWright, que é um operador de Kubernetes.",
+      "veredito": "correta",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (aberta em 24/11/2026 por um colaborador do repositório, que também é o responsável por ela) e https://github.com/NVIDIA/nodewright (\"A Kubernetes Operator to manage Node OS customizations\", público)"
+    },
+    {
+      "fala": 3,
+      "afirmacao": "O título fala em registrar as decisões de arquitetura como ADRs numerados.",
+      "veredito": "correta",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "Na pasta de designs do projeto tinha quatro documentos, com dois padrões de nome diferentes, sem índice e sem status.",
+      "veredito": "correta",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (quatro arquivos em docs/designs/, um com data no nome e três só com slug, sem índice nem controle de status)"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "Um deles dizia que estava proposto, mas já tinha sido mergeado com duas aprovações.",
+      "veredito": "correta",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (non-interruptible-workloads.md diz Status: proposed e foi mergeado com duas aprovações no PR #962)"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "E dois tinham sido editados depois do merge pra ficar iguais ao código.",
+      "veredito": "correta",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (designs do webhook bootstrap lease e de Jobs, editados após o merge); noticia.json"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "quem contribui com o projeto não consegue saber o que é decisão tomada, o que é proposta e o que já foi substituído. E a issue cita também os assistentes de código com inteligência artificial, que leem essa pasta",
+      "veredito": "correta",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (cita o .claude/CLAUDE.md, que manda os agentes lerem os designs)"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "Transformar os quatro documentos em ADRs numerados, do um ao quatro, cada um com uma seção de status.",
+      "veredito": "correta",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (ADR 001 a 004)"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "Criar um leia-me na pasta explicando quando uma mudança precisa de ADR, com os status proposto, aceito, rejeitado e substituído.",
+      "veredito": "correta",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (Proposed, Accepted, Rejected, Superseded by ADR-NNN)"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "E uma regra: ADR mergeado não é reescrito. O comportamento atual do sistema vai pra outras pastas de documentação.",
+      "veredito": "correta",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (comportamento atual em docs/architecture/, docs/user-guide/ e docs/operations/)"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "Quando eu li, a proposta ainda estava em revisão.",
+      "veredito": "correta",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (issue aberta; PR #1085 vinculado, em revisão)"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "o Michael Nygard, no artigo Documenting Architecture Decisions, de dois mil e onze, que é o texto que popularizou os ADRs.",
+      "veredito": "correta",
+      "fonte": "Michael Nygard, Documenting Architecture Decisions (2011); conhecimento consolidado; FoSA cap. 19 credita a Nygard a origem dos ADRs"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "Ele diz que, quando alguém novo encontra uma decisão sem saber o motivo, sobram duas opções. Aceitar a decisão às cegas, mesmo que ela não faça mais sentido. Ou mudar a decisão às cegas, sem saber o que ela protegia.",
+      "veredito": "correta",
+      "fonte": "Michael Nygard, Documenting Architecture Decisions (2011) (\"Blindly accept the decision\" / \"Blindly change it\")"
+    },
+    {
+      "fala": 36,
+      "afirmacao": "O Nygard propõe uma coisa curta, de uma ou duas páginas, um arquivo por decisão, guardado junto com o código do projeto.",
+      "veredito": "correta",
+      "fonte": "Michael Nygard, Documenting Architecture Decisions (2011) (\"one or two pages long\"; guardados no repositório do projeto, em doc/arch/adr-NNN.md)"
+    },
+    {
+      "fala": 36,
+      "afirmacao": "A estrutura dele tem cinco partes. Título, que é curto e numerado. Contexto, que descreve as forças em jogo: técnicas, de negócio, de time, de prazo. Decisão, que é a resposta a essas forças. Status. E consequências.",
+      "veredito": "imprecisa",
+      "correcao": "As cinco partes e a ordem conferem, mas a lista de forças atribuída ao Nygard não é a dele. Ele fala em forças tecnológicas, políticas, sociais e locais do projeto. Diga isso, ou tire a lista da boca do Nygard e apresente 'negócio, time, prazo' como exemplos da Helena.",
+      "fonte": "Michael Nygard, Documenting Architecture Decisions (2011) (\"This section describes the forces at play, including technological, political, social, and project local\")"
+    },
+    {
+      "fala": 38,
+      "afirmacao": "O contexto é escrito de forma neutra, descrevendo os fatos, sem defender ainda a resposta.",
+      "veredito": "correta",
+      "fonte": "Michael Nygard, Documenting Architecture Decisions (2011) (\"The language in this section is value-neutral. It is simply describing facts.\")"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "O Nygard sugere escrever em voz ativa e com frases completas, no estilo nós vamos usar tal coisa.",
+      "veredito": "correta",
+      "fonte": "Michael Nygard, Documenting Architecture Decisions (2011) (\"stated in full sentences, with active voice. 'We will …'\")"
+    },
+    {
+      "fala": 44,
+      "afirmacao": "O Nygard insiste que entram todas as consequências, as positivas, as negativas e as neutras.",
+      "veredito": "correta",
+      "fonte": "Michael Nygard, Documenting Architecture Decisions (2011) (\"All consequences should be listed here, not just the 'positive' ones\")"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "Proposto enquanto está em discussão, aceito quando foi decidido.",
+      "veredito": "correta",
+      "fonte": "Michael Nygard, Documenting Architecture Decisions (2011) (proposed / accepted)"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "aqui vem a regra que o NodeWright adotou e que o Nygard já defendia: quando uma decisão muda, você não apaga nem reescreve o ADR antigo. Você escreve um novo e marca o antigo como substituído, apontando pro novo. Os números não são reaproveitados.",
+      "veredito": "imprecisa",
+      "correcao": "A regra confere com o Nygard, mas o NodeWright não a adotou: ela está numa proposta ainda em revisão, como o próprio Davi disse na fala 9. Diga 'a regra que o NodeWright está propondo'.",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (issue aberta, PR #1085 ainda em revisão); Michael Nygard, Documenting Architecture Decisions (2011) (superseded com referência ao substituto; \"Numbers will not be reused\")"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "Tem um capítulo inteiro sobre decisões de arquitetura, o dezenove. Eles partem do formato do Nygard e acrescentam duas seções.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, Fundamentals of Software Architecture, cap. 19 (1ª edição; na 2ª é o cap. 21)"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "Uma é conformidade, que responde como o time vai garantir que a decisão está sendo seguida, seja por revisão manual, seja por um teste automatizado. A outra é notas, com metadados como autor, datas e quem aprovou.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, Fundamentals of Software Architecture, cap. 19 (seções Compliance e Notes; compliance por revisão manual ou fitness function automatizada; Notes com autor original, datas de aprovação e modificação, quem aprovou)"
+    },
+    {
+      "fala": 60,
+      "afirmacao": "O Nygard fala em decisões arquiteturalmente significativas, e dá um critério: são as que afetam a estrutura, as características não funcionais, as dependências, as interfaces ou as técnicas de construção.",
+      "veredito": "correta",
+      "fonte": "Michael Nygard, Documenting Architecture Decisions (2011); Richards e Ford, Fundamentals of Software Architecture, cap. 19 (seção Architecturally Significant)"
+    },
+    {
+      "fala": 60,
+      "afirmacao": "A sua escolha do Strategy é design, vive dentro de um módulo e é barata de trocar. A mensageria entre os serviços é arquitetural, porque muda a estrutura, a disponibilidade e o contrato entre as partes.",
+      "veredito": "correta",
+      "fonte": "Aplicação direta do critério do Nygard citado no FoSA cap. 19 (estrutura, características não funcionais, interfaces)"
+    },
+    {
+      "fala": 66,
+      "afirmacao": "No capítulo dezenove, o Richards e o Ford descrevem três antipadrões de decisão. O primeiro é Covering Your Assets, que é se proteger. O arquiteto evita decidir ou adia a decisão indefinidamente, com medo de escolher errado.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, Fundamentals of Software Architecture, cap. 19 (Covering Your Assets, Groundhog Day, Email-Driven Architecture; CYA: o arquiteto evita ou adia a decisão por medo de errar)"
+    },
+    {
+      "fala": 68,
+      "afirmacao": "A saída que eles propõem é esperar até o último momento responsável, quando você tem informação suficiente pra decidir, e então decidir, trabalhando junto com quem vai implementar.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, Fundamentals of Software Architecture, cap. 19 (last responsible moment e colaboração contínua com os times de desenvolvimento)"
+    },
+    {
+      "fala": 70,
+      "afirmacao": "Groundhog Day, o nome daquele filme em que o personagem acorda no mesmo dia pra sempre. É a decisão que volta pra pauta toda semana, porque ninguém sabe por que ela foi tomada.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, Fundamentals of Software Architecture, cap. 19; filme Groundhog Day (1993)"
+    },
+    {
+      "fala": 72,
+      "afirmacao": "E a causa, segundo eles, é justificar mal. A decisão foi comunicada sem os motivos técnicos e de negócio. A correção é justificar as duas coisas",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, Fundamentals of Software Architecture, cap. 19 (justificativa incompleta; dar justificativa técnica e de negócio)"
+    },
+    {
+      "fala": 74,
+      "afirmacao": "Email-Driven Architecture. A decisão até foi tomada e justificada, mas mora num e-mail, numa thread de chat, numa ata de reunião. As pessoas não sabem que ela existe, perdem ou esquecem. A recomendação do livro é ter um único lugar oficial pras decisões e, na comunicação, mandar o link pra lá, em vez de colar a decisão no corpo da mensagem.",
+      "veredito": "correta",
+      "fonte": "Richards e Ford, Fundamentals of Software Architecture, cap. 19 (pessoas perdem, esquecem ou nem sabem da decisão; um único system of record e só o link no e-mail)"
+    },
+    {
+      "fala": 76,
+      "afirmacao": "o caso do NodeWright mostra outro sintoma, que não está nessa lista [...] O registro estava lá, mas foi editado até virar descrição do código.",
+      "veredito": "correta",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (dois designs editados após o merge para bater com o código); a observação é apresentada como da Helena, não do livro"
+    },
+    {
+      "fala": 84,
+      "afirmacao": "Ainda assim, eu prefiro um ADR tardio e honesto, dizendo o que se sabe e o que se perdeu, a nenhum. Foi o que o NodeWright fez com os quatro designs antigos.",
+      "veredito": "imprecisa",
+      "correcao": "O NodeWright ainda não fez isso: a conversão dos quatro designs em ADRs é uma proposta em revisão. E a issue não diz que os ADRs registram o que se perdeu. Diga 'é o que o NodeWright está propondo fazer com os quatro designs antigos'.",
+      "fonte": "https://github.com/NVIDIA/nodewright/issues/1083 (issue aberta; conversão proposta no PR #1085, ainda em revisão)"
+    },
+    {
+      "fala": 93,
+      "afirmacao": "abra o repositório do Pebacast no GitHub e escreva o ADR que falta pra uma decisão que ele tomou e não registrou, como guardar o currículo em arquivos YAML na pasta curriculum",
+      "veredito": "correta",
+      "fonte": "https://github.com/lucas-jdev/pebacast (público); curriculum/sagas/*.yaml existe; docs/adr/ (0001 a 0011) não tem ADR sobre o currículo em YAML. Dá para fazer sem trabalhar na área, só com material aberto"
+    },
+    {
+      "fala": 97,
+      "afirmacao": "As fontes do episódio foram Fundamentals of Software Architecture, de Mark Richards e Neal Ford, capítulo dezenove, e o artigo Documenting Architecture Decisions, de Michael Nygard.",
+      "veredito": "correta",
+      "fonte": "curriculum/sagas/software.yaml, sw-004: referências fosa (cap. 19) e nygard-adr"
+    }
+  ]
+}
