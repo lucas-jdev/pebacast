@@ -1,0 +1,404 @@
+{
+  "episodio": "sw-004",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura de software de verdade. Aviso importante: este episódio foi gerado por inteligência artificial e revisado por uma segunda inteligência artificial, que conferiu as afirmações contra as fontes. O tema de hoje são os ADRs, os registros de decisão de arquitetura, e por que uma decisão que ninguém escreveu acaba sendo tomada de novo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Eu sou o Davi, e quem está comigo de novo é a Helena. A Helena é arquiteta de software há quinze anos, começou num monólito legado de banco, e hoje é a pessoa que o time chama antes de uma decisão difícil, e não depois. Helena, bem-vinda!"
+    },
+    {
+      "persona": "helena",
+      "texto": "Obrigada, Davi. Oi, você que está ouvindo, aqui é a Helena. E hoje o assunto é um dos meus preferidos, então pode me interromper quando eu empolgar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Pode deixar. Então vamos pro caso, que é bem fresquinho. No dia vinte e quatro de novembro, um mantenedor abriu uma issue no GitHub, no repositório público da NVIDIA chamado NodeWright, que é um operador de Kubernetes. O título fala em registrar as decisões de arquitetura como ADRs numerados."
+    },
+    {
+      "persona": "helena",
+      "texto": "E o que motivou a issue? Porque ninguém acorda numa segunda-feira querendo escrever documentação."
+    },
+    {
+      "persona": "davi",
+      "texto": "Exatamente! O que ele descreve é o seguinte. Na pasta de designs do projeto tinha quatro documentos, com dois padrões de nome diferentes, sem índice e sem status. Um deles dizia que estava proposto, mas já tinha sido mergeado com duas aprovações. E dois tinham sido editados depois do merge pra ficar iguais ao código."
+    },
+    {
+      "persona": "helena",
+      "texto": "Hum. E qual é a consequência disso, segundo a própria issue?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Que quem contribui com o projeto não consegue saber o que é decisão tomada, o que é proposta e o que já foi substituído. E a issue cita também os assistentes de código com inteligência artificial, que leem essa pasta e ficam tão perdidos quanto as pessoas."
+    },
+    {
+      "persona": "helena",
+      "texto": "Gostei que ele colocou os assistentes de código na conta. Quem lê o repositório hoje não é só gente nova no time. E o que ele propôs?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Transformar os quatro documentos em ADRs numerados, do um ao quatro, cada um com uma seção de status. Criar um leia-me na pasta explicando quando uma mudança precisa de ADR, com os status proposto, aceito, rejeitado e substituído. E uma regra: ADR mergeado não é reescrito. O comportamento atual do sistema vai pra outras pastas de documentação. Quando eu li, a proposta ainda estava em revisão."
+    },
+    {
+      "persona": "helena",
+      "texto": "Tá. Antes de eu falar qualquer coisa, me conta o que você faria no lugar dele."
+    },
+    {
+      "persona": "davi",
+      "texto": "Olha, sinceramente? Meu primeiro instinto seria o contrário. Eu faria documentação viva. Cada vez que o código muda, alguém atualiza o documento de design, e pronto, o documento sempre bate com o sistema. E, pra decisão, o histórico do git já tem tudo. Tem o commit, tem a descrição do pull request, tem a discussão. Pra que criar mais um tipo de arquivo?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Parece razoável. Deixa eu te fazer umas perguntas. Imagina que daqui a dois anos você entra nesse projeto e lê um desses documentos atualizados. O que ele te conta?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Como o sistema funciona hoje."
+    },
+    {
+      "persona": "helena",
+      "texto": "E ele te conta por que funciona desse jeito?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Talvez. Se quem escreveu colocou o motivo."
+    },
+    {
+      "persona": "helena",
+      "texto": "E se alguém editou o documento depois do merge, como aconteceu no NodeWright, o motivo que está lá é o original, ou é o que fazia sentido pro código novo?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. Quando eu atualizo o documento pra bater com o código, eu apago o momento da decisão. Fica só o resultado, e some a situação em que ela foi tomada."
+    },
+    {
+      "persona": "helena",
+      "texto": "Isso. São dois documentos com trabalhos diferentes. Um descreve o comportamento atual e deve mudar sempre que o sistema muda. O outro registra uma decisão: naquele momento, com aquelas forças, nós escolhemos isso. Esse segundo não deve mudar, porque o valor dele está justamente em congelar o contexto. Quando você mistura os dois no mesmo arquivo, ele não serve bem pra nenhuma das duas coisas."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas e o git? O pull request tem a discussão inteira."
+    },
+    {
+      "persona": "helena",
+      "texto": "Tem? Quantos pull requests o seu time mergeou no último ano?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Sei lá. Centenas, com certeza."
+    },
+    {
+      "persona": "helena",
+      "texto": "E se eu te pedir agora o motivo de vocês terem escolhido o banco de dados que vocês usam, você sabe em qual daqueles pull requests procurar?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Não. E provavelmente essa decisão nem foi num pull request. Foi numa reunião."
+    },
+    {
+      "persona": "helena",
+      "texto": "Pois é. A discussão existe, mas está espalhada e misturada com centenas de mudanças pequenas. Ela não é encontrável. E informação que ninguém encontra, na prática, não existe."
+    },
+    {
+      "persona": "davi",
+      "texto": "Faz sentido. Mas aí eu tenho uma dúvida honesta: o que acontece de ruim se ninguém sabe o motivo? O sistema continua funcionando."
+    },
+    {
+      "persona": "helena",
+      "texto": "Quem descreveu isso muito bem foi o Michael Nygard, no artigo Documenting Architecture Decisions, de dois mil e onze, que é o texto que popularizou os ADRs. Ele diz que, quando alguém novo encontra uma decisão sem saber o motivo, sobram duas opções. Aceitar a decisão às cegas, mesmo que ela não faça mais sentido. Ou mudar a decisão às cegas, sem saber o que ela protegia."
+    },
+    {
+      "persona": "davi",
+      "texto": "E as duas são ruins."
+    },
+    {
+      "persona": "helena",
+      "texto": "As duas. Na primeira, o sistema fica preso a uma escolha que talvez já tenha perdido a razão de existir. Na segunda, você quebra alguma coisa que só aquela decisão segurava. Eu já vivi a segunda, e não foi bonito."
+    },
+    {
+      "persona": "davi",
+      "texto": "Conta!",
+      "estilo": "curioso"
+    },
+    {
+      "persona": "helena",
+      "texto": "Na migração pra microsserviços que eu liderei, e que depois nós desfizemos em parte, tinha um módulo que fazia o fechamento contábil de um jeito estranho, tudo numa única transação enorme. Parecia código velho mal feito. Separamos em serviços. Semanas depois, apareceram lançamentos pela metade. Aquela transação gigante era a forma que alguém tinha encontrado, anos antes, de garantir consistência. Ninguém tinha escrito isso em lugar nenhum."
+    },
+    {
+      "persona": "davi",
+      "texto": "Nossa. Então, se tivesse um parágrafo dizendo isso, vocês teriam pensado duas vezes."
+    },
+    {
+      "persona": "helena",
+      "texto": "Teríamos pelo menos feito a pergunta certa. E é aí que o ADR entra."
+    },
+    {
+      "persona": "davi",
+      "texto": "Beleza, me convenceu que precisa registrar. Mas como é um ADR na prática? Eu imagino um documento enorme."
+    },
+    {
+      "persona": "helena",
+      "texto": "E o que você acha que acontece com um documento enorme?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Ninguém lê. E ninguém escreve, pra começo de conversa."
+    },
+    {
+      "persona": "helena",
+      "texto": "Exato. O Nygard propõe uma coisa curta, de uma ou duas páginas, um arquivo por decisão, guardado junto com o código do projeto. A estrutura dele tem cinco partes. Título, que é curto e numerado. Contexto, que descreve as forças em jogo: tecnológicas, políticas, sociais e locais do projeto. Decisão, que é a resposta a essas forças. Status. E consequências."
+    },
+    {
+      "persona": "davi",
+      "texto": "Vamos por partes. O que vai no contexto?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Tudo que faria uma pessoa sensata chegar a essa decisão. O orçamento, o tamanho do time, o requisito de latência. O contexto é escrito de forma neutra, descrevendo os fatos, sem defender ainda a resposta. E, na minha prática, é ali que eu coloco as alternativas que foram consideradas, com o motivo de cada uma ter perdido."
+    },
+    {
+      "persona": "davi",
+      "texto": "Por que as alternativas? Se a decisão já foi tomada, quem liga pro que perdeu?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Quem vai chegar daqui a um ano com uma ideia brilhante, que provavelmente já foi discutida. Se a alternativa descartada está escrita, com o motivo, a conversa começa do ponto certo. Se não está, a conversa começa do zero."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá. E a decisão?"
+    },
+    {
+      "persona": "helena",
+      "texto": "O Nygard sugere escrever em voz ativa e com frases completas, no estilo nós vamos usar tal coisa. Nada de talvez, nada de seria interessante. Uma decisão hesitante não é uma decisão."
+    },
+    {
+      "persona": "davi",
+      "texto": "E consequências é a lista do que melhora?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Tá, e qual é o trade-off? Se só tiver o que melhora, é propaganda. O Nygard insiste que entram todas as consequências, as positivas, as negativas e as neutras. O que fica mais fácil e o que fica mais difícil depois dessa escolha. Esse é o pedaço que mais ajuda quem chega depois, porque mostra que o custo foi aceito de propósito."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o status é aquilo que o NodeWright queria? Proposto, aceito, substituído?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Isso. Proposto enquanto está em discussão, aceito quando foi decidido. E aqui vem a regra que o NodeWright está propondo e que o Nygard já defendia: quando uma decisão muda, você não apaga nem reescreve o ADR antigo. Você escreve um novo e marca o antigo como substituído, apontando pro novo. Os números não são reaproveitados."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então a pasta de ADRs vira um diário. Dá pra ler a história das decisões em ordem."
+    },
+    {
+      "persona": "helena",
+      "texto": "É uma boa imagem. E repara no documento do NodeWright que dizia proposto, mas já estava aprovado. Um status errado é pior do que status nenhum, porque ele informa errado com cara de oficial."
+    },
+    {
+      "persona": "davi",
+      "texto": "E no livro Fundamentals of Software Architecture, do Mark Richards e do Neal Ford, que já usamos aqui no Pebacast, tem isso também?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Tem um capítulo inteiro sobre decisões de arquitetura, o dezenove. Eles partem do formato do Nygard e acrescentam duas seções. Uma é conformidade, que responde como o time vai garantir que a decisão está sendo seguida, seja por revisão manual, seja por um teste automatizado. A outra é notas, com metadados como autor, datas e quem aprovou."
+    },
+    {
+      "persona": "davi",
+      "texto": "Conformidade é interessante. Porque decisão escrita e ignorada também não serve pra muita coisa."
+    },
+    {
+      "persona": "helena",
+      "texto": "Exato. Se o ADR diz que a camada de apresentação não acessa o banco direto, alguém precisa conferir isso. Se der pra automatizar, melhor."
+    },
+    {
+      "persona": "davi",
+      "texto": "Agora, uma dúvida que me pegou. O leia-me do NodeWright vai dizer quando uma mudança precisa de ADR. Mas como é que eu sei? Se eu escrever ADR pra cada decisão, eu não faço mais nada."
+    },
+    {
+      "persona": "helena",
+      "texto": "Ótima pergunta. Qual foi a última decisão técnica que você tomou no trabalho?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Ontem eu decidi usar o padrão Strategy pra calcular o frete por tipo de entrega, em vez de um monte de if."
+    },
+    {
+      "persona": "helena",
+      "texto": "E se daqui a seis meses alguém trocar isso por outra coisa, quanto do sistema muda?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Uma classe, talvez duas. Fica tudo dentro do módulo de frete."
+    },
+    {
+      "persona": "helena",
+      "texto": "E a decisão de o cálculo de frete chamar o serviço de rastreamento por mensageria, em vez de uma chamada síncrona?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Aí muda muita coisa. Muda como os dois se falam e o que acontece se o rastreamento cair."
+    },
+    {
+      "persona": "helena",
+      "texto": "Aí está a diferença entre decisão de design e decisão arquitetural. O Nygard fala em decisões arquiteturalmente significativas, e dá um critério: são as que afetam a estrutura, as características não funcionais, as dependências, as interfaces ou as técnicas de construção. A sua escolha do Strategy é design, vive dentro de um módulo e é barata de trocar. A mensageria entre os serviços é arquitetural, porque muda a estrutura, a disponibilidade e o contrato entre as partes."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o teste rápido é: quanto custa voltar atrás e quantas partes do sistema sentem a mudança."
+    },
+    {
+      "persona": "helena",
+      "texto": "É uma boa regra de bolso, e eu uso uma parecida. Mas depende. Escolher um framework pode ser design num projeto pequeno e arquitetural num sistema em que ele define como todos os módulos são construídos. A fronteira não é fixa, ela depende do contexto."
+    },
+    {
+      "persona": "davi",
+      "texto": "Faz sentido. E o que não for arquitetural não precisa de registro nenhum?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Precisa do registro de sempre: um bom nome, um comentário quando for estranho, uma descrição decente no pull request. O ADR é pra decisão que a pessoa daqui a dois anos vai precisar entender pra não quebrar o sistema."
+    },
+    {
+      "persona": "davi",
+      "texto": "Helena, você falou de decisão sem registro como um problema geral. Mas o livro dá nome pra esses problemas, né?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Dá, e eu adoro esses nomes porque todo mundo se reconhece. No capítulo dezenove, o Richards e o Ford descrevem três antipadrões de decisão. O primeiro é Covering Your Assets, que é se proteger. O arquiteto evita decidir ou adia a decisão indefinidamente, com medo de escolher errado."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso eu já vi. A reunião termina com vamos amadurecer a ideia, e a ideia nunca amadurece."
+    },
+    {
+      "persona": "helena",
+      "texto": "E enquanto isso o time decide sozinho, cada um de um jeito, sem registro nenhum. A saída que eles propõem é esperar até o último momento responsável, quando você tem informação suficiente pra decidir, e então decidir, trabalhando junto com quem vai implementar."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o segundo?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Groundhog Day, o nome daquele filme em que o personagem acorda no mesmo dia pra sempre. É a decisão que volta pra pauta toda semana, porque ninguém sabe por que ela foi tomada."
+    },
+    {
+      "persona": "davi",
+      "texto": "Esse é o meu time com a escolha do banco de dados. Toda vez que entra alguém novo, nós discutimos de novo se devia ser outro."
+    },
+    {
+      "persona": "helena",
+      "texto": "E a causa, segundo eles, é justificar mal. A decisão foi comunicada sem os motivos técnicos e de negócio. A correção é justificar as duas coisas, e o lugar natural pra isso é o contexto e as consequências do ADR."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o terceiro?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Email-Driven Architecture. A decisão até foi tomada e justificada, mas mora num e-mail, numa thread de chat, numa ata de reunião. As pessoas não sabem que ela existe, perdem ou esquecem. A recomendação do livro é ter um único lugar oficial pras decisões e, na comunicação, mandar o link pra lá, em vez de colar a decisão no corpo da mensagem."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, isso é exatamente o que eu propus no começo. Deixar a decisão na descrição do pull request é um primo do e-mail."
+    },
+    {
+      "persona": "helena",
+      "texto": "É um primo próximo. E repara que o caso do NodeWright mostra outro sintoma, que não está nessa lista, mas que eu vejo direto: a decisão que existe, mas foi sobrescrita. O registro estava lá, mas foi editado até virar descrição do código. É uma forma silenciosa de perder a decisão."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, até aqui eu estou convencido. Mas eu quero ouvir o outro lado. Qual é o custo de adotar ADR?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Gostei. O primeiro custo é tempo. Escrever um contexto honesto, listar as alternativas e as consequências negativas dá trabalho, e esse trabalho cai justamente na hora em que o time quer seguir em frente."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o segundo?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Disciplina. ADR funciona como hábito, não como projeto. Se só uma pessoa escreve, quando ela sai do time, os ADRs param. E sobra uma pasta incompleta que dá a falsa sensação de que tudo está documentado."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se o time exagerar e quiser ADR pra tudo?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Aí você troca um problema por outro. Vira burocracia, ninguém lê, e as decisões importantes se perdem no meio de cinquenta registros sobre nome de variável. Por isso o leia-me do NodeWright é a parte mais importante da proposta, na minha opinião: definir quando precisa de ADR é o que mantém o processo leve."
+    },
+    {
+      "persona": "davi",
+      "texto": "E tem o risco de escrever o ADR depois, pra justificar o que já foi feito?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Tem, e é comum. Um ADR escrito meses depois tende a contar uma história mais arrumada do que a real. Ainda assim, eu prefiro um ADR tardio e honesto, dizendo o que se sabe e o que se perdeu, a nenhum. É o que o NodeWright propõe fazer com os quatro designs antigos."
+    },
+    {
+      "persona": "davi",
+      "texto": "E do outro lado da balança, o que se ganha?"
+    },
+    {
+      "persona": "helena",
+      "texto": "Quem chega entende o sistema mais rápido, as discussões repetidas diminuem, e dá pra mudar uma decisão com consciência, sabendo o que ela protegia. E tem um ganho que, há alguns anos, ninguém colocaria na lista: um assistente de código que lê um ADR com status claro sugere mudanças coerentes com o que foi decidido. Se ele lê um documento editado e ambíguo, ele vai repetir a confusão, só que mais rápido."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a minha documentação viva? Morreu?"
+    },
+    {
+      "persona": "helena",
+      "texto": "De jeito nenhum. Ela continua necessária, só que separada. Documentação do comportamento atual muda junto com o código. ADR não muda, ganha sucessores. O erro não é ter documentação viva, é usar o mesmo arquivo pras duas funções."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi o episódio todo. Decisão que não foi escrita leva a aceitar às cegas ou a mudar às cegas. O ADR resolve isso com um documento curto, guardado junto do código: título numerado, contexto com as forças e as alternativas, a decisão em voz ativa, o status e as consequências, as boas e as ruins. O livro do Richards e do Ford ainda soma conformidade e notas."
+    },
+    {
+      "persona": "helena",
+      "texto": "Até aqui, perfeito."
+    },
+    {
+      "persona": "davi",
+      "texto": "Nem toda decisão merece ADR. A que vive dentro de um módulo e é barata de desfazer é design. A que mexe com estrutura, características não funcionais, dependências, interfaces ou forma de construir é arquitetural, mas essa fronteira depende do contexto. E os antipadrões: adiar a decisão por medo, rediscutir a mesma decisão toda semana porque ninguém justificou, e deixar a decisão perdida em e-mail ou chat. Mais o caso do NodeWright: reescrever o registro até ele virar outra coisa. O custo é tempo e disciplina, e o risco é virar burocracia se ninguém definir quando um ADR é necessário."
+    },
+    {
+      "persona": "davi",
+      "texto": "Agora, o desafio da semana. Escreva um ADR de uma decisão que o seu time já tomou e nunca registrou, incluindo as alternativas que foram descartadas."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se você ainda não trabalha na área, abra o repositório do Pebacast no GitHub e escreva o ADR que falta pra uma decisão que ele tomou e não registrou, como guardar o currículo em arquivos YAML na pasta curriculum, com as alternativas que você imagina que perderam."
+    },
+    {
+      "persona": "helena",
+      "texto": "E uma dica: comece pelas consequências negativas. Se você não conseguir pensar em nenhuma, ainda não entendeu a decisão."
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado! Helena, muito obrigado por mais essa conversa. Hoje mesmo eu vou procurar quem escolheu o nosso banco de dados."
+    },
+    {
+      "persona": "helena",
+      "texto": "Obrigada você, Davi. E pra quem está ouvindo: a próxima vez que alguém perguntar por que o sistema é assim, que a resposta seja um link, e não uma lenda."
+    },
+    {
+      "persona": "davi",
+      "texto": "Esse foi o Pebacast. As fontes do episódio foram Fundamentals of Software Architecture, de Mark Richards e Neal Ford, capítulo dezenove, e o artigo Documenting Architecture Decisions, de Michael Nygard. Até o próximo episódio!"
+    }
+  ],
+  "desafio": "Escreva um ADR de uma decisão que o seu time já tomou e nunca registrou, incluindo as alternativas que foram descartadas.",
+  "desafio_iniciante": "Abra o repositório do Pebacast em github.com/lucas-jdev/pebacast e escreva o ADR que falta para uma decisão que não tem registro em docs/adr, como guardar o currículo em arquivos YAML na pasta curriculum, com contexto, decisão, consequências e as alternativas que você imagina que foram descartadas.",
+  "fontes": [
+    "Fundamentals of Software Architecture, Mark Richards e Neal Ford, cap. 19",
+    "Documenting Architecture Decisions, Michael Nygard, 2011"
+  ]
+}
