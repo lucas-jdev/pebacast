@@ -120,6 +120,13 @@ qualidade_texto:
     tava: estava
     cê: você
 
+# QA de pronúncia (#107, src/podcast/qualidade_pronuncia.py): os dois modelos ouvem cada janela da fala
+# e julgam os termos de tts.pronuncia que têm instrucao. Só avisa o erro que os dois marcam.
+qualidade_pronuncia:
+  modelos: [gemini-3.6-flash, gemini-3.5-flash]
+  timeout_s: 300
+  janela_maxima_s: 300
+
 publicacao:
   audio: github_releases
   feed: github_pages

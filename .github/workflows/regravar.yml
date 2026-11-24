@@ -1,7 +1,7 @@
 # Regrava o áudio de um episódio já publicado, em dois passos (ADR 0008).
-# "regravar" anexa uma candidata ao release para ouvir; "substituir" troca o áudio no ar por ela,
-# mantendo URL, GUID e data de publicação. Os dois passos mostram o QA do áudio no resumo,
-# e "substituir" fecha a issue de incidente do episódio se a candidata passou.
+# "regravar" anexa uma candidata ao release para ouvir, com o QA do áudio e o laudo de pronúncia
+# no resumo; "substituir" guarda o áudio no ar como -anterior.mp3 e troca pela candidata,
+# mantendo URL, GUID e data de publicação, e fecha a issue de incidente do episódio se a candidata passou.
 name: Regravar áudio
 
 on:

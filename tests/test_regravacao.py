@@ -79,12 +79,13 @@ def test_regravar_anexa_candidata_sem_tocar_no_audio_publicado(projeto, tmp_path
 def test_substituir_troca_o_audio_e_mantem_url_guid_e_data(projeto, tmp_path):
     releases = ReleasesFalso()
     antes = _ja_publicado(projeto, tmp_path, releases)
+    no_ar = releases.assets["sw-001"]["pebacast-sw-001.mp3"]
     regravar(projeto, "sw-001", releases, _fabrica(), tmp_path / "trabalho")
     candidata = releases.assets["sw-001"]["pebacast-sw-001-candidata.mp3"]
 
     depois = substituir(projeto, "sw-001", releases, tmp_path / "troca", lambda: REGRAVADO).publicacao
 
-    assert releases.assets["sw-001"] == {"pebacast-sw-001.mp3": candidata}
+    assert releases.assets["sw-001"] == {"pebacast-sw-001.mp3": candidata, "pebacast-sw-001-anterior.mp3": no_ar}
     assert {chave: depois[chave] for chave in ("guid", "url_audio", "publicado_em")} == \
         {chave: antes[chave] for chave in ("guid", "url_audio", "publicado_em")}
     assert depois["tamanho_bytes"] == len(candidata)
@@ -190,7 +191,7 @@ def test_substituir_por_candidata_que_passa_no_qa_fecha_o_incidente(projeto, tmp
 
     assert substituicao.laudo.aprovado
     assert [comando[:4] for comando in gh.acoes()] == [["gh", "issue", "close", "31"]]
-    assert list(releases.assets["sw-001"]) == ["pebacast-sw-001.mp3"]
+    assert sorted(releases.assets["sw-001"]) == ["pebacast-sw-001-anterior.mp3", "pebacast-sw-001.mp3"]
 
 
 @precisa_ffmpeg
@@ -219,4 +220,4 @@ def test_substituir_candidata_sem_medidas_troca_o_audio_sem_laudo(projeto, tmp_p
                               IncidentesDeAudio("dono/repo", None, gh))
 
     assert substituicao.laudo is None and gh.comandos == []
-    assert list(releases.assets["sw-001"]) == ["pebacast-sw-001.mp3"]
+    assert sorted(releases.assets["sw-001"]) == ["pebacast-sw-001-anterior.mp3", "pebacast-sw-001.mp3"]

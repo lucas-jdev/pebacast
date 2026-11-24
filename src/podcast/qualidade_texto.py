@@ -74,16 +74,16 @@ class GeminiTranscritor:
 
         def chamar() -> str:
             resposta = self._cliente.models.generate_content(model=self.nome, contents=[parte, PROMPT])
-            if _cortada_por_limite(resposta):
+            if cortada_por_limite(resposta):
                 raise TranscricaoIncompleta(f"{self.nome} parou no limite de tokens de saída")
             return resposta.text or ""
 
         # Os modelos que entendem áudio deram 503 em série no teste do Prumo: 5xx e 429 esperam e tentam de novo.
         return tentar(chamar, rotulo=f"Transcrição ({self.nome})", tentativas=self._tentativas,
-                      espera_inicial_s=self._espera_inicial_s, dormir=self._dormir, desistir=_desistir)
+                      espera_inicial_s=self._espera_inicial_s, dormir=self._dormir, desistir=desistir_de_repetir)
 
 
-def _cortada_por_limite(resposta: Any) -> bool:
+def cortada_por_limite(resposta: Any) -> bool:
     candidatos = getattr(resposta, "candidates", None) or []
     return any("MAX_TOKENS" in str(getattr(candidato, "finish_reason", "")) for candidato in candidatos)
 
@@ -106,7 +106,7 @@ def janelas(trecho_fala: tuple[float, float], trocas_s: Sequence[float], maximo_
     return resultado
 
 
-def _desistir(erro: Exception) -> Exception | None:
+def desistir_de_repetir(erro: Exception) -> Exception | None:
     if isinstance(erro, TranscricaoIncompleta):
         return erro  # mesmo áudio, mesmo limite: repetir só gasta cota
     status = getattr(erro, "code", None) or getattr(erro, "status_code", None)

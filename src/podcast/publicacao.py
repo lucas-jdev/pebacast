@@ -29,6 +29,7 @@ from podcast.indexacao import escrever_chave
 from podcast.personas import carregar_personas
 from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
 from podcast.qualidade_audio import IncidentesDeAudio, Laudo, Limites, RegistroDeIncidentes, avaliar, medir
+from podcast.qualidade_pronuncia import IncidentesDePronuncia, LaudoDePronuncia, QaDePronuncia
 from podcast.qualidade_texto import IncidentesDeTexto, LaudoDeTexto, QaDeTexto
 from podcast.roteiro import Projeto, regras_para
 from podcast.site import caminho_do_episodio, escrever_pagina
@@ -107,6 +108,9 @@ class Resultado:
     texto: dict[str, LaudoDeTexto] = field(default_factory=dict)
     # Fora dos avisos de propósito: 503 da transcrição é comum e abriria issue demais. Fica no resumo e no ::warning::.
     texto_nao_rodou: dict[str, str] = field(default_factory=dict)
+    pronuncia: dict[str, LaudoDePronuncia] = field(default_factory=dict)
+    # Fora dos avisos pelo mesmo motivo do texto.
+    pronuncia_nao_rodou: dict[str, str] = field(default_factory=dict)
 
 
 def episodios_pendentes(projeto: Projeto) -> list[str]:
@@ -192,12 +196,14 @@ def publicar_pendentes(
     incidentes: RegistroDeIncidentes | None = None,
     esperas: RegistroDeEspera | None = None,
     qa_texto: QaDeTexto | None = None,
+    qa_pronuncia: QaDePronuncia | None = None,
 ) -> Resultado:
     config = projeto.config()
     personas = carregar_personas(projeto.raiz / "curriculum" / "personas")
     sagas = projeto.sagas()
     publicados, reprovados, avisos, qualidade, aguardando = [], {}, [], {}, []
     texto, texto_nao_rodou = {}, {}
+    pronuncia, pronuncia_nao_rodou = {}, {}
 
     for episodio_id in episodios_pendentes(projeto):
         saga = saga_do_episodio(sagas, episodio_id)
@@ -266,15 +272,30 @@ def publicar_pendentes(
             log.exception("O QA do áudio de %s falhou.", episodio_id)
             avisos.append(Aviso(episodio_id, f"publicado, mas o QA do áudio não rodou até o fim. {type(erro).__name__}: {erro}"))
 
-        if qa_texto is not None:
-            try:
-                originais = carregar_falas(_ler_json(pasta / ROTEIRO), personas)
-                texto[episodio_id] = qa_texto.rodar(episodio_id, mp3, trechos, originais)
-            except Exception as erro:
-                log.exception("O QA de texto de %s não rodou.", episodio_id)
-                texto_nao_rodou[episodio_id] = f"QA de texto não rodou. {type(erro).__name__}: {erro}"
+        # Os dois QAs leem o roteiro original: o de pronúncia procura o termo antes da grafia trocada.
+        def originais() -> list[Fala]:
+            return carregar_falas(_ler_json(pasta / ROTEIRO), personas)
 
-    return Resultado(publicados, reprovados, avisos, qualidade, aguardando, texto, texto_nao_rodou)
+        if qa_texto is not None:
+            _rodar_qa_sem_segurar("texto", episodio_id, texto, texto_nao_rodou,
+                                  lambda: qa_texto.rodar(episodio_id, mp3, trechos, originais()))
+        if qa_pronuncia is not None:
+            _rodar_qa_sem_segurar("pronúncia", episodio_id, pronuncia, pronuncia_nao_rodou,
+                                  lambda: qa_pronuncia.rodar(episodio_id, mp3, trechos, originais()))
+
+    return Resultado(publicados, reprovados, avisos, qualidade, aguardando, texto, texto_nao_rodou,
+                     pronuncia, pronuncia_nao_rodou)
+
+
+def _rodar_qa_sem_segurar(nome: str, episodio_id: str, laudos: dict[str, Any], nao_rodou: dict[str, str],
+                          rodar: Callable[[], Any]) -> None:
+    """Roda um QA que depende de modelo externo; se ele quebrar, o motivo vai para o resumo, não para os avisos."""
+    try:
+        if (laudo := rodar()) is not None:
+            laudos[episodio_id] = laudo
+    except Exception as erro:
+        log.exception("O QA de %s de %s não rodou.", nome, episodio_id)
+        nao_rodou[episodio_id] = f"QA de {nome} não rodou. {type(erro).__name__}: {erro}"
 
 
 def _avisar_sem_segurar(avisos: list[Aviso], episodio_id: str, falha: str, acao: Callable[[], object]) -> None:
@@ -419,10 +440,13 @@ def _ler_json(arquivo: Path) -> Any:
 
 
 def resumo_da_qualidade(resultado: Resultado) -> str:
-    """O QA do áudio e o de texto de cada episódio, para o resumo da execução no Actions."""
+    """O QA do áudio, o de texto e o de pronúncia de cada episódio, para o resumo da execução no Actions."""
     partes = [laudo.markdown(f"Qualidade do áudio do {episodio_id}") for episodio_id, laudo in resultado.qualidade.items()]
     partes += [laudo.markdown(f"Texto do {episodio_id}") for episodio_id, laudo in resultado.texto.items()]
     partes += [f"### Texto do {episodio_id}\n\n{motivo}\n" for episodio_id, motivo in resultado.texto_nao_rodou.items()]
+    partes += [laudo.markdown(f"Pronúncia do {episodio_id}") for episodio_id, laudo in resultado.pronuncia.items()]
+    partes += [f"### Pronúncia do {episodio_id}\n\n{motivo}\n"
+               for episodio_id, motivo in resultado.pronuncia_nao_rodou.items()]
     return "\n".join(partes)
 
 
@@ -461,7 +485,7 @@ def _criar_parser() -> argparse.ArgumentParser:
     publicar.add_argument("--avisos", type=Path, default=Path("avisos.md"),
                           help="Avisos de fallback de voz, para a issue de fallback. Os outros abrem a issue de avisos.")
     publicar.add_argument("--qualidade", type=Path, default=Path("qualidade.md"),
-                          help="Medidas do QA do áudio, para o resumo da execução.")
+                          help="Laudos dos QAs de áudio, texto e pronúncia, para o resumo da execução.")
     publicar.add_argument("--execucao", help="URL da execução, citada nas issues de incidente.")
 
     comandos.add_parser("feed", help="Só regenera o feed.")
@@ -491,8 +515,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     criar_provedor = fabrica_da_config(config["tts"])
     qa_texto = (QaDeTexto.de_config(config["qualidade_texto"], IncidentesDeTexto(args.repo, args.execucao))
                 if config.get("qualidade_texto") else None)
+    qa_pronuncia = (QaDePronuncia.de_config(config["qualidade_pronuncia"], config["tts"],
+                                            IncidentesDePronuncia(args.repo, args.execucao))
+                    if config.get("qualidade_pronuncia") else None)
     resultado = publicar_pendentes(projeto, GitHubReleases(args.repo), criar_provedor, args.trabalho,
-                                   incidentes=incidentes, esperas=esperas, qa_texto=qa_texto)
+                                   incidentes=incidentes, esperas=esperas, qa_texto=qa_texto, qa_pronuncia=qa_pronuncia)
     escrever_site(projeto, args.site)
 
     print(f"Publicados: {', '.join(resultado.publicados) or 'nenhum'}")
@@ -502,7 +529,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     resumo = resumo_da_qualidade(resultado)
     if resumo:
         args.qualidade.write_text(resumo, encoding="utf-8")
-    for episodio_id, motivo in resultado.texto_nao_rodou.items():
+    for episodio_id, motivo in [*resultado.texto_nao_rodou.items(), *resultado.pronuncia_nao_rodou.items()]:
         print(f"::warning::{episodio_id}: {motivo}")
     encaminhar_avisos(resultado.avisos, args.avisos, IncidentesDeAvisos(args.repo, args.execucao))
     if resultado.reprovados:
