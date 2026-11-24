@@ -60,6 +60,8 @@ flowchart TD
         incidente(["Issue incidente do episódio<br/>(Áudio do &lt;id&gt; fora do padrão)<br/>reprovar de novo só comenta"]):::falha
         qa_texto{"QA de texto: dois modelos<br/>transcrevem a fala. Divergência<br/>do roteiro nos dois?"}
         incidente_texto(["Issue incidente do episódio<br/>(Texto do &lt;id&gt; diverge do roteiro)<br/>o Lucas ouve e fecha"]):::falha
+        qa_pronuncia{"QA de pronúncia: dois modelos<br/>julgam os termos do dicionário.<br/>Erro marcado pelos dois?"}
+        incidente_pronuncia(["Issue incidente do episódio<br/>(Pronúncia do &lt;id&gt; diverge do dicionário)<br/>o Lucas ouve e fecha"]):::falha
         feed["Gera feed.xml e o site,<br/>com uma página por episódio"]
         pages[Publica no GitHub Pages;<br/>se o GitHub não achar o pacote,<br/>tenta de novo depois de 60 s]
         indexnow["Avisa o IndexNow das URLs<br/>que mudaram; falha só vira aviso"]
@@ -108,9 +110,12 @@ flowchart TD
     registro -. "aviso que não<br/>é fallback" .-> avisos
     avisos --> triagem
     qa -- "passando ou não,<br/>publica" --> qa_texto
-    qa_texto -- "com ou sem divergência,<br/>e mesmo se não rodar" --> feed
+    qa_texto -- "com ou sem divergência,<br/>e mesmo se não rodar" --> qa_pronuncia
     qa_texto -. sim .-> incidente_texto
     incidente_texto --> ouvir
+    qa_pronuncia -- "com ou sem erro,<br/>e mesmo se não rodar" --> feed
+    qa_pronuncia -. sim .-> incidente_pronuncia
+    incidente_pronuncia --> ouvir
     qa -. "não" .-> incidente
     qa -. "sim: fecha a issue<br/>de áudio do episódio" .-> incidente
     feed --> pages
@@ -125,7 +130,7 @@ flowchart TD
     ouvir -. "regravar.yml: candidata,<br/>depois substituir" .-> release
 
     class aguardando,selecao,elegivel,noticia,relevante,hipotetico,roteiro,revisao,aprovado,limite,correcao,validar_local,commit rotina
-    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,espera,agendado,mix,release,registro,qa,qa_texto,feed,pages,indexnow actions
+    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,espera,agendado,mix,release,registro,qa,qa_texto,qa_pronuncia,feed,pages,indexnow actions
 ```
 
 ## QA do áudio
@@ -145,6 +150,10 @@ As quatro medidas, com aprovado ou reprovado, vão para o resumo da execução n
 
 Depois do QA do áudio, dois modelos transcrevem a fala do MP3 e o código compara com o roteiro, palavra por palavra. Só conta a divergência que os dois ouviram igual. Em modo aviso: abre a issue `incidente` "Texto do &lt;id&gt; diverge do roteiro" e nunca segura a publicação, nem quando a transcrição está fora do ar ([pipeline.md](pipeline.md#qa-de-texto)).
 
+## QA de pronúncia
+
+Depois do QA de texto, os mesmos dois modelos ouvem a fala e julgam cada termo do dicionário de pronúncia que tem instrução e aparece no roteiro, como o "Pebacast" com E aberto. O QA de texto não vê esse erro: o termo dito errado vira o mesmo texto. Só conta o erro que os dois modelos marcam na mesma janela. O laudo mostra, mesmo aprovado, quantas vezes cada modelo ouviu o termo. Em modo aviso: abre a issue `incidente` "Pronúncia do &lt;id&gt; diverge do dicionário" e nunca segura a publicação ([pipeline.md](pipeline.md#qa-de-pronúncia)).
+
 ## Cota diária esgotada
 
 No free tier, o Gemini TTS aceita 10 requisições por dia, e um episódio usa de 4 a 5. Se a cota do dia acabar, o episódio **não** vai para o Kokoro ([ADR 0011](adr/0011-cota-esgotada-espera.md)): voz ruim fica para sempre no feed, e um dia de atraso some no dia seguinte. Ele ganha um `aguardando_cota.json`, a issue `incidente` "Cota do Gemini esgotada: &lt;id&gt; aguardando" é aberta e o card "Próximo" do site avisa que houve um problema interno e que o episódio sai em breve. O `publicar.yml` agendado às 08:15 UTC (5h15 em Natal), depois da renovação, tenta de novo. Quando o episódio sai, o arquivo é apagado e a issue fecha. Enquanto ele aguarda, a rotina não escreve outro roteiro, então a fila inteira anda um dia.
@@ -152,7 +161,7 @@ No free tier, o Gemini TTS aceita 10 requisições por dia, e um episódio usa d
 ## Fora do caminho principal
 
 - **Watchdog** (`watchdog.yml`, a cada 6 h): abre uma issue se a rotina passar 36 h sem commitar roteiro, e fecha quando ela volta.
-- **Regravação** (`regravar.yml`, manual): quando o Lucas ouve e o áudio saiu ruim, narra o mesmo roteiro de novo como candidata, com o QA do áudio no resumo da execução; se ficar melhor, ele manda substituir e o episódio troca de áudio sem mudar URL, GUID nem data ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). Se a candidata substituída passou no QA, a issue de incidente de áudio do episódio fecha sozinha.
+- **Regravação** (`regravar.yml`, manual): quando o Lucas ouve e o áudio saiu ruim, narra o mesmo roteiro de novo como candidata, com o QA do áudio e o laudo de pronúncia no resumo da execução; se ficar melhor, ele manda substituir e o episódio troca de áudio sem mudar URL, GUID nem data, e o áudio que sai do ar fica no release como `pebacast-<id>-anterior.mp3` ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). Se a candidata substituída passou no QA, a issue de incidente de áudio do episódio fecha sozinha.
 - **Site e feed** também são regenerados quando muda o site, o currículo ou a configuração (`site.yml`), sem gerar áudio. Os três workflows que publicam no Pages (`publicar.yml`, `site.yml` e `regravar.yml`) dividem uma fila e geram o site a partir do `main` de quando rodam, nunca de um commit anterior: o `site.yml` faz checkout da ponta do branch, e os outros dois regeneram o site depois do `git pull --rebase`. Assim, um deploy que esperou na fila não apaga um episódio publicado enquanto ele esperava, e um episódio publicado não desfaz o que mudou no site durante a síntese. Depois do deploy, os dois workflows avisam o IndexNow das URLs que mudaram, para o Bing indexar logo. Isso nunca bloqueia a publicação ([pipeline.md](pipeline.md#entrar-no-índice-dos-buscadores)).
 - **Votos e recados** vivem fora do GitHub, num Worker da Cloudflare com D1 ([votos.md](votos.md)).
 - **Trailer** (`scripts/pebamotion.py`, manual e local): depois de publicado, o Lucas pode gerar um trailer animado do episódio com recortes literais da voz, nos formatos 9:16 e 16:9 ([pebamotion](../pebamotion/README.md), [ADR 0010](adr/0010-pebamotion.md)).

@@ -193,15 +193,33 @@ A transcrição usa a mesma camada única de retentativa do TTS (`src/podcast/re
 
 | Modelo | Requisições por dia (free tier) | Uso por episódio |
 |---|---|---|
-| `gemini-3.6-flash` | _conferir no AI Studio_ | 1 por janela (cerca de 4) |
-| `gemini-3.5-flash` | _conferir no AI Studio_ | 1 por janela (cerca de 4) |
+| `gemini-3.6-flash` | _conferir no AI Studio_ | 2 por janela, uma no QA de texto e outra no de pronúncia (cerca de 8) |
+| `gemini-3.5-flash` | _conferir no AI Studio_ | 2 por janela, uma no QA de texto e outra no de pronúncia (cerca de 8) |
+
+## QA de pronúncia
+
+O QA de texto não percebe quando o TTS diz um termo do jeito errado: no co-002 (23/11), o Davi disse "Pebacast" com E fechado na abertura, e a transcrição saiu "Pebacast" do mesmo jeito. Depois do QA de texto, `src/podcast/qualidade_pronuncia.py` confere isso, em **modo aviso** (#107):
+
+1. Separa os termos de `tts.pronuncia` que têm `instrucao` e aparecem no roteiro **original**, com o mesmo casamento do dicionário. A instrução é o critério, então o dicionário continua sendo a única fonte. Sem nenhum desses termos, não faz requisição.
+2. Recorta a fala nas mesmas janelas do QA de texto (`qualidade_pronuncia.janela_maxima_s`, 5 min) e manda cada janela aos dois modelos de `qualidade_pronuncia.modelos`, pedindo JSON num esquema fixo: para cada vez que ouviu um termo, o segundo aproximado na janela, o veredito (`certo` ou `errado`) e como soou. Uma resposta com termo fora da lista ou veredito fora do esquema conta como inválida.
+3. Só conta o erro que **os dois** modelos marcam no mesmo termo e na mesma janela.
+
+O laudo vai para o resumo da execução (`qualidade.md`) com a contagem por termo, mesmo aprovado: quantas vezes o roteiro diz o termo e quantas cada modelo ouviu, certas e erradas. Ouvir menos vezes do que o roteiro diz significa que o QA não julgou aquelas ocorrências, e é o que separa "sem erro" de "não ouviu". Com erro confirmado, o Python abre a issue `incidente` "Pronúncia do <id> diverge do dicionário", ou comenta na aberta, com o instante aproximado no MP3 e o que cada modelo ouviu. O Lucas ouve, marca se o aviso acertou e fecha à mão.
+
+As falhas seguem o QA de texto: a mesma retentativa, a resposta cortada no limite de tokens conta como "não rodou", e "QA de pronúncia não rodou" vai só para o resumo e para um `::warning::`, fora dos avisos.
+
+**Calibração.** Um modelo de áudio pode não distinguir E aberto de fechado, e a confirmação por dois modelos reduz o falso positivo, não o falso negativo. Para calibrar num MP3 já publicado, como o original do co-002, que o Lucas ouviu errado:
+
+```bash
+python -m podcast.qualidade_pronuncia pebacast-co-002-anterior.mp3 episodios/co-002/roteiro.json
+```
 
 ## Regravação do áudio
 
 Quando um áudio publicado sai ruim, `.github/workflows/regravar.yml` narra o mesmo roteiro de novo, disparado à mão no Actions com o id do episódio:
 
-1. **regravar** (`python -m podcast.regravacao regravar <id>`): valida o roteiro, narra só com o TTS principal, sem fallback, e anexa `pebacast-<id>-candidata.mp3` ao release, com as medidas do QA ao lado (`pebacast-<id>-candidata.qualidade.json`). O link e as quatro medidas aparecem no resumo da execução. O feed não muda, e a issue de incidente também não: a candidata ainda não está no ar.
-2. **substituir** (`python -m podcast.regravacao substituir <id>`): põe a candidata no lugar do áudio publicado, atualiza tamanho, duração e `regravado_em` no `publicacao.json` e publica o feed. URL, GUID e data de publicação continuam os mesmos. Com as medidas da candidata, mostra o QA no resumo e atualiza a issue de incidente do episódio: fecha se passou, comenta se não.
+1. **regravar** (`python -m podcast.regravacao regravar <id>`): valida o roteiro, narra só com o TTS principal, sem fallback, e anexa `pebacast-<id>-candidata.mp3` ao release, com as medidas do QA ao lado (`pebacast-<id>-candidata.qualidade.json`). O link, as quatro medidas e o laudo do [QA de pronúncia](#qa-de-pronúncia) da candidata aparecem no resumo da execução. O QA de pronúncia não abre issue aqui, e se não rodar o passo continua, porque a candidata já foi anexada. O feed não muda, e a issue de incidente também não: a candidata ainda não está no ar.
+2. **substituir** (`python -m podcast.regravacao substituir <id>`): guarda o áudio que está no ar como `pebacast-<id>-anterior.mp3` no release, que serve de caminho de volta e de caso de calibração dos QAs, e só então põe a candidata no lugar do áudio publicado. Depois atualiza tamanho, duração e `regravado_em` no `publicacao.json` e publica o feed. URL, GUID e data de publicação continuam os mesmos. Com as medidas da candidata, mostra o QA no resumo e atualiza a issue de incidente do episódio: fecha se passou, comenta se não.
 
 Decisão em [ADR 0008](adr/0008-regravacao-em-dois-passos.md).
 

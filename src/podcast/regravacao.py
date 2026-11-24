@@ -1,8 +1,9 @@
 """Regravação do áudio de um episódio já publicado, em dois passos (ADR 0008).
 
 `regravar` narra de novo o mesmo roteiro e anexa uma candidata ao release do episódio,
-sem tocar no feed, com as medidas do QA do áudio ao lado. Depois de ouvir, `substituir` troca
-o áudio publicado pela candidata: a URL, o GUID e a data de publicação continuam os mesmos.
+sem tocar no feed, com as medidas do QA do áudio e o laudo de pronúncia ao lado. Depois de ouvir,
+`substituir` troca o áudio publicado pela candidata: a URL, o GUID e a data de publicação continuam
+os mesmos, e o áudio que sai do ar fica no release como `-anterior.mp3`.
 
     python -m podcast.regravacao regravar sw-002 --repo dono/repo
     python -m podcast.regravacao --site _site substituir sw-002 --repo dono/repo
@@ -22,6 +23,7 @@ from podcast.audio import exportar_mp3
 from podcast.personas import carregar_personas
 from podcast.publicacao import (
     GitHubReleases,
+    carregar_falas,
     carregar_vinheta,
     escrever_site,
     falas_do_episodio,
@@ -37,9 +39,10 @@ from podcast.qualidade_audio import (
     avaliar,
     medir,
 )
+from podcast.qualidade_pronuncia import LaudoDePronuncia, QaDePronuncia
 from podcast.roteiro import Projeto, regras_para
 from podcast.tts.provedor import TtsProvider
-from podcast.validacao import PUBLICACAO, validar_episodio
+from podcast.validacao import PUBLICACAO, ROTEIRO, validar_episodio
 
 
 log = logging.getLogger(__name__)
@@ -53,6 +56,16 @@ class RegravacaoInvalida(Exception):
 class Candidata:
     url: str
     laudo: Laudo
+    pronuncia: LaudoDePronuncia | None = None
+    pronuncia_nao_rodou: str | None = None
+
+    def markdown(self, episodio_id: str) -> str:
+        partes = [self.laudo.markdown(f"Qualidade da candidata do {episodio_id}")]
+        if self.pronuncia is not None:
+            partes.append(self.pronuncia.markdown(f"Pronúncia da candidata do {episodio_id}"))
+        if self.pronuncia_nao_rodou:
+            partes.append(f"### Pronúncia da candidata do {episodio_id}\n\n{self.pronuncia_nao_rodou}\n")
+        return "\n".join(partes)
 
 
 @dataclass(frozen=True)
@@ -75,6 +88,11 @@ def nome_publicado(episodio_id: str) -> str:
     return f"pebacast-{episodio_id}.mp3"
 
 
+def nome_anterior(episodio_id: str) -> str:
+    """O áudio que saiu do ar na última substituição: o caminho de volta, e o caso de calibração dos QAs."""
+    return f"pebacast-{episodio_id}-anterior.mp3"
+
+
 def nome_candidata(episodio_id: str) -> str:
     return f"pebacast-{episodio_id}-candidata.mp3"
 
@@ -90,6 +108,7 @@ def regravar(
     storage: StorageDeRegravacao,
     criar_provedor: Callable[[str], TtsProvider],
     trabalho: Path,
+    qa_pronuncia: QaDePronuncia | None = None,
 ) -> Candidata:
     """Narra o episódio de novo e anexa a candidata, com as medidas do QA. Devolve a URL para ouvir."""
     _exigir_publicado(projeto, episodio_id)
@@ -119,7 +138,16 @@ def regravar(
     arquivo_medicao = trabalho / nome_medicao_candidata(episodio_id)
     arquivo_medicao.write_text(medicao.para_json(), encoding="utf-8")
     storage.anexar(episodio_id, arquivo_medicao)
-    return Candidata(url, avaliar(medicao, limites))
+    laudo = avaliar(medicao, limites)
+    if qa_pronuncia is None:
+        return Candidata(url, laudo)
+    # A candidata já está no release: uma falha do QA vira motivo no resumo, não erro do passo.
+    try:
+        falas = carregar_falas(json.loads((pasta / ROTEIRO).read_text(encoding="utf-8")), personas)
+        return Candidata(url, laudo, pronuncia=qa_pronuncia.rodar(episodio_id, mp3, trechos, falas))
+    except Exception as erro:
+        log.exception("O QA de pronúncia da candidata de %s não rodou.", episodio_id)
+        return Candidata(url, laudo, pronuncia_nao_rodou=f"QA de pronúncia não rodou. {type(erro).__name__}: {erro}")
 
 
 def substituir(
@@ -137,6 +165,9 @@ def substituir(
 
     candidata = storage.baixar(episodio_id, nome_candidata(episodio_id), trabalho)
     medicao = _baixar_medicao(storage, episodio_id, trabalho)
+    # Antes de sobrescrever: sem isso, o --clobber apagava o áudio que sai do ar para sempre.
+    no_ar = storage.baixar(episodio_id, nome_publicado(episodio_id), trabalho / "no-ar")
+    storage.anexar(episodio_id, no_ar.rename(no_ar.with_name(nome_anterior(episodio_id))))
     definitivo = candidata.rename(candidata.with_name(nome_publicado(episodio_id)))
     # A candidata só sai depois de o definitivo subir: se o upload falhar, dá para tentar de novo.
     storage.anexar(episodio_id, definitivo)
@@ -212,11 +243,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.comando == "regravar":
             from podcast.tts.fabrica import fabrica_da_config
 
-            criar_provedor = fabrica_da_config(projeto.config()["tts"])
-            candidata = regravar(projeto, args.episodio, storage, criar_provedor, args.trabalho)
+            config = projeto.config()
+            criar_provedor = fabrica_da_config(config["tts"])
+            # Sem incidentes: o laudo da candidata é para decidir se vale substituir, não um aviso do episódio no ar.
+            qa_pronuncia = (QaDePronuncia.de_config(config["qualidade_pronuncia"], config["tts"])
+                            if config.get("qualidade_pronuncia") else None)
+            candidata = regravar(projeto, args.episodio, storage, criar_provedor, args.trabalho, qa_pronuncia)
             print(f"Candidata para ouvir: {candidata.url}")
-            args.qualidade.write_text(candidata.laudo.markdown(f"Qualidade da candidata do {args.episodio}"),
-                                      encoding="utf-8")
+            args.qualidade.write_text(candidata.markdown(args.episodio), encoding="utf-8")
         else:
             incidentes = IncidentesDeAudio(args.repo, args.execucao)
             substituicao = substituir(projeto, args.episodio, storage, args.trabalho, incidentes=incidentes)
