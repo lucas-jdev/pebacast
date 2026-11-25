@@ -608,7 +608,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     link = "./" if na_propria_pagina else caminho_do_episodio(episodio["id"])
     titulo = (f'<h1 class="episodio__titulo" id="titulo-{eid}">{escape(episodio["titulo"])}</h1>' if na_propria_pagina else
               f'<h3 class="episodio__titulo" id="titulo-{eid}"><a href="{escape(link)}">{escape(episodio["titulo"])}</a></h3>')
-    caso, player = _caso(item["noticia"]), _player(item["publicacao"], episodio["id"])
+    caso, player = _caso(item["noticia"]), _player(item)
     abertura = f"{player}\n    {caso}" if na_propria_pagina else f"{caso}\n    {player}"
     classe = "episodio episodio--destaque" + (" episodio--pagina" if na_propria_pagina else "")
     return f"""<article class="{classe}" id="{eid}" data-saga="{escape(saga.id)}">
@@ -694,7 +694,7 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     {_meta(item)}
     <h3 class="item__titulo" id="titulo-{eid}"><a href="{escape(caminho_do_episodio(episodio['id']))}">{escape(episodio['titulo'])}</a></h3>
     {_caso(item["noticia"])}
-    {_player(item["publicacao"], episodio["id"])}{_votos(episodio["id"], votos)}
+    {_player(item)}{_votos(episodio["id"], votos)}
     <details class="dobra">
       <summary>Objetivos e desafio</summary>
       {_objetivos_e_desafio(episodio, roteiro)}
@@ -751,14 +751,19 @@ def _primeira_frase(texto: str, limite: int = 180) -> str:
     return frase[: limite - 1].rsplit(" ", 1)[0].rstrip(",;:") + "…"
 
 
-def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
-    duracao = publicacao["duracao_segundos"]
-    return f"""<div class="player" role="group" aria-labelledby="titulo-{escape(episodio_id)}" data-duracao="{duracao}" data-episodio="{escape(episodio_id)}">
+def _player(item: Mapping[str, Any]) -> str:
+    """O título e a saga vão em data-* para a tela de bloqueio do celular (Media Session), que não lê a página."""
+    publicacao, episodio, saga = item["publicacao"], item["episodio"], item["saga"]
+    episodio_id, duracao = episodio["id"], publicacao["duracao_segundos"]
+    return f"""<div class="player" role="group" aria-labelledby="titulo-{escape(episodio_id)}" data-duracao="{duracao}" data-episodio="{escape(episodio_id)}"
+      data-titulo="{escape(episodio['titulo'])}" data-rotulo="{escape(saga.rotulo_do(episodio_id))}">
       <audio controls preload="none"><source src="{escape(publicacao['url_audio'])}" type="audio/mpeg"></audio>
       <button class="player__play" type="button" aria-label="Tocar">
         <svg class="player__icone-play" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-play"/></svg>
         <svg class="player__icone-pausa" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-pause"/></svg>
       </button>
+      <button class="player__pular" type="button" data-pular="-15" aria-label="Voltar 15 segundos">−15</button>
+      <button class="player__pular" type="button" data-pular="30" aria-label="Avançar 30 segundos">+30</button>
       <div class="player__trilha">
         <input class="player__barra" type="range" min="0" max="{duracao}" value="0" step="1" aria-label="Posição no episódio">
         <div class="player__tempos"><span class="player__atual">0:00</span><span><span class="so-leitor">de </span>{escape(_duracao(duracao))}</span></div>

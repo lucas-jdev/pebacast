@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Gera as imagens publicadas do site a partir das artes em assets/:
 #   site/capa-kraft.jpg (3000x3000), capa do podcast no feed, de assets/capa.svg
+#   site/capa-512.jpg (512x512), a mesma capa reduzida para a tela de bloqueio do celular (Media Session)
 #   site/og.jpg (1200x630), prévia de compartilhamento (Open Graph), de assets/og.svg
 #   site/apple-touch-icon.png (180x180) e site/favicon.ico (48x48), de site/favicon.svg
 # Precisa do Chrome (ou de outro Chromium em $CHROME) e do ffmpeg.
@@ -33,6 +34,9 @@ icone() {
 }
 
 renderizar capa.svg 3000 3000 capa-kraft.jpg
+# A arte é desenhada em 3000 px fixos: a versão pequena sai reduzindo a grande.
+ffmpeg -loglevel error -y -i "$raiz/site/capa-kraft.jpg" -vf scale=512:512 -q:v 4 "$raiz/site/capa-512.jpg"
+echo "site/capa-512.jpg: $(wc -c < "$raiz/site/capa-512.jpg") bytes"
 renderizar og.svg 1200 630 og.jpg
 icone 180 apple-touch-icon.png
 icone 48 favicon.ico
