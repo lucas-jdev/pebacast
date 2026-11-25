@@ -9,6 +9,11 @@
   };
 
   const players = [...document.querySelectorAll(".player")];
+
+  const segundosDoLink = (duracao) => {
+    const pedido = Number(new URLSearchParams(location.search).get("t"));
+    return Number.isInteger(pedido) && pedido > 0 && (!duracao || pedido < duracao) ? pedido : 0;
+  };
   const CAPA = new URL("capa-512.jpg", document.currentScript.src).href;
   const SETAS = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5 };
 
@@ -124,7 +129,10 @@
     const retomar = player.querySelector("[data-retomar]");
     const doComeco = retomar.querySelector(".player__do-comeco");
     // Com preload="none" o áudio ainda não carregou: a posição salva só vale depois do loadedmetadata.
-    let retomarEm = progresso.posicao(id);
+    // Um link compartilhado com o minuto (?t=90) vence a posição salva: quem mandou quer mostrar aquele trecho.
+    const doLink = player.closest(".episodio--pagina") ? segundosDoLink(Number(player.dataset.duracao)) : 0;
+    let retomarEm = doLink || progresso.posicao(id);
+    player.querySelector("[data-retomar-motivo]").textContent = doLink ? "O link começa em" : "Você parou em";
     let gravadoEm = 0;
     let tocandoEm = null;
 
@@ -530,6 +538,48 @@
         }
       } finally {
         enviar.disabled = false;
+      }
+    });
+  });
+
+  // Compartilhar sem recarregar (#118): o compartilhar do aparelho quando existe; senão, copia o endereço.
+  // Com o áudio passado de 0:00, dá para mandar o link já no minuto (?t=).
+  document.querySelectorAll("[data-compartilhar]").forEach((link) => {
+    const audio = document.querySelector(`.player[data-episodio="${CSS.escape(link.dataset.compartilhar)}"] audio`);
+    const barra = audio?.closest(".player").querySelector(".player__barra");
+    const minuto = document.createElement("label");
+    minuto.className = "compartilhar__minuto";
+    minuto.hidden = true;
+    minuto.innerHTML = '<input type="checkbox"> a partir de <span></span>';
+    const status = document.createElement("span");
+    status.className = "compartilhar__aviso";
+    status.setAttribute("role", "status");
+    link.after(" ", minuto, " ", status);
+
+    const posicao = () => Math.floor(audio ? (audio.currentTime || Number(barra.value)) : 0);
+    const atualizarMinuto = () => {
+      minuto.hidden = posicao() < 1;
+      minuto.querySelector("span").textContent = formatar(posicao());
+    };
+    audio?.addEventListener("timeupdate", atualizarMinuto);
+    audio?.addEventListener("pause", atualizarMinuto);
+    atualizarMinuto();
+
+    link.addEventListener("click", async (evento) => {
+      evento.preventDefault();
+      const url = new URL(link.href);
+      if (!minuto.hidden && minuto.querySelector("input").checked) url.searchParams.set("t", String(posicao()));
+      const titulo = audio?.closest(".player").dataset.titulo || document.title;
+      if (navigator.share) {
+        try { await navigator.share({ title: titulo, url: url.href }); } catch { /* a pessoa desistiu */ }
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(url.href);
+        status.textContent = "Link copiado.";
+        setTimeout(() => { status.textContent = ""; }, 2500);
+      } catch {
+        status.textContent = `Copie o endereço: ${url.href}`;
       }
     });
   });

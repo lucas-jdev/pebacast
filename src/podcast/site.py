@@ -196,9 +196,14 @@ def gerar_pagina_do_episodio(projeto: Projeto, arquivo_feed: str, episodio_id: s
     )
 
 
+def _objetivos_em_frases(episodio: Mapping[str, Any]) -> str:
+    """Os objetivos como frases: juntos sem pontuação, a prévia do WhatsApp lia "…do STRIDE Relacionar…" (#118)."""
+    return " ".join(f"{' '.join(o.split()).rstrip('.;')}." for o in episodio.get("objetivos", []) if o.strip())
+
+
 def _resumo(episodio: Mapping[str, Any], nome: str, limite: int = 155) -> str:
-    """Descrição para buscadores: os objetivos do episódio, cortados numa palavra até o limite."""
-    texto = " ".join(" ".join(episodio.get("objetivos", [])).split()) or f"Episódio do {nome}."
+    """Descrição para buscadores e para a prévia de compartilhamento: os objetivos, cortados numa palavra até o limite."""
+    texto = _objetivos_em_frases(episodio) or f"Episódio do {nome}."
     if len(texto) <= limite:
         return texto
     return texto[: limite - 1].rsplit(" ", 1)[0].rstrip(",;:.") + "…"
@@ -393,7 +398,7 @@ def _episodio_estruturado(item: Mapping[str, Any], meta: Mapping[str, Any], seri
         "url": _url(meta, caminho_do_episodio(episodio["id"])),
         "datePublished": publicacao["publicado_em"],
         "timeRequired": f"PT{max(1, round(publicacao['duracao_segundos'] / 60))}M",
-        "description": " ".join(episodio.get("objetivos", [])),
+        "description": _objetivos_em_frases(episodio),
         "associatedMedia": {"@type": "MediaObject", "contentUrl": publicacao["url_audio"]},
         "partOfSeries": {"@id": serie},
     }
@@ -813,7 +818,7 @@ def _player(item: Mapping[str, Any]) -> str:
           <input class="player__nivel" type="range" min="0" max="100" step="5" value="100" aria-label="Volume" aria-orientation="vertical">
         </div>
       </div>
-      <p class="player__retomar" data-retomar hidden><span>Você parou em <span data-retomar-tempo></span>.</span>
+      <p class="player__retomar" data-retomar hidden><span><span data-retomar-motivo>Você parou em</span> <span data-retomar-tempo></span>.</span>
         <button class="player__do-comeco" type="button" aria-label="Ouvir do começo">Do começo</button></p>
       <p class="player__aviso" role="status" data-player-aviso></p>
     </div></div>"""
@@ -911,8 +916,11 @@ def _fontes(roteiro: Mapping[str, Any]) -> str:
 
 
 def _links(item: Mapping[str, Any], link_permanente: str) -> str:
+    """Sem JS, "Compartilhar" é só o link da página. Com JS, ele abre o compartilhar do aparelho ou copia o
+    endereço, sem recarregar a página nem cortar o áudio (#118)."""
+    eid = escape(item["episodio"]["id"])
     return f"""<p class="episodio__links"><a href="{escape(item['publicacao']['url_audio'])}" download>Baixar o MP3</a>
-      <span aria-hidden="true">·</span> <a href="{escape(link_permanente)}">Link deste episódio</a></p>"""
+      <span aria-hidden="true">·</span> <a href="{escape(link_permanente)}" data-compartilhar="{eid}">Compartilhar</a></p>"""
 
 
 _ESTADO_DO_PROXIMO = {

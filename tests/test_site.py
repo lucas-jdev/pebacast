@@ -87,7 +87,7 @@ def test_inicial_mostra_so_o_ultimo_e_aponta_para_o_arquivo(projeto):
     assert 'id="sw-002"' in pagina
     assert 'id="sw-001"' not in pagina
     assert 'href="episodios.html">Ver os 2 episódios publicados' in pagina
-    assert 'href="episodios/sw-002/">Link deste episódio' in pagina
+    assert 'href="episodios/sw-002/" data-compartilhar="sw-002">Compartilhar' in pagina
 
 
 def test_proximo_segue_a_fila_da_pipeline(projeto):
@@ -773,7 +773,7 @@ def test_listas_levam_a_pagina_do_episodio(projeto):
 
     assert '<h3 class="episodio__titulo" id="titulo-sw-002"><a href="episodios/sw-002/">Dois</a></h3>' in inicial
     assert '<a href="episodios/sw-001/">Um</a></h3>' in arquivo
-    assert 'href="episodios/sw-001/">Link deste episódio' in arquivo
+    assert 'href="episodios/sw-001/" data-compartilhar="sw-001">Compartilhar' in arquivo
     assert 'id="sw-001"' in arquivo, "as âncoras antigas (episodios.html#sw-001) continuam valendo"
 
 
@@ -1203,3 +1203,24 @@ def test_roteiro_sem_desafio_iniciante_nao_mostra_nada(projeto):
     _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
 
     assert "desafio__iniciante" not in gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+
+def test_previa_de_compartilhamento_le_os_objetivos_como_frases(projeto):
+    # #118: os objetivos juntos sem pontuação liam "…do STRIDE Relacionar…" na prévia do WhatsApp.
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+    saga = yaml.safe_load((projeto.raiz / "curriculum" / "sagas" / "software.yaml").read_text(encoding="utf-8"))
+    saga["episodios"][0]["objetivos"] = ["Aplicar o STRIDE", "Relacionar ameaça e controle."]
+    (projeto.raiz / "curriculum" / "sagas" / "software.yaml").write_text(yaml.safe_dump(saga, allow_unicode=True), encoding="utf-8")
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+    assert '<meta property="og:description" content="Aplicar o STRIDE. Relacionar ameaça e controle.">' in pagina
+
+
+def test_player_diz_de_onde_vem_a_retomada(projeto):
+    # O JS troca "Você parou em" por "O link começa em" quando a página abre com ?t= (#118).
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+    assert '<span data-retomar-motivo>Você parou em</span> <span data-retomar-tempo></span>' in pagina
