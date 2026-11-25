@@ -18,10 +18,11 @@
   };
 
   // Onde o ouvinte parou, só neste navegador (decidido em 24/11: sem sincronizar entre aparelhos).
-  // Passar dos 90% tocando conta como ouvido: quase ninguém espera a vinheta final. Pular para lá não conta,
-  // senão um toque errado na trilha (ela fica logo abaixo do volume no celular) marcava o que não foi ouvido.
+  // Passar dos 90% tocando conta como ouvido: quase ninguém espera a vinheta final. Um salto longo para lá não
+  // conta, senão um toque errado na trilha (ela fica logo abaixo do volume no celular) marcava o que não foi
+  // ouvido. Um +30, na tela ou na de bloqueio, ainda é escuta: quem pula a despedida ouviu o episódio.
   const FRACAO_OUVIDA = 0.9;
-  const PASSO_CONTINUO_S = 3;
+  const SALTO_DE_ESCUTA_S = 31;
   const AVISO_SOME_MS = 6000;
   const progresso = {
     posicao: (id) => Number(armazenamento.ler(`pebacast:posicao:${id}`)) || 0,
@@ -34,8 +35,9 @@
     },
   };
 
+  // Na página do episódio o próprio player já diz onde parou: ali o selo diz só se foi ouvido.
   const mostrarProgresso = (id) => document.querySelectorAll(`[data-progresso="${CSS.escape(id)}"]`).forEach((selo) => {
-    const posicao = progresso.posicao(id);
+    const posicao = selo.closest(".episodio--pagina") ? 0 : progresso.posicao(id);
     const parou = posicao ? `parou em ${formatar(posicao)}` : "";
     selo.textContent = progresso.ouvido(id) ? ["Ouvido", parou].filter(Boolean).join(" · ") : parou && `P${parou.slice(1)}`;
     selo.hidden = !selo.textContent;
@@ -153,7 +155,7 @@
     const conferirSeOuviu = () => {
       const agora = audio.currentTime, antes = tocandoEm, limite = finalDoEpisodio();
       tocandoEm = audio.paused ? null : agora;
-      const cruzouTocando = antes !== null && antes < limite && agora >= limite && agora - antes < PASSO_CONTINUO_S;
+      const cruzouTocando = antes !== null && antes < limite && agora >= limite && agora - antes <= SALTO_DE_ESCUTA_S;
       if (!cruzouTocando || progresso.ouvido(id)) return;
       progresso.marcarOuvido(id);
       mostrarProgresso(id);
@@ -193,7 +195,6 @@
       play.setAttribute("aria-label", "Tocar");
       gravarPosicao({ atualizarSelo: true });
     });
-    audio.addEventListener("seeking", () => { tocandoEm = null; });
     audio.addEventListener("loadedmetadata", () => {
       if (Number.isFinite(audio.duration)) barra.max = Math.round(audio.duration);
       if (retomarEm) audio.currentTime = retomarEm;
