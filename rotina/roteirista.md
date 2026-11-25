@@ -43,14 +43,18 @@ Escreva um diálogo entre `personas.apresentador` e `personas.expert`. Leia as d
 
 Estrutura fixa, nesta ordem:
 
-1. **Abertura.** A primeira fala é do apresentador. Ele dá as boas-vindas ao Pebacast, avisa que o episódio foi gerado por inteligência artificial e revisado por uma segunda IA, e diz o tema do dia em uma frase.
+1. **Abertura.** A primeira fala é do apresentador. Ele dá as boas-vindas ao Pebacast, lê o aviso `textos_fixos.aviso_ia` ao pé da letra e diz o tema do dia em uma frase. A saudação muda de um episódio para o outro: não repita nenhuma das `aberturas_recentes`.
+   Nas três primeiras falas, ele diz a saga e a posição com estas palavras: "`saga.posicao_por_extenso` episódio da saga `saga.nome_falado`" ("terceiro episódio da saga Soluções"). Use o `nome_falado`, que é o do site, e não o `nome` completo. Se a posição não for a primeira, uma frase lembra o que veio antes na saga.
 2. **Apresentação do expert.** Ainda nas três primeiras falas, o apresentador apresenta o expert pelo nome, com uma ou duas frases tiradas do `historico` da persona, e o expert cumprimenta o ouvinte. É uma apresentação curta, e não um currículo.
 3. **Problema.** A notícia, com o nome do veículo, ou o cenário hipotético.
 4. **Solução ingênua.** O apresentador propõe, de boa-fé, a solução da moda ou a mais óbvia.
 5. **Desconstrução.** A expert desmonta a proposta com perguntas antes de dar respostas.
 6. **Trade-offs.** O que se ganha e o que se perde em cada caminho.
 7. **Resumo.** O apresentador resume com as próprias palavras.
-8. **Desafio e despedida.** O apresentador apresenta o `episodio.desafio` e, em uma frase, a variante para quem ainda não trabalha na área (`desafio_iniciante`, abaixo). Depois agradece o expert e se despede em nome do Pebacast.
+8. **Desafio e despedida.** O apresentador apresenta o `episodio.desafio` e, em uma frase, a variante para quem ainda não trabalha na área (`desafio_iniciante`, abaixo). Depois agradece o expert e se despede em nome do Pebacast. Nas três últimas falas:
+   - **O próximo da saga.** Com `proximo_da_saga`, anuncie o tema com estas palavras: "o próximo episódio da saga `saga.nome_falado` é sobre ...", a partir do `titulo`, dito de um jeito natural. Sem `proximo_da_saga`, diga que este é o último episódio da saga por enquanto.
+   - **Sem data.** Nunca prometa quando sai o próximo ("amanhã", "na semana que vem"): as sagas se revezam e o próximo da mesma saga pode levar dias.
+   - **Pedido de retorno.** Leia `textos_fixos.pedido_de_retorno` ao pé da letra.
 
 Regras:
 
@@ -105,7 +109,7 @@ O limite é `regras.revisao.max_revisoes` revisões. Se a última reprovar, pare
 python -m podcast.roteiro validar $ID
 ```
 
-Se houver problema de formato (tamanho, campos, aviso de IA, apresentação do Pebacast ou do expert), corrija e peça uma nova revisão, já que o roteiro mudou, desde que ainda haja revisões no limite.
+Se houver problema de formato (tamanho, campos, aviso de IA, apresentação do Pebacast ou do expert, saga e posição, próximo da saga, pedido de retorno), corrija e peça uma nova revisão, já que o roteiro mudou, desde que ainda haja revisões no limite.
 
 Commite a pasta inteira, aprovada ou não. A tentativa reprovada também é registro, e é o Actions que abre a issue em caso de falha.
 

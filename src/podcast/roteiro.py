@@ -10,6 +10,7 @@ conferir o que escreveu. Ver docs/adr/0006-roteiro-por-rotina-claude.md.
 
 import argparse
 import json
+import re
 import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -25,6 +26,7 @@ from podcast.validacao import (
     NOTICIA,
     PUBLICACAO,
     ROTEIRO,
+    Orientacao,
     Regras,
     hash_do_roteiro,
     roteiro_aprovado,
@@ -41,6 +43,8 @@ AGUARDANDO_COTA = "aguardando_cota"
 PUBLICADO = "publicado"
 
 SAIDA_SEM_EPISODIO = 3
+QUANTIDADE_DE_ABERTURAS = 5
+PRIMEIRA_FRASE = re.compile(r"[^.!?]*[.!?]?")
 
 
 class SemEpisodio(Exception):
@@ -128,10 +132,43 @@ def urls_ja_usadas(pasta_episodios: Path, exceto: str) -> frozenset[str]:
     return frozenset(urls)
 
 
+_UNIDADES_ORDINAIS = ("", "primeiro", "segundo", "terceiro", "quarto", "quinto", "sexto", "sétimo", "oitavo", "nono")
+_DEZENAS_ORDINAIS = ("", "décimo", "vigésimo", "trigésimo", "quadragésimo", "quinquagésimo", "sexagésimo",
+                     "septuagésimo", "octogésimo", "nonagésimo")
+
+
+def ordinal_por_extenso(numero: int) -> str:
+    """Como o apresentador diz a posição no áudio: 12 → "décimo segundo"."""
+    if not 1 <= numero <= 99:
+        raise ValueError(f"Posição {numero} fora de 1 a 99.")
+    dezena, unidade = divmod(numero, 10)
+    return " ".join(parte for parte in (_DEZENAS_ORDINAIS[dezena], _UNIDADES_ORDINAIS[unidade]) if parte)
+
+
+def proximo_da_saga(saga: Saga, episodio_id: str) -> Episodio | None:
+    """O seguinte no currículo, que é o que o ouvinte encontra ao continuar a saga."""
+    posicao = saga.posicao_do(episodio_id)
+    return saga.episodios[posicao] if posicao < len(saga.episodios) else None
+
+
+def orientacao_para(config: Mapping[str, Any], saga: Saga, episodio_id: str) -> Orientacao | None:
+    textos = config.get("roteiro")
+    if not textos:
+        return None
+    return Orientacao(
+        saga=saga.nome_curto,
+        posicao_por_extenso=ordinal_por_extenso(saga.posicao_do(episodio_id)),
+        tem_proximo=proximo_da_saga(saga, episodio_id) is not None,
+        aviso_ia=textos["aviso_ia"],
+        pedido_de_retorno=textos["pedido_de_retorno"],
+    )
+
+
 def regras_para(projeto: Projeto, saga: Saga, episodio_id: str) -> Regras:
     config = projeto.config()
     personas = projeto.personas()
     voz_principal = apresentador(personas, saga.id)
+    publicado = (projeto.episodios / episodio_id / PUBLICACAO).exists()
     return Regras(
         episodio_id=episodio_id,
         nome_podcast=config["feed"]["titulo"],
@@ -145,6 +182,7 @@ def regras_para(projeto: Projeto, saga: Saga, episodio_id: str) -> Regras:
         vereditos_reprovam=frozenset(config["revisao"]["vereditos_reprovam"]),
         nota_minima_relevancia=config["noticias"]["nota_minima_relevancia"],
         urls_ja_usadas=urls_ja_usadas(projeto.episodios, exceto=episodio_id),
+        orientacao=None if publicado else orientacao_para(config, saga, episodio_id),
     )
 
 
@@ -244,11 +282,21 @@ def montar_contexto(projeto: Projeto, data: date) -> dict[str, Any]:
 
     personas = projeto.personas()
     regras = regras_para(projeto, saga, episodio.id)
+    seguinte = proximo_da_saga(saga, episodio.id)
     return {
         "data_publicacao": data.isoformat(),
         "pasta": f"episodios/{episodio.id}",
-        "saga": {chave: saga.dados[chave] for chave in ("id", "nome", "pergunta_central")},
+        "saga": {
+            **{chave: saga.dados[chave] for chave in ("id", "nome", "pergunta_central")},
+            "nome_falado": saga.nome_curto,
+            "posicao": saga.posicao_do(episodio.id),
+            "posicao_por_extenso": ordinal_por_extenso(saga.posicao_do(episodio.id)),
+            "total_de_episodios": len(saga.episodios),
+        },
         "episodio": episodio.dados,
+        "proximo_da_saga": None if seguinte is None else {"id": seguinte.id, "titulo": seguinte.dados["titulo"]},
+        "textos_fixos": config.get("roteiro") or {},
+        "aberturas_recentes": aberturas_recentes(projeto, QUANTIDADE_DE_ABERTURAS),
         "referencias": saga.referencias_do(episodio),
         "personas": {
             "apresentador": personas[regras.apresentador],
@@ -262,6 +310,24 @@ def montar_contexto(projeto: Projeto, data: date) -> dict[str, Any]:
         "noticias_ja_usadas": sorted(regras.urls_ja_usadas),
         "feedbacks_recentes": projeto.feedbacks_recentes(saga.id, config["feedback"]["ultimos_por_saga"]),
     }
+
+
+def aberturas_recentes(projeto: Projeto, quantidade: int) -> list[str]:
+    """A primeira frase dos últimos episódios publicados, para a saudação não virar fórmula."""
+    publicados = []
+    for arquivo in projeto.episodios.glob(f"*/{PUBLICACAO}"):
+        roteiro = arquivo.parent / ROTEIRO
+        if not roteiro.exists():
+            continue
+        publicado_em = str(json.loads(arquivo.read_text(encoding="utf-8")).get("publicado_em", ""))
+        falas = json.loads(roteiro.read_text(encoding="utf-8")).get("falas") or [{}]
+        publicados.append((publicado_em, _primeira_frase(str(falas[0].get("texto", "")))))
+    publicados.sort(reverse=True)
+    return [frase for _, frase in publicados[:quantidade]]
+
+
+def _primeira_frase(texto: str) -> str:
+    return PRIMEIRA_FRASE.match(texto.strip()).group(0)
 
 
 def _garantir_nada_aguardando(estados: Mapping[str, str]) -> None:

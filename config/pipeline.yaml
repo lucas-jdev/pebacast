@@ -19,6 +19,15 @@ episodio:
   idioma: pt-BR
   exigir_referencias_verificadas: true
 
+# Textos que todo roteiro novo fala ao pé da letra (#112): a validação reprova o que não os traz.
+# O aviso repete a abertura das show notes; o pedido aponta para o link que elas trazem.
+roteiro:
+  aviso_ia: >-
+    Este episódio foi gerado por inteligência artificial, com fontes escolhidas à mão e
+    afirmações revisadas por uma segunda IA.
+  pedido_de_retorno: >-
+    Conta pra gente o que achou: o link para votar e deixar um recado está na descrição do episódio.
+
 noticias:
   janelas_dias: [7, 30, 60]
   nota_minima_relevancia: 7

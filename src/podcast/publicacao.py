@@ -361,10 +361,13 @@ def escrever_site(projeto: Projeto, site: Path) -> None:
 
 
 def show_notes(episodio: Mapping[str, Any], roteiro: Mapping[str, Any], noticia: Mapping[str, Any],
-               revisoes: Sequence[Mapping[str, Any]], credito_vinheta: str | None = None) -> str:
+               revisoes: Sequence[Mapping[str, Any]], url_do_episodio: str, credito_vinheta: str | None = None) -> str:
     linhas = [
         "Conteúdo gerado por inteligência artificial, com fontes escolhidas à mão e afirmações revisadas por "
         "uma segunda IA.",
+        "",
+        # O áudio termina pedindo retorno "pelo link na descrição" (#112): é este.
+        f"Vote e deixe um recado: {url_do_episodio}",
         "",
         "Objetivos:",
         *[f"- {objetivo}" for objetivo in episodio.get("objetivos", [])],
@@ -387,7 +390,8 @@ def show_notes(episodio: Mapping[str, Any], roteiro: Mapping[str, Any], noticia:
 
 
 def _episodios_publicados(projeto: Projeto) -> list[dict[str, Any]]:
-    credito = (projeto.config()["audio"].get("vinheta") or {}).get("credito")
+    config = projeto.config()
+    credito = (config["audio"].get("vinheta") or {}).get("credito")
     itens = []
     for saga in projeto.sagas().values():
         for episodio in saga.episodios:
@@ -405,6 +409,7 @@ def _episodios_publicados(projeto: Projeto) -> list[dict[str, Any]]:
                     _ler_json(pasta / ROTEIRO),
                     _ler_json(pasta / NOTICIA),
                     [_ler_json(arquivo) for arquivo in revisoes],
+                    config["feed"]["url_site"] + caminho_do_episodio(episodio.id),
                     credito if publicacao.get("vinheta") else None,
                 ),
             })

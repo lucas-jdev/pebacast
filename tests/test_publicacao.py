@@ -252,6 +252,7 @@ def test_feed_lista_episodios_publicados_com_enclosure_e_guid(projeto, tmp_path)
     assert item.find("pubDate").text == "Sun, 08 Nov 2026 01:00:00 +0000"
     notas = item.find("description").text
     assert "gerado por inteligência artificial" in notas
+    assert "Vote e deixe um recado: https://x.github.io/pebacast/episodios/sw-001/" in notas
     assert "Apagão (Jornal, 2026-11-01) https://n/1" in notas
     assert "Desafio: Liste dois trade-offs." in notas
 
