@@ -337,6 +337,10 @@
     const arquivo = document.querySelector(".arquivo");
     const lead = document.querySelector("[data-arquivo-lead]");
     const leadOriginal = lead?.textContent;
+    const titulo = document.querySelector("[data-arquivo-titulo]");
+    const tituloOriginal = titulo?.textContent;
+    const tituloDaAba = document.title;
+    const proximos = [...document.querySelectorAll("[data-proximo-da-saga]")];
 
     // Com uma saga escolhida, a lista vai na ordem do currículo (do mais antigo ao mais novo), que é a ordem em
     // que se ouve uma saga. A ordem muda no DOM, e não só no CSS, para o Tab seguir o que se vê.
@@ -366,9 +370,15 @@
       });
       ordenar(Boolean(saga));
       opcoes.forEach((opcao) => opcao.setAttribute("aria-pressed", String(opcao.dataset.saga === saga)));
+      // Com uma saga escolhida, a página é a da saga: o título diz isso, e o fim da lista aponta o próximo dela.
+      const nome = opcoes.find((opcao) => opcao.dataset.saga === saga)?.dataset.nome;
+      if (titulo) titulo.textContent = saga ? `Saga ${nome}` : tituloOriginal;
+      document.title = saga ? `Saga ${nome} · ${tituloDaAba}` : tituloDaAba;
+      proximos.forEach((nota) => { nota.hidden = nota.dataset.proximoDaSaga !== saga; });
       // No celular a faixa de sagas rola de lado: traz a escolhida para o meio, em vez de deixá-la cortada.
       filtro.querySelector('.filtro__opcao[aria-pressed="true"]')?.scrollIntoView({ block: "nearest", inline: "center" });
-      status.textContent = `${visiveis} ${visiveis === 1 ? "episódio" : "episódios"}`;
+      const quantos = `${visiveis} ${visiveis === 1 ? "episódio" : "episódios"}`;
+      status.textContent = saga ? `Saga ${opcoes.find((opcao) => opcao.dataset.saga === saga)?.dataset.nome}: ${quantos}` : quantos;
     };
 
     // O filtro mora em ?saga= porque o # já é do episódio. replaceState para "voltar" sair da página em vez de desfazer filtro.
