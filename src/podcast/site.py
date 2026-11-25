@@ -752,10 +752,12 @@ def _primeira_frase(texto: str, limite: int = 180) -> str:
 
 
 def _player(item: Mapping[str, Any]) -> str:
-    """O título e a saga vão em data-* para a tela de bloqueio do celular (Media Session), que não lê a página."""
+    """O título e a saga vão em data-* para a tela de bloqueio do celular (Media Session), que não lê a página.
+    A caixa em volta é o container das consultas do CSS: o layout depende da largura do player, e não da tela,
+    porque no tablet o card estreita o player tanto quanto um celular."""
     publicacao, episodio, saga = item["publicacao"], item["episodio"], item["saga"]
     episodio_id, duracao = episodio["id"], publicacao["duracao_segundos"]
-    return f"""<div class="player" role="group" aria-labelledby="titulo-{escape(episodio_id)}" data-duracao="{duracao}" data-episodio="{escape(episodio_id)}"
+    return f"""<div class="player-caixa"><div class="player" role="group" aria-labelledby="titulo-{escape(episodio_id)}" data-duracao="{duracao}" data-episodio="{escape(episodio_id)}"
       data-titulo="{escape(episodio['titulo'])}" data-rotulo="{escape(saga.rotulo_do(episodio_id))}">
       <audio controls preload="none"><source src="{escape(publicacao['url_audio'])}" type="audio/mpeg"></audio>
       <button class="player__play" type="button" aria-label="Tocar">
@@ -782,7 +784,7 @@ def _player(item: Mapping[str, Any]) -> str:
       <p class="player__retomar" data-retomar hidden><span>Você parou em <span data-retomar-tempo></span>.</span>
         <button class="player__do-comeco" type="button" aria-label="Ouvir do começo">Do começo</button></p>
       <p class="player__aviso" role="status" data-player-aviso></p>
-    </div>"""
+    </div></div>"""
 
 
 def _votos(episodio_id: str, api: str) -> str:

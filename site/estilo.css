@@ -244,24 +244,6 @@ button { font: inherit; }
 .player__nivel::-moz-range-progress { width: 6px; border-radius: 999px; background: var(--acento); }
 .player__nivel::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-left: -6px; border-radius: 50%; background: var(--texto); border: 3px solid var(--fundo); }
 .player__nivel::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--texto); border: 3px solid var(--fundo); }
-/* No celular a trilha divide a linha com cinco botões e sobra pouco para arrastar: ela ganha a linha de baixo inteira. */
-@media (max-width: 560px) {
-  .player { grid-template-columns: auto auto auto 1fr auto; grid-template-areas: "play menos mais velocidade volume" "trilha trilha trilha trilha trilha";
-    gap: 0.5rem; padding: 0.6rem; }
-  .player__play { width: 48px; height: 48px; }
-  .player__pular { min-width: 42px; padding: 0 0.2rem; }
-  .player__pular:not([data-pular^="-"]) { margin-left: 0; }
-  .player__velocidade { justify-self: end; width: 3.5rem; font-size: 0.9rem; }
-}
-/* Celulares de 360 px ou menos: os botões estreitam (a altura continua 44 px) para a linha caber sem rolar de lado. */
-@media (max-width: 400px) {
-  .player { gap: 0.5rem 0.375rem; }
-  .player__play { width: 44px; height: 44px; }
-  .player__pular, .player__volume-botao { min-width: 40px; width: 40px; }
-  .player__velocidade { width: 3.2rem; }
-}
-/* Em 320 px não cabe: o volume sai, e o botão físico do aparelho continua mandando. */
-@media (max-width: 340px) { .js .player__volume { display: none; } .player { grid-template-areas: "play menos mais velocidade velocidade" "trilha trilha trilha trilha trilha"; } }
 
 /* detalhes */
 /* minmax(0, 1fr): com 1fr a coluna não encolhe abaixo da palavra mais longa, e um caminho de arquivo
@@ -887,7 +869,9 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 .player__play { background: var(--destaque); color: var(--texto); border: 3px solid var(--texto); box-shadow: 4px 4px 0 var(--texto); }
 .player__play:hover { background: #ffd54f; }
 .player__play:active { box-shadow: 1px 1px 0 var(--texto); translate: 3px 3px; }
-.player__velocidade, .player__volume-botao { background: #fffaf0; }
+.player__velocidade, .player__volume-botao, .player__pular { background: #fffaf0; }
+.player__pular:hover, .player__velocidade:hover, .player__volume-botao:hover { background: #fff; }
+.player__pular:active, .player__velocidade:active, .player__volume-botao:active { translate: 1px 1px; }
 
 /* Selo de revisão como carimbo verde, do mesmo jeito que o carimbo beta. */
 .selo { background: transparent; border: 2px solid var(--verde); border-radius: 2px; color: var(--texto);
@@ -959,3 +943,25 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 ::-webkit-scrollbar-thumb { background: var(--texto); border: 3px solid var(--fundo-2); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--destaque); border-color: var(--texto); }
 ::-webkit-scrollbar-corner { background: var(--fundo-2); }
+
+/* ---------------------------------------------------------------- player estreito (#117) */
+/* Fica no fim do arquivo para valer sobre o tema e o ajuste de 400 px de tela. Quem decide é a largura do
+   próprio player (a .player-caixa), que no tablet é tão estreito quanto no celular. Abaixo de 600 px a trilha
+   ganha a linha de baixo inteira; na linha de cima, play, −15, +30, velocidade e volume. */
+.player-caixa { container-type: inline-size; }
+@container (max-width: 600px) {
+  .player { grid-template-columns: auto auto auto 1fr auto; grid-template-areas: "play menos mais velocidade volume" "trilha trilha trilha trilha trilha";
+    gap: 0.5rem 0.375rem; padding: 0.6rem; }
+  .player__play { width: 44px; height: 44px; }
+  .player__pular:not([data-pular^="-"]) { margin-left: 0; }
+  .player__velocidade { justify-self: end; width: 3rem; font-size: 0.85rem; }
+}
+/* Player com menos de 273 px (telas abaixo de ~360): −15, +30 e volume estreitam para 40 px, e a altura segue em 44. */
+@container (max-width: 272px) {
+  .player__pular, .player__volume-botao { min-width: 40px; width: 40px; }
+}
+/* Abaixo de 261 px (telas de ~345 px ou menos) não cabe: o volume sai e fica com o botão físico do aparelho. */
+@container (max-width: 260px) {
+  .js .player__volume { display: none; }
+  .player { grid-template-areas: "play menos mais velocidade velocidade" "trilha trilha trilha trilha trilha"; }
+}

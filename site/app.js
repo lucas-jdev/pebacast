@@ -10,7 +10,7 @@
 
   const players = [...document.querySelectorAll(".player")];
   const CAPA = new URL("capa-512.jpg", document.currentScript.src).href;
-  const SETAS = { ArrowLeft: -5, ArrowRight: 5 };
+  const SETAS = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5 };
 
   // Em aba anônima ou com o armazenamento bloqueado, o localStorage lança: o site segue como se nada estivesse salvo.
   const armazenamento = {
