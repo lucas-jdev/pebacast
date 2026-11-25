@@ -804,6 +804,19 @@ h1.episodio__titulo { font-size: clamp(1.9rem, 4vw, 2.8rem); }
 .player__aviso:empty { display: none; }
 .player__aviso a { color: var(--texto); }
 
+/* Onde o ouvinte parou (#111). Só existe com JS: sem ele, o player nativo não lembra nada. */
+.player__retomar { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem; margin: -0.25rem 0 0;
+  font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.player__retomar[hidden] { display: none; }
+.player__do-comeco { min-height: 44px; padding: 0 0.2rem; border: 0; background: none; color: var(--texto); font: inherit; font-weight: 650;
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.player__do-comeco:hover { text-decoration-thickness: 2px; }
+.progresso { padding: 0 0.45rem; border: 2px solid currentColor; border-radius: 2px; color: var(--texto); font-size: 0.85rem;
+  font-weight: 650; line-height: 1.6; font-variant-numeric: tabular-nums; }
+/* Contorno nos dois estados: tinta cheia faria o selo parecer o botão "Assinar". */
+.progresso--ouvido::before { content: "✓" / ""; margin-right: 0.3em; }
+.progresso[hidden] { display: none; }
+
 /* ---------------------------------------------------------------- transcrição (#55) */
 /* Na página do episódio, a transcrição é leitura corrida: sem caixa com rolagem própria, linha de até ~66
    caracteres, a fonte do corpo e o nome de quem fala numa linha só dele. */

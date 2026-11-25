@@ -10,18 +10,51 @@
 
   const players = [...document.querySelectorAll(".player")];
 
+  // Em aba anônima ou com o armazenamento bloqueado, o localStorage lança: o site segue como se nada estivesse salvo.
+  const armazenamento = {
+    ler: (chave) => { try { return localStorage.getItem(chave); } catch { return null; } },
+    gravar: (chave, valor) => { try { localStorage.setItem(chave, valor); } catch { /* modo privado */ } },
+    apagar: (chave) => { try { localStorage.removeItem(chave); } catch { /* modo privado */ } },
+  };
+
+  // Onde o ouvinte parou, só neste navegador (decidido em 24/11: sem sincronizar entre aparelhos).
+  // Passar dos 90% tocando conta como ouvido: quase ninguém espera a vinheta final. Um salto longo para lá não
+  // conta, senão um toque errado na trilha (ela fica logo abaixo do volume no celular) marcava o que não foi
+  // ouvido. Um +30, na tela ou na de bloqueio, ainda é escuta: quem pula a despedida ouviu o episódio.
+  const FRACAO_OUVIDA = 0.9;
+  const SALTO_DE_ESCUTA_S = 31;
+  const AVISO_SOME_MS = 6000;
+  const progresso = {
+    posicao: (id) => Number(armazenamento.ler(`pebacast:posicao:${id}`)) || 0,
+    ouvido: (id) => armazenamento.ler(`pebacast:ouvido:${id}`) !== null,
+    gravarPosicao: (id, segundos) => armazenamento.gravar(`pebacast:posicao:${id}`, String(Math.floor(segundos))),
+    esquecerPosicao: (id) => armazenamento.apagar(`pebacast:posicao:${id}`),
+    marcarOuvido: (id) => {
+      armazenamento.gravar(`pebacast:ouvido:${id}`, new Date().toISOString());
+      progresso.esquecerPosicao(id);
+    },
+  };
+
+  // Na página do episódio o próprio player já diz onde parou: ali o selo diz só se foi ouvido.
+  const mostrarProgresso = (id) => document.querySelectorAll(`[data-progresso="${CSS.escape(id)}"]`).forEach((selo) => {
+    const posicao = selo.closest(".episodio--pagina") ? 0 : progresso.posicao(id);
+    const parou = posicao ? `parou em ${formatar(posicao)}` : "";
+    selo.textContent = progresso.ouvido(id) ? ["Ouvido", parou].filter(Boolean).join(" · ") : parou && `P${parou.slice(1)}`;
+    selo.hidden = !selo.textContent;
+    selo.classList.toggle("progresso--ouvido", progresso.ouvido(id));
+  });
+  document.querySelectorAll("[data-progresso]").forEach((selo) => mostrarProgresso(selo.dataset.progresso));
+
   // Volume: um só para o site, lembrado entre visitas. No iOS o audio.volume é só leitura (manda o botão físico),
   // então lá o botão vira "Silenciar" em vez de abrir uma barra que não faria nada.
   const CHAVE_DO_VOLUME = "pebacast:volume";
   const volumeAjustavel = (() => { const teste = new Audio(); teste.volume = 0.5; return teste.volume === 0.5; })();
   const lerVolume = () => {
-    try {
-      const guardado = localStorage.getItem(CHAVE_DO_VOLUME);
-      const valor = Number(guardado);
-      return guardado !== null && valor >= 0 && valor <= 1 ? valor : 1;
-    } catch { return 1; }
+    const guardado = armazenamento.ler(CHAVE_DO_VOLUME);
+    const valor = Number(guardado);
+    return guardado !== null && valor >= 0 && valor <= 1 ? valor : 1;
   };
-  const gravarVolume = (valor) => { try { localStorage.setItem(CHAVE_DO_VOLUME, String(valor)); } catch { /* modo privado */ } };
+  const gravarVolume = (valor) => armazenamento.gravar(CHAVE_DO_VOLUME, String(valor));
   const estadoDoVolume = (valor) => (valor === 0 ? "mudo" : valor < 0.5 ? "baixo" : "alto");
 
   const aplicarVolume = (valor) => players.forEach((player) => {
@@ -53,7 +86,7 @@
     // Carregando: o MP3 vem de um redirect do GitHub Releases e pode demorar.
     const carregando = (sim) => {
       player.classList.toggle("player--carregando", sim);
-      play.setAttribute("aria-label", sim ? "Carregando" : audio.paused ? "Tocar" : "Pausar");
+      play.setAttribute("aria-label", sim ? "Carregando" : audio.paused ? rotuloDoPlay() : "Pausar");
     };
     // Erro: volta para "Tocar" e oferece o arquivo, em vez de ficar parado em "Pausar" no 0:00.
     const falhou = () => {
@@ -61,6 +94,7 @@
       player.classList.remove("player--tocando");
       play.setAttribute("aria-label", "Tocar");
       aviso.textContent = "Não deu pra carregar o áudio. ";
+      aviso.dataset.erro = "";
       const baixar = document.createElement("a");
       baixar.href = fonte?.src || audio.currentSrc;
       baixar.textContent = "Baixar o MP3";
@@ -70,7 +104,11 @@
     fonte?.addEventListener("error", falhou);
     audio.addEventListener("error", falhou);
     audio.addEventListener("waiting", () => carregando(true));
-    audio.addEventListener("playing", () => { aviso.textContent = ""; carregando(false); });
+    // Tocar de novo limpa o erro, mas não outros avisos, como o de episódio ouvido.
+    audio.addEventListener("playing", () => {
+      if ("erro" in aviso.dataset) { aviso.textContent = ""; delete aviso.dataset.erro; }
+      carregando(false);
+    });
 
     audio.removeAttribute("controls");
 
@@ -79,7 +117,63 @@
       barra.style.setProperty("--progresso", `${(Number(barra.value) / max) * 100}%`);
       barra.setAttribute("aria-valuetext", `${formatar(barra.value)} de ${formatar(barra.max)}`);
     };
-    pintar();
+
+    const id = player.dataset.episodio;
+    const retomar = player.querySelector("[data-retomar]");
+    const doComeco = retomar.querySelector(".player__do-comeco");
+    // Com preload="none" o áudio ainda não carregou: a posição salva só vale depois do loadedmetadata.
+    let retomarEm = progresso.posicao(id);
+    let gravadoEm = 0;
+    let tocandoEm = null;
+
+    const rotuloDoPlay = () => (retomarEm ? `Continuar de ${formatar(retomarEm)}` : "Tocar");
+    const posicionar = (segundos) => {
+      barra.value = Math.floor(segundos);
+      atual.textContent = formatar(segundos);
+      pintar();
+    };
+    const oferecerRetomada = () => {
+      retomar.hidden = !retomarEm;
+      retomar.querySelector("[data-retomar-tempo]").textContent = formatar(retomarEm);
+      if (audio.paused) play.setAttribute("aria-label", rotuloDoPlay());
+    };
+    const desistirDaRetomada = () => { retomarEm = 0; oferecerRetomada(); };
+
+    const finalDoEpisodio = () => (Number.isFinite(audio.duration) ? audio.duration : Number(player.dataset.duracao)) * FRACAO_OUVIDA;
+    // O selo do card só muda quando a pessoa para (pause, sair da página): "parou em" com o áudio tocando confunde.
+    const gravarPosicao = ({ atualizarSelo = false } = {}) => {
+      if (audio.currentTime < 1) return;
+      if (audio.currentTime >= finalDoEpisodio()) progresso.esquecerPosicao(id);
+      else progresso.gravarPosicao(id, audio.currentTime);
+      gravadoEm = audio.currentTime;
+      if (atualizarSelo) mostrarProgresso(id);
+    };
+    const avisar = (texto) => {
+      aviso.textContent = texto;
+      setTimeout(() => { if (aviso.textContent === texto) aviso.textContent = ""; }, AVISO_SOME_MS);
+    };
+    const conferirSeOuviu = () => {
+      const agora = audio.currentTime, antes = tocandoEm, limite = finalDoEpisodio();
+      tocandoEm = audio.paused ? null : agora;
+      const cruzouTocando = antes !== null && antes < limite && agora >= limite && agora - antes <= SALTO_DE_ESCUTA_S;
+      if (!cruzouTocando || progresso.ouvido(id)) return;
+      progresso.marcarOuvido(id);
+      mostrarProgresso(id);
+      avisar("Episódio marcado como ouvido.");
+    };
+
+    posicionar(retomarEm);
+    oferecerRetomada();
+
+    doComeco.addEventListener("click", () => {
+      desistirDaRetomada();
+      progresso.esquecerPosicao(id);
+      mostrarProgresso(id);
+      if (audio.readyState > 0) audio.currentTime = 0;
+      posicionar(0);
+      if (audio.paused) play.click();
+      play.focus();
+    });
 
     play.addEventListener("click", () => {
       if (audio.paused) {
@@ -99,21 +193,27 @@
     audio.addEventListener("pause", () => {
       player.classList.remove("player--tocando", "player--carregando");
       play.setAttribute("aria-label", "Tocar");
+      gravarPosicao({ atualizarSelo: true });
     });
     audio.addEventListener("loadedmetadata", () => {
       if (Number.isFinite(audio.duration)) barra.max = Math.round(audio.duration);
+      if (retomarEm) audio.currentTime = retomarEm;
       pintar();
     });
     audio.addEventListener("timeupdate", () => {
-      if (arrastando) return;
-      barra.value = Math.floor(audio.currentTime);
-      atual.textContent = formatar(audio.currentTime);
-      pintar();
+      if (arrastando || (retomarEm && audio.currentTime < 1)) return;
+      if (retomarEm) desistirDaRetomada();
+      posicionar(audio.currentTime);
+      if (!audio.paused && Math.abs(audio.currentTime - gravadoEm) >= 5) gravarPosicao();
+      conferirSeOuviu();
     });
+    // Fechar a aba no meio do áudio não dispara pause: o pagehide é o último momento garantido para gravar.
+    window.addEventListener("pagehide", () => { if (!audio.paused) gravarPosicao({ atualizarSelo: true }); });
 
     barra.addEventListener("input", () => { arrastando = true; atual.textContent = formatar(barra.value); pintar(); });
     barra.addEventListener("change", () => {
       arrastando = false;
+      desistirDaRetomada();
       if (audio.readyState === 0) audio.load();
       audio.currentTime = Number(barra.value);
     });
@@ -268,10 +368,8 @@
   // Curti / não curti. O voto vale por navegador: fica no localStorage para o botão lembrar, e o servidor guarda um por visitante.
   // O corpo vai como texto puro de propósito: é um pedido "simples" de CORS, sem a ida e volta do preflight.
   const guardado = {
-    ler: (id) => { try { return localStorage.getItem(`pebacast:voto:${id}`); } catch { return null; } },
-    gravar: (id, voto) => {
-      try { voto ? localStorage.setItem(`pebacast:voto:${id}`, voto) : localStorage.removeItem(`pebacast:voto:${id}`); } catch { /* modo privado */ }
-    },
+    ler: (id) => armazenamento.ler(`pebacast:voto:${id}`),
+    gravar: (id, voto) => (voto ? armazenamento.gravar(`pebacast:voto:${id}`, voto) : armazenamento.apagar(`pebacast:voto:${id}`)),
   };
 
   document.querySelectorAll(".votos").forEach((bloco) => {
