@@ -18,8 +18,11 @@
   };
 
   // Onde o ouvinte parou, só neste navegador (decidido em 24/11: sem sincronizar entre aparelhos).
-  // Passou de 90%, conta como ouvido: quase ninguém espera a vinheta final.
+  // Passar dos 90% tocando conta como ouvido: quase ninguém espera a vinheta final. Pular para lá não conta,
+  // senão um toque errado na trilha (ela fica logo abaixo do volume no celular) marcava o que não foi ouvido.
   const FRACAO_OUVIDA = 0.9;
+  const PASSO_CONTINUO_S = 3;
+  const AVISO_SOME_MS = 6000;
   const progresso = {
     posicao: (id) => Number(armazenamento.ler(`pebacast:posicao:${id}`)) || 0,
     ouvido: (id) => armazenamento.ler(`pebacast:ouvido:${id}`) !== null,
@@ -33,7 +36,8 @@
 
   const mostrarProgresso = (id) => document.querySelectorAll(`[data-progresso="${CSS.escape(id)}"]`).forEach((selo) => {
     const posicao = progresso.posicao(id);
-    selo.textContent = progresso.ouvido(id) ? "Ouvido" : posicao ? `Parou em ${formatar(posicao)}` : "";
+    const parou = posicao ? `parou em ${formatar(posicao)}` : "";
+    selo.textContent = progresso.ouvido(id) ? ["Ouvido", parou].filter(Boolean).join(" · ") : parou && `P${parou.slice(1)}`;
     selo.hidden = !selo.textContent;
     selo.classList.toggle("progresso--ouvido", progresso.ouvido(id));
   });
@@ -116,8 +120,9 @@
     const retomar = player.querySelector("[data-retomar]");
     const doComeco = retomar.querySelector(".player__do-comeco");
     // Com preload="none" o áudio ainda não carregou: a posição salva só vale depois do loadedmetadata.
-    let retomarEm = progresso.ouvido(id) ? 0 : progresso.posicao(id);
+    let retomarEm = progresso.posicao(id);
     let gravadoEm = 0;
+    let tocandoEm = null;
 
     const rotuloDoPlay = () => (retomarEm ? `Continuar de ${formatar(retomarEm)}` : "Tocar");
     const posicionar = (segundos) => {
@@ -132,18 +137,27 @@
     };
     const desistirDaRetomada = () => { retomarEm = 0; oferecerRetomada(); };
 
-    const gravarPosicao = () => {
-      if (progresso.ouvido(id) || audio.currentTime < 1) return;
-      progresso.gravarPosicao(id, audio.currentTime);
+    const finalDoEpisodio = () => (Number.isFinite(audio.duration) ? audio.duration : Number(player.dataset.duracao)) * FRACAO_OUVIDA;
+    // O selo do card só muda quando a pessoa para (pause, sair da página): "parou em" com o áudio tocando confunde.
+    const gravarPosicao = ({ atualizarSelo = false } = {}) => {
+      if (audio.currentTime < 1) return;
+      if (audio.currentTime >= finalDoEpisodio()) progresso.esquecerPosicao(id);
+      else progresso.gravarPosicao(id, audio.currentTime);
       gravadoEm = audio.currentTime;
-      mostrarProgresso(id);
+      if (atualizarSelo) mostrarProgresso(id);
+    };
+    const avisar = (texto) => {
+      aviso.textContent = texto;
+      setTimeout(() => { if (aviso.textContent === texto) aviso.textContent = ""; }, AVISO_SOME_MS);
     };
     const conferirSeOuviu = () => {
-      const duracao = Number.isFinite(audio.duration) ? audio.duration : Number(player.dataset.duracao);
-      if (progresso.ouvido(id) || !duracao || audio.currentTime / duracao < FRACAO_OUVIDA) return;
+      const agora = audio.currentTime, antes = tocandoEm, limite = finalDoEpisodio();
+      tocandoEm = audio.paused ? null : agora;
+      const cruzouTocando = antes !== null && antes < limite && agora >= limite && agora - antes < PASSO_CONTINUO_S;
+      if (!cruzouTocando || progresso.ouvido(id)) return;
       progresso.marcarOuvido(id);
       mostrarProgresso(id);
-      aviso.textContent = "Episódio marcado como ouvido.";
+      avisar("Episódio marcado como ouvido.");
     };
 
     posicionar(retomarEm);
@@ -177,8 +191,9 @@
     audio.addEventListener("pause", () => {
       player.classList.remove("player--tocando", "player--carregando");
       play.setAttribute("aria-label", "Tocar");
-      gravarPosicao();
+      gravarPosicao({ atualizarSelo: true });
     });
+    audio.addEventListener("seeking", () => { tocandoEm = null; });
     audio.addEventListener("loadedmetadata", () => {
       if (Number.isFinite(audio.duration)) barra.max = Math.round(audio.duration);
       if (retomarEm) audio.currentTime = retomarEm;
@@ -192,7 +207,7 @@
       conferirSeOuviu();
     });
     // Fechar a aba no meio do áudio não dispara pause: o pagehide é o último momento garantido para gravar.
-    window.addEventListener("pagehide", () => { if (!audio.paused) gravarPosicao(); });
+    window.addEventListener("pagehide", () => { if (!audio.paused) gravarPosicao({ atualizarSelo: true }); });
 
     barra.addEventListener("input", () => { arrastando = true; atual.textContent = formatar(barra.value); pintar(); });
     barra.addEventListener("change", () => {

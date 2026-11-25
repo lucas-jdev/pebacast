@@ -775,7 +775,7 @@ def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
         </div>
       </div>
       <p class="player__retomar" data-retomar hidden><span>Você parou em <span data-retomar-tempo></span>.</span>
-        <button class="player__do-comeco" type="button">Ouvir do começo</button></p>
+        <button class="player__do-comeco" type="button" aria-label="Ouvir do começo">Do começo</button></p>
       <p class="player__aviso" role="status" data-player-aviso></p>
     </div>"""
 

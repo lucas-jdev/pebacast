@@ -813,7 +813,10 @@ h1.episodio__titulo { font-size: clamp(1.9rem, 4vw, 2.8rem); }
 .player__do-comeco:hover { text-decoration-thickness: 2px; }
 .progresso { padding: 0 0.45rem; border: 2px solid currentColor; border-radius: 2px; color: var(--texto); font-size: 0.85rem;
   font-weight: 650; line-height: 1.6; font-variant-numeric: tabular-nums; }
-.progresso--ouvido { border-color: var(--texto); background: var(--texto); color: var(--fundo); }
+/* Contorno nos dois estados: tinta cheia faria o selo parecer o botão "Assinar". */
+.progresso--ouvido::before { content: "✓" / ""; margin-right: 0.3em; }
+/* Na página do episódio, o próprio player já diz onde parou: o selo repetiria o mesmo tempo. */
+.episodio--pagina .progresso:not(.progresso--ouvido) { display: none; }
 .progresso[hidden] { display: none; }
 
 /* ---------------------------------------------------------------- transcrição (#55) */
