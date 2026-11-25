@@ -1029,6 +1029,18 @@ def test_volume_de_cada_player_controla_o_proprio_painel(projeto):
         assert 'id="i-volume"' in pagina and 'id="i-mudo"' in pagina
 
 
+def test_onde_o_ouvinte_parou_nasce_escondido_e_so_o_js_mostra(projeto):
+    # Sem JS (ou sem nada salvo), nada de "Você parou em" nem de selo vazio (#111).
+    _tres_publicados(projeto)
+
+    pagina = gerar_pagina_episodios(projeto, "feed.xml")
+
+    players = re.findall(r'<div class="player" [^>]*data-episodio="([\w-]+)"', pagina)
+    assert players and pagina.count('<p class="player__retomar" data-retomar hidden>') == len(players)
+    for eid in players:
+        assert f'<span class="progresso" data-progresso="{eid}" hidden></span>' in pagina
+
+
 # ---------------------------------------------------------------- transcrição e acabamento (#55, #57)
 
 

@@ -715,6 +715,7 @@ def _meta(item: Mapping[str, Any]) -> str:
     return f"""<p class="episodio__meta">
       <time datetime="{escape(publicacao['publicado_em'])}">{escape(_data_por_extenso(publicacao['publicado_em']))}</time>
       <span aria-hidden="true">·</span> {escape(_minutos(publicacao['duracao_segundos']))}
+      <span class="progresso" data-progresso="{escape(item['episodio']['id'])}" hidden></span>
     </p>"""
 
 
@@ -773,6 +774,8 @@ def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
           <input class="player__nivel" type="range" min="0" max="100" step="5" value="100" aria-label="Volume" aria-orientation="vertical">
         </div>
       </div>
+      <p class="player__retomar" data-retomar hidden><span>Você parou em <span data-retomar-tempo></span>.</span>
+        <button class="player__do-comeco" type="button">Ouvir do começo</button></p>
       <p class="player__aviso" role="status" data-player-aviso></p>
     </div>"""
 
