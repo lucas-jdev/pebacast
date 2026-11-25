@@ -10,10 +10,18 @@
 
   const players = [...document.querySelectorAll(".player")];
 
-  const segundosDoLink = (duracao) => {
-    const pedido = Number(new URLSearchParams(location.search).get("t"));
-    return Number.isInteger(pedido) && pedido > 0 && (!duracao || pedido < duracao) ? pedido : 0;
-  };
+  // O minuto de um link compartilhado (?t=90) vale uma vez: sai do endereço assim que é lido. Senão, reabrir a
+  // mesma mensagem ou restaurar a aba voltaria sempre a ele, por cima de onde a pessoa parou depois.
+  const MINUTO_DO_LINK = (() => {
+    const url = new URL(location.href);
+    const pedido = Number(url.searchParams.get("t"));
+    if (url.searchParams.has("t")) {
+      url.searchParams.delete("t");
+      history.replaceState(history.state, "", url);
+    }
+    return Number.isInteger(pedido) && pedido > 0 ? pedido : 0;
+  })();
+  const segundosDoLink = (duracao) => (MINUTO_DO_LINK && (!duracao || MINUTO_DO_LINK < duracao) ? MINUTO_DO_LINK : 0);
   const CAPA = new URL("capa-512.jpg", document.currentScript.src).href;
   const SETAS = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5 };
 
@@ -129,14 +137,18 @@
     const retomar = player.querySelector("[data-retomar]");
     const doComeco = retomar.querySelector(".player__do-comeco");
     // Com preload="none" o áudio ainda não carregou: a posição salva só vale depois do loadedmetadata.
-    // Um link compartilhado com o minuto (?t=90) vence a posição salva: quem mandou quer mostrar aquele trecho.
+    // Um link com o minuto (?t=90) começa ali, porque quem mandou quer mostrar aquele trecho; mas, se a pessoa
+    // tinha parado em outro ponto, o player oferece voltar para lá, e "Do começo" não apaga esse lugar.
     const doLink = player.closest(".episodio--pagina") ? segundosDoLink(Number(player.dataset.duracao)) : 0;
-    let retomarEm = doLink || progresso.posicao(id);
-    player.querySelector("[data-retomar-motivo]").textContent = doLink ? "O link começa em" : "Você parou em";
+    const salvo = progresso.posicao(id);
+    let retomarEm = doLink || salvo;
+    let peloLink = Boolean(doLink);
     let gravadoEm = 0;
     let tocandoEm = null;
+    const motivo = player.querySelector("[data-retomar-motivo]");
+    const ondeParei = retomar.querySelector(".player__onde-parei");
 
-    const rotuloDoPlay = () => (retomarEm ? `Continuar de ${formatar(retomarEm)}` : "Tocar");
+    const rotuloDoPlay = () => (!retomarEm ? "Tocar" : peloLink ? `Tocar a partir de ${formatar(retomarEm)}` : `Continuar de ${formatar(retomarEm)}`);
     const posicionar = (segundos) => {
       barra.value = Math.floor(segundos);
       atual.textContent = formatar(segundos);
@@ -144,10 +156,13 @@
     };
     const oferecerRetomada = () => {
       retomar.hidden = !retomarEm;
+      motivo.textContent = peloLink ? "O link começa em" : "Você parou em";
       retomar.querySelector("[data-retomar-tempo]").textContent = formatar(retomarEm);
+      ondeParei.hidden = !(peloLink && salvo && Math.abs(salvo - retomarEm) >= 5);
+      retomar.querySelector("[data-onde-parei]").textContent = `onde parei (${formatar(salvo)})`;
       if (audio.paused) play.setAttribute("aria-label", rotuloDoPlay());
     };
-    const desistirDaRetomada = () => { retomarEm = 0; oferecerRetomada(); };
+    const desistirDaRetomada = () => { retomarEm = 0; peloLink = false; oferecerRetomada(); };
 
     const finalDoEpisodio = () => (Number.isFinite(audio.duration) ? audio.duration : Number(player.dataset.duracao)) * FRACAO_OUVIDA;
     // O selo do card só muda quando a pessoa para (pause, sair da página): "parou em" com o áudio tocando confunde.
@@ -175,10 +190,22 @@
     posicionar(retomarEm);
     oferecerRetomada();
 
+    ondeParei.addEventListener("click", () => {
+      retomarEm = salvo;
+      peloLink = false;
+      if (audio.readyState > 0) audio.currentTime = salvo;
+      posicionar(salvo);
+      oferecerRetomada();
+      play.focus();
+    });
+
     doComeco.addEventListener("click", () => {
+      const eraDoLink = peloLink;
       desistirDaRetomada();
-      progresso.esquecerPosicao(id);
-      mostrarProgresso(id);
+      if (!eraDoLink) {
+        progresso.esquecerPosicao(id);
+        mostrarProgresso(id);
+      }
       if (audio.readyState > 0) audio.currentTime = 0;
       posicionar(0);
       if (audio.paused) play.click();
@@ -543,33 +570,47 @@
   });
 
   // Compartilhar sem recarregar (#118): o compartilhar do aparelho quando existe; senão, copia o endereço.
-  // Com o áudio passado de 0:00, dá para mandar o link já no minuto (?t=).
+  // Com JS, o link do rodapé do card vira uma linha própria logo abaixo do player e dos votos, com um botão
+  // (é uma ação, e não navegação) e, antes dele, a opção de mandar o link já no minuto em que a pessoa está.
   document.querySelectorAll("[data-compartilhar]").forEach((link) => {
-    const audio = document.querySelector(`.player[data-episodio="${CSS.escape(link.dataset.compartilhar)}"] audio`);
-    const barra = audio?.closest(".player").querySelector(".player__barra");
-    const minuto = document.createElement("label");
-    minuto.className = "compartilhar__minuto";
-    minuto.hidden = true;
-    minuto.innerHTML = '<input type="checkbox"> a partir de <span></span>';
-    const status = document.createElement("span");
-    status.className = "compartilhar__aviso";
-    status.setAttribute("role", "status");
-    link.after(" ", minuto, " ", status);
+    const cartao = link.closest(".episodio, .item");
+    const player = cartao?.querySelector(`.player[data-episodio="${CSS.escape(link.dataset.compartilhar)}"]`);
+    const audio = player?.querySelector("audio");
+    const barra = player?.querySelector(".player__barra");
+    const endereco = link.href;
 
+    const linha = document.createElement("p");
+    linha.className = "compartilhar";
+    linha.innerHTML = '<label class="compartilhar__minuto" hidden><input type="checkbox"><span></span></label>'
+      + '<button class="compartilhar__botao" type="button">Compartilhar</button>'
+      + '<span class="compartilhar__aviso" role="status"></span>';
+    const minuto = linha.querySelector(".compartilhar__minuto");
+    const caixa = minuto.querySelector("input");
+    const botao = linha.querySelector("button");
+    const status = linha.querySelector(".compartilhar__aviso");
+    (cartao.querySelector(".votos") || player?.closest(".player-caixa") || link.closest("p")).after(linha);
+    link.previousElementSibling?.matches('[aria-hidden="true"]') && link.previousElementSibling.remove();
+    link.remove();
+
+    // Marcada, a caixa guarda o minuto daquele instante: o áudio segue tocando enquanto a pessoa compartilha.
+    let congelado = 0;
     const posicao = () => Math.floor(audio ? (audio.currentTime || Number(barra.value)) : 0);
+    const minutoDoLink = () => (caixa.checked ? congelado : posicao());
     const atualizarMinuto = () => {
+      if (caixa.checked) return;
       minuto.hidden = posicao() < 1;
-      minuto.querySelector("span").textContent = formatar(posicao());
+      minuto.querySelector("span").textContent = `a partir de ${formatar(posicao())}`;
+      caixa.setAttribute("aria-label", `Compartilhar a partir de ${formatar(posicao())}`);
     };
+    caixa.addEventListener("change", () => { congelado = posicao(); atualizarMinuto(); });
     audio?.addEventListener("timeupdate", atualizarMinuto);
     audio?.addEventListener("pause", atualizarMinuto);
     atualizarMinuto();
 
-    link.addEventListener("click", async (evento) => {
-      evento.preventDefault();
-      const url = new URL(link.href);
-      if (!minuto.hidden && minuto.querySelector("input").checked) url.searchParams.set("t", String(posicao()));
-      const titulo = audio?.closest(".player").dataset.titulo || document.title;
+    botao.addEventListener("click", async () => {
+      const url = new URL(endereco);
+      if (!minuto.hidden && caixa.checked && minutoDoLink() >= 1) url.searchParams.set("t", String(minutoDoLink()));
+      const titulo = player?.dataset.titulo || document.title;
       if (navigator.share) {
         try { await navigator.share({ title: titulo, url: url.href }); } catch { /* a pessoa desistiu */ }
         return;

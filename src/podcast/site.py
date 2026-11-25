@@ -819,6 +819,7 @@ def _player(item: Mapping[str, Any]) -> str:
         </div>
       </div>
       <p class="player__retomar" data-retomar hidden><span><span data-retomar-motivo>Você parou em</span> <span data-retomar-tempo></span>.</span>
+        <button class="player__onde-parei" type="button" hidden>Voltar para <span data-onde-parei></span></button>
         <button class="player__do-comeco" type="button" aria-label="Ouvir do começo">Do começo</button></p>
       <p class="player__aviso" role="status" data-player-aviso></p>
     </div></div>"""
