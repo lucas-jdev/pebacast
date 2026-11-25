@@ -188,13 +188,21 @@ button { font: inherit; }
 }
 
 /* player */
-.player { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 1rem; margin-top: 1.5rem; padding: 0.75rem 0.9rem 0.75rem 0.75rem; background: var(--fundo); border: var(--borda) solid var(--linha); border-radius: var(--raio-botao); }
+.player { display: grid; grid-template-columns: auto auto auto 1fr auto auto; grid-template-areas: "play menos mais trilha velocidade volume";
+  align-items: center; gap: 1rem; margin-top: 1.5rem; padding: 0.75rem 0.9rem 0.75rem 0.75rem; background: var(--fundo); border: var(--borda) solid var(--linha); border-radius: var(--raio-botao); }
+.player__play { grid-area: play; }
+.player__pular[data-pular^="-"] { grid-area: menos; }
+.player__pular:not([data-pular^="-"]) { grid-area: mais; margin-left: -0.5rem; }
+.player__trilha { grid-area: trilha; }
+.player__velocidade { grid-area: velocidade; }
+.player__volume { grid-area: volume; }
 .player audio { grid-column: 1 / -1; width: 100%; }
 .player > button, .player__trilha { display: none; }
 .js .player audio { display: none; }
 .js .player__trilha { display: block; }
 .js .player__play { display: grid; }
 .js .player__velocidade { display: inline-block; }
+.js .player__pular { display: inline-grid; }
 .player__play { place-items: center; width: 52px; height: 52px; border-radius: 50%; border: 0; cursor: pointer; background: var(--acento); color: var(--sobre-acento); transition: background 0.15s ease; }
 .player__play:hover { background: var(--acento-forte); }
 .player__play svg { width: 22px; height: 22px; }
@@ -209,7 +217,11 @@ button { font: inherit; }
 .player__barra::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -6px; border-radius: 50%; background: var(--texto); border: 3px solid var(--fundo); }
 .player__barra::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--texto); border: 3px solid var(--fundo); }
 .player__tempos { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--texto-suave); font-variant-numeric: tabular-nums; margin-top: -2px; }
-.player__velocidade { min-width: 56px; height: 44px; padding: 0 0.7rem; border-radius: var(--raio-botao); cursor: pointer; border: var(--borda) solid var(--linha); background: var(--fundo-2); color: var(--texto); font-weight: 650; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.player__pular { place-items: center; min-width: 44px; height: 44px; padding: 0 0.45rem; border-radius: var(--raio-botao); cursor: pointer;
+  border: var(--borda) solid var(--linha); background: var(--fundo-2); color: var(--texto); font-weight: 650; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.player__pular:hover { border-color: var(--texto); }
+/* Largura fixa: de 1× para 1,75× o botão não pode empurrar a trilha. */
+.player__velocidade { width: 4.4rem; height: 44px; padding: 0; border-radius: var(--raio-botao); cursor: pointer; border: var(--borda) solid var(--linha); background: var(--fundo-2); color: var(--texto); font-weight: 650; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
 .player__velocidade:hover { border-color: var(--texto); }
 .player__volume { display: none; position: relative; }
 .js .player__volume { display: block; }
@@ -224,6 +236,7 @@ button { font: inherit; }
 .player__volume-painel { position: absolute; z-index: 5; bottom: calc(100% + 10px); left: 50%; translate: -50% 0; padding: 14px 10px;
   background: var(--fundo); border: var(--borda) solid var(--linha); border-radius: var(--raio-botao); }
 .player__volume-painel[hidden] { display: none; }
+.player__volume-painel--abaixo { bottom: auto; top: calc(100% + 10px); }
 .player__nivel { --nivel: 100%; display: block; width: 24px; height: 110px; margin: 0; writing-mode: vertical-lr; direction: rtl;
   background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; }
 .player__nivel::-webkit-slider-runnable-track { width: 6px; border-radius: 999px; background: linear-gradient(to top, var(--acento) var(--nivel), var(--fundo-3) var(--nivel)); }
@@ -532,6 +545,7 @@ body { line-height: 1.7; }
 .player__barra::-webkit-slider-runnable-track { height: 10px; border-radius: 0; border: 2px solid var(--texto); background: linear-gradient(to right, var(--texto) var(--progresso), #fff var(--progresso)); }
 .player__barra::-webkit-slider-thumb { border-radius: 0; background: var(--destaque); border: 2px solid var(--texto); margin-top: -6px; }
 .player__velocidade { border: 3px solid var(--texto); background: var(--destaque); border-radius: 2px; }
+.player__pular { border: 3px solid var(--texto); border-radius: 2px; }
 .player__volume-botao { border: 3px solid var(--texto); border-radius: 2px; }
 .player__volume-painel { border: 3px solid var(--texto); border-radius: 2px; background: #fffaf0; box-shadow: 4px 4px 0 var(--texto); }
 .player__nivel::-webkit-slider-runnable-track { width: 10px; border-radius: 0; border: 2px solid var(--texto); background: linear-gradient(to top, var(--texto) var(--nivel), #fff var(--nivel)); }
@@ -855,7 +869,9 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 .player__play { background: var(--destaque); color: var(--texto); border: 3px solid var(--texto); box-shadow: 4px 4px 0 var(--texto); }
 .player__play:hover { background: #ffd54f; }
 .player__play:active { box-shadow: 1px 1px 0 var(--texto); translate: 3px 3px; }
-.player__velocidade, .player__volume-botao { background: #fffaf0; }
+.player__velocidade, .player__volume-botao, .player__pular { background: #fffaf0; }
+.player__pular:hover, .player__velocidade:hover, .player__volume-botao:hover { background: #fff; }
+.player__pular:active, .player__velocidade:active, .player__volume-botao:active { translate: 1px 1px; }
 
 /* Selo de revisão como carimbo verde, do mesmo jeito que o carimbo beta. */
 .selo { background: transparent; border: 2px solid var(--verde); border-radius: 2px; color: var(--texto);
@@ -927,3 +943,35 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 ::-webkit-scrollbar-thumb { background: var(--texto); border: 3px solid var(--fundo-2); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--destaque); border-color: var(--texto); }
 ::-webkit-scrollbar-corner { background: var(--fundo-2); }
+
+/* ---------------------------------------------------------------- player estreito (#117) */
+/* Fica no fim do arquivo para valer sobre o tema e o ajuste de 400 px de tela. Quem decide é a largura do
+   próprio player (a .player-caixa), que no tablet é tão estreito quanto no celular. Abaixo de 600 px a trilha
+   ganha a linha de baixo inteira; na linha de cima, play, −15, +30, velocidade e volume. */
+.player-caixa { container-type: inline-size; }
+@container (max-width: 600px) {
+  .player { grid-template-columns: auto auto auto 1fr auto; grid-template-areas: "play menos mais velocidade volume" "trilha trilha trilha trilha trilha";
+    gap: 0.5rem 0.375rem; padding: 0.6rem; }
+  .player__play { width: 44px; height: 44px; }
+  .player__pular:not([data-pular^="-"]) { margin-left: 0; }
+  .player__velocidade { justify-self: end; width: 3rem; font-size: 0.85rem; }
+}
+/* Player com menos de 273 px (telas abaixo de ~360): −15, +30 e volume estreitam para 40 px, e a altura segue em 44. */
+@container (max-width: 272px) {
+  .player__pular, .player__volume-botao { min-width: 40px; width: 40px; }
+}
+/* Abaixo de 261 px (telas de ~345 px ou menos) não cabe: o volume sai e fica com o botão físico do aparelho. */
+@container (max-width: 260px) {
+  .js .player__volume { display: none; }
+  .player { grid-template-areas: "play menos mais velocidade velocidade" "trilha trilha trilha trilha trilha"; }
+}
+/* Sem container query (Safari anterior ao 16), a quebra em duas linhas vale pela largura da tela. */
+@supports not (container-type: inline-size) {
+  @media (max-width: 600px) {
+    .player { grid-template-columns: auto auto auto 1fr auto; grid-template-areas: "play menos mais velocidade volume" "trilha trilha trilha trilha trilha";
+      gap: 0.5rem 0.375rem; padding: 0.6rem; }
+    .player__play { width: 44px; height: 44px; }
+    .player__pular:not([data-pular^="-"]) { margin-left: 0; }
+    .player__velocidade { justify-self: end; width: 3rem; font-size: 0.85rem; }
+  }
+}

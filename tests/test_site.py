@@ -1041,6 +1041,17 @@ def test_onde_o_ouvinte_parou_nasce_escondido_e_so_o_js_mostra(projeto):
         assert f'<span class="progresso" data-progresso="{eid}" hidden></span>' in pagina
 
 
+def test_player_tem_pular_com_nome_acessivel_e_dados_para_a_tela_de_bloqueio(projeto):
+    # #117: −15/+30 com nome que diz a direção, e título e saga para o Media Session.
+    _tres_publicados(projeto)
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+
+    assert '<button class="player__pular" type="button" data-pular="-15" aria-label="Voltar 15 segundos">' in pagina
+    assert '<button class="player__pular" type="button" data-pular="30" aria-label="Avançar 30 segundos">' in pagina
+    assert re.search(r'data-episodio="sw-002"\s+data-titulo="Dois" data-rotulo="Saga Software · ep. 2"', pagina)
+
+
 # ---------------------------------------------------------------- transcrição e acabamento (#55, #57)
 
 

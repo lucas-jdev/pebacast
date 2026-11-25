@@ -9,6 +9,8 @@
   };
 
   const players = [...document.querySelectorAll(".player")];
+  const CAPA = new URL("capa-512.jpg", document.currentScript.src).href;
+  const SETAS = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5 };
 
   // Em aba anônima ou com o armazenamento bloqueado, o localStorage lança: o site segue como se nada estivesse salvo.
   const armazenamento = {
@@ -210,13 +212,51 @@
     // Fechar a aba no meio do áudio não dispara pause: o pagehide é o último momento garantido para gravar.
     window.addEventListener("pagehide", () => { if (!audio.paused) gravarPosicao({ atualizarSelo: true }); });
 
-    barra.addEventListener("input", () => { arrastando = true; atual.textContent = formatar(barra.value); pintar(); });
-    barra.addEventListener("change", () => {
-      arrastando = false;
+    const irPara = (segundos) => {
+      const fim = Number.isFinite(audio.duration) ? audio.duration : Number(barra.max);
+      const destino = Math.min(Math.max(0, segundos), fim);
       desistirDaRetomada();
       if (audio.readyState === 0) audio.load();
-      audio.currentTime = Number(barra.value);
+      audio.currentTime = destino;
+      posicionar(destino);
+    };
+    const pular = (segundos) => irPara((audio.readyState ? audio.currentTime : Number(barra.value)) + segundos);
+
+    barra.addEventListener("input", () => { arrastando = true; atual.textContent = formatar(barra.value); pintar(); });
+    barra.addEventListener("change", () => { arrastando = false; irPara(Number(barra.value)); });
+    // A seta nativa anda 1 s, o que não serve num áudio de 18 min.
+    barra.addEventListener("keydown", (evento) => {
+      if (!(evento.key in SETAS)) return;
+      evento.preventDefault();
+      pular(SETAS[evento.key]);
     });
+    player.querySelectorAll("[data-pular]").forEach((botao) => botao.addEventListener("click", () => pular(Number(botao.dataset.pular))));
+
+    // Tela de bloqueio e notificação de mídia: capa, título e botões de pular para quem ouve com o celular no bolso.
+    const sessao = navigator.mediaSession;
+    const atualizarPosicaoNaSessao = () => {
+      if (!sessao?.setPositionState || sessao.metadata?.title !== player.dataset.titulo || !Number.isFinite(audio.duration)) return;
+      try {
+        sessao.setPositionState({ duration: audio.duration, position: Math.min(audio.currentTime, audio.duration), playbackRate: audio.playbackRate });
+      } catch { /* posição fora da duração durante um seek */ }
+    };
+    audio.addEventListener("play", () => {
+      if (!sessao) return;
+      sessao.metadata = new MediaMetadata({
+        title: player.dataset.titulo, artist: "Pebacast", album: player.dataset.rotulo,
+        artwork: [{ src: CAPA, sizes: "512x512", type: "image/jpeg" }],
+      });
+      const acoes = {
+        play: () => audio.paused && play.click(),
+        pause: () => audio.pause(),
+        seekbackward: (detalhes) => pular(-(detalhes.seekOffset || 15)),
+        seekforward: (detalhes) => pular(detalhes.seekOffset || 30),
+        seekto: (detalhes) => irPara(detalhes.seekTime),
+      };
+      Object.entries(acoes).forEach(([acao, tratar]) => { try { sessao.setActionHandler(acao, tratar); } catch { /* ação não suportada */ } });
+      atualizarPosicaoNaSessao();
+    });
+    ["loadedmetadata", "seeked", "ratechange"].forEach((evento) => audio.addEventListener(evento, atualizarPosicaoNaSessao));
 
     velocidade.addEventListener("click", () => {
       const proxima = VELOCIDADES[(VELOCIDADES.indexOf(audio.playbackRate) + 1) % VELOCIDADES.length];
@@ -238,9 +278,14 @@
       return;
     }
 
+    // O painel abre para cima; se ali ele ficaria cortado pela tela ou escondido sob o cabeçalho fixo, abre para baixo.
     const abrirVolume = (aberto) => {
       painel.hidden = !aberto;
       botaoDoVolume.setAttribute("aria-expanded", String(aberto));
+      if (!aberto) return;
+      painel.classList.remove("player__volume-painel--abaixo");
+      const limite = document.querySelector(".topo")?.getBoundingClientRect().bottom ?? 0;
+      if (painel.getBoundingClientRect().top < Math.max(0, limite)) painel.classList.add("player__volume-painel--abaixo");
     };
     botaoDoVolume.addEventListener("click", () => {
       const abrir = painel.hidden;
