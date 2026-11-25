@@ -278,3 +278,32 @@ def test_resposta_parada_no_limite_de_tokens_nao_e_repetida():
     with pytest.raises(TranscricaoIncompleta, match="limite de tokens"):
         GeminiTranscritor("modelo", cliente, dormir=esperas.append).transcrever(b"mp3")
     assert Modelos.chamadas == 1 and esperas == []
+
+
+# Ruído da transcrição (#132): casos reais dos incidentes do sw-004, se-002 e co-002.
+
+@pytest.mark.parametrize(("roteiro", "ouvido"), [
+    ("dados e marcou fronteira de confiança", "dados e marcou a fronteira de confiança"),  # se-002
+    ("e de spoofing e se passar por", "e de spoofing se passar por"),  # se-002
+    ("o mesmo arquivo pras duas funções", "o mesmo arquivo para as duas funções"),  # sw-004
+    ("corpo da mensagem perai isso é exatamente", "corpo da mensagem pera aí isso é exatamente"),  # sw-004
+    ("pequeno e arquitetural num sistema em que", "pequeno e arquitetural no sistema em que"),  # sw-004
+    ("e quais são os trade-offs aqui, porque nada é de graça", "e quais são os tradeoffs aqui, porque nada é de graça"),
+])
+def test_artigo_solto_contracao_e_separacao_sao_ruido_da_transcricao(davi, roteiro, ouvido):
+    laudo = _qa(ouvido, ouvido).comparar([Fala(davi, roteiro)], [ouvido, ouvido])
+
+    assert laudo.aprovado, laudo.markdown("ruído")
+
+
+@pytest.mark.parametrize(("roteiro", "ouvido", "trecho"), [
+    ("um repositório da NVIDIA chamado Nodewright que é", "um repositório da NVIDIA chamado Nygard que é", "nodewright"),
+    ("e por isso não muda a decisão que o time tomou", "e por isso muda a decisão que o time tomou", "nao"),
+    ("aceito o risco nem que seja por escrito", "aceito o risco que seja por escrito", "nem"),
+])
+def test_palavra_de_conteudo_e_negacao_continuam_no_laudo(davi, roteiro, ouvido, trecho):
+    # O "Nygard" no lugar de "Nodewright" foi o acerto de verdade do sw-004, perdido no meio do ruído.
+    laudo = _qa(ouvido, ouvido).comparar([Fala(davi, roteiro)], [ouvido, ouvido])
+
+    [divergencia] = laudo.divergencias
+    assert f"[{trecho}]" in divergencia.trecho

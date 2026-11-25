@@ -38,6 +38,15 @@ class TranscricaoIncompleta(Exception):
     """A transcrição cobre pouco do roteiro: comparar daria um alarme falso do tamanho do que faltou."""
 STATUS_TRANSITORIOS = frozenset({408, 429})
 PALAVRA = re.compile(r"\w+")
+# Artigo, conjunção e interjeição soltos (#132): nos 4 primeiros incidentes, 18 de 48 divergências eram
+# só isso ("[] a", "[e] (nada)"), e nenhuma mudava o que o ouvinte entende. A comparação já é sem acento.
+# "não", "nem" e "sem" ficam de fora de propósito: um deles sumido inverte a frase.
+PALAVRAS_DE_FUNCAO = frozenset({
+    "a", "o", "as", "os", "um", "uma", "uns", "umas",
+    "e", "ou", "mas",
+    "de", "do", "da", "dos", "das", "em", "no", "na", "nos", "nas", "num", "numa",
+    "ah", "eh", "oh", "ai", "ei", "hum",
+})
 
 
 class Transcritor(Protocol):
@@ -137,14 +146,20 @@ class Trecho:
 def divergencias(roteiro: Sequence[str], transcricao: Sequence[str]) -> list[Trecho]:
     trechos = []
     for tag, i1, i2, j1, j2 in SequenceMatcher(None, roteiro, transcricao, autojunk=False).get_opcodes():
-        if tag == "equal":
-            continue
-        ouvidas = transcricao[j1:j2]
-        # Número por extenso transcrito como algarismo é ruído, não erro do áudio.
-        if ouvidas and all(palavra.isdigit() for palavra in ouvidas):
-            continue
-        trechos.append(Trecho(i1, i2, " ".join(ouvidas)))
+        if tag != "equal" and not e_ruido(roteiro[i1:i2], transcricao[j1:j2]):
+            trechos.append(Trecho(i1, i2, " ".join(transcricao[j1:j2])))
     return trechos
+
+
+def e_ruido(escritas: Sequence[str], ouvidas: Sequence[str]) -> bool:
+    """Diferença que é da transcrição, e não do áudio."""
+    # Número por extenso transcrito como algarismo.
+    if ouvidas and all(palavra.isdigit() for palavra in ouvidas):
+        return True
+    # A mesma fala com outra separação: "trade off" e "tradeoff", "senao" e "se nao".
+    if "".join(escritas) == "".join(ouvidas):
+        return True
+    return all(palavra in PALAVRAS_DE_FUNCAO for palavra in (*escritas, *ouvidas))
 
 
 def confirmadas(primeira: Sequence[Trecho], segunda: Sequence[Trecho]) -> list[tuple[Trecho, Trecho]]:
