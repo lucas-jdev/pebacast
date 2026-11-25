@@ -98,7 +98,8 @@ def test_proximo_segue_a_fila_da_pipeline(projeto):
 
     assert pagina.count('class="proximo__titulo"') == 1
     assert 'class="proximo__titulo">sl-001<' in pagina
-    assert "O roteiro é o próximo a ser escrito." in pagina
+    assert "É o próximo da fila: as fontes já foram conferidas" in pagina
+    assert "roteiro é o próximo a ser escrito" not in pagina  # vocabulário da pipeline (#120)
 
 
 def test_roteiro_aprovado_e_o_proximo_mesmo_fora_da_ordem(projeto):
@@ -107,7 +108,7 @@ def test_roteiro_aprovado_e_o_proximo_mesmo_fora_da_ordem(projeto):
     pagina = gerar_index(projeto, "feed.xml")
 
     assert 'class="proximo__titulo">Um<' in pagina
-    assert "Roteiro aprovado na revisão." in pagina
+    assert "Já está escrito e revisado: sai na próxima publicação." in pagina
 
 
 
@@ -121,7 +122,7 @@ def test_roteiro_aguardando_a_cota_avisa_que_sai_em_breve(projeto):
     assert 'class="proximo__titulo">Um<' in pagina
     assert ("Tivemos um problema interno ao gravar a voz deste episódio. "
             "O roteiro já está pronto, e ele sai em breve.") in pagina
-    assert "Roteiro aprovado na revisão." not in pagina
+    assert "Já está escrito e revisado" not in pagina
 
 def test_sem_episodio_elegivel_avisa_que_o_proximo_esta_sendo_cavado(projeto):
     _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
@@ -155,8 +156,8 @@ def test_filtro_por_saga_so_aparece_com_mais_de_uma_saga(projeto):
     _ja_publicado(projeto, "sl-001", "2026-11-08T15:00:00+00:00")
     pagina = gerar_pagina_episodios(projeto, "feed.xml")
 
-    assert 'data-saga="software" aria-pressed="false">Software <span class="filtro__total">1</span>' in pagina
-    assert 'data-saga="solucoes" aria-pressed="false">Soluções <span class="filtro__total">1</span>' in pagina
+    assert 'data-saga="software" data-nome="Software" aria-pressed="false">Software <span class="filtro__total">1</span>' in pagina
+    assert 'data-saga="solucoes" data-nome="Soluções" aria-pressed="false">Soluções <span class="filtro__total">1</span>' in pagina
 
 
 def test_escreve_inicial_e_arquivo(projeto, tmp_path):
@@ -395,8 +396,8 @@ def test_filtro_tem_um_botao_por_saga_com_o_id_usado_na_url(projeto):
 
     pagina = gerar_pagina_episodios(projeto, "feed.xml")
 
-    assert 'class="filtro__opcao" type="button" data-saga="software" aria-pressed="false"' in pagina
-    assert 'class="filtro__opcao" type="button" data-saga="solucoes" aria-pressed="false"' in pagina
+    assert 'class="filtro__opcao" type="button" data-saga="software" data-nome="Software" aria-pressed="false"' in pagina
+    assert 'class="filtro__opcao" type="button" data-saga="solucoes" data-nome="Soluções" aria-pressed="false"' in pagina
 
 
 def test_filtro_le_e_grava_a_saga_na_url_sem_criar_historico():
@@ -728,8 +729,20 @@ def test_sem_proximo_publicado_diz_qual_e_o_proximo_do_curriculo_e_convida_a_ass
     pagina = _texto(gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001"))
 
     assert "O ep. 2 da saga Software, Dois" in pagina
-    assert "ainda não saiu. As sagas se revezam: assine para receber." in pagina
+    assert "ainda não saiu. As sagas se revezam, então pode levar alguns dias." in pagina
     assert "Anterior" not in pagina
+    assert "Enquanto isso" not in pagina, "só há episódio da própria saga"
+
+
+def test_proximo_que_nao_saiu_oferece_o_mais_recente_de_outra_saga(projeto):
+    # Sem beco sem saída (#120): quem chegou ao fim do que saiu da saga ganha outra coisa para ouvir.
+    _usar_fila(projeto)
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+    _ja_publicado(projeto, "sl-001", "2026-11-08T15:00:00+00:00")
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+    assert ('Enquanto isso: <a href="../../episodios/sl-001/">sl-001</a>, da saga Soluções.') in pagina
 
 
 def test_ultimo_episodio_do_curriculo_diz_que_a_saga_acabou(projeto):
@@ -982,13 +995,40 @@ def test_pagina_do_episodio_se_apresenta_e_leva_a_sobre(projeto):
     assert '<a href="../../sobre/">O que é →</a>' in pagina
 
 
-def test_antes_ouca_mostra_o_pre_requisito_publicado(projeto):
+def test_pre_requisito_da_mesma_saga_nao_repete_o_caminho_do_anterior(projeto):
+    # #120: "continua SW 001" ao lado de "Anterior: SW 002" parecia dizer que a pessoa pulou um episódio.
     _tres_publicados(projeto)
+    _ja_publicado(projeto, "sw-003", "2026-11-10T15:00:00+00:00")
 
-    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-002")
+    for episodio in ("sw-001", "sw-002", "sw-003"):
+        assert 'class="antes"' not in gerar_pagina_do_episodio(projeto, "feed.xml", episodio)
+
+
+def test_pre_requisito_de_outra_saga_continua_avisado(projeto):
+    _usar_fila(projeto)
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+    saga = yaml.safe_load((projeto.raiz / "curriculum" / "sagas" / "solucoes.yaml").read_text(encoding="utf-8"))
+    saga["episodios"][0]["pre_requisitos"] = ["sw-001"]
+    (projeto.raiz / "curriculum" / "sagas" / "solucoes.yaml").write_text(yaml.safe_dump(saga, allow_unicode=True), encoding="utf-8")
+    _ja_publicado(projeto, "sl-001", "2026-11-08T15:00:00+00:00")
+
+    pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sl-001")
 
     assert '<p class="antes">Este episódio continua <a href="../../episodios/sw-001/">Um</a>.' in pagina
-    assert 'class="antes"' not in gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
+
+
+def test_arquivo_traz_o_proximo_de_cada_saga_escondido_e_o_titulo_que_o_filtro_troca(projeto):
+    _usar_fila(projeto)
+    _ja_publicado(projeto, "sw-001", "2026-11-07T15:00:00+00:00")
+    _ja_publicado(projeto, "sl-001", "2026-11-08T15:00:00+00:00")
+
+    pagina = gerar_pagina_episodios(projeto, "feed.xml")
+
+    assert '<h1 class="secao__titulo" data-arquivo-titulo>Todos os episódios</h1>' in pagina
+    assert 'data-saga="software" data-nome="Software"' in pagina
+    assert re.search(r'<p class="arquivo__proximo" data-proximo-da-saga="software" hidden>Próximo da saga: '
+                     r'<strong>Dois</strong>, o ep\. 2,', pagina)
+    assert '<p class="arquivo__proximo" data-proximo-da-saga="solucoes" hidden>' in pagina
 
 
 def test_pre_requisito_que_nao_saiu_nao_vira_link(projeto):

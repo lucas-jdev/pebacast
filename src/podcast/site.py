@@ -228,7 +228,7 @@ def _secao_do_episodio(item: Mapping[str, Any], publicados: Sequence[Mapping[str
                 f'<span class="vizinhos__rotulo">{rotulo}</span>{escape(outro["episodio"]["titulo"])}</a>')
 
     links = vizinho(anterior, "← Anterior", "anterior") + (
-        vizinho(proximo, "Próximo →", "proximo") if proximo else _proximo_que_nao_saiu(item))
+        vizinho(proximo, "Próximo →", "proximo") if proximo else _proximo_que_nao_saiu(item, publicados))
     return f"""<section class="secao" id="episodio">
   <div class="largura">
     <p class="apresenta"><strong>{escape(meta['titulo'])}</strong> · podcast diário de arquitetura em diálogo,
@@ -242,17 +242,24 @@ def _secao_do_episodio(item: Mapping[str, Any], publicados: Sequence[Mapping[str
 
 
 def _antes_ouca(item: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]]) -> str:
-    """Os pré-requisitos do currículo que já saíram: quem chega pelo ep. 2 sabe que o 1 vem antes."""
+    """Os pré-requisitos publicados que ficam fora do caminho da saga.
+
+    Um pré-requisito da mesma saga vem antes no currículo, e quem segue o "← Anterior" passa por ele.
+    Citá-lo ao lado do anterior ("continua SW 001" junto de "Anterior: SW 002") parecia dizer que a
+    pessoa pulou um episódio (#120). Fica o aviso para o pré-requisito de outra saga.
+    """
     no_ar = {i["episodio"]["id"]: i["episodio"]["titulo"] for i in publicados}
-    antes = [eid for eid in item["episodio"].get("pre_requisitos", []) if eid in no_ar]
+    da_saga = {episodio.id for episodio in item["saga"].episodios}
+    antes = [eid for eid in item["episodio"].get("pre_requisitos", []) if eid in no_ar and eid not in da_saga]
     if not antes:
         return ""
     links = " e ".join(f'<a href="../../{caminho_do_episodio(eid)}">{escape(no_ar[eid])}</a>' for eid in antes)
     return f'<p class="antes">Este episódio continua {links}. Se ainda não ouviu, vale começar por lá.</p>'
 
 
-def _proximo_que_nao_saiu(item: Mapping[str, Any]) -> str:
-    """Sem próximo publicado na saga: diz qual é o próximo do currículo, ou que a saga acabou, e convida a assinar."""
+def _proximo_que_nao_saiu(item: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]]) -> str:
+    """Sem próximo publicado na saga: diz qual é o próximo do currículo, ou que a saga acabou, e não deixa a
+    pessoa num beco: oferece o episódio mais recente de outra saga para ouvir enquanto isso."""
     saga, episodio_id = item["saga"], item["episodio"]["id"]
     ordem = [e.id for e in saga.episodios]
     seguinte = saga.episodios[ordem.index(episodio_id) + 1] if ordem.index(episodio_id) + 1 < len(ordem) else None
@@ -260,10 +267,14 @@ def _proximo_que_nao_saiu(item: Mapping[str, Any]) -> str:
         texto = f"Este é o último episódio da saga {escape(saga.nome_curto)} no currículo."
     else:
         texto = (f"O ep. {saga.posicao_do(seguinte.id)} da saga {escape(saga.nome_curto)}, "
-                 f"<em>{escape(seguinte.titulo)}</em>, ainda não saiu. As sagas se revezam: assine para receber.")
+                 f"<em>{escape(seguinte.titulo)}</em>, ainda não saiu. As sagas se revezam, então pode levar alguns dias.")
+    outro = next((i for i in publicados if i["saga"].id != saga.id), None)
+    enquanto_isso = "" if outro is None else (
+        f'<span class="vizinhos__enquanto">Enquanto isso: <a href="../../{caminho_do_episodio(outro["episodio"]["id"])}">'
+        f'{escape(outro["episodio"]["titulo"])}</a>, da saga {escape(outro["saga"].nome_curto)}.</span>')
     return f"""<div class="vizinhos__link vizinhos__link--proximo vizinhos__em-breve">
-      <span class="vizinhos__rotulo">Próximo</span>{texto}
-      <a class="botao botao--pequeno" href="../../#assinar">Assinar</a>
+      <span class="vizinhos__rotulo">Próximo</span>{texto}{enquanto_isso}
+      <a class="botao botao--pequeno" href="../../#assinar">Assinar para receber</a>
     </div>"""
 
 
@@ -653,13 +664,31 @@ def _secao_arquivo(publicados: Sequence[Mapping[str, Any]], personas: Mapping[st
   <div class="largura">
     <div class="secao__cabeca">
       <p class="sobretitulo">Arquivo</p>
-      <h1 class="secao__titulo">Todos os episódios</h1>
+      <h1 class="secao__titulo" data-arquivo-titulo>Todos os episódios</h1>
       <p class="secao__lead" data-arquivo-lead>{escape(lead)}</p>
     </div>
     {_filtro_por_saga(publicados)}
     <div class="arquivo">{grupos}</div>
+    {_proximos_por_saga(publicados)}
   </div>
 </section>"""
+
+
+def _proximos_por_saga(publicados: Sequence[Mapping[str, Any]]) -> str:
+    """No fim da lista filtrada por uma saga, o próximo dela que ainda não saiu. O JS mostra o da saga escolhida."""
+    no_ar = {item["episodio"]["id"] for item in publicados}
+    sagas = {item["saga"].id: item["saga"] for item in publicados}
+    notas = []
+    for saga in sagas.values():
+        seguinte = next((e for e in saga.episodios if e.id not in no_ar), None)
+        if seguinte is None:
+            texto = f"Por enquanto, a saga {escape(saga.nome_curto)} acaba aqui."
+        else:
+            texto = (f"Próximo da saga: <strong>{escape(seguinte.titulo)}</strong>, o ep. {saga.posicao_do(seguinte.id)}, "
+                     "ainda não saiu. As sagas se revezam, então pode levar alguns dias.")
+        notas.append(f'<p class="arquivo__proximo" data-proximo-da-saga="{escape(saga.id)}" hidden>{texto} '
+                     '<a href="./#assinar">Assinar para receber</a></p>')
+    return "".join(notas)
 
 
 def _filtro_por_saga(publicados: Sequence[Mapping[str, Any]]) -> str:
@@ -673,7 +702,7 @@ def _filtro_por_saga(publicados: Sequence[Mapping[str, Any]]) -> str:
         (sid, nome, contagem[sid]) for sid, nome, _ in SAGAS if sid in contagem
     ]
     botoes = "".join(
-        f'<button class="filtro__opcao" type="button" data-saga="{escape(sid)}" aria-pressed="{"true" if not sid else "false"}">'
+        f'<button class="filtro__opcao" type="button" data-saga="{escape(sid)}" data-nome="{escape(nome)}" aria-pressed="{"true" if not sid else "false"}">'
         f'{escape(nome)} <span class="filtro__total">{quantos}</span></button>'
         for sid, nome, quantos in opcoes
     )
@@ -884,10 +913,11 @@ def _links(item: Mapping[str, Any], link_permanente: str) -> str:
 
 
 _ESTADO_DO_PROXIMO = {
-    AGUARDANDO_PUBLICACAO: "Roteiro aprovado na revisão. Falta só gravar a voz e publicar.",
+    AGUARDANDO_PUBLICACAO: "Já está escrito e revisado: sai na próxima publicação.",
     AGUARDANDO_COTA: "Tivemos um problema interno ao gravar a voz deste episódio. O roteiro já está pronto, e ele sai em breve.",
 }
-_ESTADO_PADRAO = "Fontes conferidas. O roteiro é o próximo a ser escrito."
+# Para o ouvinte, e não no vocabulário da pipeline (achado B2 da investigação de HX, #5).
+_ESTADO_PADRAO = "É o próximo da fila: as fontes já foram conferidas, e ele deve sair na próxima publicação."
 
 
 _DIAS_POR_EXTENSO = {"segunda": "segunda", "terca": "terça", "quarta": "quarta", "quinta": "quinta",

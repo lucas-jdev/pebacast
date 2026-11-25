@@ -809,6 +809,12 @@ h1.episodio__titulo { font-size: clamp(1.9rem, 4vw, 2.8rem); }
 .vizinhos__em-breve { font-family: var(--fonte-texto); font-size: 1rem; line-height: 1.5; text-align: left; border-style: dashed; }
 .vizinhos__em-breve:hover { background: #fffaf0; }
 .vizinhos__em-breve .botao { display: flex; width: max-content; margin-top: 0.8rem; }
+.vizinhos__enquanto { display: block; margin-top: 0.6rem; }
+.vizinhos__enquanto a { color: var(--texto); font-weight: 650; }
+/* Fim do arquivo filtrado por saga (#120): o próximo dela, com a mesma borda tracejada do "em breve". */
+.arquivo__proximo { max-width: 46rem; margin: 1.6rem 0 0; padding: 0.9rem 1.1rem; border: 3px dashed var(--texto); line-height: 1.55; }
+.arquivo__proximo[hidden] { display: none; }
+.arquivo__proximo a { color: var(--texto); font-weight: 650; }
 
 /* Player: carregando (o MP3 vem de um redirect do GitHub Releases) e erro, com o caminho para baixar o arquivo. */
 .player--carregando .player__play { animation: carregando 1s ease-in-out infinite alternate; }
