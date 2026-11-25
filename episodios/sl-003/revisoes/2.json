@@ -1,0 +1,186 @@
+{
+  "aprovado": true,
+  "roteiro_sha256": "2ce23d9475f8929fce3a35284900e81f80c023626a66d44976eb461701143659",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "O caso de hoje é hipotético, tá? Não é notícia, é um cenário que a gente montou pra conversa.",
+      "veredito": "correta",
+      "fonte": "noticia.json (tipo: hipotetico)"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "O laboratório manda os exames realizados pro faturamento num arquivo que sai toda madrugada. A farmácia lê as prescrições e as alergias direto das tabelas do banco do prontuário. E o portal do paciente chama o laboratório na hora",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário)"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "o time do prontuário reorganizou a tabela de alergias numa atualização de rotina. [...] a tela de conferência da farmácia passou a mostrar a lista de alergias vazia. Uma manhã inteira assim, até alguém estranhar, e aí os farmacêuticos voltaram a conferir no prontuário, paciente por paciente.",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário); 'nem avisaram ninguém' é detalhe acrescentado ao caso hipotético, coerente com ele"
+    },
+    {
+      "fala": 9,
+      "afirmacao": "Na mesma semana o laboratório ficou instável e o portal do paciente caiu junto. Aí a nova gerente de tecnologia chegou com a proposta. [...] troca tudo por mensageria. Evento pra tudo.",
+      "veredito": "correta",
+      "fonte": "noticia.json (cenário)"
+    },
+    {
+      "fala": 14,
+      "afirmacao": "Enterprise Integration Patterns, do Gregor Hohpe e do Bobby Woolf. No capítulo dois eles organizam a integração entre aplicações em quatro estilos: transferência de arquivos, banco de dados compartilhado, chamada remota de procedimento e mensageria.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, 'Integration Styles': File Transfer, Shared Database, Remote Procedure Invocation, Messaging; referência do episódio em curriculum/sagas/solucoes.yaml"
+    },
+    {
+      "fala": 15,
+      "afirmacao": "E o hospital usa três dos quatro sem nem saber.",
+      "veredito": "correta",
+      "fonte": "noticia.json: arquivo, banco compartilhado e chamada remota; mensageria é a proposta"
+    },
+    {
+      "fala": 18,
+      "afirmacao": "O arquivo é um contrato. Cada sistema continua dono dos próprios dados e só promete um formato de saída. Isso deixa os dois bem desacoplados: um não precisa saber nem em que linguagem o outro foi escrito.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, File Transfer: os integradores não precisam conhecer o interior da aplicação; arquivos são um mecanismo universal, independente de linguagem e plataforma"
+    },
+    {
+      "fala": 20,
+      "afirmacao": "Na minha leitura, o ponto que os autores insistem é a atualidade dos dados: arquivo costuma ser gerado em intervalos, e entre um arquivo e outro os sistemas discordam.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, File Transfer: atualizações pouco frequentes deixam os sistemas fora de sincronia; critério 'data timeliness' da introdução do capítulo. Enquadrado como leitura da persona"
+    },
+    {
+      "fala": 22,
+      "afirmacao": "alguém precisa combinar nome, formato, o que fazer com arquivo pela metade, com arquivo que não chegou.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, File Transfer: é preciso combinar nomes, locais, formato e o controle de arquivos em escrita (locking); conhecimento consolidado"
+    },
+    {
+      "fala": 24,
+      "afirmacao": "o dado é um só. A farmácia vê a alergia no mesmo instante em que o médico registra. Não tem arquivo atrasado, não tem cópia divergente.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, Shared Database: os dados ficam consistentes o tempo todo, sem atraso de cópia"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "Banco compartilhado é integração. Não é atalho, não é gambiarra temporária, é um estilo de integração com nome e com contrato.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2: Shared Database é um dos quatro estilos. 'Não é atalho' é leitura da persona, como registra o currículo"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "Só que o contrato é o esquema inteiro das tabelas, e ninguém escreveu esse contrato em lugar nenhum. Toda coluna que a farmácia lê virou uma promessa que o prontuário fez sem saber.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, Shared Database e Remote Procedure Invocation: o banco compartilhado expõe uma estrutura de dados grande e não encapsulada a todas as aplicações; leitura aplicada ao cenário hipotético"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "O livro também aponta outra dificuldade: desenhar um esquema que sirva bem pra várias aplicações ao mesmo tempo é difícil, e quanto mais gente depende dele, mais ele trava as mudanças.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, Shared Database: é difícil chegar a um esquema unificado que atenda a várias aplicações; em Remote Procedure Invocation, o livro diz que a estrutura de dados grande e não encapsulada do banco compartilhado torna mais difícil mudar e manter a família de aplicações integradas"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "Tem ainda o lado da carga: uma consulta pesada da farmácia disputa recurso com o médico que está prescrevendo.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, Shared Database: várias aplicações lendo e alterando os mesmos dados podem tornar o banco um gargalo de desempenho e causar deadlocks"
+    },
+    {
+      "fala": 32,
+      "afirmacao": "A grande diferença pros outros dois é que aqui você não compartilha dado, você compartilha função. O portal não precisa saber como o laboratório guarda o resultado, ele só pede. O laboratório continua dono do dado e da regra.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, Remote Procedure Invocation: arquivo e banco compartilham dados mas não funcionalidade; RPI aplica encapsulamento e cada aplicação mantém o controle dos próprios dados"
+    },
+    {
+      "fala": 36,
+      "afirmacao": "Na chamada remota, os dois sistemas precisam estar de pé ao mesmo tempo. A disponibilidade de um passa a depender da do outro.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado sobre chamada síncrona; Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, RPI é síncrona"
+    },
+    {
+      "fala": 36,
+      "afirmacao": "a chamada remota parece uma chamada local no código. Quem escreve esquece que tem uma rede no meio, com latência, com falha, com resposta que não volta. Na minha leitura, é por isso que os autores tratam esse estilo como acoplado, mesmo ele escondendo bem os dados.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, RPI: há grandes diferenças de desempenho e confiabilidade entre chamada remota e local, e quem as ignora cria sistemas lentos e pouco confiáveis; mesmo com o encapsulamento, as aplicações continuam 'fairly tightly coupled'"
+    },
+    {
+      "fala": 38,
+      "afirmacao": "Na mensageria, um sistema manda uma mensagem pra um canal, e o outro consome quando puder. Os dois não precisam estar no ar no mesmo instante, a mensagem espera. Dá pra mandar pacotes pequenos e frequentes, então o dado chega quase na hora",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, Messaging: transferir pacotes de dados com frequência, de imediato, de forma confiável e assíncrona; o sistema de mensageria guarda e reenvia a mensagem até a entrega"
+    },
+    {
+      "fala": 38,
+      "afirmacao": "É o estilo que o livro inteiro aprofunda. Na minha opinião, é o que costuma equilibrar melhor os critérios, mas os próprios autores deixam claro que nenhum estilo vence em todos, e que a escolha é feita integração por integração.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, introdução 'Integration Styles': cada estilo tem vantagens e desvantagens e as aplicações podem combinar estilos, cada ponto de integração usando o que melhor lhe serve; os capítulos seguintes do livro tratam só de mensageria. O 'equilibrar melhor' agora é opinião declarada da persona (corrige o apontamento da revisão 1)"
+    },
+    {
+      "fala": 40,
+      "afirmacao": "O que ajuda é o portal guardar uma cópia dos resultados, alimentada por mensagens do laboratório, e responder a partir dela. Aí o laboratório pode cair e o paciente ainda vê o que já saiu. Mas repara que isso tem custo: agora existem duas cópias do resultado, e a do portal pode estar alguns segundos atrás.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: réplica local alimentada por eventos traz disponibilidade em troca de consistência eventual"
+    },
+    {
+      "fala": 40,
+      "afirmacao": "Então pra essa pergunta específica do paciente, trocar a chamada por evento não ajuda tanto quanto parece.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: consulta interativa pede resposta síncrona; o ganho vem da cópia local, como a fala seguinte explica"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "Mensagem que chega duas vezes, mensagem que chega fora de ordem, fila que enche, alguém que precisa olhar pra tudo isso de madrugada. É um jeito mais flexível, mas é também o mais complexo de construir e de depurar dos quatro.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, Messaging: o modelo assíncrono é mais difícil de programar, testar e depurar; entrega duplicada e fora de ordem são tratadas no livro (Idempotent Receiver, Resequencer)"
+    },
+    {
+      "fala": 42,
+      "afirmacao": "Você troca indisponibilidade por dado um pouco atrasado e por uma infraestrutura nova pra operar.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado (consistência eventual e custo operacional do broker); Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, Messaging"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "Uma é a farmácia perguntar ao prontuário na hora, por uma chamada remota, numa interface que o prontuário publica e promete manter. A outra é continuar no banco compartilhado, mas tratando como integração de verdade: uma visão própria pra farmácia, documentada, com dono",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado: RPC com interface estável encapsula o esquema; view dedicada é prática reconhecida para reduzir o acoplamento ao esquema interno. Apresentado como recomendação da persona, sem atribuição"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "O livro propõe olhar vários critérios ao escolher o estilo. Eu uso dois como porta de entrada",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, introdução: critérios como acoplamento das aplicações, intrusão, tecnologia, formato, atualidade do dado, dado ou funcionalidade, assincronia. Os dois escolhidos são declarados como escolha da persona"
+    },
+    {
+      "fala": 50,
+      "afirmacao": "O primeiro: quanto acoplamento eu aceito? Ou seja, quanto um sistema pode saber do outro e quanto uma mudança de um pode quebrar o outro. O segundo: quanta latência o negócio aceita?",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, introdução: 'application coupling' e 'data timeliness' estão entre os critérios; currículo sl-003, objetivo 2"
+    },
+    {
+      "fala": 52,
+      "afirmacao": "Mensageria também serviria, mas pagaria um custo que o problema não pede.",
+      "veredito": "correta",
+      "fonte": "Coerente com Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, cap. 2 (mensageria mais complexa); juízo da persona sobre o cenário"
+    },
+    {
+      "fala": 59,
+      "afirmacao": "Arquivo: cada um é dono do seu dado, o contrato é pequeno, mas o dado chega atrasado. Banco compartilhado: o dado é um só e está sempre atualizado, mas o contrato é o esquema inteiro [...] Chamada remota: compartilha função em vez de dado, esconde bem o banco, mas os dois precisam estar no ar juntos, e a rede não é uma chamada local.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2; resumo coerente com as falas já conferidas"
+    },
+    {
+      "fala": 61,
+      "afirmacao": "E mensageria: os sistemas não precisam estar no ar juntos, o dado chega rápido em pedaços pequenos, mas você ganha cópias que podem atrasar e uma infraestrutura bem mais complexa pra operar.",
+      "veredito": "correta",
+      "fonte": "Enterprise Integration Patterns (Hohpe e Woolf), cap. 2, Messaging"
+    },
+    {
+      "fala": 63,
+      "afirmacao": "E se você ainda não trabalha na área, abra o arquivo docs barra c4 traço negócio ponto md no repositório do Pebacast, no GitHub, classifique as setas do diagrama de contêineres num dos quatro estilos e escolha uma pra imaginar com outro estilo.",
+      "veredito": "correta",
+      "fonte": "Repositório github.com/lucas-jdev/pebacast é público (API do GitHub: visibility public); docs/c4-negocio.md existe e tem a seção 'Nível 2 · Contêineres' com setas entre contêineres. Não exige emprego nem sistema privado"
+    }
+  ]
+}
