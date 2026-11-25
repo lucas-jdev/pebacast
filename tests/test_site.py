@@ -742,7 +742,7 @@ def test_proximo_que_nao_saiu_oferece_o_mais_recente_de_outra_saga(projeto):
 
     pagina = gerar_pagina_do_episodio(projeto, "feed.xml", "sw-001")
 
-    assert ('Enquanto isso: <a href="../../episodios/sl-001/">sl-001</a>, da saga Soluções.') in pagina
+    assert ('Enquanto isso, comece a saga Soluções:<a href="../../episodios/sl-001/">sl-001</a>') in pagina
 
 
 def test_ultimo_episodio_do_curriculo_diz_que_a_saga_acabou(projeto):

@@ -377,7 +377,8 @@
       proximos.forEach((nota) => { nota.hidden = nota.dataset.proximoDaSaga !== saga; });
       // No celular a faixa de sagas rola de lado: traz a escolhida para o meio, em vez de deixá-la cortada.
       filtro.querySelector('.filtro__opcao[aria-pressed="true"]')?.scrollIntoView({ block: "nearest", inline: "center" });
-      status.textContent = `${visiveis} ${visiveis === 1 ? "episódio" : "episódios"}`;
+      const quantos = `${visiveis} ${visiveis === 1 ? "episódio" : "episódios"}`;
+      status.textContent = saga ? `Saga ${opcoes.find((opcao) => opcao.dataset.saga === saga)?.dataset.nome}: ${quantos}` : quantos;
     };
 
     // O filtro mora em ?saga= porque o # já é do episódio. replaceState para "voltar" sair da página em vez de desfazer filtro.

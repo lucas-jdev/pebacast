@@ -268,13 +268,16 @@ def _proximo_que_nao_saiu(item: Mapping[str, Any], publicados: Sequence[Mapping[
     else:
         texto = (f"O ep. {saga.posicao_do(seguinte.id)} da saga {escape(saga.nome_curto)}, "
                  f"<em>{escape(seguinte.titulo)}</em>, ainda não saiu. As sagas se revezam, então pode levar alguns dias.")
-    outro = next((i for i in publicados if i["saga"].id != saga.id), None)
-    enquanto_isso = "" if outro is None else (
-        f'<span class="vizinhos__enquanto">Enquanto isso: <a href="../../{caminho_do_episodio(outro["episodio"]["id"])}">'
-        f'{escape(outro["episodio"]["titulo"])}</a>, da saga {escape(outro["saga"].nome_curto)}.</span>')
+    # O ep. 1 da outra saga com episódio mais recente: o meio de outra trilha não serve a quem está começando.
+    no_ar = {i["episodio"]["id"]: i for i in publicados}
+    outra = next((i["saga"] for i in publicados if i["saga"].id != saga.id and i["saga"].episodios[0].id in no_ar), None)
+    inicio = None if outra is None else no_ar[outra.episodios[0].id]
+    enquanto_isso = "" if inicio is None else (
+        f'<span class="vizinhos__enquanto">Enquanto isso, comece a saga {escape(outra.nome_curto)}:'
+        f'<a href="../../{caminho_do_episodio(inicio["episodio"]["id"])}">{escape(inicio["episodio"]["titulo"])}</a></span>')
     return f"""<div class="vizinhos__link vizinhos__link--proximo vizinhos__em-breve">
       <span class="vizinhos__rotulo">Próximo</span>{texto}{enquanto_isso}
-      <a class="botao botao--pequeno" href="../../#assinar">Assinar para receber</a>
+      <a class="vizinhos__assinar" href="../../#assinar">Assinar para receber</a>
     </div>"""
 
 
@@ -687,7 +690,7 @@ def _proximos_por_saga(publicados: Sequence[Mapping[str, Any]]) -> str:
             texto = (f"Próximo da saga: <strong>{escape(seguinte.titulo)}</strong>, o ep. {saga.posicao_do(seguinte.id)}, "
                      "ainda não saiu. As sagas se revezam, então pode levar alguns dias.")
         notas.append(f'<p class="arquivo__proximo" data-proximo-da-saga="{escape(saga.id)}" hidden>{texto} '
-                     '<a href="./#assinar">Assinar para receber</a></p>')
+                     '<a class="vizinhos__assinar" href="./#assinar">Assinar para receber</a></p>')
     return "".join(notas)
 
 
