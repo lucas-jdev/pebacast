@@ -33,8 +33,10 @@ from podcast.roteiro import (
 from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, max_revisoes
 
 ARQUIVOS_ESTATICOS = "site"
-# O ícone oficial do Spotify, baixado do kit de design dele (developer.spotify.com/documentation/design) e
-# colocado à mão, porque marca não se redesenha. Sem o arquivo, o botão "Ouvir no Spotify" fica só com o texto.
+# O ícone oficial do Spotify, sem nenhuma alteração: Primary_Logo_White_RGB.svg do pacote 2024-spotify-logo-icon.zip
+# do kit de design (developer.spotify.com/documentation/design), porque marca não se redesenha. É a versão branca
+# porque o botão é escuro, e as regras reservam o verde para fundo preto ou branco puro. Sem o arquivo, o botão
+# "Ouvir no Spotify" fica só com o texto.
 ICONE_DO_SPOTIFY = "icones/spotify.svg"
 PAGINA_EPISODIOS = "episodios.html"
 PAGINA_SOBRE = "sobre/"
@@ -1151,7 +1153,7 @@ def _secao_assinar(url_feed: str, meta: Mapping[str, Any], beta: bool = False, s
         lead = ("No Spotify é um toque. Em qualquer outro app de podcast que aceite RSS, como AntennaPod, Pocket Casts,\n"
                 "        Apple Podcasts ou Overcast, cole o endereço do feed. Episódio novo chega sozinho.")
         # alt vazio: o texto do botão já diz "Spotify", e o leitor de tela não precisa ouvir a marca duas vezes.
-        icone = (f'<img class="botao__marca" src="{ICONE_DO_SPOTIFY}" alt="" width="20" height="20">'
+        icone = (f'<img class="botao__marca" src="{ICONE_DO_SPOTIFY}" alt="" width="23" height="22">'
                  if icone_spotify else "")
         acao = (f'\n      <p class="assinar__acoes"><a class="botao" href="{escape(spotify)}">{icone}Ouvir no Spotify</a></p>')
     else:

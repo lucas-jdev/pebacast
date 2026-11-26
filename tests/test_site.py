@@ -933,11 +933,11 @@ def test_icone_do_spotify_entra_so_com_o_arquivo_oficial_colocado(projeto):
     assert "botao__marca" not in gerar_index(projeto, "feed.xml")
 
     icone = projeto.raiz / "site" / "icones" / "spotify.svg"
-    icone.parent.mkdir(parents=True)
+    icone.parent.mkdir(parents=True, exist_ok=True)
     icone.write_text('<svg xmlns="http://www.w3.org/2000/svg"/>', encoding="utf-8")
 
     assert ('<a class="botao" href="https://open.spotify.com/show/5EMHP24shu7Y7fhfRbLkUz"><img class="botao__marca" '
-            'src="icones/spotify.svg" alt="" width="20" height="20">Ouvir no Spotify</a>') in gerar_index(projeto, "feed.xml")
+            'src="icones/spotify.svg" alt="" width="23" height="22">Ouvir no Spotify</a>') in gerar_index(projeto, "feed.xml")
 
 
 def test_com_o_spotify_a_serie_aponta_para_ele_no_sameas(projeto):
