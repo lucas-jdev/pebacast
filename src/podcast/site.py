@@ -196,9 +196,14 @@ def gerar_pagina_do_episodio(projeto: Projeto, arquivo_feed: str, episodio_id: s
     )
 
 
+def _objetivos_em_frases(episodio: Mapping[str, Any]) -> str:
+    """Os objetivos como frases: juntos sem pontuação, a prévia do WhatsApp lia "…do STRIDE Relacionar…" (#118)."""
+    return " ".join(f"{' '.join(o.split()).rstrip('.;')}." for o in episodio.get("objetivos", []) if o.strip())
+
+
 def _resumo(episodio: Mapping[str, Any], nome: str, limite: int = 155) -> str:
-    """Descrição para buscadores: os objetivos do episódio, cortados numa palavra até o limite."""
-    texto = " ".join(" ".join(episodio.get("objetivos", [])).split()) or f"Episódio do {nome}."
+    """Descrição para buscadores e para a prévia de compartilhamento: os objetivos, cortados numa palavra até o limite."""
+    texto = _objetivos_em_frases(episodio) or f"Episódio do {nome}."
     if len(texto) <= limite:
         return texto
     return texto[: limite - 1].rsplit(" ", 1)[0].rstrip(",;:.") + "…"
@@ -393,7 +398,7 @@ def _episodio_estruturado(item: Mapping[str, Any], meta: Mapping[str, Any], seri
         "url": _url(meta, caminho_do_episodio(episodio["id"])),
         "datePublished": publicacao["publicado_em"],
         "timeRequired": f"PT{max(1, round(publicacao['duracao_segundos'] / 60))}M",
-        "description": " ".join(episodio.get("objetivos", [])),
+        "description": _objetivos_em_frases(episodio),
         "associatedMedia": {"@type": "MediaObject", "contentUrl": publicacao["url_audio"]},
         "partOfSeries": {"@id": serie},
     }
@@ -813,7 +818,8 @@ def _player(item: Mapping[str, Any]) -> str:
           <input class="player__nivel" type="range" min="0" max="100" step="5" value="100" aria-label="Volume" aria-orientation="vertical">
         </div>
       </div>
-      <p class="player__retomar" data-retomar hidden><span>Você parou em <span data-retomar-tempo></span>.</span>
+      <p class="player__retomar" data-retomar hidden><span><span data-retomar-motivo>Você parou em</span> <span data-retomar-tempo></span>.</span>
+        <button class="player__onde-parei" type="button" hidden></button>
         <button class="player__do-comeco" type="button" aria-label="Ouvir do começo">Do começo</button></p>
       <p class="player__aviso" role="status" data-player-aviso></p>
     </div></div>"""
@@ -911,8 +917,11 @@ def _fontes(roteiro: Mapping[str, Any]) -> str:
 
 
 def _links(item: Mapping[str, Any], link_permanente: str) -> str:
+    """Sem JS, "Compartilhar" é só o link da página. Com JS, ele abre o compartilhar do aparelho ou copia o
+    endereço, sem recarregar a página nem cortar o áudio (#118)."""
+    eid = escape(item["episodio"]["id"])
     return f"""<p class="episodio__links"><a href="{escape(item['publicacao']['url_audio'])}" download>Baixar o MP3</a>
-      <span aria-hidden="true">·</span> <a href="{escape(link_permanente)}">Link deste episódio</a></p>"""
+      <span aria-hidden="true">·</span> <a href="{escape(link_permanente)}" data-compartilhar="{eid}">Compartilhar</a></p>"""
 
 
 _ESTADO_DO_PROXIMO = {
@@ -1363,6 +1372,7 @@ _SIMBOLOS = """<svg width="0" height="0" style="position:absolute" aria-hidden="
   <symbol id="i-curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
   <symbol id="i-nao_curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" transform="rotate(180 12 12)" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
   <symbol id="i-fora" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6m0-6-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-compartilhar" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="18" cy="5.5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="18.5" r="2.6"/><path d="m8.3 10.8 7.4-4.1m-7.4 6.5 7.4 4.1"/></g></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
 </svg>"""
 

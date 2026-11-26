@@ -9,6 +9,23 @@
   };
 
   const players = [...document.querySelectorAll(".player")];
+
+  // O minuto de um link compartilhado (?t=90) vale uma vez: sai do endereço assim que é lido. Senão, reabrir a
+  // mesma mensagem ou restaurar a aba voltaria sempre a ele, por cima de onde a pessoa parou depois.
+  // Ele fica no history.state, que sobrevive a um recarregamento (o navegador do WhatsApp recarrega, o Android
+  // descarta a aba) mas não a uma nova abertura, até a pessoa tocar.
+  const MINUTO_DO_LINK = (() => {
+    const url = new URL(location.href);
+    const pedido = url.searchParams.has("t") ? Number(url.searchParams.get("t")) : Number(history.state?.minutoDoLink);
+    const valido = Number.isInteger(pedido) && pedido > 0 ? pedido : 0;
+    url.searchParams.delete("t");
+    history.replaceState({ ...history.state, minutoDoLink: valido || undefined }, "", url);
+    return valido;
+  })();
+  const esquecerMinutoDoLink = () => {
+    if (history.state?.minutoDoLink) history.replaceState({ ...history.state, minutoDoLink: undefined }, "", location.href);
+  };
+  const segundosDoLink = (duracao) => (MINUTO_DO_LINK && (!duracao || MINUTO_DO_LINK < duracao) ? MINUTO_DO_LINK : 0);
   const CAPA = new URL("capa-512.jpg", document.currentScript.src).href;
   const SETAS = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5 };
 
@@ -124,27 +141,43 @@
     const retomar = player.querySelector("[data-retomar]");
     const doComeco = retomar.querySelector(".player__do-comeco");
     // Com preload="none" o áudio ainda não carregou: a posição salva só vale depois do loadedmetadata.
-    let retomarEm = progresso.posicao(id);
+    // Um link com o minuto (?t=90) começa ali, porque quem mandou quer mostrar aquele trecho; mas, se a pessoa
+    // tinha parado em outro ponto, o player oferece voltar para lá, e "Do começo" não apaga esse lugar.
+    const doLink = player.closest(".episodio--pagina") ? segundosDoLink(Number(player.dataset.duracao)) : 0;
+    const salvo = progresso.posicao(id);
+    let retomarEm = doLink || salvo;
+    let peloLink = Boolean(doLink);
+    // Ouvindo o trecho de um link, com outro lugar salvo, a pessoa está de visita: nada é gravado por cima do
+    // lugar dela, e "Voltar a 1:40" fica à mão enquanto toca, até ela escolher voltar ou ouvir do começo.
+    let deVisita = Boolean(doLink && salvo && Math.abs(salvo - doLink) >= 5);
     let gravadoEm = 0;
     let tocandoEm = null;
+    const motivo = player.querySelector("[data-retomar-motivo]");
+    const ondeParei = retomar.querySelector(".player__onde-parei");
 
-    const rotuloDoPlay = () => (retomarEm ? `Continuar de ${formatar(retomarEm)}` : "Tocar");
+    const rotuloDoPlay = () => (!retomarEm ? "Tocar" : peloLink ? `Tocar a partir de ${formatar(retomarEm)}` : `Continuar de ${formatar(retomarEm)}`);
     const posicionar = (segundos) => {
       barra.value = Math.floor(segundos);
       atual.textContent = formatar(segundos);
       pintar();
     };
     const oferecerRetomada = () => {
-      retomar.hidden = !retomarEm;
+      retomar.hidden = !retomarEm && !deVisita;
+      motivo.parentElement.hidden = !retomarEm;
+      doComeco.hidden = !retomarEm;
+      motivo.textContent = peloLink ? "O link começa em" : "Você parou em";
       retomar.querySelector("[data-retomar-tempo]").textContent = formatar(retomarEm);
+      ondeParei.hidden = !deVisita;
+      ondeParei.textContent = `Voltar a ${formatar(salvo)}`;
+      ondeParei.setAttribute("aria-label", `Voltar a ${formatar(salvo)}, onde você parou`);
       if (audio.paused) play.setAttribute("aria-label", rotuloDoPlay());
     };
-    const desistirDaRetomada = () => { retomarEm = 0; oferecerRetomada(); };
+    const desistirDaRetomada = () => { retomarEm = 0; peloLink = false; oferecerRetomada(); };
 
     const finalDoEpisodio = () => (Number.isFinite(audio.duration) ? audio.duration : Number(player.dataset.duracao)) * FRACAO_OUVIDA;
     // O selo do card só muda quando a pessoa para (pause, sair da página): "parou em" com o áudio tocando confunde.
     const gravarPosicao = ({ atualizarSelo = false } = {}) => {
-      if (audio.currentTime < 1) return;
+      if (audio.currentTime < 1 || deVisita) return;
       if (audio.currentTime >= finalDoEpisodio()) progresso.esquecerPosicao(id);
       else progresso.gravarPosicao(id, audio.currentTime);
       gravadoEm = audio.currentTime;
@@ -167,10 +200,26 @@
     posicionar(retomarEm);
     oferecerRetomada();
 
+    ondeParei.addEventListener("click", () => {
+      retomarEm = salvo;
+      peloLink = false;
+      deVisita = false;
+      esquecerMinutoDoLink();
+      if (audio.readyState > 0) audio.currentTime = salvo;
+      posicionar(salvo);
+      oferecerRetomada();
+      play.focus();
+    });
+
     doComeco.addEventListener("click", () => {
+      const eraDoLink = peloLink;
+      deVisita = false;
+      esquecerMinutoDoLink();
       desistirDaRetomada();
-      progresso.esquecerPosicao(id);
-      mostrarProgresso(id);
+      if (!eraDoLink) {
+        progresso.esquecerPosicao(id);
+        mostrarProgresso(id);
+      }
       if (audio.readyState > 0) audio.currentTime = 0;
       posicionar(0);
       if (audio.paused) play.click();
@@ -187,7 +236,11 @@
       }
     });
 
-    audio.addEventListener("play", () => { player.classList.add("player--tocando"); play.setAttribute("aria-label", "Pausar"); });
+    audio.addEventListener("play", () => {
+      player.classList.add("player--tocando");
+      play.setAttribute("aria-label", "Pausar");
+      esquecerMinutoDoLink();
+    });
     // Conta uma audição por episódio e visita no GoatCounter, quando o analytics está ligado.
     audio.addEventListener("play", () => {
       window.goatcounter?.count?.({ path: `ouviu/${player.dataset.episodio}`, title: "Play no site", event: true });
@@ -530,6 +583,68 @@
         }
       } finally {
         enviar.disabled = false;
+      }
+    });
+  });
+
+  // Compartilhar sem recarregar (#118): o compartilhar do aparelho quando existe; senão, copia o endereço.
+  // Com JS, o link do rodapé do card vira uma linha própria logo abaixo do player e dos votos, com um botão
+  // (é uma ação, e não navegação) e, antes dele, a opção de mandar o link já no minuto em que a pessoa está.
+  document.querySelectorAll("[data-compartilhar]").forEach((link) => {
+    const cartao = link.closest(".episodio, .item");
+    const player = cartao?.querySelector(`.player[data-episodio="${CSS.escape(link.dataset.compartilhar)}"]`);
+    const audio = player?.querySelector("audio");
+    const barra = player?.querySelector(".player__barra");
+    const endereco = link.href;
+
+    const linha = document.createElement("p");
+    linha.className = "compartilhar";
+    linha.innerHTML = '<label class="compartilhar__minuto" hidden><input type="checkbox"><span></span></label>'
+      + '<button class="compartilhar__botao" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-compartilhar"/></svg>Compartilhar</button>'
+      + '<span class="compartilhar__aviso" role="status"></span>';
+    const minuto = linha.querySelector(".compartilhar__minuto");
+    const caixa = minuto.querySelector("input");
+    const botao = linha.querySelector("button");
+    const status = linha.querySelector(".compartilhar__aviso");
+    (cartao.querySelector(".votos") || player?.closest(".player-caixa") || link.closest("p")).after(linha);
+    link.previousElementSibling?.matches('[aria-hidden="true"]') && link.previousElementSibling.remove();
+    link.remove();
+
+    // Marcada, a caixa guarda o minuto daquele instante: o áudio segue tocando enquanto a pessoa compartilha.
+    let congelado = 0;
+    const posicao = () => Math.floor(audio ? (audio.currentTime || Number(barra.value)) : 0);
+    const minutoDoLink = () => (caixa.checked ? congelado : posicao());
+    // O rótulo nomeia a opção ("Incluir o minuto 1:30"), e não a ação: o leitor de tela não ouve
+    // "Compartilhar" duas vezes seguidas, na caixa e no botão.
+    const escreverMinuto = (segundos) => { minuto.querySelector("span").textContent = `Incluir o minuto ${formatar(segundos)}`; };
+    const atualizarMinuto = () => {
+      if (caixa.checked) return;
+      minuto.hidden = posicao() < 1;
+      escreverMinuto(posicao());
+    };
+    caixa.addEventListener("change", () => {
+      congelado = posicao();
+      if (caixa.checked) escreverMinuto(congelado);
+      else atualizarMinuto();
+    });
+    audio?.addEventListener("timeupdate", atualizarMinuto);
+    audio?.addEventListener("pause", atualizarMinuto);
+    atualizarMinuto();
+
+    botao.addEventListener("click", async () => {
+      const url = new URL(endereco);
+      if (!minuto.hidden && caixa.checked && minutoDoLink() >= 1) url.searchParams.set("t", String(minutoDoLink()));
+      const titulo = player?.dataset.titulo || document.title;
+      if (navigator.share) {
+        try { await navigator.share({ title: titulo, url: url.href }); } catch { /* a pessoa desistiu */ }
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(url.href);
+        status.textContent = "Link copiado.";
+        setTimeout(() => { status.textContent = ""; }, 2500);
+      } catch {
+        status.textContent = `Copie o endereço: ${url.href}`;
       }
     });
   });
