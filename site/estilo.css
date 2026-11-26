@@ -98,6 +98,8 @@ button { font: inherit; }
 }
 .botao:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
 .botao svg { width: 18px; height: 18px; flex: none; }
+/* Ícone de marca, do jeito que veio do kit oficial: sem filtro nem recolorir (as regras de uso da marca pedem). */
+.botao__marca { width: 20px; height: 20px; flex: none; }
 .botao--contorno { background: transparent; color: var(--texto); border-color: currentColor; }
 .botao--contorno:hover { background: var(--texto); color: var(--fundo); border-color: var(--texto); }
 .botao--pequeno { min-height: 44px; padding: 0 1rem; font-size: 0.95rem; }

@@ -33,6 +33,9 @@ from podcast.roteiro import (
 from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, max_revisoes
 
 ARQUIVOS_ESTATICOS = "site"
+# O ícone oficial do Spotify, baixado do kit de design dele (developer.spotify.com/documentation/design) e
+# colocado à mão, porque marca não se redesenha. Sem o arquivo, o botão "Ouvir no Spotify" fica só com o texto.
+ICONE_DO_SPOTIFY = "icones/spotify.svg"
 PAGINA_EPISODIOS = "episodios.html"
 PAGINA_SOBRE = "sobre/"
 PASTA_DOS_EPISODIOS = "episodios"
@@ -86,7 +89,8 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
         _secao_sagas(sagas, publicados),
         _secao_como(config),
         _secao_assinar(_url_feed(meta, arquivo_feed), meta, beta=_config_do_site(config)["beta"],
-                       spotify=_config_do_site(config)["spotify"]),
+                       spotify=_config_do_site(config)["spotify"],
+                       icone_spotify=(projeto.raiz / ARQUIVOS_ESTATICOS / ICONE_DO_SPOTIFY).is_file()),
     ]
     return _documento(
         config, arquivo_feed,
@@ -1139,13 +1143,17 @@ def _quebravel(url: str) -> str:
     return escape(esquema + separador) + "/<wbr>".join(escape(parte) for parte in resto.split("/"))
 
 
-def _secao_assinar(url_feed: str, meta: Mapping[str, Any], beta: bool = False, spotify: str = "") -> str:
+def _secao_assinar(url_feed: str, meta: Mapping[str, Any], beta: bool = False, spotify: str = "",
+                   icone_spotify: bool = False) -> str:
     """Com o programa no Spotify, ele vem primeiro: é o único caminho que não pede saber o que é RSS."""
     if spotify:
         titulo = "Assine no Spotify ou pelo feed"
         lead = ("No Spotify é um toque. Em qualquer outro app de podcast que aceite RSS, como AntennaPod, Pocket Casts,\n"
                 "        Apple Podcasts ou Overcast, cole o endereço do feed. Episódio novo chega sozinho.")
-        acao = (f'\n      <p class="assinar__acoes"><a class="botao" href="{escape(spotify)}">Ouvir no Spotify</a></p>')
+        # alt vazio: o texto do botão já diz "Spotify", e o leitor de tela não precisa ouvir a marca duas vezes.
+        icone = (f'<img class="botao__marca" src="{ICONE_DO_SPOTIFY}" alt="" width="20" height="20">'
+                 if icone_spotify else "")
+        acao = (f'\n      <p class="assinar__acoes"><a class="botao" href="{escape(spotify)}">{icone}Ouvir no Spotify</a></p>')
     else:
         titulo = "Assine pelo feed"
         em_breve = " No Spotify em breve; por enquanto, pelo feed." if beta else ""
