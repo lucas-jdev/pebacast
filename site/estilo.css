@@ -987,18 +987,20 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 
 /* Compartilhar (#118): linha própria abaixo do player e dos votos; a opção do minuto vem antes do botão. */
 .compartilhar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; margin: 1rem 0 0; }
-.compartilhar__botao { min-height: 44px; padding: 0 0.9rem; border: 3px solid var(--texto); border-radius: 2px; background: #fffaf0;
-  color: var(--texto); font: inherit; font-weight: 650; cursor: pointer; }
-.compartilhar__botao:hover { background: #fff; }
+/* Mesmo carimbo dos votos logo acima: tamanho de letra, ícone de 18 px e hover. */
+.compartilhar__botao { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; padding: 0 0.85rem; border: 3px solid var(--texto);
+  border-radius: 2px; background: #fffaf0; color: var(--texto); font: inherit; font-weight: 650; font-size: 0.95rem; cursor: pointer; }
+.compartilhar__botao svg { width: 18px; height: 18px; flex: none; }
+.compartilhar__botao:hover { background: var(--fundo-2); }
 .compartilhar__botao:active { translate: 1px 1px; }
-.compartilhar__minuto { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.compartilhar__minuto { display: inline-flex; align-items: center; gap: 0.6rem; min-height: 44px; cursor: pointer; font-variant-numeric: tabular-nums; }
 .compartilhar__minuto[hidden] { display: none; }
 /* Caixa no traço do Cordel: borda de 3 px e canto reto, como os outros controles do card. */
 .compartilhar__minuto input { appearance: none; display: grid; place-content: center; width: 1.3rem; height: 1.3rem; margin: 0;
   border: 3px solid var(--texto); border-radius: 0; background: #fffaf0; cursor: pointer; }
-.compartilhar__minuto input:checked::before { content: "✓"; font-weight: 800; line-height: 1; color: var(--texto); }
+.compartilhar__minuto input:checked::before { content: "✓" / ""; font-weight: 800; line-height: 1; color: var(--texto); }
 .compartilhar__aviso { font-weight: 650; overflow-wrap: anywhere; }
 .compartilhar__aviso:empty { display: none; }
-.player__onde-parei { min-height: 44px; padding: 0 0.2rem; border: 0; background: none; color: var(--texto); font: inherit; font-weight: 650;
+.player__onde-parei { min-height: 44px; padding: 0 0.2rem; text-align: left; border: 0; background: none; color: var(--texto); font: inherit; font-weight: 650;
   text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .player__onde-parei[hidden] { display: none; }

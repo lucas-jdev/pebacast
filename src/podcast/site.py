@@ -819,7 +819,7 @@ def _player(item: Mapping[str, Any]) -> str:
         </div>
       </div>
       <p class="player__retomar" data-retomar hidden><span><span data-retomar-motivo>Você parou em</span> <span data-retomar-tempo></span>.</span>
-        <button class="player__onde-parei" type="button" hidden>Voltar para <span data-onde-parei></span></button>
+        <button class="player__onde-parei" type="button" hidden></button>
         <button class="player__do-comeco" type="button" aria-label="Ouvir do começo">Do começo</button></p>
       <p class="player__aviso" role="status" data-player-aviso></p>
     </div></div>"""
@@ -1372,6 +1372,7 @@ _SIMBOLOS = """<svg width="0" height="0" style="position:absolute" aria-hidden="
   <symbol id="i-curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
   <symbol id="i-nao_curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" transform="rotate(180 12 12)" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
   <symbol id="i-fora" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6m0-6-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-compartilhar" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="18" cy="5.5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="18.5" r="2.6"/><path d="m8.3 10.8 7.4-4.1m-7.4 6.5 7.4 4.1"/></g></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
 </svg>"""
 

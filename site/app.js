@@ -12,15 +12,19 @@
 
   // O minuto de um link compartilhado (?t=90) vale uma vez: sai do endereço assim que é lido. Senão, reabrir a
   // mesma mensagem ou restaurar a aba voltaria sempre a ele, por cima de onde a pessoa parou depois.
+  // Ele fica no history.state, que sobrevive a um recarregamento (o navegador do WhatsApp recarrega, o Android
+  // descarta a aba) mas não a uma nova abertura, até a pessoa tocar.
   const MINUTO_DO_LINK = (() => {
     const url = new URL(location.href);
-    const pedido = Number(url.searchParams.get("t"));
-    if (url.searchParams.has("t")) {
-      url.searchParams.delete("t");
-      history.replaceState(history.state, "", url);
-    }
-    return Number.isInteger(pedido) && pedido > 0 ? pedido : 0;
+    const pedido = url.searchParams.has("t") ? Number(url.searchParams.get("t")) : Number(history.state?.minutoDoLink);
+    const valido = Number.isInteger(pedido) && pedido > 0 ? pedido : 0;
+    url.searchParams.delete("t");
+    history.replaceState({ ...history.state, minutoDoLink: valido || undefined }, "", url);
+    return valido;
   })();
+  const esquecerMinutoDoLink = () => {
+    if (history.state?.minutoDoLink) history.replaceState({ ...history.state, minutoDoLink: undefined }, "", location.href);
+  };
   const segundosDoLink = (duracao) => (MINUTO_DO_LINK && (!duracao || MINUTO_DO_LINK < duracao) ? MINUTO_DO_LINK : 0);
   const CAPA = new URL("capa-512.jpg", document.currentScript.src).href;
   const SETAS = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5 };
@@ -143,6 +147,9 @@
     const salvo = progresso.posicao(id);
     let retomarEm = doLink || salvo;
     let peloLink = Boolean(doLink);
+    // Ouvindo o trecho de um link, com outro lugar salvo, a pessoa está de visita: nada é gravado por cima do
+    // lugar dela, e "Voltar a 1:40" fica à mão enquanto toca, até ela escolher voltar ou ouvir do começo.
+    let deVisita = Boolean(doLink && salvo && Math.abs(salvo - doLink) >= 5);
     let gravadoEm = 0;
     let tocandoEm = null;
     const motivo = player.querySelector("[data-retomar-motivo]");
@@ -155,11 +162,14 @@
       pintar();
     };
     const oferecerRetomada = () => {
-      retomar.hidden = !retomarEm;
+      retomar.hidden = !retomarEm && !deVisita;
+      motivo.parentElement.hidden = !retomarEm;
+      doComeco.hidden = !retomarEm;
       motivo.textContent = peloLink ? "O link começa em" : "Você parou em";
       retomar.querySelector("[data-retomar-tempo]").textContent = formatar(retomarEm);
-      ondeParei.hidden = !(peloLink && salvo && Math.abs(salvo - retomarEm) >= 5);
-      retomar.querySelector("[data-onde-parei]").textContent = `onde parei (${formatar(salvo)})`;
+      ondeParei.hidden = !deVisita;
+      ondeParei.textContent = `Voltar a ${formatar(salvo)}`;
+      ondeParei.setAttribute("aria-label", `Voltar a ${formatar(salvo)}, onde você parou`);
       if (audio.paused) play.setAttribute("aria-label", rotuloDoPlay());
     };
     const desistirDaRetomada = () => { retomarEm = 0; peloLink = false; oferecerRetomada(); };
@@ -167,7 +177,7 @@
     const finalDoEpisodio = () => (Number.isFinite(audio.duration) ? audio.duration : Number(player.dataset.duracao)) * FRACAO_OUVIDA;
     // O selo do card só muda quando a pessoa para (pause, sair da página): "parou em" com o áudio tocando confunde.
     const gravarPosicao = ({ atualizarSelo = false } = {}) => {
-      if (audio.currentTime < 1) return;
+      if (audio.currentTime < 1 || deVisita) return;
       if (audio.currentTime >= finalDoEpisodio()) progresso.esquecerPosicao(id);
       else progresso.gravarPosicao(id, audio.currentTime);
       gravadoEm = audio.currentTime;
@@ -193,6 +203,8 @@
     ondeParei.addEventListener("click", () => {
       retomarEm = salvo;
       peloLink = false;
+      deVisita = false;
+      esquecerMinutoDoLink();
       if (audio.readyState > 0) audio.currentTime = salvo;
       posicionar(salvo);
       oferecerRetomada();
@@ -201,6 +213,8 @@
 
     doComeco.addEventListener("click", () => {
       const eraDoLink = peloLink;
+      deVisita = false;
+      esquecerMinutoDoLink();
       desistirDaRetomada();
       if (!eraDoLink) {
         progresso.esquecerPosicao(id);
@@ -222,7 +236,11 @@
       }
     });
 
-    audio.addEventListener("play", () => { player.classList.add("player--tocando"); play.setAttribute("aria-label", "Pausar"); });
+    audio.addEventListener("play", () => {
+      player.classList.add("player--tocando");
+      play.setAttribute("aria-label", "Pausar");
+      esquecerMinutoDoLink();
+    });
     // Conta uma audição por episódio e visita no GoatCounter, quando o analytics está ligado.
     audio.addEventListener("play", () => {
       window.goatcounter?.count?.({ path: `ouviu/${player.dataset.episodio}`, title: "Play no site", event: true });
@@ -582,7 +600,7 @@
     const linha = document.createElement("p");
     linha.className = "compartilhar";
     linha.innerHTML = '<label class="compartilhar__minuto" hidden><input type="checkbox"><span></span></label>'
-      + '<button class="compartilhar__botao" type="button">Compartilhar</button>'
+      + '<button class="compartilhar__botao" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-compartilhar"/></svg>Compartilhar</button>'
       + '<span class="compartilhar__aviso" role="status"></span>';
     const minuto = linha.querySelector(".compartilhar__minuto");
     const caixa = minuto.querySelector("input");
@@ -596,13 +614,19 @@
     let congelado = 0;
     const posicao = () => Math.floor(audio ? (audio.currentTime || Number(barra.value)) : 0);
     const minutoDoLink = () => (caixa.checked ? congelado : posicao());
+    // O rótulo nomeia a opção ("Incluir o minuto 1:30"), e não a ação: o leitor de tela não ouve
+    // "Compartilhar" duas vezes seguidas, na caixa e no botão.
+    const escreverMinuto = (segundos) => { minuto.querySelector("span").textContent = `Incluir o minuto ${formatar(segundos)}`; };
     const atualizarMinuto = () => {
       if (caixa.checked) return;
       minuto.hidden = posicao() < 1;
-      minuto.querySelector("span").textContent = `a partir de ${formatar(posicao())}`;
-      caixa.setAttribute("aria-label", `Compartilhar a partir de ${formatar(posicao())}`);
+      escreverMinuto(posicao());
     };
-    caixa.addEventListener("change", () => { congelado = posicao(); atualizarMinuto(); });
+    caixa.addEventListener("change", () => {
+      congelado = posicao();
+      if (caixa.checked) escreverMinuto(congelado);
+      else atualizarMinuto();
+    });
     audio?.addEventListener("timeupdate", atualizarMinuto);
     audio?.addEventListener("pause", atualizarMinuto);
     atualizarMinuto();
