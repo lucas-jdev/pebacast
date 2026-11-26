@@ -1,0 +1,327 @@
+{
+  "episodio": "si-003",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura sem decoreba. Aviso de sempre: este episódio foi gerado por inteligência artificial e revisado por uma segunda IA. Hoje o tema é particionamento, ou seja, como dividir um banco de dados grande em pedaços sem perder o controle de onde cada dado mora."
+    },
+    {
+      "persona": "davi",
+      "texto": "E quem conversa comigo de novo é o Rafael. O Rafael tem catorze anos de sistemas distribuídos, começou com sensores em máquinas agrícolas e depois foi pra uma empresa de pagamentos, onde participou da integração com o Pix. Rafael, bem-vindo!"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Obrigado, Davi. Oi, você que está ouvindo. Hoje a gente vai cortar o banco em fatias. E toda fatia, uma hora, fica mais pesada que as outras.",
+      "estilo": "com humor seco"
+    },
+    {
+      "persona": "davi",
+      "texto": "Já começou com spoiler. Então, eu trouxe um caso real. É um pull request público no GitHub, o número catorze mil quatrocentos e quatro do repositório do FoundationDB, aquele banco de dados distribuído de chave e valor que a Apple mantém como código aberto. Ele foi aberto no dia dois de novembro de dois mil e vinte e seis."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Bom caso. Me conta o que ele corrige."
+    },
+    {
+      "persona": "davi",
+      "texto": "Vou tentar. O FoundationDB divide os dados em pedaços que ele chama de shards. Cada shard é uma faixa contínua de chaves, tipo de tal chave até tal chave. E tem um componente, a distribuição de dados, que fica movendo essas faixas entre grupos de servidores pra equilibrar a carga."
+    },
+    {
+      "persona": "davi",
+      "texto": "O problema é que, na hora de procurar um shard quente de leitura pra mover, o rastreador só sorteava entre as primeiras faixas de cada grupo, na ordem das chaves, até um limite. As faixas depois desse limite nunca entravam no sorteio. Então um shard quente lá no fim podia ficar esquecido pra sempre."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Isso. E a correção é elegante: em vez de olhar só o começo da lista, ele tira uma amostra entre todas as faixas do grupo, sem repetir, e mantém o mesmo número de consultas de métrica por pedido. No dia vinte e quatro de novembro ele recebeu uma revisão favorável, mas continua aberto, sem merge."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. O banco estava tentando apagar o incêndio, mas só procurava fogo na primeira metade do prédio."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Mais ou menos isso. Só que o prédio era em ordem alfabética. E repara numa coisa: esse bug só existe porque alguém, lá atrás, decidiu dividir por faixa de chave e decidiu rebalancear automaticamente. As duas decisões têm custo. É desse custo que eu quero falar hoje."
+    },
+    {
+      "persona": "davi",
+      "texto": "Beleza. Mas antes, deixa eu fazer o papel do dev empolgado. Lá na empresa de logística onde eu trabalho, a tabela de eventos de rastreio está enorme. Cada pacote gera dezenas de eventos. Se um dia eu precisar particionar, eu já sei o que fazer."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Conta."
+    },
+    {
+      "persona": "davi",
+      "texto": "Simples. Eu pego o identificador do evento, passo numa função de hash e faço o resto da divisão pelo número de máquinas. Se o resto der zero, vai pra máquina zero. Se der um, máquina um. Distribuição uniforme, nenhum shard quente, ninguém esquecido no fim da fila. Precisou de mais capacidade? Coloca mais uma máquina e pronto."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Gostei da confiança. Vou te fazer umas perguntas. Primeira: qual é a consulta que o seu time mais roda nessa tabela?",
+      "estilo": "sorrindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Provavelmente, me dá todos os eventos do pacote tal, em ordem de tempo. E tem um relatório que pega todos os eventos de ontem."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Então. Com o hash do identificador do evento, onde estão os eventos de um mesmo pacote?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Espalhados. Cada evento tem um identificador diferente, então cada um cai numa máquina diferente. Ah. Pra montar o histórico de um pacote eu teria que perguntar pra todas as máquinas."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Pra todas. E o relatório de ontem também. Isso tem nome: é a consulta espalhada, que no inglês o pessoal chama de scatter and gather. Você manda a pergunta pra todas as partições e junta as respostas. E a resposta só chega quando a mais lenta responder."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então, se eu tenho dez máquinas e uma delas está num dia ruim, minha consulta inteira fica num dia ruim."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Exatamente. O Martin Kleppmann, no Designing Data-Intensive Applications, no capítulo seis, chama esse efeito de amplificação da latência de cauda. Quanto mais partições a consulta toca, mais chance de pegar uma lenta. Na média parece tudo bem, mas o usuário sente o pior caso."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas então eu troco a chave. Em vez do identificador do evento, eu faço o hash do código do pacote. Aí todos os eventos de um pacote caem juntos."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Melhor. Agora o histórico do pacote vai numa partição só. E o relatório de ontem?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Continua espalhado. Ontem tem pacote de todo código, em todas as máquinas."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Pois é. Aqui está a primeira escolha de verdade do episódio. Existem dois jeitos clássicos de decidir em qual partição uma chave mora. O primeiro é por faixa de chave, que é o que o FoundationDB faz. Você ordena as chaves e corta em intervalos contínuos, como uma enciclopédia em vários volumes: o primeiro vai de A até C, o segundo de D até F, e assim por diante."
+    },
+    {
+      "persona": "rafael",
+      "texto": "A vantagem é que as chaves vizinhas moram juntas. Pedir tudo entre tal data e tal data é ir em uma ou poucas partições e ler em sequência. O segundo jeito é por hash da chave. Você passa a chave numa função de hash, e cada partição fica responsável por uma faixa de valores de hash. Isso espalha bem, mas destrói a ordem. Duas chaves vizinhas vão parar em lugares sem nenhuma relação."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então com hash eu perco a consulta por intervalo."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Perde a eficiência dela. Ainda dá pra fazer, mas vira consulta espalhada. Com faixa você mantém o intervalo, mas corre outro risco. Quer adivinhar qual?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Se eu particionar a tabela de eventos por faixa de data, todo evento de agora vai pra mesma faixa. A de hoje."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Isso. Esse é um exemplo que o Kleppmann usa no capítulo seis, com dados de sensores gravados com a hora como chave. Todas as escritas do momento caem na partição de hoje. Uma máquina trabalha, as outras assistem. Isso é a partição quente, o famoso hot spot."
+    },
+    {
+      "persona": "rafael",
+      "texto": "E eu vivi isso na pele. Na época dos sensores agrícolas, a gente guardava as leituras pela hora da medição. De madrugada, quando as máquinas reconectavam depois de um dia sem rede, todas despejavam as leituras atrasadas ao mesmo tempo. E todas na mesma faixa de horário. Um servidor pegando fogo e os outros dormindo.",
+      "estilo": "lembrando, com um meio sorriso"
+    },
+    {
+      "persona": "davi",
+      "texto": "E como vocês resolveram?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Do jeito que o livro também sugere pra esse caso: a chave deixou de começar pela hora e passou a começar pelo identificador do sensor, e só depois a hora. Aí as escritas se espalharam entre os sensores. O preço foi que o relatório de todos os sensores numa janela de tempo virou uma consulta por sensor. A gente trocou uma escrita concentrada por uma leitura espalhada."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí. Então não tem chave que resolve tudo?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Não tem. A chave de particionamento é uma aposta sobre quais consultas vão ser baratas. Toda consulta que não segue a chave paga mais caro. Você não escolhe a chave olhando os dados, escolhe olhando as perguntas que vai fazer pra eles."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas e o hash? Pelo menos o hash não tem partição quente, né? Ele espalha tudo."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Beleza. E quando uma chave só receber metade das requisições?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Como assim, uma chave só?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Imagina um cliente gigante, um marketplace enorme que manda metade dos pacotes do país. Se a sua chave é o código do cliente, todos os pacotes dele têm o mesmo hash. O hash espalha chaves diferentes, mas não divide uma chave sozinha. O Kleppmann dá o exemplo de uma celebridade numa rede social: milhões de pessoas interagindo com o mesmo identificador ao mesmo tempo. Vai tudo pra mesma partição, com ou sem hash."
+    },
+    {
+      "persona": "davi",
+      "texto": "Nossa. E aí, faz o quê?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Uma saída que o livro descreve é acrescentar um número aleatório no fim da chave quente. Em vez de uma chave, você tem, digamos, cem variações dela, e as escritas se espalham por cem lugares."
+    },
+    {
+      "persona": "davi",
+      "texto": "Que bonito. Resolvido."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Calma. Agora pense na leitura. Pra saber tudo daquele cliente, você precisa ler as cem variações e juntar. E precisa guardar em algum lugar quais chaves foram divididas, porque não faz sentido fazer isso com todas. Só vale pra poucas chaves muito quentes, e o próprio sistema geralmente não descobre sozinho quais são. Quem descobre é você, olhando métrica."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso me lembra o pull request do FoundationDB. O banco precisa achar o shard quente pra poder agir. Se a forma de procurar é cega pra uma parte dos dados, o quente fica lá."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Bem lembrado. Detectar a partição quente é metade do trabalho. Mover ou dividir é a outra metade. E se a amostragem tem um ponto cego, você tem um sistema que acha que está equilibrado e não está."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, vamos pra outra parte do meu plano. O hash e o resto da divisão pelo número de máquinas. Isso eu ainda defendo. É simples."
+    },
+    {
+      "persona": "rafael",
+      "texto": "É simples. Então vamos fazer a conta junto. Você tem dez máquinas. A chave cujo hash dá vinte e três vai pra qual?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Vinte e três dividido por dez, resto três. Máquina três."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Agora você colocou a décima primeira máquina. Pra onde vai a mesma chave?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Vinte e três dividido por onze, resto um. Máquina um. Ih."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Ih. E isso não acontece só com ela. Quando o número de máquinas muda, quase todas as chaves mudam de lugar. Você queria acrescentar dez por cento de capacidade e acabou movendo quase o banco inteiro pela rede. O Kleppmann fala exatamente disso: o resto da divisão pelo número de nós é uma péssima forma de distribuir, justamente porque torna o rebalanceamento caríssimo."
+    },
+    {
+      "persona": "davi",
+      "texto": "E qual é o jeito certo?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Não tem um certo, tem alguns razoáveis. Um deles é criar, desde o começo, muito mais partições do que máquinas. Cada máquina fica com várias. Quando entra uma máquina nova, ela rouba algumas partições inteiras das outras. A chave nunca muda de partição, só a partição muda de máquina."
+    },
+    {
+      "persona": "davi",
+      "texto": "Ah, então o número de partições é fixo, e o que muda é quem cuida de cada uma."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Isso. O custo é que você precisa escolher esse número lá no começo, e errar pra menos ou pra mais dói. Partições demais têm custo de gestão, partições de menos ficam gigantes. O outro jeito é o particionamento dinâmico, que combina bem com faixa de chave: quando uma partição cresce demais, ela se divide em duas; quando encolhe muito, junta com a vizinha. É parecido com o que o FoundationDB faz com os shards."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o rebalanceamento é uma coisa que fica acontecendo o tempo todo, em segundo plano."
+    },
+    {
+      "persona": "rafael",
+      "texto": "E é aí que mora o perigo. Rebalancear é mover dados pela rede enquanto o sistema está atendendo usuário. Isso gasta banda, gasta disco, e as máquinas envolvidas ficam mais lentas justamente durante a mudança. E agora vem a pergunta de sempre. Beleza. E quando a rede cair?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. No meio do rebalanceamento?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Pior. Imagina que uma máquina está lenta porque está sobrecarregada. O detector de falhas acha que ela morreu. O rebalanceamento automático começa a tirar as partições dela e jogar nas outras. As outras, que já estavam carregadas, recebem carga extra e um monte de dados chegando pela rede. Ficam lentas também. O detector acha que elas morreram."
+    },
+    {
+      "persona": "davi",
+      "texto": "E vira efeito dominó."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Vira. O Kleppmann alerta pra isso: rebalanceamento totalmente automático combinado com detecção automática de falha pode causar falha em cascata. Por isso muita gente prefere que o sistema sugira o plano de rebalanceamento e um humano aprove. Na minha opinião, para dado de pagamento, eu quero um humano nessa decisão. Já passei uma madrugada vendo partição pular de máquina em máquina e não desejo pra ninguém.",
+      "estilo": "mais sério"
+    },
+    {
+      "persona": "davi",
+      "texto": "Mas aí no FoundationDB é automático, né? O pull request é justamente sobre o sistema achar sozinho o que mover."
+    },
+    {
+      "persona": "rafael",
+      "texto": "É, e isso é uma escolha legítima. Lá o rebalanceamento automático é parte do produto. O que o caso mostra é que, quando você automatiza, a qualidade da decisão depende de como o sistema enxerga a carga. Se ele só olha o começo da lista, decide mal. Automatizar não tira o problema, só muda onde ele aparece."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, e uma última dúvida. Quando eu particiono, como a minha aplicação sabe pra qual máquina mandar a consulta? Se as partições ficam mudando de lugar..."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Ótima pergunta, e o capítulo seis também trata disso. Alguém precisa guardar o mapa de qual partição está em qual máquina. Pode ser um serviço de coordenação separado, pode ser uma camada de roteamento na frente, ou as próprias máquinas trocando essa informação entre si. E esse mapa é mais uma coisa que pode estar desatualizada. Se a partição mudou de lugar e o roteador não ficou sabendo, a consulta vai pro lugar errado."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o rebalanceamento não custa só a cópia dos dados. Custa também manter todo mundo concordando sobre o mapa."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Exatamente. E tem um último custo que pega muita gente: os índices secundários. Digamos que você particionou os pacotes pelo código do cliente e agora quer buscar por cidade de destino. A cidade não é a chave. Ou cada partição guarda um índice local só dos seus dados, e aí a busca por cidade vira consulta espalhada de novo, ou você cria um índice global, particionado pela cidade, e aí a leitura fica barata, mas cada escrita pode ter que atualizar outra partição."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então é sempre a mesma troca. Ou a escrita paga, ou a leitura paga."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Quase sempre. O que você controla é quem paga e quando."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi o episódio inteiro, com as minhas palavras."
+    },
+    {
+      "persona": "davi",
+      "texto": "Particionar é dividir os dados entre máquinas pra crescer além de uma só. Tem dois jeitos principais. Por faixa de chave, as chaves vizinhas ficam juntas, então consulta por intervalo é barata, mas uma chave que cresce sempre pro mesmo lado, tipo data, concentra tudo numa partição quente. Por hash, a carga espalha bem entre chaves diferentes, mas eu perco a ordem e a consulta por intervalo vira consulta espalhada."
+    },
+    {
+      "persona": "davi",
+      "texto": "Nenhum dos dois salva uma chave sozinha muito popular, tipo o cliente gigante ou a celebridade. Pra essa, dá pra dividir a chave com um sufixo, mas aí a leitura precisa juntar os pedaços. Escolher a chave é escolher quais consultas vão ser baratas. Consulta que toca várias partições espera a mais lenta."
+    },
+    {
+      "persona": "davi",
+      "texto": "E rebalancear custa caro. Resto da divisão pelo número de máquinas move quase tudo, por isso se usa número fixo de partições ou divisão dinâmica. E rebalanceamento automático pode piorar uma crise, porque mexe nos dados justo quando o sistema está fraco. Bem resumido?"
+    },
+    {
+      "persona": "rafael",
+      "texto": "Muito bem resumido. Eu só acrescentaria uma coisa: meça. Partição quente quase nunca aparece no planejamento. Ela aparece numa terça à noite, no gráfico de uma máquina só.",
+      "estilo": "com humor seco"
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado. Então vamos pro desafio da semana. Escolha a maior tabela de um sistema que você mantém e proponha uma chave de particionamento. Aponte qual consulta ficaria mais cara com essa escolha."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se você ainda não trabalha na área, abre o arquivo de migração da tabela de votos no repositório do Pebacast, no GitHub, em lucas-jdev barra pebacast, pasta votos barra migrations, proponha particionar essa tabela pelo episódio ou pelo visitante, e diga qual das consultas do arquivo votos barra src barra votos ponto js ficaria mais cara."
+    },
+    {
+      "persona": "davi",
+      "texto": "Rafael, muito obrigado por mais essa conversa."
+    },
+    {
+      "persona": "rafael",
+      "texto": "Eu que agradeço, Davi. E pra você que ouviu: escolha a chave pensando na pergunta, não no dado."
+    },
+    {
+      "persona": "davi",
+      "texto": "Valeu, pessoal! Esse foi o Pebacast. Até o próximo episódio!"
+    }
+  ],
+  "desafio": "Escolha a maior tabela de um sistema que você mantém e proponha uma chave de particionamento. Aponte qual consulta ficaria mais cara com essa escolha.",
+  "desafio_iniciante": "Abra votos/migrations/0001_votos.sql no repositório do Pebacast, github.com/lucas-jdev/pebacast, proponha particionar a tabela votos pelo episódio ou pelo visitante e diga qual das consultas de votos/src/votos.js ficaria mais cara com essa escolha.",
+  "fontes": [
+    "Designing Data-Intensive Applications, Martin Kleppmann, cap. 6"
+  ]
+}
