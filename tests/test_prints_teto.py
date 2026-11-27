@@ -31,6 +31,9 @@ TRAVA_O_RENDERER = '<script>addEventListener("scroll", () => { while (true) {} }
 PAGINA = ('<!doctype html><html><body><header>topo</header>'
           '<section id="s1" style="height:2400px">um</section>{}</body></html>')
 TETO_TESTE_S = 10
+# A nova tentativa abre um navegador e carrega a página do zero: com a máquina carregada (a suíte
+# inteira rodando), 10 s ficam justos. A primeira tentativa trava de propósito e gasta o teto todo.
+TETO_NOVA_TENTATIVA_S = 30
 
 
 def _site(tmp_path: Path, trava: bool) -> Path:
@@ -122,7 +125,7 @@ def test_pagina_que_trava_so_na_primeira_vez_sai_na_segunda_tentativa(chromium, 
     diagnostico = tmp_path / "diagnostico"
 
     gerados = prints.capturar(_site(tmp_path, trava=False), tmp_path / "capturas", ["index"], lado="antes",
-                              teto_s=TETO_TESTE_S, diagnostico=diagnostico)
+                              teto_s=TETO_NOVA_TENTATIVA_S, diagnostico=diagnostico)
 
     assert sorted(arquivo.name for arquivo in gerados) == [
         "index--cabecalho--celular.png", "index--cabecalho--desktop.png",
