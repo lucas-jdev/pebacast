@@ -47,6 +47,19 @@ PALAVRAS_DE_FUNCAO = frozenset({
     "de", "do", "da", "dos", "das", "em", "no", "na", "nos", "nas", "num", "numa",
     "ah", "eh", "oh", "ai", "ei", "hum",
 })
+# Símbolo de caminho lido por extenso (#141): o roteiro diz "docs barra c4 traço negócio ponto md", o TTS fala assim,
+# e o transcritor escreve "docs/c4-negocio.md", sem palavra no lugar do símbolo. Só é ruído quando não se ouviu
+# nada ali: "[ponto]" → "porto" continua contando.
+SIMBOLOS_LIDOS = frozenset({"barra", "ponto", "traco", "underline", "arroba"})
+# O falado e o escrito do mesmo tempo de "estar" (#141): o TTS diz "tá", "tavam", "tiver", e o roteiro escreve
+# "estar", "estavam", "estiver". É o mesmo critério do "pra" no lugar de "para".
+FORMAS_DE_ESTAR = (
+    frozenset({"estar", "esta", "ta"}),
+    frozenset({"estava", "tava"}),
+    frozenset({"estavam", "tavam"}),
+    frozenset({"estiver", "tiver"}),
+    frozenset({"estiverem", "tiverem"}),
+)
 
 
 class Transcritor(Protocol):
@@ -159,7 +172,15 @@ def e_ruido(escritas: Sequence[str], ouvidas: Sequence[str]) -> bool:
     # A mesma fala com outra separação: "trade off" e "tradeoff", "senao" e "se nao".
     if "".join(escritas) == "".join(ouvidas):
         return True
+    if not ouvidas and escritas and all(palavra in SIMBOLOS_LIDOS for palavra in escritas):
+        return True
+    if escritas and len(escritas) == len(ouvidas) and all(map(_mesma_forma_de_estar, escritas, ouvidas)):
+        return True
     return all(palavra in PALAVRAS_DE_FUNCAO for palavra in (*escritas, *ouvidas))
+
+
+def _mesma_forma_de_estar(escrita: str, ouvida: str) -> bool:
+    return escrita == ouvida or any(escrita in formas and ouvida in formas for formas in FORMAS_DE_ESTAR)
 
 
 def confirmadas(primeira: Sequence[Trecho], segunda: Sequence[Trecho]) -> list[tuple[Trecho, Trecho]]:

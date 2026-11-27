@@ -307,3 +307,65 @@ def test_palavra_de_conteudo_e_negacao_continuam_no_laudo(davi, roteiro, ouvido,
 
     [divergencia] = laudo.divergencias
     assert f"[{trecho}]" in divergencia.trecho
+
+
+# Caminho lido por extenso e formas de "estar" (#141): falas reais do sl-003 (#137) e do si-003 (#140), com o que os
+# dois modelos ouviram em cada linha do incidente.
+DESAFIO_DO_SL_003 = (
+    "Anotado. Agora o desafio da semana. Desenhe as integrações de um sistema que você mantém e classifique cada uma "
+    "num dos quatro estilos. Escolha uma e explique o que mudaria se ela usasse outro estilo. E se você ainda não "
+    "trabalha na área, abra o arquivo docs barra c4 traço negócio ponto md no repositório do Pebacast, no GitHub, "
+    "classifique as setas do diagrama de contêineres num dos quatro estilos e escolha uma pra imaginar com outro estilo."
+)
+DESAFIO_DO_SI_003 = (
+    "E se você ainda não trabalha na área, abre o arquivo de migração da tabela de votos no repositório do Pebacast, "
+    "no GitHub, em lucas-jdev barra pebacast, pasta votos barra migrations, proponha particionar essa tabela pelo "
+    "episódio ou pelo visitante, e diga qual das consultas do arquivo votos barra src barra votos ponto js ficaria "
+    "mais cara."
+)
+
+@pytest.mark.parametrize(("roteiro", "ouvido"), [
+    # sl-003: [barra], [traco] e [ponto] → (nada), três linhas do incidente numa fala só.
+    (DESAFIO_DO_SL_003, DESAFIO_DO_SL_003.replace("docs barra c4 traço negócio ponto md", "docs/c4-negócio.md")),
+    # si-003: [barra] → (nada) ×4 e [ponto] → (nada).
+    (DESAFIO_DO_SI_003, DESAFIO_DO_SI_003.replace("lucas-jdev barra pebacast", "lucas-jdev/pebacast")
+     .replace("votos barra migrations", "votos/migrations").replace("votos barra src barra votos ponto js", "votos/src/votos.js")),
+    # sl-003: [estar] → "esta" (×5) e [estiver] → "tiver".
+    ("Na chamada remota, os dois sistemas precisam estar de pé ao mesmo tempo.",
+     "Na chamada remota, os dois sistemas precisam está de pé ao mesmo tempo."),
+    ("E mensageria: os sistemas não precisam estar no ar juntos, o dado chega rápido",
+     "E mensageria: os sistemas não precisam tá no ar juntos, o dado chega rápido"),
+    ("Se a cópia dela estiver atrasada, e o médico acabou de registrar uma alergia nova",
+     "Se a cópia dela tiver atrasada, e o médico acabou de registrar uma alergia nova"),
+    # si-003: [estavam] → "tavam" e [estar] → "esta".
+    ("As outras, que já estavam carregadas, recebem carga extra",
+     "As outras, que já tavam carregadas, recebem carga extra"),
+    ("E esse mapa é mais uma coisa que pode estar desatualizada.",
+     "E esse mapa é mais uma coisa que pode está desatualizada."),
+])
+def test_caminho_lido_por_extenso_e_forma_falada_de_estar_sao_ruido(davi, roteiro, ouvido):
+    laudo = _qa(ouvido, ouvido).comparar([Fala(davi, roteiro)], [ouvido, ouvido])
+
+    assert laudo.aprovado, laudo.markdown("ruído")
+
+
+@pytest.mark.parametrize(("roteiro", "ouvido", "trecho"), [
+    # Flexão e troca de palavra continuam contando (decisão do Lucas no #132): linhas do si-003 e do sl-003.
+    (DESAFIO_DO_SI_003, DESAFIO_DO_SI_003.replace("abre o arquivo", "abra o arquivo").replace(" barra ", "/")
+     .replace(" ponto ", "."), "abre"),
+    ("E vai continuar sendo, mas um depende com critério. O livro propõe olhar",
+     "E vai continuar sendo, mas um depende com critérios. O livro propõe olhar", "criterio"),
+    ("Chamada remota numa interface estável, ou banco compartilhado assumido",
+     "Chamada remota para uma interface estável, ou banco compartilhado assumido", "numa"),
+    # Símbolo com outra palavra no lugar não é caminho: é o TTS dizendo outra coisa.
+    (DESAFIO_DO_SL_003, DESAFIO_DO_SL_003.replace("docs barra c4 traço negócio ponto md", "docs/c4-negócio porto md"),
+     "ponto"),
+    # Outro tempo de "estar" é outra frase.
+    ("Se a cópia dela estiver atrasada, e o médico acabou de registrar",
+     "Se a cópia dela estava atrasada, e o médico acabou de registrar", "estiver"),
+])
+def test_flexao_e_simbolo_com_outra_palavra_no_lugar_continuam_no_laudo(davi, roteiro, ouvido, trecho):
+    laudo = _qa(ouvido, ouvido).comparar([Fala(davi, roteiro)], [ouvido, ouvido])
+
+    [divergencia] = laudo.divergencias
+    assert f"[{trecho}]" in divergencia.trecho
