@@ -44,3 +44,7 @@ Negativas:
 - O `gh release upload --clobber` apaga o asset antigo antes de subir o novo. Por alguns segundos a URL do episódio dá 404. Se o upload falhar no meio, a candidata continua no release, e rodar **substituir** de novo resolve.
 - Quem já baixou o episódio no app fica com o áudio antigo até baixar de novo.
 - Regravar não corrige a causa. Problema recorrente de voz se resolve na pipeline, não sorteando o TTS de novo.
+
+## Nota (2026-11-27)
+
+O QA de voz pode disparar o passo 1 sozinho, no modo `regravar` ([ADR 0012](0012-qa-de-voz.md)): só a publicação dispara, no máximo uma candidata automática por episódio, e o passo 2 continua manual. Este ADR segue valendo como está.

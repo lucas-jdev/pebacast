@@ -136,6 +136,28 @@ qualidade_pronuncia:
   timeout_s: 300
   janela_maxima_s: 300
 
+# QA de voz (#21, ADR 0012, src/podcast/qualidade_voz.py): depois de publicar, separa os turnos pelo
+# roteiro e mede o timbre de cada persona com o WeSpeaker ResNet34-LM (ONNX). Não roda no fallback.
+# Limites e segmentação do spike #27 (docs/spikes/qa-de-voz.md, no branch spike/qa-de-voz).
+qa_voz:
+  modo: aviso                     # aviso: só a issue; regravar: a publicação também dispara o regravar.yml
+  modelo:
+    # Pesos CC BY 4.0 (WeSpeaker, treinados no VoxCeleb). Conferidos pelo SHA-256 antes de carregar.
+    url: https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34_LM.onnx
+    sha256: e9848563da86f263117134dfd7ad63c92355b37de492b55e325400c9d9c39012
+  segmentacao:
+    folga_caracteres: 12          # turno curto demora mais que o proporcional aos caracteres
+    peso_da_pausa: 0.2
+    peso_da_voz: 0.1              # evidência de voz na última passada
+    borda_do_miolo: 0.2           # mede só o miolo do turno, sem 20 % de cada borda
+    miolo_min_s: 2.0
+  limites:
+    miolos_min_no_bloco: 2        # bloco com menos trechos (ou com menos no resto) não é julgado
+    timbre_bloco_min: 0.75        # persona no bloco × resto do episódio (spike, bons: mín. 0,80)
+    timbre_referencia_min: 0.73   # persona no bloco × referência (bons: mín. 0,78)
+    persona_referencia_min: 0.92  # persona no episódio × referência (bons: mín. 0,97)
+    vozes_confundiveis_max: 0.61  # Davi × convidada (bons: máx. 0,51; a mesma voz: 0,96 ou mais)
+
 publicacao:
   audio: github_releases
   feed: github_pages

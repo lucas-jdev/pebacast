@@ -1,7 +1,9 @@
 # Regrava o áudio de um episódio já publicado, em dois passos (ADR 0008).
-# "regravar" anexa uma candidata ao release para ouvir, com o QA do áudio e o laudo de pronúncia
-# no resumo; "substituir" guarda o áudio no ar como -anterior.mp3 e troca pela candidata,
-# mantendo URL, GUID e data de publicação, e fecha a issue de incidente do episódio se a candidata passou.
+# "regravar" anexa uma candidata ao release para ouvir, com o QA do áudio e os laudos de pronúncia
+# e de voz no resumo, e comenta o laudo de voz na issue de voz aberta do episódio; "substituir" guarda
+# o áudio no ar como -anterior.mp3 e troca pela candidata, mantendo URL, GUID e data de publicação,
+# e fecha as issues de incidente (áudio e voz) do episódio se a candidata passou.
+# Também é disparado pelo publicar.yml no modo regravar do QA de voz (ADR 0012), sempre com acao=regravar.
 name: Regravar áudio
 
 on:
@@ -54,7 +56,19 @@ jobs:
 
       # Sem o Kokoro: a regravação não tem fallback.
       - name: Instalar a pipeline
-        run: pip install -e ".[gemini]"
+        run: pip install -e ".[gemini,qa-voz]"
+
+      # O modelo do QA de voz (ADR 0012): a chave é o SHA-256 da config. O Python baixa se faltar e
+      # confere o hash antes de carregar, com cache ou sem.
+      - name: SHA-256 do modelo do QA de voz
+        id: modelo-voz
+        run: echo "sha=$(python -c "import yaml; print(yaml.safe_load(open('config/pipeline.yaml', encoding='utf-8'))['qa_voz']['modelo']['sha256'])")" >> "$GITHUB_OUTPUT"
+
+      - name: Modelo do QA de voz (cache)
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pebacast/modelos
+          key: qa-voz-modelo-${{ steps.modelo-voz.outputs.sha }}
 
       - name: Decifrar a vinheta
         if: ${{ hashFiles('assets/vinheta.mp3.gpg') != '' }}
@@ -68,7 +82,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          python -m podcast.regravacao regravar "$EPISODIO" --repo "$GITHUB_REPOSITORY" | tee saida.txt
+          python -m podcast.regravacao --execucao "$RUN_URL" regravar "$EPISODIO" --repo "$GITHUB_REPOSITORY" | tee saida.txt
           { echo "## Candidata do $EPISODIO"; echo; cat saida.txt; echo; cat qualidade.md; echo
             echo "Se ficou melhor, rode este workflow de novo com **substituir**."; } >> "$GITHUB_STEP_SUMMARY"
 

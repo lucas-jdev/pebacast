@@ -22,6 +22,7 @@ flowchart TB
     gemini["<b>Gemini API</b><br/>[sistema externo]<br/>voz das personas"]:::externo
     apps["<b>Apps de podcast</b><br/>[sistema externo]<br/>AntennaPod, Spotify"]:::externo
     buscadores["<b>Buscadores</b><br/>[sistema externo]<br/>Google e Bing, de onde as IAs<br/>tiram o que buscam na web"]:::externo
+    sherpa["<b>Release do sherpa-onnx</b><br/>[sistema externo]<br/>modelo de voz do QA de voz"]:::externo
 
     ouvinte -- "ouve episódios" --> apps
     apps -- "assinam o feed RSS" --> pebacast
@@ -32,6 +33,7 @@ flowchart TB
     pebacast -- "sintetiza o diálogo" --> gemini
     pebacast -- "avisa o que mudou" --> buscadores
     ouvinte -- "pergunta a uma IA,<br/>que busca no índice" --> buscadores
+    pebacast -- "baixa o modelo de voz,<br/>conferido pelo SHA-256" --> sherpa
 ```
 
 | Elemento | Valor para o negócio |
@@ -42,6 +44,7 @@ flowchart TB
 | Gemini API | Dá vozes distintas às personas. Sem ela, o fallback local sustenta a publicação, com qualidade menor. |
 | Apps de podcast | Distribuição sem custo, pelo padrão RSS. |
 | Buscadores | Quem pergunta a uma IA sobre o Pebacast só recebe resposta se o site estiver no índice do Google (Gemini) e do Bing (ChatGPT, Copilot). |
+| Release do sherpa-onnx | Hospeda o modelo de voz (WeSpeaker ResNet34-LM, CC BY 4.0) com que o QA de voz pega a troca de timbre. Se ele sumir, o QA de voz deixa de rodar, e nada é segurado ([ADR 0012](adr/0012-qa-de-voz.md)). |
 
 ## Nível 2 · Contêineres
 
@@ -76,6 +79,7 @@ flowchart TB
     apps["<b>Apps de podcast</b><br/>[externo]"]:::externo
     goat["<b>GoatCounter</b><br/>[externo]<br/>visitas, sem cookie"]:::externo
     indexnow["<b>IndexNow</b><br/>[externo]<br/>repassa ao Bing as URLs novas"]:::externo
+    sherpa["<b>Release do sherpa-onnx</b><br/>[externo]<br/>modelo de voz, baixado<br/>e conferido por hash"]:::externo
 
     lucas -- "edita currículo,<br/>verifica referências" --> repo
     rotina <-- "pede revisão" --> revisor
@@ -92,6 +96,8 @@ flowchart TB
     lucas -. "dispara e ouve<br/>às cegas" .-> pronuncia
     pronuncia -- "narra cada variante" --> gemini
     pipeline -- "narra, transcreve e ouve<br/>para os QAs de texto e pronúncia" --> gemini
+    pipeline -- "baixa o modelo do QA de voz<br/>(cache pelo SHA-256)" --> sherpa
+    pipeline -. "modo regravar do QA de voz:<br/>dispara a regravação" .-> pipeline
     pipeline -- "sobe o MP3" --> audio
     pipeline -- "gera e publica" --> site
     pipeline -. "avisa as URLs que mudaram,<br/>sem bloquear" .-> indexnow
@@ -104,7 +110,7 @@ flowchart TB
     ouvinte -- "navega" --> site
 ```
 
-Lilás é IA (Claude), azul é código (GitHub Actions, site estático e o Pebamotion, que roda na máquina do Lucas), verde é onde os dados ficam e bege são serviços de terceiros. O único humano no desenho é o Lucas, que entra pelo repositório (currículo e referências), pelo retorno e, quando um áudio sai ruim, disparando a regravação no Actions ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). Para divulgar um episódio, ele gera o trailer no Pebamotion ([ADR 0010](adr/0010-pebamotion.md)). O Lucas lê os recados pelo console do D1 ([votos.md](votos.md)), e o Pipeline registra o `publicacao.json` de volta no repositório. Depois de cada deploy, o Pipeline avisa o IndexNow das URLs que mudaram. O Lucas acompanha a indexação no Search Console e no Bing Webmaster Tools, que ficam fora do desenho porque não fazem parte da entrega ([pipeline.md](pipeline.md#entrar-no-índice-dos-buscadores)).
+Lilás é IA (Claude), azul é código (GitHub Actions, site estático e o Pebamotion, que roda na máquina do Lucas), verde é onde os dados ficam e bege são serviços de terceiros. O único humano no desenho é o Lucas, que entra pelo repositório (currículo e referências), pelo retorno e, quando um áudio sai ruim, disparando a regravação no Actions ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). No modo `regravar` do QA de voz, o próprio Pipeline dispara a candidata quando a voz reprova; substituir continua com o Lucas ([ADR 0012](adr/0012-qa-de-voz.md)). Para divulgar um episódio, ele gera o trailer no Pebamotion ([ADR 0010](adr/0010-pebamotion.md)). O Lucas lê os recados pelo console do D1 ([votos.md](votos.md)), e o Pipeline registra o `publicacao.json` de volta no repositório. Depois de cada deploy, o Pipeline avisa o IndexNow das URLs que mudaram. O Lucas acompanha a indexação no Search Console e no Bing Webmaster Tools, que ficam fora do desenho porque não fazem parte da entrega ([pipeline.md](pipeline.md#entrar-no-índice-dos-buscadores)).
 
 Nos PRs que mudam o visual do site, o **Capturar prints** roda o código do PR, inclusive de fork, só com leitura, e entrega um artefato; o **Comentar prints** roda com o código do `main`, valida esse artefato e só então escreve no branch `prints` e no PR ([ADR 0009](adr/0009-prints-automaticos-nos-prs.md)).
 

@@ -62,6 +62,9 @@ flowchart TD
         incidente_texto(["Issue incidente do episódio<br/>(Texto do &lt;id&gt; diverge do roteiro)<br/>o Lucas ouve e fecha"]):::falha
         qa_pronuncia{"QA de pronúncia: dois modelos<br/>julgam os termos do dicionário.<br/>Erro marcado pelos dois?"}
         incidente_pronuncia(["Issue incidente do episódio<br/>(Pronúncia do &lt;id&gt; diverge do dicionário)<br/>o Lucas ouve e fecha"]):::falha
+        qa_voz{"QA de voz: timbre por bloco,<br/>contra a referência e vozes<br/>confundíveis. Reprovou?<br/>(não roda no Kokoro)"}
+        incidente_voz(["Issue incidente do episódio<br/>(Voz do &lt;id&gt; fora do padrão)<br/>reprovar de novo só comenta"]):::falha
+        disparo["Modo regravar: dispara o<br/>regravar.yml uma vez, se ninguém<br/>aguarda a cota e só este saiu"]
         feed["Gera feed.xml e o site,<br/>com uma página por episódio"]
         pages[Publica no GitHub Pages;<br/>se o GitHub não achar o pacote,<br/>tenta de novo depois de 60 s]
         indexnow["Avisa o IndexNow das URLs<br/>que mudaram; falha só vira aviso"]
@@ -113,9 +116,15 @@ flowchart TD
     qa_texto -- "com ou sem divergência,<br/>e mesmo se não rodar" --> qa_pronuncia
     qa_texto -. sim .-> incidente_texto
     incidente_texto --> ouvir
-    qa_pronuncia -- "com ou sem erro,<br/>e mesmo se não rodar" --> feed
+    qa_pronuncia -- "com ou sem erro,<br/>e mesmo se não rodar" --> qa_voz
     qa_pronuncia -. sim .-> incidente_pronuncia
     incidente_pronuncia --> ouvir
+    qa_voz -- "passando ou não,<br/>e mesmo se não rodar" --> feed
+    qa_voz -. "sim" .-> incidente_voz
+    qa_voz -. "não: fecha a issue<br/>de voz do episódio" .-> incidente_voz
+    qa_voz -. "sim, no modo regravar" .-> disparo
+    disparo -. "regravar.yml: candidata;<br/>o laudo de voz dela<br/>comenta na issue" .-> release
+    incidente_voz --> ouvir
     qa -. "não" .-> incidente
     qa -. "sim: fecha a issue<br/>de áudio do episódio" .-> incidente
     feed --> pages
@@ -130,7 +139,7 @@ flowchart TD
     ouvir -. "regravar.yml: candidata,<br/>depois substituir" .-> release
 
     class aguardando,selecao,elegivel,noticia,relevante,hipotetico,roteiro,revisao,aprovado,limite,correcao,validar_local,commit rotina
-    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,espera,agendado,mix,release,registro,qa,qa_texto,qa_pronuncia,feed,pages,indexnow actions
+    class validar_ci,pronuncia,tts,erro_tts,retry,kokoro,espera,agendado,mix,release,registro,qa,qa_texto,qa_pronuncia,qa_voz,disparo,feed,pages,indexnow actions
 ```
 
 ## QA do áudio
@@ -150,6 +159,18 @@ As quatro medidas, com aprovado ou reprovado, vão para o resumo da execução n
 
 Depois do QA do áudio, dois modelos transcrevem a fala do MP3 e o código compara com o roteiro, palavra por palavra. Só conta a divergência que os dois ouviram igual. Em modo aviso: abre a issue `incidente` "Texto do &lt;id&gt; diverge do roteiro" e nunca segura a publicação, nem quando a transcrição está fora do ar ([pipeline.md](pipeline.md#qa-de-texto)).
 
+## QA de voz
+
+Depois do QA de pronúncia, o código separa os turnos de cada persona pelo roteiro e mede o timbre de cada uma com um modelo de voz em ONNX ([ADR 0012](adr/0012-qa-de-voz.md), [pipeline.md](pipeline.md#qa-de-voz)). Ele confere:
+
+- se cada persona é a mesma voz em todos os blocos;
+- se cada persona soa como nos episódios anteriores, pela impressão de voz de referência;
+- se o Davi e a convidada não soam como a mesma voz.
+
+Reprovou: abre a issue `incidente` "Voz do &lt;id&gt; fora do padrão". Reprovar de novo só comenta, e a issue fecha sozinha quando a voz do episódio passa. No fallback (Kokoro), o laudo diz "não aplicável".
+
+No modo `regravar` (`qa_voz.modo`, desligado até o fim da calibração), a voz reprovada também dispara o `regravar.yml`, no máximo uma vez. O disparo só acontece se a execução publicou um episódio só e nenhum ficou aguardando a cota. Nunca segura a publicação.
+
 ## QA de pronúncia
 
 Depois do QA de texto, os mesmos dois modelos ouvem a fala e julgam cada termo do dicionário de pronúncia que tem instrução e aparece no roteiro, como o "Pebacast" com E aberto. O QA de texto não vê esse erro: o termo dito errado vira o mesmo texto. Só conta o erro que os dois modelos marcam na mesma janela. O laudo mostra, mesmo aprovado, quantas vezes cada modelo ouviu o termo. Em modo aviso: abre a issue `incidente` "Pronúncia do &lt;id&gt; diverge do dicionário" e nunca segura a publicação ([pipeline.md](pipeline.md#qa-de-pronúncia)).
@@ -161,7 +182,7 @@ No free tier, o Gemini TTS aceita 10 requisições por dia, e um episódio usa d
 ## Fora do caminho principal
 
 - **Watchdog** (`watchdog.yml`, a cada 6 h): abre uma issue se a rotina passar 36 h sem commitar roteiro, e fecha quando ela volta.
-- **Regravação** (`regravar.yml`, manual): quando o Lucas ouve e o áudio saiu ruim, narra o mesmo roteiro de novo como candidata, com o QA do áudio e o laudo de pronúncia no resumo da execução; se ficar melhor, ele manda substituir e o episódio troca de áudio sem mudar URL, GUID nem data, e o áudio que sai do ar fica no release como `pebacast-<id>-anterior.mp3` ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). Se a candidata substituída passou no QA, a issue de incidente de áudio do episódio fecha sozinha.
+- **Regravação** (`regravar.yml`, manual): quando o Lucas ouve e o áudio saiu ruim, narra o mesmo roteiro de novo como candidata, com o QA do áudio e os laudos de pronúncia e de voz no resumo da execução (o de voz também comenta na issue de voz aberta: "aprovada: ouça e substitua" ou "também reprovou; a próxima regravação é manual"); se ficar melhor, ele manda substituir e o episódio troca de áudio sem mudar URL, GUID nem data, e o áudio que sai do ar fica no release como `pebacast-<id>-anterior.mp3` ([ADR 0008](adr/0008-regravacao-em-dois-passos.md)). Se a candidata substituída passou no QA, as issues de incidente de áudio e de voz do episódio fecham sozinhas. No modo `regravar` do QA de voz, a publicação dispara o passo da candidata sozinha ([ADR 0012](adr/0012-qa-de-voz.md)); substituir continua manual.
 - **Site e feed** também são regenerados quando muda o site, o currículo ou a configuração (`site.yml`), sem gerar áudio. Os três workflows que publicam no Pages (`publicar.yml`, `site.yml` e `regravar.yml`) dividem uma fila e geram o site a partir do `main` de quando rodam, nunca de um commit anterior: o `site.yml` faz checkout da ponta do branch, e os outros dois regeneram o site depois do `git pull --rebase`. Assim, um deploy que esperou na fila não apaga um episódio publicado enquanto ele esperava, e um episódio publicado não desfaz o que mudou no site durante a síntese. Depois do deploy, os dois workflows avisam o IndexNow das URLs que mudaram, para o Bing indexar logo. Isso nunca bloqueia a publicação ([pipeline.md](pipeline.md#entrar-no-índice-dos-buscadores)).
 - **Votos e recados** vivem fora do GitHub, num Worker da Cloudflare com D1 ([votos.md](votos.md)).
 - **Trailer** (`scripts/pebamotion.py`, manual e local): depois de publicado, o Lucas pode gerar um trailer animado do episódio com recortes literais da voz, nos formatos 9:16 e 16:9 ([pebamotion](../pebamotion/README.md), [ADR 0010](adr/0010-pebamotion.md)).

@@ -5,7 +5,8 @@
 # Com a cota diária do Gemini esgotada, o episódio aguarda (ADR 0011): o agendamento diário
 # tenta de novo depois da renovação da cota, e só passa da verificação se houver episódio aguardando a cota.
 # O QA do áudio vai para o resumo da execução; reprovar abre (ou fecha) a issue de incidente
-# do episódio pelo próprio Python, sem segurar a publicação.
+# do episódio pelo próprio Python, sem segurar a publicação. O mesmo vale para os QAs de texto,
+# pronúncia e voz. No modo regravar do QA de voz (ADR 0012), a voz reprovada dispara o regravar.yml.
 name: Publicar episódio
 
 on:
@@ -69,6 +70,13 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
+    # As do topo, mais actions: write, só para o modo regravar do QA de voz disparar o regravar.yml.
+    permissions:
+      contents: write
+      issues: write
+      pages: write
+      id-token: write
+      actions: write
     env:
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       GH_TOKEN: ${{ github.token }}
@@ -85,9 +93,21 @@ jobs:
       - name: Instalar ffmpeg e espeak-ng
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg espeak-ng
 
-      # O Kokoro (fallback) traz o PyTorch; a versão de CPU é bem menor.
+      # O Kokoro (fallback) traz o PyTorch; a versão de CPU é bem menor. O qa-voz não traz torch.
       - name: Instalar a pipeline
-        run: pip install -e ".[gemini,kokoro]" --extra-index-url https://download.pytorch.org/whl/cpu
+        run: pip install -e ".[gemini,kokoro,qa-voz]" --extra-index-url https://download.pytorch.org/whl/cpu
+
+      # O modelo do QA de voz (ADR 0012): a chave é o SHA-256 da config. O Python baixa se faltar e
+      # confere o hash antes de carregar, com cache ou sem.
+      - name: SHA-256 do modelo do QA de voz
+        id: modelo-voz
+        run: echo "sha=$(python -c "import yaml; print(yaml.safe_load(open('config/pipeline.yaml', encoding='utf-8'))['qa_voz']['modelo']['sha256'])")" >> "$GITHUB_OUTPUT"
+
+      - name: Modelo do QA de voz (cache)
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pebacast/modelos
+          key: qa-voz-modelo-${{ steps.modelo-voz.outputs.sha }}
 
       # Faixa de terceiros: só a versão cifrada fica no repositório (docs/vinheta.md).
       - name: Decifrar a vinheta
@@ -131,6 +151,14 @@ jobs:
           fi
           git pull --rebase origin main
           git push origin main
+
+      # Modo regravar do QA de voz (ADR 0012): só depois do push, porque a regravação lê o publicacao.json
+      # do main. No máximo um id, e nenhum se algum episódio ficou aguardando a cota. A regravação entra
+      # na fila do grupo publicar e roda depois desta execução.
+      - name: Disparar a regravação pedida pelo QA de voz
+        if: ${{ hashFiles('relatorio.json') != '' }}
+        continue-on-error: true
+        run: python -m podcast.qualidade_voz disparar --repo "$GITHUB_REPOSITORY" --execucao "$RUN_URL"
 
       # O site sai do main depois do rebase: o que entrou enquanto o áudio era gerado também vai ao ar.
       - name: Gerar o site com o main atual

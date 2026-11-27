@@ -40,8 +40,9 @@ from podcast.qualidade_audio import (
     medir,
 )
 from podcast.qualidade_pronuncia import LaudoDePronuncia, QaDePronuncia
+from podcast.qualidade_voz import REFERENCIA, IncidentesDeVoz, LaudoDeVoz, QaDeVoz, RegistroDeVoz
 from podcast.roteiro import Projeto, regras_para
-from podcast.tts.provedor import TtsProvider
+from podcast.tts.provedor import CotaDiariaEsgotada, TtsProvider
 from podcast.validacao import PUBLICACAO, ROTEIRO, validar_episodio
 
 
@@ -58,6 +59,8 @@ class Candidata:
     laudo: Laudo
     pronuncia: LaudoDePronuncia | None = None
     pronuncia_nao_rodou: str | None = None
+    voz: LaudoDeVoz | None = None
+    voz_nao_rodou: str | None = None
 
     def markdown(self, episodio_id: str) -> str:
         partes = [self.laudo.markdown(f"Qualidade da candidata do {episodio_id}")]
@@ -65,6 +68,10 @@ class Candidata:
             partes.append(self.pronuncia.markdown(f"Pronúncia da candidata do {episodio_id}"))
         if self.pronuncia_nao_rodou:
             partes.append(f"### Pronúncia da candidata do {episodio_id}\n\n{self.pronuncia_nao_rodou}\n")
+        if self.voz is not None:
+            partes.append(self.voz.markdown(f"Voz da candidata do {episodio_id}"))
+        if self.voz_nao_rodou:
+            partes.append(f"### Voz da candidata do {episodio_id}\n\n{self.voz_nao_rodou}\n")
         return "\n".join(partes)
 
 
@@ -72,6 +79,7 @@ class Candidata:
 class Substituicao:
     publicacao: dict[str, Any]
     laudo: Laudo | None
+    voz: LaudoDeVoz | None = None
 
 
 class StorageDeRegravacao(Protocol):
@@ -102,6 +110,16 @@ def nome_medicao_candidata(episodio_id: str) -> str:
     return f"pebacast-{episodio_id}-candidata.qualidade.json"
 
 
+def nome_voz_candidata(episodio_id: str) -> str:
+    """O laudo de voz da candidata: o substituir lê este, sem medir de novo (e sem o extra qa-voz)."""
+    return f"pebacast-{episodio_id}-candidata.voz.json"
+
+
+# Na issue de voz aberta: a candidata não saiu porque a cota diária acabou (ADR 0011).
+COMENTARIO_DE_COTA = ("A candidata não saiu: a cota diária do Gemini esgotou. Rode o workflow Regravar áudio à mão "
+                      "depois das 08:15 UTC, quando a cota já renovou.")
+
+
 def regravar(
     projeto: Projeto,
     episodio_id: str,
@@ -109,6 +127,8 @@ def regravar(
     criar_provedor: Callable[[str], TtsProvider],
     trabalho: Path,
     qa_pronuncia: QaDePronuncia | None = None,
+    qa_voz: QaDeVoz | None = None,
+    incidentes_voz: RegistroDeVoz | None = None,
 ) -> Candidata:
     """Narra o episódio de novo e anexa a candidata, com as medidas do QA. Devolve a URL para ouvir."""
     _exigir_publicado(projeto, episodio_id)
@@ -127,7 +147,15 @@ def regravar(
 
     personas = carregar_personas(projeto.raiz / "curriculum" / "personas")
     provedor = criar_provedor(config["tts"]["principal"])
-    audio = provedor.sintetizar(falas_do_episodio(pasta, personas, config["tts"]))
+    falas_tts = falas_do_episodio(pasta, personas, config["tts"])
+    try:
+        audio = provedor.sintetizar(falas_tts)
+    except CotaDiariaEsgotada as erro:
+        # Sem fallback, como no ADR 0008; a issue de voz, se aberta, fica sabendo por que não veio a candidata.
+        if incidentes_voz is not None:
+            _sem_segurar("comentar a cota esgotada na issue de voz",
+                         lambda: incidentes_voz.comentar(episodio_id, COMENTARIO_DE_COTA))
+        raise RegravacaoInvalida(f"a cota diária do Gemini esgotou ({erro}); rode de novo depois das 08:15 UTC") from erro
 
     mp3 = trabalho / nome_candidata(episodio_id)
     trechos = exportar_mp3(audio, mp3, config["audio"]["bitrate_kbps"], vinheta=vinheta)
@@ -139,15 +167,37 @@ def regravar(
     arquivo_medicao.write_text(medicao.para_json(), encoding="utf-8")
     storage.anexar(episodio_id, arquivo_medicao)
     laudo = avaliar(medicao, limites)
-    if qa_pronuncia is None:
-        return Candidata(url, laudo)
-    # A candidata já está no release: uma falha do QA vira motivo no resumo, não erro do passo.
+    # A candidata já está no release: uma falha de um QA vira motivo no resumo, não erro do passo.
+    pronuncia = pronuncia_nao_rodou = voz = voz_nao_rodou = None
+    if qa_pronuncia is not None:
+        try:
+            falas = carregar_falas(json.loads((pasta / ROTEIRO).read_text(encoding="utf-8")), personas)
+            pronuncia = qa_pronuncia.rodar(episodio_id, mp3, trechos, falas)
+        except Exception as erro:
+            log.exception("O QA de pronúncia da candidata de %s não rodou.", episodio_id)
+            pronuncia_nao_rodou = f"QA de pronúncia não rodou. {type(erro).__name__}: {erro}"
+    if qa_voz is not None:
+        try:
+            voz = qa_voz.medir(mp3, trechos, falas_tts)
+            arquivo_voz = trabalho / nome_voz_candidata(episodio_id)
+            arquivo_voz.write_text(voz.para_json(), encoding="utf-8")
+            storage.anexar(episodio_id, arquivo_voz)
+        except Exception as erro:
+            log.exception("O QA de voz da candidata de %s não rodou.", episodio_id)
+            voz, voz_nao_rodou = None, f"QA de voz não rodou. {type(erro).__name__}: {erro}"
+        if voz is not None and incidentes_voz is not None:
+            laudo_voz = voz
+            _sem_segurar("comentar a candidata na issue de voz",
+                         lambda: incidentes_voz.comentar_candidata(episodio_id, laudo_voz))
+    return Candidata(url, laudo, pronuncia, pronuncia_nao_rodou, voz, voz_nao_rodou)
+
+
+def _sem_segurar(acao: str, executar: Callable[[], object]) -> None:
+    """Conversa com a issue depois que a candidata já existe: uma falha no GitHub não derruba o passo."""
     try:
-        falas = carregar_falas(json.loads((pasta / ROTEIRO).read_text(encoding="utf-8")), personas)
-        return Candidata(url, laudo, pronuncia=qa_pronuncia.rodar(episodio_id, mp3, trechos, falas))
-    except Exception as erro:
-        log.exception("O QA de pronúncia da candidata de %s não rodou.", episodio_id)
-        return Candidata(url, laudo, pronuncia_nao_rodou=f"QA de pronúncia não rodou. {type(erro).__name__}: {erro}")
+        executar()
+    except Exception:
+        log.exception("Não deu para %s.", acao)
 
 
 def substituir(
@@ -157,6 +207,7 @@ def substituir(
     trabalho: Path,
     agora: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
     incidentes: RegistroDeIncidentes | None = None,
+    incidentes_voz: RegistroDeVoz | None = None,
 ) -> Substituicao:
     """Troca o áudio publicado pela candidata, atualiza o `publicacao.json` e o incidente de QA do episódio."""
     arquivo = _exigir_publicado(projeto, episodio_id)
@@ -165,6 +216,7 @@ def substituir(
 
     candidata = storage.baixar(episodio_id, nome_candidata(episodio_id), trabalho)
     medicao = _baixar_medicao(storage, episodio_id, trabalho)
+    voz = _baixar_voz(storage, episodio_id, trabalho)
     # Antes de sobrescrever: sem isso, o --clobber apagava o áudio que sai do ar para sempre.
     no_ar = storage.baixar(episodio_id, nome_publicado(episodio_id), trabalho / "no-ar")
     storage.anexar(episodio_id, no_ar.rename(no_ar.with_name(nome_anterior(episodio_id))))
@@ -174,6 +226,8 @@ def substituir(
     storage.remover(episodio_id, candidata.name)
     if medicao is not None:
         storage.remover(episodio_id, nome_medicao_candidata(episodio_id))
+    if voz is not None:
+        storage.remover(episodio_id, nome_voz_candidata(episodio_id))
 
     publicacao.update(
         medir_mp3(definitivo),
@@ -191,7 +245,10 @@ def substituir(
             incidentes.registrar(episodio_id, laudo)
         except Exception:
             log.exception("Não deu para atualizar a issue de QA de %s.", episodio_id)
-    return Substituicao(publicacao, laudo)
+    if voz is not None and incidentes_voz is not None:
+        # A voz no ar agora é a da candidata: se passou, fecha a issue de voz; se não, comenta nela.
+        _sem_segurar("atualizar a issue de voz", lambda: incidentes_voz.registrar(episodio_id, voz))
+    return Substituicao(publicacao, laudo, voz)
 
 
 def _baixar_medicao(storage: StorageDeRegravacao, episodio_id: str, trabalho: Path) -> Medicao | None:
@@ -201,6 +258,16 @@ def _baixar_medicao(storage: StorageDeRegravacao, episodio_id: str, trabalho: Pa
     except Exception:
         # Candidata gerada antes do QA existir: substitui do mesmo jeito, só sem o laudo.
         log.warning("A candidata de %s não tem as medidas do QA.", episodio_id, exc_info=True)
+        return None
+
+
+def _baixar_voz(storage: StorageDeRegravacao, episodio_id: str, trabalho: Path) -> LaudoDeVoz | None:
+    try:
+        arquivo = storage.baixar(episodio_id, nome_voz_candidata(episodio_id), trabalho)
+        return LaudoDeVoz.de_json(arquivo.read_text(encoding="utf-8"))
+    except Exception:
+        # Candidata gerada antes do QA de voz, ou o QA de voz não rodou nela.
+        log.warning("A candidata de %s não tem o laudo de voz.", episodio_id, exc_info=True)
         return None
 
 
@@ -248,18 +315,27 @@ def main(argv: Sequence[str] | None = None) -> int:
             # Sem incidentes: o laudo da candidata é para decidir se vale substituir, não um aviso do episódio no ar.
             qa_pronuncia = (QaDePronuncia.de_config(config["qualidade_pronuncia"], config["tts"])
                             if config.get("qualidade_pronuncia") else None)
-            candidata = regravar(projeto, args.episodio, storage, criar_provedor, args.trabalho, qa_pronuncia)
+            # O QA de voz também vai sem incidentes: só comenta na issue de voz que já estiver aberta.
+            qa_voz = (QaDeVoz.de_config(config["qa_voz"], config["tts"],
+                                        carregar_personas(projeto.raiz / "curriculum" / "personas"),
+                                        projeto.raiz / REFERENCIA)
+                      if config.get("qa_voz") else None)
+            candidata = regravar(projeto, args.episodio, storage, criar_provedor, args.trabalho, qa_pronuncia,
+                                 qa_voz, IncidentesDeVoz(args.repo, args.execucao))
             print(f"Candidata para ouvir: {candidata.url}")
             args.qualidade.write_text(candidata.markdown(args.episodio), encoding="utf-8")
         else:
             incidentes = IncidentesDeAudio(args.repo, args.execucao)
-            substituicao = substituir(projeto, args.episodio, storage, args.trabalho, incidentes=incidentes)
+            substituicao = substituir(projeto, args.episodio, storage, args.trabalho, incidentes=incidentes,
+                                      incidentes_voz=IncidentesDeVoz(args.repo, args.execucao))
             escrever_site(projeto, args.site)
             publicacao = substituicao.publicacao
             print(f"Áudio substituído: {publicacao['url_audio']} ({publicacao['duracao_segundos']} s)")
-            if substituicao.laudo is not None:
-                args.qualidade.write_text(substituicao.laudo.markdown(f"Qualidade do áudio do {args.episodio}"),
-                                          encoding="utf-8")
+            partes = [laudo.markdown(titulo) for laudo, titulo in (
+                (substituicao.laudo, f"Qualidade do áudio do {args.episodio}"),
+                (substituicao.voz, f"Voz do {args.episodio}")) if laudo is not None]
+            if partes:
+                args.qualidade.write_text("\n".join(partes), encoding="utf-8")
     except RegravacaoInvalida as erro:
         print(f"Não deu para {args.comando} {args.episodio}: {erro}", file=sys.stderr)
         return 1

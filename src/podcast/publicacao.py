@@ -31,6 +31,7 @@ from podcast.pronuncia import aplicar_pronuncias, carregar_pronuncias
 from podcast.qualidade_audio import IncidentesDeAudio, Laudo, Limites, RegistroDeIncidentes, avaliar, medir
 from podcast.qualidade_pronuncia import IncidentesDePronuncia, LaudoDePronuncia, QaDePronuncia
 from podcast.qualidade_texto import IncidentesDeTexto, LaudoDeTexto, QaDeTexto
+from podcast.qualidade_voz import REFERENCIA, IncidentesDeVoz, LaudoDeVoz, QaDeVoz, a_regravar
 from podcast.roteiro import Projeto, regras_para
 from podcast.site import caminho_do_episodio, escrever_pagina
 from podcast.tts.provedor import CotaDiariaEsgotada, RequisicaoRecusada, TtsProvider
@@ -111,6 +112,10 @@ class Resultado:
     pronuncia: dict[str, LaudoDePronuncia] = field(default_factory=dict)
     # Fora dos avisos pelo mesmo motivo do texto.
     pronuncia_nao_rodou: dict[str, str] = field(default_factory=dict)
+    voz: dict[str, LaudoDeVoz] = field(default_factory=dict)
+    voz_nao_rodou: dict[str, str] = field(default_factory=dict)
+    # Modo regravar do QA de voz (ADR 0012): no máximo um id, que o publicar.yml manda para o regravar.yml.
+    regravar_automatico: list[str] = field(default_factory=list)
 
 
 def episodios_pendentes(projeto: Projeto) -> list[str]:
@@ -197,6 +202,7 @@ def publicar_pendentes(
     esperas: RegistroDeEspera | None = None,
     qa_texto: QaDeTexto | None = None,
     qa_pronuncia: QaDePronuncia | None = None,
+    qa_voz: QaDeVoz | None = None,
 ) -> Resultado:
     config = projeto.config()
     personas = carregar_personas(projeto.raiz / "curriculum" / "personas")
@@ -204,6 +210,7 @@ def publicar_pendentes(
     publicados, reprovados, avisos, qualidade, aguardando = [], {}, [], {}, []
     texto, texto_nao_rodou = {}, {}
     pronuncia, pronuncia_nao_rodou = {}, {}
+    voz, voz_nao_rodou = {}, {}
 
     for episodio_id in episodios_pendentes(projeto):
         saga = saga_do_episodio(sagas, episodio_id)
@@ -282,9 +289,14 @@ def publicar_pendentes(
         if qa_pronuncia is not None:
             _rodar_qa_sem_segurar("pronúncia", episodio_id, pronuncia, pronuncia_nao_rodou,
                                   lambda: qa_pronuncia.rodar(episodio_id, mp3, trechos, originais()))
+        if qa_voz is not None:
+            # As falas que foram ao TTS, com a pronúncia: o tamanho de cada turno guia a separação.
+            _rodar_qa_sem_segurar("voz", episodio_id, voz, voz_nao_rodou,
+                                  lambda: qa_voz.rodar(episodio_id, mp3, trechos, falas, fallback=erro_principal is not None))
 
+    regravar = a_regravar(qa_voz.modo, publicados, aguardando, voz) if qa_voz is not None else []
     return Resultado(publicados, reprovados, avisos, qualidade, aguardando, texto, texto_nao_rodou,
-                     pronuncia, pronuncia_nao_rodou)
+                     pronuncia, pronuncia_nao_rodou, voz, voz_nao_rodou, regravar)
 
 
 def _rodar_qa_sem_segurar(nome: str, episodio_id: str, laudos: dict[str, Any], nao_rodou: dict[str, str],
@@ -440,13 +452,15 @@ def _ler_json(arquivo: Path) -> Any:
 
 
 def resumo_da_qualidade(resultado: Resultado) -> str:
-    """O QA do áudio, o de texto e o de pronúncia de cada episódio, para o resumo da execução no Actions."""
+    """O QA do áudio, o de texto, o de pronúncia e o de voz de cada episódio, para o resumo da execução no Actions."""
     partes = [laudo.markdown(f"Qualidade do áudio do {episodio_id}") for episodio_id, laudo in resultado.qualidade.items()]
     partes += [laudo.markdown(f"Texto do {episodio_id}") for episodio_id, laudo in resultado.texto.items()]
     partes += [f"### Texto do {episodio_id}\n\n{motivo}\n" for episodio_id, motivo in resultado.texto_nao_rodou.items()]
     partes += [laudo.markdown(f"Pronúncia do {episodio_id}") for episodio_id, laudo in resultado.pronuncia.items()]
     partes += [f"### Pronúncia do {episodio_id}\n\n{motivo}\n"
                for episodio_id, motivo in resultado.pronuncia_nao_rodou.items()]
+    partes += [laudo.markdown(f"Voz do {episodio_id}") for episodio_id, laudo in resultado.voz.items()]
+    partes += [f"### Voz do {episodio_id}\n\n{motivo}\n" for episodio_id, motivo in resultado.voz_nao_rodou.items()]
     return "\n".join(partes)
 
 
@@ -455,6 +469,7 @@ def relatorio(resultado: Resultado) -> dict[str, Any]:
     return {
         "publicados": resultado.publicados,
         "aguardando_cota": resultado.aguardando,
+        "regravar_automatico": resultado.regravar_automatico,
         "avisos": {
             "fallback": [str(aviso) for aviso in resultado.avisos if aviso.fallback],
             "outros": [str(aviso) for aviso in resultado.avisos if not aviso.fallback],
@@ -485,7 +500,7 @@ def _criar_parser() -> argparse.ArgumentParser:
     publicar.add_argument("--avisos", type=Path, default=Path("avisos.md"),
                           help="Avisos de fallback de voz, para a issue de fallback. Os outros abrem a issue de avisos.")
     publicar.add_argument("--qualidade", type=Path, default=Path("qualidade.md"),
-                          help="Laudos dos QAs de áudio, texto e pronúncia, para o resumo da execução.")
+                          help="Laudos dos QAs de áudio, texto, pronúncia e voz, para o resumo da execução.")
     publicar.add_argument("--execucao", help="URL da execução, citada nas issues de incidente.")
 
     comandos.add_parser("feed", help="Só regenera o feed.")
@@ -518,8 +533,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     qa_pronuncia = (QaDePronuncia.de_config(config["qualidade_pronuncia"], config["tts"],
                                             IncidentesDePronuncia(args.repo, args.execucao))
                     if config.get("qualidade_pronuncia") else None)
+    qa_voz = (QaDeVoz.de_config(config["qa_voz"], config["tts"], carregar_personas(projeto.raiz / "curriculum" / "personas"),
+                                projeto.raiz / REFERENCIA, IncidentesDeVoz(args.repo, args.execucao))
+              if config.get("qa_voz") else None)
     resultado = publicar_pendentes(projeto, GitHubReleases(args.repo), criar_provedor, args.trabalho,
-                                   incidentes=incidentes, esperas=esperas, qa_texto=qa_texto, qa_pronuncia=qa_pronuncia)
+                                   incidentes=incidentes, esperas=esperas, qa_texto=qa_texto, qa_pronuncia=qa_pronuncia,
+                                   qa_voz=qa_voz)
     escrever_site(projeto, args.site)
 
     print(f"Publicados: {', '.join(resultado.publicados) or 'nenhum'}")
@@ -529,7 +548,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     resumo = resumo_da_qualidade(resultado)
     if resumo:
         args.qualidade.write_text(resumo, encoding="utf-8")
-    for episodio_id, motivo in [*resultado.texto_nao_rodou.items(), *resultado.pronuncia_nao_rodou.items()]:
+    for episodio_id, motivo in [*resultado.texto_nao_rodou.items(), *resultado.pronuncia_nao_rodou.items(),
+                                *resultado.voz_nao_rodou.items()]:
         print(f"::warning::{episodio_id}: {motivo}")
     encaminhar_avisos(resultado.avisos, args.avisos, IncidentesDeAvisos(args.repo, args.execucao))
     if resultado.reprovados:
