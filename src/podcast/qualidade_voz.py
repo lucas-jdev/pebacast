@@ -427,7 +427,7 @@ class Referencia:
                 for persona, item in sorted(self.personas.items())
             },
         }
-        arquivo.write_text(json.dumps(dados, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        arquivo.write_text(json.dumps(dados, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
 
     def valida(self, persona: Persona, modelo_sha256: str) -> tuple[np.ndarray | None, str | None]:
         """O vetor da persona, ou None e o motivo de não haver referência válida."""
