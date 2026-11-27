@@ -1,5 +1,3 @@
-// TEMPORÁRIO (#136): trava o renderer ao rolar, para conferir o teto e o artefato de diagnóstico no CI.
-addEventListener("scroll", () => { while (true) {} });
 // Player dos episódios, filtro do arquivo e botão de copiar o feed. Sem JS, o <audio controls> nativo continua lá e o arquivo mostra tudo.
 (() => {
   const VELOCIDADES = [1, 1.25, 1.5, 1.75, 2, 0.75];
