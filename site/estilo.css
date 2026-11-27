@@ -98,6 +98,9 @@ button { font: inherit; }
 }
 .botao:hover { background: var(--acento-forte); border-color: var(--acento-forte); }
 .botao svg { width: 18px; height: 18px; flex: none; }
+/* Ícone de marca do jeito que veio do kit oficial, sem filtro nem recolorir. As regras do Spotify pedem no mínimo
+   21 px no digital e um respiro de metade da altura (11 px): o gap de 0.55rem mais 3 px chega lá até o texto. */
+.botao__marca { width: auto; height: 22px; flex: none; margin-right: 3px; }
 .botao--contorno { background: transparent; color: var(--texto); border-color: currentColor; }
 .botao--contorno:hover { background: var(--texto); color: var(--fundo); border-color: var(--texto); }
 .botao--pequeno { min-height: 44px; padding: 0 1rem; font-size: 0.95rem; }
