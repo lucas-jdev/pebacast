@@ -1,0 +1,214 @@
+{
+  "aprovado": false,
+  "roteiro_sha256": "e28056992e290a51c5cfe714779786aba2bbae74f27a44086da6680bd9a9dcc0",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "um postmortem publicado no GitHub, no repositório do Sirena, um sistema do governo francês na área da saúde. O documento entrou no repositório no começo de novembro e conta uma queda de produção do dia vinte e três de outubro.",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02); sirena-sante.social.gouv.fr, organização DNUM-SocialGouv; PR mesclado em 2 de novembro de 2026."
+    },
+    {
+      "fala": 4,
+      "afirmacao": "o site ficou fora do ar por uma hora e vinte e quatro minutos",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02): '1h24 d'indisponibilité publique' (12h07:59 a 13h32)."
+    },
+    {
+      "fala": 4,
+      "afirmacao": "Um serviço externo que checa se o site está de pé mandou alerta oito minutos depois da queda, e mandou um lembrete quase meia hora depois.",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02): updown.io ALERT: DOWN às 12h08, STILL DOWN (29 minutes) às 12h36."
+    },
+    {
+      "fala": 4,
+      "afirmacao": "o time só ficou sabendo do problema quarenta e sete minutos depois do primeiro alerta, porque o product owner avisou",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02): sinalização humana da PO às 12h55, '47 min après la première alerte automatique'."
+    },
+    {
+      "fala": 5,
+      "afirmacao": "Depois que alguém olhou, o diagnóstico levou dois minutos. A causa estava nos eventos do cluster desde o começo. Mais da metade do tempo fora do ar foi gente que não sabia que precisava olhar.",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02): 'Cause identifiée, 2 minutes après le signalement'; FailedScheduling desde ~12h09; 47 dos 84 minutos, 'plus de la moitié'."
+    },
+    {
+      "fala": 8,
+      "afirmacao": "No Grafana, o alerta que apareceu dizia que um cron job tinha falhado em produção. Mas nenhum cron job tinha falhado.",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02): DatasourceNoData na regra 'Cron job failed (production)', 'aucun cron n'avait échoué'."
+    },
+    {
+      "fala": 9,
+      "afirmacao": "o worker sumiu, então os logs dele pararam de chegar, e uma regra de ausência de dados disparou com um título que apontava pra uma falha de aplicação. O próprio postmortem diz isso: o rótulo apontava uma pane de aplicação para um problema de infraestrutura.",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02), seção 6: 'Le libellé désigne une panne applicative pour un problème d'infrastructure'."
+    },
+    {
+      "fala": 10,
+      "afirmacao": "dois bancos de dados, o do Metabase e um MariaDB, ficaram fora por quase três horas sem alerta nenhum. O único alerta sobre eles foi um pico de CPU, depois que eles voltaram.",
+      "veredito": "imprecisa",
+      "correcao": "O Metabase não é banco de dados, é a ferramenta de painéis e relatórios; o postmortem fala do Metabase de produção e da base MariaDB 'sirec'. Ficaram fora cerca de 2h45 e 2h50, sem alerta de disponibilidade. Os alertas de CPU foram dois, nos pods do Metabase, depois que o Metabase voltou; nenhum veio depois da volta do MariaDB, que só voltou às 14h50. Sugestão: 'o Metabase, a ferramenta de painéis, e um banco MariaDB ficaram fora quase três horas sem nenhum alerta. Os únicos alertas sobre o Metabase foram picos de CPU depois que ele já tinha voltado.'",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02), seções Impact, Chronologie e 7; Metabase é ferramenta de BI (metabase.com)."
+    },
+    {
+      "fala": 11,
+      "afirmacao": "Os nós do cluster estavam entre noventa e cinco e cem por cento das reservas de CPU, enquanto o uso real estava perto de dez por cento.",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02), Cause principale e seção 2."
+    },
+    {
+      "fala": 11,
+      "afirmacao": "as aplicações expulsas não tinham onde rodar de novo",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02): as aplicações despejadas ficaram em Pending, sem nó com reservas disponíveis."
+    },
+    {
+      "fala": 13,
+      "afirmacao": "Ele olha o que cada aplicação reservou, não o que ela usa.",
+      "veredito": "correta",
+      "fonte": "Documentação do Kubernetes (agendamento por requests); Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02), seção 2: 'Le scheduler ne raisonne que sur les réservations'."
+    },
+    {
+      "fala": 23,
+      "afirmacao": "Foi mais ou menos o que aconteceu com o time do Sirena: o alerta certo existia, mas chegou num lugar onde ninguém estava esperando um problema de verdade.",
+      "veredito": "imprecisa",
+      "correcao": "Na sequência do canal silenciado por excesso de alertas (falas 21 a 23), a frase sugere que o Sirena sofria de fadiga de alerta, o que o postmortem não diz. Ele diz que o canal alerts/sirena/uptime era um registro, e não um canal de plantão, e que faltava uma regra de escalonamento. Sugestão: 'No Sirena, o alerta certo existia, mas caía num canal que o próprio time descreve como um registro, e não um plantão: não havia regra dizendo quem tinha que agir.'",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02), seção 4 e Actions à mener: 'Le canal alerts/sirena/uptime n'est pas un canal d'astreinte, c'est un journal'."
+    },
+    {
+      "fala": 25,
+      "afirmacao": "O capítulo seis do livro Site Reliability Engineering, de Betsy Beyer, Chris Jones, Jennifer Petoff e Niall Richard Murphy, é dedicado a monitorar sistemas distribuídos.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/. Os quatro nomes são os organizadores do livro."
+    },
+    {
+      "fala": 25,
+      "afirmacao": "Uma das ideias centrais ali é separar sintoma de causa. Sintoma é o que está quebrado do ponto de vista de quem usa. Causa é o porquê.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/, seção Symptoms Versus Causes: 'what's broken' é o sintoma e 'why' é a causa."
+    },
+    {
+      "fala": 27,
+      "afirmacao": "A minha leitura do capítulo é que o alerta que acorda alguém deveria olhar pro sintoma, e as causas ficam nos painéis, pra quem for investigar.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/: páginas em sintomas; 'spend much more effort on catching symptoms than causes'."
+    },
+    {
+      "fala": 29,
+      "afirmacao": "Tem causa que vale alerta, quando ela avisa de um sintoma que ainda vai acontecer. Um disco que vai encher em quatro horas é causa",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/: 'only worry about very definite, very imminent causes'; o exemplo do disco que enche em 4 horas está na seção Saturation."
+    },
+    {
+      "fala": 31,
+      "afirmacao": "O livro descreve três saídas pro monitoramento: o alerta, que pede ação humana imediata; o ticket, que pede ação humana, mas pode esperar uns dias; e o registro, que ninguém precisa ler na hora, mas que vai estar lá quando alguém for investigar.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering, cap. 1 (Introduction, seção Monitoring): 'three kinds of valid monitoring output: Alerts, Tickets, Logging'; o cap. 6 retoma page, ticket e log."
+    },
+    {
+      "fala": 35,
+      "afirmacao": "O livro diz que, se você só puder medir quatro coisas do seu sistema voltado pro usuário, meça essas quatro: latência, tráfego, erros e saturação.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/, The Four Golden Signals: 'If you can only measure four metrics of your user-facing system, focus on these four'."
+    },
+    {
+      "fala": 37,
+      "afirmacao": "É o tempo pra atender uma requisição. E tem uma armadilha que o livro aponta: separe a latência das requisições que deram certo da latência das que deram erro.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/, Latency: 'distinguish between the latency of successful requests and the latency of failed requests'."
+    },
+    {
+      "fala": 39,
+      "afirmacao": "O capítulo recomenda olhar a cauda da distribuição, com histogramas ou percentis, em vez de uma média só.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/, Worrying About Your Tail."
+    },
+    {
+      "fala": 41,
+      "afirmacao": "Requisições por segundo num site, transações num banco, o que fizer sentido pro seu sistema.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/, Traffic: HTTP requests per second; transactions and retrievals per second."
+    },
+    {
+      "fala": 43,
+      "afirmacao": "o livro lembra que nem todo erro é explícito. Tem o erro cinco zero zero, claro. Mas tem a resposta que volta com sucesso e com o conteúdo errado, e tem a resposta que demora mais do que você prometeu",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/, Errors: explicitly, implicitly e by policy."
+    },
+    {
+      "fala": 43,
+      "afirmacao": "No caso do Sirena, a página de erro cinco zero três era o sintoma mais claro de todos. E o serviço externo viu esse sintoma oito minutos depois.",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02): updown.io, '503 Service Unavailable', alerta às 12h08."
+    },
+    {
+      "fala": 45,
+      "afirmacao": "Saturação é o quanto o seu serviço está cheio, olhando pro recurso mais apertado. E o capítulo faz uma observação que eu acho valiosa: muitos sistemas começam a degradar bem antes de chegar a cem por cento.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/, Saturation: 'How full your service is', 'resources that are most constrained', 'many systems degrade in performance before they achieve 100% utilization'."
+    },
+    {
+      "fala": 47,
+      "afirmacao": "o recurso que estava apertado não era a CPU física, era a capacidade de agendar, a soma das reservas",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02), seção 2."
+    },
+    {
+      "fala": 49,
+      "afirmacao": "os eventos do agendador falhando desde o primeiro minuto",
+      "veredito": "imprecisa",
+      "correcao": "O postmortem situa os primeiros FailedScheduling por volta das 12h09 e diz que a informação estava disponível 'à la minute 9' (contando do início das evicções, às 12h00), cerca de um minuto depois de o site cair. Sugestão: 'os eventos do agendador falhando desde as 12h09, logo no começo da queda'.",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02), Chronologie e seção 5."
+    },
+    {
+      "fala": 49,
+      "afirmacao": "o documento registra que uma ação parecida, sobre alertas de pods, já tinha saído de um postmortem anterior, no começo de outubro, e não tinha sido implementada",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02), seção 6: ação 'alerter sur les redémarrages de pods et les CrashLoopBackOff' do postmortem de 07/10/2026, 'n'est pas réalisée'."
+    },
+    {
+      "fala": 55,
+      "afirmacao": "Alguém coloca o identificador do usuário como dimensão de uma métrica e, de repente, aquela métrica vira milhões de séries.",
+      "veredito": "correta",
+      "fonte": "Conhecimento consolidado sobre cardinalidade em bancos de séries temporais (documentação do Prometheus, boas práticas de labels)."
+    },
+    {
+      "fala": 59,
+      "afirmacao": "O capítulo defende um monitoramento tão simples quanto possível, e sugere que sinais que são coletados, mas não aparecem em nenhum painel e não são usados por nenhum alerta, são candidatos a remoção.",
+      "veredito": "correta",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/, As Simple as Possible, No Simpler: 'signals that are collected, but not exposed in any prebaked dashboard nor used by any alert, are candidates for removal'."
+    },
+    {
+      "fala": 61,
+      "afirmacao": "Esse é o custo que mais aparece no livro, a complexidade.",
+      "veredito": "imprecisa",
+      "correcao": "Não dá para confirmar que a complexidade é 'o custo que mais aparece no livro'. O cap. 6 de fato pede monitoramento simples e trata a complexidade como custo, mas a comparação é uma atribuição sem base. Sugestão: 'O capítulo trata a complexidade como um custo: ele pede regras simples e monitoramento tão simples quanto possível.'",
+      "fonte": "Site Reliability Engineering (Beyer, Jones, Petoff, Murphy, 2016), cap. 6, Monitoring Distributed Systems, https://sre.google/sre-book/monitoring-distributed-systems/, As Simple as Possible, No Simpler."
+    },
+    {
+      "fala": 61,
+      "afirmacao": "O alerta do cron job do Sirena é um bom exemplo de regra que envelheceu: ela foi escrita pensando num tipo de falha e disparou em outro, com um título que enganava.",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02), seção 6 e ação 'Scinder la règle Cron job failed'."
+    },
+    {
+      "fala": 69,
+      "afirmacao": "No caso do Sirena, quem avisou primeiro, pro time, foi o product owner.",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02): 'Signalement humain : Aurélie (PO)... C'est le point d'entrée réel de l'incident'."
+    },
+    {
+      "fala": 73,
+      "afirmacao": "saturação, medida no recurso que realmente aperta, que no caso do Sirena eram as reservas, e não a CPU",
+      "veredito": "correta",
+      "fonte": "Postmortem docs/postmortem-2026-10-23.md, PR DNUM-SocialGouv/sirena#1733 (commit f2a751e, merge em 2026-11-02), seção 2."
+    },
+    {
+      "fala": 77,
+      "afirmacao": "abra a pasta ponto github barra workflows no repositório do Pebacast, em github ponto com barra lucas jdev barra pebacast, liste cada situação que abre uma issue, como a do watchdog, que avisa depois de trinta e seis horas sem roteiro novo",
+      "veredito": "correta",
+      "fonte": "Repositório lucas-jdev/pebacast, público: .github/workflows/watchdog.yml abre issue após 36 h sem roteiro novo; publicar.yml e regravar.yml também abrem issues. Dá para fazer sem trabalhar na área."
+    }
+  ]
+}

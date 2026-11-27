@@ -12,7 +12,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
-from podcast.audio import ALVO_LOUDNESS_LUFS, Loudness, Trechos, medir_loudness
+from podcast.audio import ALVO_LOUDNESS_LUFS, Trechos, medir_trecho
 from podcast.issues import IssuesDeIncidente
 
 # Folga para o meio da pausa cair dentro do silêncio detectado mesmo com o atraso do limitador.
@@ -81,14 +81,14 @@ class Laudo:
 
 
 def medir(mp3: Path, trechos: Trechos, limites: Limites) -> Medicao:
-    total = _loudness(mp3)
-    fala = _loudness(mp3, trechos.fala)
+    total = medir_trecho(mp3)
+    fala = medir_trecho(mp3, trechos.fala)
     return Medicao(
         pico_real_dbtp=total.pico_real_dbtp,
         loudness_lufs=total.integrada_lufs,
         fala_lufs=fala.integrada_lufs,
-        abertura_lufs=_loudness(mp3, trechos.abertura).integrada_lufs if trechos.abertura else None,
-        encerramento_lufs=_loudness(mp3, trechos.encerramento).integrada_lufs if trechos.encerramento else None,
+        abertura_lufs=medir_trecho(mp3, trechos.abertura).integrada_lufs if trechos.abertura else None,
+        encerramento_lufs=medir_trecho(mp3, trechos.encerramento).integrada_lufs if trechos.encerramento else None,
         maior_pausa_s=maior_pausa(trechos.trocas_s, silencios(mp3, trechos.fala, limites.silencio_dbfs)),
         trocas=len(trechos.trocas_s),
     )
@@ -188,11 +188,6 @@ class IncidentesDeAudio:
             partes.append("A issue fecha sozinha quando o áudio do episódio passar no QA, por exemplo depois de "
                           "regravar e substituir (`regravar.yml`).")
         return "\n".join(partes)
-
-
-def _loudness(mp3: Path, trecho: tuple[float, float] | None = None) -> Loudness:
-    corte = ["-ss", f"{trecho[0]:.3f}", "-to", f"{trecho[1]:.3f}"] if trecho else []
-    return medir_loudness([*corte, "-i", str(mp3)], "[0:a]anull[medir]")
 
 
 def _numero(valor: float, casas: int = 1) -> str:

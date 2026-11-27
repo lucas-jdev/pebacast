@@ -89,7 +89,7 @@ audio:
   vinheta:
     arquivo: assets/vinheta.mp3
     credito: Vinheta "Indie Rock", de AtlasAudio, via Pixabay (https://pixabay.com/pt/users/atlasaudio-54514918/)
-    abaixo_da_fala_lu: 2   # a música fica 2 LU abaixo da loudness da fala, seja qual for o volume da faixa
+    abaixo_da_fala_lu: 2   # no MP3 final, a abertura e o encerramento ficam 2 LU (até 2,5) abaixo da fala, medidos como o QA mede
     sobreposicao_s: 1.5    # a primeira fala entra 1,5 s antes do fim da abertura
     abertura:              # introdução da faixa, antes de a banda entrar
       inicio_s: 1.0

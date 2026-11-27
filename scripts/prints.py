@@ -1,6 +1,6 @@
 """Prints de antes e depois do site, por seção (ADR 0009).
 
-    python scripts/prints.py capturar --site <site gerado> --saida <pasta>
+    python scripts/prints.py capturar --site <site gerado> --saida <pasta> [--lado antes|depois] [--diagnostico <pasta>]
     python scripts/prints.py comparar <capturas antes> <capturas depois> --saida <artefato> [--pr N]
     python scripts/prints.py validar <artefato>                      (imprime o número do PR)
     python scripts/prints.py comentario <artefato> --repo dono/repo --sha <commit>
@@ -10,6 +10,12 @@
 do main e permissão de escrita, e usam só a biblioteca padrão: tudo que vem do artefato é tratado
 como dado não confiável.
 
+Teto por página (#136): carregar, preparar e fotografar cada página numa tela tem 60 s, contados no
+Python e não na página, então valem mesmo com o renderer travado. Estourou, o navegador é morto e a
+mesma página é tentada uma vez num navegador novo; estourou de novo, `capturar` falha na hora com a
+página, o viewport e o lado. Com `--diagnostico`, cada estouro grava ali o trace do Playwright, o
+console da página e os processos do navegador; num run sem estouro, nada é gravado.
+
 Regra de nome das seções: o cabeçalho (`header` fora de `section`) é `cabecalho`, o rodapé
 (`footer` fora de `section`) é `rodape`, e cada `section` usa o `id`, senão o `aria-labelledby`,
 senão `secao-<posição>`. O nome é normalizado para [a-z0-9-]; repetido ganha sufixo `-2`, `-3`...
@@ -18,10 +24,13 @@ senão `secao-<posição>`. O nome é normalizado para [a-z0-9-]; repetido ganha
 from __future__ import annotations
 
 import argparse
+import asyncio
 import faulthandler
 import json
+import os
 import re
 import shutil
+import signal
 import sys
 import threading
 import unicodedata
@@ -195,6 +204,20 @@ TETO_QUADRO_MS = 1_000
 TETO_CARGA_MS = 10_000
 TETO_TOTAL_MS = 60_000
 
+# Teto de cada página numa tela (carregar, preparar e fotografar), contado no Python. No #136 o
+# renderer travou dentro do evaluate do _JS_PREPARAR: nem os setTimeout de cima disparavam, e o passo
+# só caía no timeout de 6 min do job. O teto é um asyncio.wait_for sobre as chamadas ao Playwright: o
+# relógio é do Python, que só espera o socket do driver, e não depende de JS rodando na página.
+# Estourou: guarda o diagnóstico, mata o processo do navegador pelo PID (o renderer travado vai junto)
+# e tenta a mesma página uma vez, num navegador novo. Estourou de novo: falha na hora.
+TETO_PAGINA_S = 60
+TENTATIVAS = 2
+TETO_DIAGNOSTICO_S = 10
+
+
+class PaginaTravou(Exception):
+    pass
+
 
 def _servidor(site: Path):
     from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -218,56 +241,185 @@ def caminho_da_pagina(site: Path, pagina: str) -> str | None:
     return ROTULOS[pagina] if arquivo.is_file() else None
 
 
-def capturar(site: Path, saida: Path, paginas: Iterable[str] = PAGINAS) -> list[Path]:
-    from playwright.sync_api import sync_playwright
+def _matar(pid: int) -> None:
+    try:
+        os.kill(pid, getattr(signal, "SIGKILL", signal.SIGTERM))
+    except OSError:
+        pass
 
-    saida.mkdir(parents=True, exist_ok=True)
-    # Se travar, a pilha do Python vai para o stderr a cada minuto: o log do job mostra em que chamada parou.
-    faulthandler.dump_traceback_later(60, repeat=True, file=sys.stderr)
+
+class _Navegador:
+    """Um Chromium e o PID do processo dele, lido pelo CDP do próprio navegador logo depois de abrir."""
+
+    def __init__(self, playwright: Any) -> None:
+        self._playwright = playwright
+        self.chromium: Any = None
+        self.cdp: Any = None
+        self.pid = 0
+
+    async def abrir(self) -> None:
+        print("abrindo o Chromium", file=sys.stderr, flush=True)
+        self.chromium = await self._playwright.chromium.launch(args=list(ARGS_CHROMIUM))
+        self.cdp = await self.chromium.new_browser_cdp_session()
+        processos = (await self.cdp.send("SystemInfo.getProcessInfo"))["processInfo"]
+        self.pid = next(p["id"] for p in processos if p["type"] == "browser")
+
+    async def processos(self) -> Any:
+        return (await asyncio.wait_for(self.cdp.send("SystemInfo.getProcessInfo"), TETO_DIAGNOSTICO_S))["processInfo"]
+
+    async def trocar(self) -> None:
+        """Mata o processo do navegador (sem passar pelo renderer nem pelo Playwright) e abre outro."""
+        _matar(self.pid)
+        await self.abrir()
+
+    async def fechar(self) -> None:
+        await self.chromium.close()
+
+
+class _Tela:
+    """Contexto e aba de uma tela. Com `diagnostico`, grava o trace do Playwright (sem snapshots nem
+    screenshots) e o console da página, mas só exporta quando a página estoura o teto."""
+
+    def __init__(self, navegador: _Navegador, tela: str, base: str, diagnostico: Path | None) -> None:
+        self.navegador, self.tela, self.base, self.diagnostico = navegador, tela, base, diagnostico
+        self.contexto: Any = None
+        self.aba: Any = None
+        self.console: list[str] = []
+
+    async def abrir(self) -> None:
+        largura, altura = TELAS[self.tela]
+        celular = self.tela == "celular"
+        self.contexto = await self.navegador.chromium.new_context(
+            viewport={"width": largura, "height": altura}, device_scale_factor=1,
+            is_mobile=celular, has_touch=celular, reduced_motion="reduce",
+            locale="pt-BR", timezone_id="America/Sao_Paulo",
+        )
+        # Votos, GoatCounter e afins variam entre execuções: fora do print.
+        base = self.base
+        await self.contexto.route("**/*", lambda rota: rota.continue_() if rota.request.url.startswith(base) else rota.abort())
+        if self.diagnostico:
+            await self.contexto.tracing.start(snapshots=False, screenshots=False)
+        self.aba = await self.contexto.new_page()
+        self.aba.on("console", lambda msg: self.console.append(f"console.{msg.type}: {msg.text}"))
+        self.aba.on("pageerror", lambda erro: self.console.append(f"pageerror: {erro}"))
+
+    async def comecar_pagina(self) -> None:
+        self.console.clear()
+        if self.diagnostico:
+            await self.contexto.tracing.start_chunk()
+
+    async def terminar_pagina(self) -> None:
+        # Sem `path`, o trace da página que passou é descartado: nada é gravado em disco.
+        if self.diagnostico:
+            await self.contexto.tracing.stop_chunk()
+
+    async def guardar_diagnostico(self, nome: str, mensagem: str) -> None:
+        """Trace, console e processos do navegador. Cada chamada tem teto: o navegador pode estar travado."""
+        if not self.diagnostico:
+            return
+        self.diagnostico.mkdir(parents=True, exist_ok=True)
+        linhas = [mensagem, "", "console da página:", *self.console]
+        try:
+            await asyncio.wait_for(self.contexto.tracing.stop_chunk(path=str(self.diagnostico / f"{nome}.zip")),
+                                   TETO_DIAGNOSTICO_S)
+        except Exception as erro:
+            linhas.append(f"trace não exportado: {erro!r}")
+        try:
+            linhas += ["", "processos do navegador (cpuTime em s):", json.dumps(await self.navegador.processos())]
+        except Exception as erro:
+            linhas.append(f"processos não lidos: {erro!r}")
+        (self.diagnostico / f"{nome}.txt").write_text("\n".join(linhas) + "\n", encoding="utf-8")
+
+    async def fechar(self) -> None:
+        await self.contexto.close()
+
+
+async def _fotografar(aba: Any, base: str, caminho: str, pagina: str, tela: str, saida: Path,
+                      etapa: list[str]) -> list[Path]:
+    """Carrega, prepara e fotografa uma página. `etapa[0]` diz onde está, para a mensagem de estouro."""
+    etapa[0] = "carregando"
+    print(f"{tela}: carregando {caminho}", file=sys.stderr, flush=True)
+    await aba.goto(f"{base}{caminho}", wait_until="networkidle")
+    await aba.add_style_tag(content=_CSS_OCULTOS)
+    etapa[0] = "preparando"
+    print(f"{tela}: preparando {caminho}", file=sys.stderr, flush=True)
+    preparo = await aba.evaluate(_JS_PREPARAR, [TETO_QUADRO_MS, TETO_CARGA_MS, TETO_TOTAL_MS])
+    print(f"{tela}: rolou {preparo}", file=sys.stderr, flush=True)
+    etapa[0] = "fotografando"
+    await aba.wait_for_timeout(ESPERA_MS)
+    elementos = await aba.evaluate(_JS_ELEMENTOS, SELETOR)
+    gerados = []
+    for indice, secao in nomear_secoes(elementos):
+        await aba.evaluate(_JS_ESCONDER_SOBREPOSTOS, [SELETOR, indice])
+        arquivo = saida / nome_captura(pagina, secao, tela)
+        recorte = await aba.evaluate(_JS_RECORTE, [SELETOR, indice])
+        if recorte["width"] <= 0 or recorte["height"] <= 0:
+            continue
+        await aba.screenshot(path=str(arquivo), full_page=True, clip=recorte,
+                             animations="disabled", caret="hide", scale="css")
+        gerados.append(arquivo)
+    return gerados
+
+
+async def _capturar(site: Path, saida: Path, paginas: Sequence[str], lado: str | None, teto_s: float,
+                    diagnostico: Path | None) -> list[Path]:
+    from playwright.async_api import async_playwright
+
     servidor = _servidor(site)
     base = f"http://127.0.0.1:{servidor.server_address[1]}/"
     gerados: list[Path] = []
     try:
-        with sync_playwright() as p:
-            print("abrindo o Chromium", file=sys.stderr, flush=True)
-            navegador = p.chromium.launch(args=list(ARGS_CHROMIUM))
+        async with async_playwright() as p:
+            navegador = _Navegador(p)
+            await navegador.abrir()
             for tela, (largura, altura) in TELAS.items():
-                celular = tela == "celular"
-                contexto = navegador.new_context(
-                    viewport={"width": largura, "height": altura}, device_scale_factor=1,
-                    is_mobile=celular, has_touch=celular, reduced_motion="reduce",
-                    locale="pt-BR", timezone_id="America/Sao_Paulo",
-                )
-                # Votos, GoatCounter e afins variam entre execuções: fora do print.
-                contexto.route("**/*", lambda rota: rota.continue_() if rota.request.url.startswith(base) else rota.abort())
-                pagina_web = contexto.new_page()
+                atual = _Tela(navegador, tela, base, diagnostico)
+                await atual.abrir()
                 for pagina in paginas:
                     caminho = caminho_da_pagina(site, pagina)
                     if caminho is None:
                         continue
-                    print(f"{tela}: carregando {caminho}", file=sys.stderr, flush=True)
-                    pagina_web.goto(f"{base}{caminho}", wait_until="networkidle")
-                    pagina_web.add_style_tag(content=_CSS_OCULTOS)
-                    print(f"{tela}: preparando {caminho}", file=sys.stderr, flush=True)
-                    preparo = pagina_web.evaluate(_JS_PREPARAR, [TETO_QUADRO_MS, TETO_CARGA_MS, TETO_TOTAL_MS])
-                    print(f"{tela}: rolou {preparo}", file=sys.stderr, flush=True)
-                    pagina_web.wait_for_timeout(ESPERA_MS)
-                    elementos = pagina_web.evaluate(_JS_ELEMENTOS, SELETOR)
-                    for indice, secao in nomear_secoes(elementos):
-                        pagina_web.evaluate(_JS_ESCONDER_SOBREPOSTOS, [SELETOR, indice])
-                        arquivo = saida / nome_captura(pagina, secao, tela)
-                        recorte = pagina_web.evaluate(_JS_RECORTE, [SELETOR, indice])
-                        if recorte["width"] <= 0 or recorte["height"] <= 0:
-                            continue
-                        pagina_web.screenshot(path=str(arquivo), full_page=True, clip=recorte,
-                                              animations="disabled", caret="hide", scale="css")
-                        gerados.append(arquivo)
-                contexto.close()
-            navegador.close()
+                    for tentativa in range(1, TENTATIVAS + 1):
+                        etapa = ["abrindo"]
+                        await atual.comecar_pagina()
+                        try:
+                            gerados += await asyncio.wait_for(
+                                _fotografar(atual.aba, base, caminho, pagina, tela, saida, etapa), teto_s)
+                        except TimeoutError:
+                            onde = f"página {caminho}, viewport {tela} ({largura}x{altura}), lado {lado or '-'}"
+                            print(f"{onde}: passou de {teto_s:g} s {etapa[0]}, tentativa {tentativa} de {TENTATIVAS}",
+                                  file=sys.stderr, flush=True)
+                            nome = f"travou--{lado or 'sem-lado'}--{tela}--{pagina}--tentativa-{tentativa}"
+                            await atual.guardar_diagnostico(nome, f"{onde}: passou de {teto_s:g} s {etapa[0]}")
+                            if tentativa == TENTATIVAS:
+                                _matar(navegador.pid)
+                                raise PaginaTravou(f"{onde}: travou {etapa[0]} nas {TENTATIVAS} tentativas, "
+                                                   f"com teto de {teto_s:g} s cada") from None
+                            # Navegador novo: um renderer (ou GPU) preso não contamina a nova tentativa.
+                            await navegador.trocar()
+                            atual = _Tela(navegador, tela, base, diagnostico)
+                            await atual.abrir()
+                        else:
+                            await atual.terminar_pagina()
+                            break
+                await atual.fechar()
+            await navegador.fechar()
     finally:
-        faulthandler.cancel_dump_traceback_later()
         servidor.shutdown()
     return gerados
+
+
+def capturar(site: Path, saida: Path, paginas: Iterable[str] = PAGINAS, *, lado: str | None = None,
+             teto_s: float = TETO_PAGINA_S, diagnostico: Path | None = None) -> list[Path]:
+    """Fotografa as seções de cada página nas duas telas, com teto por página (ver TETO_PAGINA_S).
+    `lado` (antes ou depois) só entra na mensagem; `diagnostico` é a pasta do que se guarda num estouro."""
+    saida.mkdir(parents=True, exist_ok=True)
+    # Se travar, a pilha do Python vai para o stderr a cada minuto: o log do job mostra em que chamada parou.
+    faulthandler.dump_traceback_later(60, repeat=True, file=sys.stderr)
+    try:
+        return asyncio.run(_capturar(site, saida, list(paginas), lado, teto_s, diagnostico))
+    finally:
+        faulthandler.cancel_dump_traceback_later()
 
 
 # ---------------------------------------------------------------- comparação
@@ -464,6 +616,8 @@ def _criar_parser() -> argparse.ArgumentParser:
     cap = sub.add_parser("capturar", help="Fotografa cada seção das páginas no desktop e no celular.")
     cap.add_argument("--site", type=Path, required=True, help="Pasta do site gerado (publicacao --site).")
     cap.add_argument("--saida", type=Path, required=True)
+    cap.add_argument("--lado", choices=("antes", "depois"), help="Só para a mensagem de estouro.")
+    cap.add_argument("--diagnostico", type=Path, help="Pasta do trace e do log quando uma página estoura o teto.")
     comp = sub.add_parser("comparar", help="Guarda só os pares que mudaram, com o manifesto.")
     comp.add_argument("antes", type=Path)
     comp.add_argument("depois", type=Path)
@@ -482,7 +636,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = _criar_parser().parse_args(argv)
     try:
         if args.comando == "capturar":
-            for arquivo in capturar(args.site, args.saida):
+            for arquivo in capturar(args.site, args.saida, lado=args.lado, diagnostico=args.diagnostico):
                 print(arquivo)
         elif args.comando == "comparar":
             manifesto = comparar(args.antes, args.depois, args.saida, args.pr)
@@ -496,6 +650,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             sys.stdout.write(corpo)
     except ArtefatoInvalido as erro:
         print(f"Artefato recusado: {erro}", file=sys.stderr)
+        return 1
+    except PaginaTravou as erro:
+        print(f"Captura abortada: {erro}", file=sys.stderr)
         return 1
     return 0
 

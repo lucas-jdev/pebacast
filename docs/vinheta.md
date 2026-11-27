@@ -20,7 +20,7 @@ Pela mesma razão, a vinheta fica fora da CC BY 4.0 do conteúdo. Ver [LICENSE-C
 ## Como trocar a faixa ou o recorte
 
 1. Baixe a faixa e salve em `assets/vinheta.mp3`.
-2. Ajuste o recorte em `config/pipeline.yaml`, na chave `audio.vinheta`: início, duração, fades, sobreposição com a primeira fala, quantos LU a música fica abaixo da fala (`abaixo_da_fala_lu`) e se toca no encerramento. O volume da faixa não importa: a montagem mede cada recorte e nivela pela fala do episódio.
+2. Ajuste o recorte em `config/pipeline.yaml`, na chave `audio.vinheta`: início, duração, fades, sobreposição com a primeira fala, quantos LU a música fica abaixo da fala (`abaixo_da_fala_lu`) e se toca no encerramento. O volume da faixa não importa: a montagem mede cada recorte, nivela pela fala do episódio e confere no MP3 final, nos trechos que o QA do áudio mede.
 3. Rode `scripts/cifrar_vinheta.sh`. Ele gera uma senha aleatória, cifra a faixa com AES-256, confere a decifragem e grava a senha no secret `VINHETA_SENHA`. A senha não aparece na tela nem fica salva no disco.
 4. Commite `assets/vinheta.mp3.gpg` e a config.
 

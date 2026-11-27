@@ -49,14 +49,27 @@ jobs:
           done
 
       - name: Fotografar as seções
-        # Normal: menos de 2 minutos. Passou disso, travou: falhar logo, com a última página no log.
+        # Normal: menos de 2 minutos. Cada página tem teto de 60 s e uma nova tentativa (#136): se
+        # travar duas vezes, falha em até uns 2 min, com a página, o viewport e o lado no log. Os 6 min
+        # são a rede de segurança se até isso travar.
         timeout-minutes: 6
         env:
           DEBUG: pw:api
         run: |
           for lado in antes depois; do
-            python depois/scripts/prints.py capturar --site "$RUNNER_TEMP/site-$lado" --saida "$RUNNER_TEMP/capturas-$lado" >/dev/null
+            python depois/scripts/prints.py capturar --site "$RUNNER_TEMP/site-$lado" --saida "$RUNNER_TEMP/capturas-$lado" \
+              --lado "$lado" --diagnostico "$RUNNER_TEMP/prints-diagnostico" >/dev/null
           done
+
+      # Só existe quando uma página estourou o teto: trace do Playwright, console e processos do navegador.
+      - name: Guardar o diagnóstico da trava
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: prints-diagnostico
+          path: ${{ runner.temp }}/prints-diagnostico/
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Comparar
         env:

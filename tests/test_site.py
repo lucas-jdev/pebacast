@@ -927,6 +927,19 @@ def test_com_o_spotify_a_assinatura_comeca_por_ele_e_o_em_breve_some(projeto):
     assert "Ainda não está no Spotify" not in _texto(gerar_pagina_sobre(projeto, "feed.xml"))
 
 
+def test_icone_do_spotify_entra_so_com_o_arquivo_oficial_colocado(projeto):
+    # Marca não se redesenha: o ícone vem do kit do Spotify, posto à mão em site/icones/spotify.svg.
+    _com_spotify(projeto, "https://open.spotify.com/show/5EMHP24shu7Y7fhfRbLkUz")
+    assert "botao__marca" not in gerar_index(projeto, "feed.xml")
+
+    icone = projeto.raiz / "site" / "icones" / "spotify.svg"
+    icone.parent.mkdir(parents=True, exist_ok=True)
+    icone.write_text('<svg xmlns="http://www.w3.org/2000/svg"/>', encoding="utf-8")
+
+    assert ('<a class="botao" href="https://open.spotify.com/show/5EMHP24shu7Y7fhfRbLkUz"><img class="botao__marca" '
+            'src="icones/spotify.svg" alt="" width="23" height="22">Ouvir no Spotify</a>') in gerar_index(projeto, "feed.xml")
+
+
 def test_com_o_spotify_a_serie_aponta_para_ele_no_sameas(projeto):
     _com_spotify(projeto, "https://open.spotify.com/show/5EMHP24shu7Y7fhfRbLkUz?si=abc")
 

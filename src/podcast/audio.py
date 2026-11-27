@@ -17,10 +17,13 @@ PASSADAS_DE_CODIFICACAO = 5
 TOLERANCIA_DE_LOUDNESS_LU = 0.2
 FOLGA_DO_TETO_DB = 0.2
 TETO_MINIMO_DBTP = -12.0
+# A música vale como nivelada entre `abaixo_da_fala_lu` e esta faixa abaixo disso, medida no MP3.
+FAIXA_DA_MUSICA_LU = 0.5
 # Abaixo disso a borda de um bloco é silêncio. A folga preserva o ataque e a cauda das consoantes.
 LIMIAR_BORDA_DBFS = -50.0
 FOLGA_BORDA_MS = 30
 SEM_LOUDNESS = -70.0  # o ebur128 devolve -70 LUFS para silêncio
+VOZ = "voz"  # rótulo, no grafo do ffmpeg, da fala já com o ganho e o limitador
 
 
 @dataclass(frozen=True)
@@ -154,8 +157,8 @@ class Vinheta:
     """Recortes de uma faixa musical na abertura e, opcionalmente, no encerramento.
 
     A primeira fala entra `sobreposicao_s` segundos antes do fim da abertura, por cima do fade-out.
-    O encerramento começa logo depois da última fala. Cada recorte fica `abaixo_da_fala_lu` abaixo
-    da loudness da fala do episódio, seja qual for o volume da faixa.
+    O encerramento começa logo depois da última fala. No MP3, cada recorte fica `abaixo_da_fala_lu`
+    abaixo da loudness da fala do episódio, seja qual for o volume da faixa.
     """
 
     arquivo: Path
@@ -235,8 +238,9 @@ def exportar_mp3(
 ) -> Trechos:
     """Monta o episódio no alvo de loudness, com o pico real limitado, e devolve onde ficou cada parte.
 
-    O ganho é um só para o episódio inteiro, medido antes. Um normalizador dinâmico (loudnorm)
-    puxaria a música do encerramento, mais baixa que a fala, para o alvo.
+    O ganho é um só para a fala inteira, medido antes. Um normalizador dinâmico (loudnorm)
+    puxaria a música do encerramento, mais baixa que a fala, para o alvo. A música entra depois do
+    ganho e do limitador da fala, com o volume conferido no MP3.
     """
     destino.parent.mkdir(parents=True, exist_ok=True)
     # A fala vai para um WAV temporário porque o ffmpeg a lê várias vezes (medir, codificar, corrigir).
@@ -246,36 +250,67 @@ def exportar_mp3(
         return _montar(audio, fala, destino, bitrate_kbps, taxa_saida, vinheta)
 
 
+def medir_trecho(arquivo: Path, trecho: tuple[float, float] | None = None) -> Loudness:
+    """Loudness de um trecho do arquivo, em segundos. É a medida do QA, e a montagem confere com ela."""
+    corte = ["-ss", f"{trecho[0]:.3f}", "-to", f"{trecho[1]:.3f}"] if trecho else []
+    return medir_loudness([*corte, "-i", str(arquivo)], "[0:a]anull[medir]")
+
+
+def correcao_da_musica(mp3: Path, trechos: Trechos, vinheta: Vinheta) -> tuple[float, float]:
+    """Quantos dB mudar na abertura e no encerramento para ficarem `abaixo_da_fala_lu` abaixo da fala no MP3.
+
+    Zero quando o recorte já está na faixa aceita, entre o alvo e `FAIXA_DA_MUSICA_LU` abaixo dele.
+    """
+    fala = medir_trecho(mp3, trechos.fala).integrada_lufs
+    alvo = -vinheta.abaixo_da_fala_lu
+    correcoes = []
+    for trecho in (trechos.abertura, trechos.encerramento):
+        musica = medir_trecho(mp3, trecho).integrada_lufs if trecho else SEM_LOUDNESS
+        diferenca = musica - fala
+        na_faixa = alvo - FAIXA_DA_MUSICA_LU <= diferenca <= alvo
+        sem_som = musica <= SEM_LOUDNESS or fala <= SEM_LOUDNESS
+        correcoes.append(0.0 if na_faixa or sem_som else alvo - FAIXA_DA_MUSICA_LU / 2 - diferenca)
+    return correcoes[0], correcoes[1]
+
+
 def _montar(audio: Audio, wav_da_fala: Path, destino: Path, bitrate_kbps: int, taxa_saida: int,
             vinheta: Vinheta | None) -> Trechos:
     taxa = audio.taxa_amostragem
     entradas = ["-i", str(wav_da_fala)]
+    fala = medir_loudness(entradas, "[0:a]anull[medir]").integrada_lufs
+    volumes = [1.0, 1.0]
     if vinheta is None:
-        grafo, trechos = "[0:a]anull[episodio]", Trechos(fala=(0.0, audio.duracao_segundos), trocas_s=audio.trocas_s)
+        trechos = Trechos(fala=(0.0, audio.duracao_segundos), trocas_s=audio.trocas_s)
     else:
-        fala = medir_loudness(entradas, "[0:a]anull[medir]").integrada_lufs
-        volumes = [vinheta.volume_do_recorte(recorte, fala, taxa) if recorte else 1.0
+        # A música entra depois do ganho e do limitador da fala: o nível dela é o da fala já no alvo.
+        volumes = [vinheta.volume_do_recorte(recorte, ALVO_LOUDNESS_LUFS, taxa) if recorte else 1.0
                    for recorte in (vinheta.abertura, vinheta.encerramento)]
         entradas = [*entradas, "-i", str(vinheta.arquivo)]
-        grafo, trechos = vinheta.filtro("0:a", "1:a", taxa, *volumes), vinheta.trechos(audio)
+        trechos = vinheta.trechos(audio)
 
-    episodio = medir_loudness(entradas, f"{grafo};[episodio]anull[medir]").integrada_lufs
-    ganho_db = ALVO_LOUDNESS_LUFS - episodio if episodio > SEM_LOUDNESS else 0.0
+    def grafo() -> str:
+        return vinheta.filtro(VOZ, "1:a", taxa, *volumes) if vinheta else f"[{VOZ}]anull[episodio]"
+
+    ganho_db = ALVO_LOUDNESS_LUFS - fala if fala > SEM_LOUDNESS else 0.0
     teto_dbtp = ALVO_PICO_DBTP
     # O que sai do limitador ainda muda no MP3: o codificador corta os agudos e o pico real sobe
     # (mais de 1 dB no sw-002), e a loudness cai alguns décimos. Mede o MP3 e corrige o que passou.
+    # A música é conferida no MP3 também, nos trechos que o QA mede (#142).
     for _ in range(PASSADAS_DE_CODIFICACAO):
-        _codificar(entradas, grafo, taxa, ganho_db, teto_dbtp, destino, bitrate_kbps, taxa_saida)
-        if episodio <= SEM_LOUDNESS:
+        _codificar(entradas, grafo(), taxa, ganho_db, teto_dbtp, destino, bitrate_kbps, taxa_saida)
+        if fala <= SEM_LOUDNESS:
             break
-        medida = medir_loudness(["-i", str(destino)], "[0:a]anull[medir]")
+        medida = medir_trecho(destino)
         desvio = ALVO_LOUDNESS_LUFS - medida.integrada_lufs
         excesso = medida.pico_real_dbtp - ALVO_PICO_DBTP
-        if abs(desvio) <= TOLERANCIA_DE_LOUDNESS_LU and excesso <= 0:
+        musica = correcao_da_musica(destino, trechos, vinheta) if vinheta else (0.0, 0.0)
+        if abs(desvio) <= TOLERANCIA_DE_LOUDNESS_LU and excesso <= 0 and not any(musica):
             break
         ganho_db += desvio
         if excesso > 0:
             teto_dbtp = max(teto_dbtp - excesso - FOLGA_DO_TETO_DB, TETO_MINIMO_DBTP)
+        # Se a fala vai baixar nesta passada, a música baixa junto, para não passar dela.
+        volumes = [volume * 10 ** ((correcao + min(desvio, 0.0)) / 20) for volume, correcao in zip(volumes, musica)]
     return trechos
 
 
@@ -289,9 +324,17 @@ def _gravar_wav(audio: Audio, destino: Path) -> None:
 
 def _codificar(entradas: Sequence[str], grafo: str, taxa: int, ganho_db: float, teto_dbtp: float,
                destino: Path, bitrate_kbps: int, taxa_saida: int) -> None:
+    """Ganho e limitador na fala, a mistura do `grafo` (que lê o rótulo VOZ) e de novo o limitador na soma.
+
+    O ganho não passa pela música: o limitador baixa os picos da fala e não os da música, e o ganho
+    que compensava isso na fala subia a música junto (si-003, #142). O segundo limitador só pega
+    o pico da fala somada à música, na sobreposição da abertura.
+    """
+    limitador = (f"aresample={taxa * SOBREAMOSTRAGEM},"
+                 f"alimiter=limit={10 ** (teto_dbtp / 20):.4f}:level=disabled")
     final = (
-        f"{grafo};[episodio]volume={ganho_db:.2f}dB,aresample={taxa * SOBREAMOSTRAGEM},"
-        f"alimiter=limit={10 ** (teto_dbtp / 20):.4f}:level=disabled,aresample={taxa_saida}[saida]"
+        f"[0:a]volume={ganho_db:.2f}dB,{limitador},aresample={taxa}[{VOZ}];"
+        f"{grafo};[episodio]{limitador},aresample={taxa_saida}[saida]"
     )
     comando = [
         "ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
