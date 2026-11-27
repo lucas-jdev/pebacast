@@ -41,6 +41,10 @@ log = logging.getLogger(__name__)
 ITUNES = "http://www.itunes.com/dtds/podcast-1.0.dtd"
 ATOM = "http://www.w3.org/2005/Atom"
 ARQUIVO_FEED = "feed.xml"
+# As show notes abrem com o mesmo aviso que o áudio fala (#112), lido de `roteiro.aviso_ia`.
+# Esta frase só vale para uma config sem os textos fixos.
+AVISO_IA_SEM_TEXTOS_FIXOS = ("Conteúdo gerado por inteligência artificial, com fontes escolhidas à mão e "
+                             "afirmações revisadas por uma segunda IA.")
 
 
 class AudioStorage(Protocol):
@@ -361,10 +365,10 @@ def escrever_site(projeto: Projeto, site: Path) -> None:
 
 
 def show_notes(episodio: Mapping[str, Any], roteiro: Mapping[str, Any], noticia: Mapping[str, Any],
-               revisoes: Sequence[Mapping[str, Any]], url_do_episodio: str, credito_vinheta: str | None = None) -> str:
+               revisoes: Sequence[Mapping[str, Any]], url_do_episodio: str, aviso_ia: str,
+               credito_vinheta: str | None = None) -> str:
     linhas = [
-        "Conteúdo gerado por inteligência artificial, com fontes escolhidas à mão e afirmações revisadas por "
-        "uma segunda IA.",
+        aviso_ia,
         "",
         # O áudio termina pedindo retorno "pelo link na descrição" (#112): é este.
         f"Vote e deixe um recado: {url_do_episodio}",
@@ -392,6 +396,7 @@ def show_notes(episodio: Mapping[str, Any], roteiro: Mapping[str, Any], noticia:
 def _episodios_publicados(projeto: Projeto) -> list[dict[str, Any]]:
     config = projeto.config()
     credito = (config["audio"].get("vinheta") or {}).get("credito")
+    aviso_ia = (config.get("roteiro") or {}).get("aviso_ia", AVISO_IA_SEM_TEXTOS_FIXOS)
     itens = []
     for saga in projeto.sagas().values():
         for episodio in saga.episodios:
@@ -410,6 +415,7 @@ def _episodios_publicados(projeto: Projeto) -> list[dict[str, Any]]:
                     _ler_json(pasta / NOTICIA),
                     [_ler_json(arquivo) for arquivo in revisoes],
                     config["feed"]["url_site"] + caminho_do_episodio(episodio.id),
+                    aviso_ia,
                     credito if publicacao.get("vinheta") else None,
                 ),
             })

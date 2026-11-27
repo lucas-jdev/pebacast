@@ -129,7 +129,7 @@ O MP3 vai para o `AudioStorage` (um release `episodio-<id>` por episódio) e o A
 
 - GUID imutável do episódio;
 - show notes com o link da página do episódio para votar e deixar recado, as fontes, o desafio e o resumo do relatório de revisão;
-- aviso de conteúdo gerado por IA.
+- o aviso de conteúdo gerado por IA, que é o mesmo `roteiro.aviso_ia` que o áudio fala na primeira fala.
 
 Mudanças que só afetam o site ou o feed (`site/`, `src/podcast/site.py`, `src/podcast/publicacao.py`, `curriculum/`, `config/`) são publicadas por `.github/workflows/site.yml`, sem esperar episódio novo. Ele também pode ser disparado à mão. Ele faz checkout da ponta do `main`, e não do commit que o disparou: se ficou na fila esperando uma publicação de episódio, ele publica o `main` já com o episódio novo. Pelo mesmo motivo, `publicar.yml` e `regravar.yml` geram o site de novo depois do `git pull --rebase`, antes do deploy.
 

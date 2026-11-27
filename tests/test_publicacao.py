@@ -380,6 +380,19 @@ def test_relatorio_tem_uma_entrada_por_episodio_para_as_issues():
     assert "sem falas" not in dados["reprovados"]["sl-001"]
 
 
+@precisa_ffmpeg
+def test_show_notes_abrem_com_o_mesmo_aviso_de_ia_que_o_audio_fala(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    _publicar(projeto, tmp_path)
+    aviso = "Este episódio foi gerado por IA, com fontes escolhidas à mão."
+    _gravar(projeto.raiz / "config" / "pipeline.yaml",
+            {**CONFIG, "roteiro": {"aviso_ia": aviso, "pedido_de_retorno": "Conta pra gente."}})
+
+    notas = ET.fromstring(gerar_feed(projeto)).find("channel/item/description").text
+
+    assert notas.startswith(f"{aviso}\n")
+
+
 def test_beta_acrescenta_o_aviso_no_fim_da_descricao_do_canal(projeto):
     _gravar(projeto.raiz / "config" / "pipeline.yaml", {**CONFIG, "site": {"beta": True}})
 
