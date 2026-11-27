@@ -1,0 +1,288 @@
+{
+  "episodio": "sl-003",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura sem decoreba. Aviso de sempre: este episódio foi gerado por inteligência artificial e revisado por uma segunda inteligência artificial. Hoje o tema é integração entre sistemas, e os quatro jeitos clássicos de fazer dois sistemas conversarem."
+    },
+    {
+      "persona": "davi",
+      "texto": "E quem conversa comigo hoje é a Beatriz de novo. Ela é arquiteta de soluções com doze anos de carreira, começou como analista de negócios num hospital e hoje desenha iniciativas inteiras, da conversa com a diretoria ao diagrama de integração. Beatriz, bem-vinda!"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Obrigada, Davi. Oi, você que está ouvindo! Integração é o assunto que eu mais desenho na vida, então hoje eu tô em casa."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então bora. O caso de hoje é hipotético, tá? Não é notícia, é um cenário que a gente montou pra conversa. Imagine um hospital de médio porte com quatro sistemas: o prontuário eletrônico, o sistema do laboratório, a farmácia e o faturamento."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Um cenário que eu conheço bem, viu. Continua.",
+      "estilo": "sorrindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "O laboratório manda os exames realizados pro faturamento num arquivo que sai toda madrugada. A farmácia lê as prescrições e as alergias direto das tabelas do banco do prontuário. E o portal do paciente chama o laboratório na hora, toda vez que alguém abre um resultado."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Até aqui, nada fora do comum. E o que aconteceu?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Numa terça, o time do prontuário reorganizou a tabela de alergias numa atualização de rotina. Coisa pequena, eles nem avisaram ninguém, porque era o banco deles. Só que a tela de conferência da farmácia passou a mostrar a lista de alergias vazia. Uma manhã inteira assim, até alguém estranhar, e aí os farmacêuticos voltaram a conferir no prontuário, paciente por paciente."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Que susto. E a outra parte?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Na mesma semana o laboratório ficou instável e o portal do paciente caiu junto. Aí a nova gerente de tecnologia chegou com a proposta. E olha, eu confesso que eu teria proposto a mesma coisa: troca tudo por mensageria. Evento pra tudo. O prontuário publica que a alergia mudou, a farmácia escuta, o laboratório publica que o exame saiu, o faturamento escuta. Cada um no seu quadrado, ninguém mais mexe no banco de ninguém. Parece o caminho moderno, né?",
+      "estilo": "empolgado"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Parece. E pode até ser o caminho certo pra uma parte disso. Mas antes de eu concordar, deixa eu te fazer umas perguntas. Que problema a gente tá resolvendo mesmo?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. A farmácia quebrou porque mexeram no banco, e o portal caiu porque o laboratório caiu."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Isso. São dois problemas diferentes, com causas diferentes. Agora me diz uma coisa: o faturamento sofreu alguma coisa nessa semana?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Não. O arquivo da madrugada chegou certinho."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Então a integração mais velha e mais sem graça do hospital foi a única que não deu problema. Guarda isso. Pra gente conversar com calma, eu quero usar um livro que é a base desse assunto: Enterprise Integration Patterns, do Gregor Hohpe e do Bobby Woolf. No capítulo dois eles organizam a integração entre aplicações em quatro estilos: transferência de arquivos, banco de dados compartilhado, chamada remota de procedimento e mensageria."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o hospital usa três dos quatro sem nem saber."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Exatamente. E a proposta é ir pro quarto. Então vamos olhar cada um pelo que ele resolve e pelo que ele cobra. Começa pelo arquivo. Por que você acha que ele não quebrou?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Porque... o laboratório gera um arquivo num formato combinado, e o faturamento lê. Se o laboratório mudar o banco dele por dentro, tanto faz, desde que o arquivo saia igual."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Perfeito. O arquivo é um contrato. Cada sistema continua dono dos próprios dados e só promete um formato de saída. Isso deixa os dois bem desacoplados: um não precisa saber nem em que linguagem o outro foi escrito. E agora, qual é o preço?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O tempo. O faturamento só fica sabendo do exame no dia seguinte."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Esse é o preço principal. Na minha leitura, o ponto que os autores insistem é a atualidade dos dados: arquivo costuma ser gerado em intervalos, e entre um arquivo e outro os sistemas discordam. Pro faturamento, um dia de atraso é aceitável? Pergunta pro negócio, não pra TI."
+    },
+    {
+      "persona": "davi",
+      "texto": "Acho que sim. A conta do convênio não fecha no mesmo minuto."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Então pra esse par, o arquivo é uma boa escolha. Tem outros custos, claro: alguém precisa combinar nome, formato, o que fazer com arquivo pela metade, com arquivo que não chegou. Mas é um custo conhecido. Agora a farmácia. Ela lê direto o banco do prontuário. Por que alguém faria isso?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Porque é o jeito mais rápido? A informação já está lá. É só um select."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E tem uma vantagem de verdade: o dado é um só. A farmácia vê a alergia no mesmo instante em que o médico registra. Não tem arquivo atrasado, não tem cópia divergente. Agora me responde: quando o time do prontuário mudou a tabela, ele achou que estava mexendo numa integração?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Não. Achou que estava mexendo no banco dele."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Esse é o coração do episódio. Banco compartilhado é integração. Não é atalho, não é gambiarra temporária, é um estilo de integração com nome e com contrato. Só que o contrato é o esquema inteiro das tabelas, e ninguém escreveu esse contrato em lugar nenhum. Toda coluna que a farmácia lê virou uma promessa que o prontuário fez sem saber.",
+      "estilo": "mais firme"
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. No arquivo, o contrato é pequeno e explícito. No banco compartilhado, o contrato é enorme e invisível."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Isso, e eu gosto dessa frase. O livro também aponta outra dificuldade: desenhar um esquema que sirva bem pra várias aplicações ao mesmo tempo é difícil, e quanto mais gente depende dele, mais ele trava as mudanças. Tem ainda o lado da carga: uma consulta pesada da farmácia disputa recurso com o médico que está prescrevendo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o problema não foi o time do prontuário ser descuidado."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Não. O problema foi ninguém tratar aquilo como integração. Num projeto que eu fiz numa rede de lojas, o estoque era lido direto do banco do sistema de vendas por uns seis sistemas diferentes. Funcionou anos. Quando quiseram trocar o sistema de vendas, descobriram que não dava, porque ninguém sabia quem lia o quê. O projeto de troca virou primeiro um projeto de arqueologia, só pra mapear quem dependia de cada tabela. Isso custou meses."
+    },
+    {
+      "persona": "davi",
+      "texto": "Nossa. Tá, e o portal com o laboratório? Esse é chamada remota, né? O portal chama uma função do laboratório e espera a resposta."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Isso. Chamada remota de procedimento. A grande diferença pros outros dois é que aqui você não compartilha dado, você compartilha função. O portal não precisa saber como o laboratório guarda o resultado, ele só pede. O laboratório continua dono do dado e da regra."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso parece ótimo. Encapsulamento, igual a gente aprende com objeto."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E é a força dele. Mas me diz: quando o laboratório ficou instável, o que o portal podia fazer?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Nada. Ele esperava, dava erro, e o paciente via a tela de erro."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Pois é. Na chamada remota, os dois sistemas precisam estar de pé ao mesmo tempo. A disponibilidade de um passa a depender da do outro. E tem uma armadilha que eu acho a mais perigosa: a chamada remota parece uma chamada local no código. Quem escreve esquece que tem uma rede no meio, com latência, com falha, com resposta que não volta. Na minha leitura, é por isso que os autores tratam esse estilo como acoplado, mesmo ele escondendo bem os dados."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, então mensageria resolve exatamente isso. O laboratório publica, o portal recebe quando der. Ninguém espera ninguém."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Resolve uma parte. Na mensageria, um sistema manda uma mensagem pra um canal, e o outro consome quando puder. Os dois não precisam estar no ar no mesmo instante, a mensagem espera. Dá pra mandar pacotes pequenos e frequentes, então o dado chega quase na hora, bem mais perto do tempo real que o arquivo da madrugada. E cada lado continua dono do seu banco. É o estilo que o livro inteiro aprofunda. Na minha opinião, é o que costuma equilibrar melhor os critérios, mas os próprios autores deixam claro que nenhum estilo vence em todos, e que a escolha é feita integração por integração. Mas olha a pergunta: o paciente que abre o portal quer o resultado agora, ou quer ser avisado depois?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Quer agora. Ele tá olhando pra tela."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Então pra essa pergunta específica do paciente, trocar a chamada por evento não ajuda tanto quanto parece. O que ajuda é o portal guardar uma cópia dos resultados, alimentada por mensagens do laboratório, e responder a partir dela. Aí o laboratório pode cair e o paciente ainda vê o que já saiu. Mas repara que isso tem custo: agora existem duas cópias do resultado, e a do portal pode estar alguns segundos atrás."
+    },
+    {
+      "persona": "davi",
+      "texto": "Hum. Então a mensageria não tira o problema, ela troca o problema.",
+      "estilo": "mais devagar"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Sempre. Você troca indisponibilidade por dado um pouco atrasado e por uma infraestrutura nova pra operar. Mensagem que chega duas vezes, mensagem que chega fora de ordem, fila que enche, alguém que precisa olhar pra tudo isso de madrugada. É um jeito mais flexível, mas é também o mais complexo de construir e de depurar dos quatro."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a farmácia? Se o prontuário publicasse um evento de alergia alterada, ela não ficaria protegida?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Ficaria protegida de mudança no esquema, sim. Mas pensa no que a farmácia faz: ela confere alergia antes de liberar um remédio. Se a cópia dela estiver atrasada, e o médico acabou de registrar uma alergia nova, o que acontece?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Ela libera sem saber. Caramba. Então ali o atraso não é aceitável.",
+      "estilo": "surpreso"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Pra conferência de alergia, provavelmente não. E aí você tem duas saídas honestas. Uma é a farmácia perguntar ao prontuário na hora, por uma chamada remota, numa interface que o prontuário publica e promete manter. A outra é continuar no banco compartilhado, mas tratando como integração de verdade: uma visão própria pra farmácia, documentada, com dono, e que nenhuma atualização mexe sem avisar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí. Você está dizendo que o banco compartilhado pode continuar?"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Pode, se for uma escolha consciente. O erro do hospital não foi usar banco compartilhado. Foi usar sem saber que estava integrando. A pior integração é a que ninguém sabe que existe."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas então como é que eu escolho? Porque até agora a resposta foi depende pra tudo.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E vai continuar sendo, mas um depende com critério. O livro propõe olhar vários critérios ao escolher o estilo. Eu uso dois como porta de entrada, que cobrem a maior parte das conversas. O primeiro: quanto acoplamento eu aceito? Ou seja, quanto um sistema pode saber do outro e quanto uma mudança de um pode quebrar o outro. O segundo: quanta latência o negócio aceita? Um segundo, um minuto, um dia?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Então vamos passar o hospital nesse filtro. Laboratório pro faturamento: latência de um dia aceitável, quero acoplamento baixo. Arquivo serve."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Serve. Mensageria também serviria, mas pagaria um custo que o problema não pede."
+    },
+    {
+      "persona": "davi",
+      "texto": "Prontuário pra farmácia na conferência de alergia: latência quase zero e o dado precisa estar certo naquele instante. Chamada remota numa interface estável, ou banco compartilhado assumido, com contrato."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Isso. E se a chamada remota for o caminho, alguém precisa decidir o que a farmácia faz quando o prontuário estiver fora. Isso é uma conversa com o farmacêutico, não uma configuração de tempo limite."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o portal do paciente: o paciente quer resposta agora, mas ele aguenta ver um resultado com alguns segundos de atraso. Aí mensageria alimentando uma cópia no portal faz sentido."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Faz. Repara que você acabou com três estilos diferentes, e isso não é bagunça. É cada integração escolhida pelo que ela precisa. O que eu desconfio é de projeto que troca tudo de uma vez pelo estilo da moda. Trocar as quatro integrações ao mesmo tempo é o jeito mais rápido de quebrar as quatro."
+    },
+    {
+      "persona": "davi",
+      "texto": "E a gerente de tecnologia, coitada, estava com a melhor das intenções."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Estava, e ela não estava errada sobre mensageria. Ela estava errada sobre aplicar uma resposta só pra perguntas diferentes. Eu levaria pra ela uma proposta em passos. Primeiro, um mapa de todas as integrações, inclusive as escondidas no banco. Segundo, pra cada uma, a latência que o negócio aceita e quem é o dono do contrato. Terceiro, mudar primeiro onde dói, que é a farmácia, e deixar quieto o que funciona, que é o arquivo da madrugada."
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu resumir com as minhas palavras, pra ver se eu peguei. Existem quatro estilos de integração. Arquivo: cada um é dono do seu dado, o contrato é pequeno, mas o dado chega atrasado. Banco compartilhado: o dado é um só e está sempre atualizado, mas o contrato é o esquema inteiro, e quem mexe na tabela está mexendo numa integração, saiba ou não. Chamada remota: compartilha função em vez de dado, esconde bem o banco, mas os dois precisam estar no ar juntos, e a rede não é uma chamada local."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Até aqui, perfeito."
+    },
+    {
+      "persona": "davi",
+      "texto": "E mensageria: os sistemas não precisam estar no ar juntos, o dado chega rápido em pedaços pequenos, mas você ganha cópias que podem atrasar e uma infraestrutura bem mais complexa pra operar. E pra escolher, eu pergunto duas coisas antes de tudo: quanto acoplamento eu aceito e quanta latência o negócio aceita. E a pergunta da latência eu faço pro negócio, não pro time de TI."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Eu não diria melhor. Só acrescento uma coisa: anota o contrato. Seja o formato do arquivo, a visão do banco, a interface da chamada ou o formato da mensagem. Integração sem contrato escrito é integração que alguém vai quebrar sem querer."
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado. Agora o desafio da semana. Desenhe as integrações de um sistema que você mantém e classifique cada uma num dos quatro estilos. Escolha uma e explique o que mudaria se ela usasse outro estilo. E se você ainda não trabalha na área, abra o arquivo docs barra c4 traço negócio ponto md no repositório do Pebacast, no GitHub, classifique as setas do diagrama de contêineres num dos quatro estilos e escolha uma pra imaginar com outro estilo."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "E uma dica: procure as integrações que não estão no diagrama. Normalmente é lá que mora a surpresa."
+    },
+    {
+      "persona": "davi",
+      "texto": "Boa! Beatriz, muito obrigado por mais essa conversa."
+    },
+    {
+      "persona": "beatriz",
+      "texto": "Eu que agradeço, Davi. Foi um prazer. Até a próxima!"
+    },
+    {
+      "persona": "davi",
+      "texto": "E você que ouviu até aqui, obrigado também. Este foi o Pebacast. Até o próximo episódio!"
+    }
+  ],
+  "desafio": "Desenhe as integrações de um sistema que você mantém e classifique cada uma num dos quatro estilos. Escolha uma e explique o que mudaria se ela usasse outro estilo.",
+  "desafio_iniciante": "Abra docs/c4-negocio.md no repositório do Pebacast, github.com/lucas-jdev/pebacast, classifique as setas do diagrama de contêineres num dos quatro estilos de integração e escolha uma para explicar o que mudaria com outro estilo.",
+  "fontes": [
+    "Enterprise Integration Patterns: Designing, Building, and Deploying Messaging Solutions, Gregor Hohpe e Bobby Woolf, cap. 2"
+  ]
+}

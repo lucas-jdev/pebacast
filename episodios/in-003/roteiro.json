@@ -1,0 +1,341 @@
+{
+  "episodio": "in-003",
+  "falas": [
+    {
+      "persona": "davi",
+      "texto": "Olá, olá! Bem-vindos ao Pebacast, o podcast pra quem quer entender arquitetura de verdade, sem decoreba. Aviso de sempre: este episódio foi gerado por inteligência artificial e revisado por uma segunda IA, que confere as afirmações contra as fontes. O tema de hoje é monitoramento de plataforma: como alertar o time sem afogar o time."
+    },
+    {
+      "persona": "davi",
+      "texto": "E quem continua comigo nessa saga de infraestrutura é o Jorge. O Jorge começou montando rack e passando cabo no datacenter de uma universidade, e hoje lidera o time de plataforma de um marketplace. Jorge, bem-vindo de volta!"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Obrigado, Davi. Oi, você que está ouvindo. Hoje o assunto é o barulho que acorda a gente de madrugada."
+    },
+    {
+      "persona": "davi",
+      "texto": "Pois é. E dessa vez a gente tem um caso real. É um postmortem publicado no GitHub, no repositório do Sirena, um sistema do governo francês na área da saúde. O documento entrou no repositório no começo de novembro e conta uma queda de produção do dia vinte e três de outubro."
+    },
+    {
+      "persona": "davi",
+      "texto": "O resumo é esse: o site ficou fora do ar por uma hora e vinte e quatro minutos. Um serviço externo que checa se o site está de pé mandou alerta assim que o site caiu, uns oito minutos depois do começo do incidente, e mandou um lembrete quase meia hora depois. Só que o time só ficou sabendo do problema quarenta e sete minutos depois do primeiro alerta, porque o product owner avisou."
+    },
+    {
+      "persona": "jorge",
+      "texto": "E repara no detalhe que o próprio time escreveu. Depois que alguém olhou, o diagnóstico levou dois minutos. A causa estava nos eventos do cluster desde o começo. Mais da metade do tempo fora do ar foi gente que não sabia que precisava olhar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso me pegou. O alerta funcionou! Ele disparou na hora certa.",
+      "estilo": "surpreso"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Disparou. E a pergunta que me interessa é outra: alguém sentiu que aquele aviso era pra largar tudo e agir? Quando um alerta chega e ninguém se mexe, quase nunca é preguiça. Normalmente é porque aquele canal já tocou tanto sem motivo que virou ruído de fundo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tem mais uma parte que eu achei curiosa. No Grafana, o alerta que apareceu dizia que um cron job tinha falhado em produção. Mas nenhum cron job tinha falhado."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Exato. O que aconteceu foi que o worker sumiu, então os logs dele pararam de chegar, e uma regra de ausência de dados disparou com um título que apontava pra uma falha de aplicação. O próprio postmortem diz isso: o rótulo apontava uma pane de aplicação para um problema de infraestrutura. Quem lê o título vai procurar no lugar errado."
+    },
+    {
+      "persona": "davi",
+      "texto": "E o Metabase, que é a ferramenta de painéis deles, e um banco MariaDB ficaram fora quase três horas sem nenhum alerta. Os únicos alertas sobre o Metabase foram picos de CPU, depois que ele já tinha voltado."
+    },
+    {
+      "persona": "jorge",
+      "texto": "E a cereja do bolo, que é a parte de que eu mais gosto. Os nós do cluster estavam entre noventa e cinco e cem por cento das reservas de CPU, enquanto o uso real estava perto de dez por cento. Ou seja, o cluster estava cheio no papel e vazio na prática, e as aplicações expulsas não tinham onde rodar de novo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu ver se eu entendi. A CPU estava tranquila, mas o cluster estava lotado?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Lotado do jeito que importava pro agendador. Ele olha o que cada aplicação reservou, não o que ela usa. Guarda isso, que a gente volta nessa ideia quando falar de saturação."
+    },
+    {
+      "persona": "davi",
+      "texto": "Beleza. Então deixa eu fazer o papel do time que acabou de passar por isso. Minha proposta, de coração: a gente monitora tudo. Toda métrica de todo serviço, todo log, tudo indo pra um lugar só. E cria alerta pra tudo que pode dar errado: CPU acima de oitenta, memória acima de oitenta, disco, fila, pod reiniciando, cron falhando. Se o banco caiu sem alerta, é porque faltou alerta. Mais alerta, menos surpresa.",
+      "estilo": "empolgado"
+    },
+    {
+      "persona": "jorge",
+      "texto": "É a reação mais natural do mundo. Eu já fiz exatamente isso, numa empresa de mídia, na época da migração pra nuvem. Então deixa eu te fazer umas perguntas. Quando o alerta de CPU acima de oitenta tocar às três da manhã, quem acorda?"
+    },
+    {
+      "persona": "davi",
+      "texto": "O plantonista, ué."
+    },
+    {
+      "persona": "jorge",
+      "texto": "E o que ele faz?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Ele olha o painel, vê se está tudo bem..."
+    },
+    {
+      "persona": "jorge",
+      "texto": "E se estiver tudo bem? Se a CPU estiver em oitenta e cinco porque é horário de pico de um job em lote, e os usuários não estão sentindo nada?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Aí ele volta a dormir. Meio irritado.",
+      "estilo": "rindo"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Agora multiplica isso por trinta alertas, cada um com seu limite, em vinte serviços. Quantas vezes por semana esse plantonista vai acordar pra olhar um painel verde?"
+    },
+    {
+      "persona": "davi",
+      "texto": "Muitas. E eu já entendi aonde você quer chegar. Na quinta vez, ele silencia o canal."
+    },
+    {
+      "persona": "jorge",
+      "texto": "E aí, quando chegar o alerta que importa, ele vai cair no mesmo canal silenciado. No Sirena, o problema foi parecido no efeito, mas não na causa: o alerta certo existia, só que caía num canal que o próprio time descreve como um registro, e não como um plantão. Não havia regra dizendo quem tinha que agir. Mais alerta, sem critério, não diminui surpresa. Aumenta a chance de o alerta certo se perder no meio."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, mas então como eu decido o que vira alerta? Porque o banco caindo sem aviso também é ruim."
+    },
+    {
+      "persona": "jorge",
+      "texto": "É ruim, concordo. E aqui vale nomear a fonte. O capítulo seis do livro Site Reliability Engineering, de Betsy Beyer, Chris Jones, Jennifer Petoff e Niall Richard Murphy, é dedicado a monitorar sistemas distribuídos. Uma das ideias centrais ali é separar sintoma de causa. Sintoma é o que está quebrado do ponto de vista de quem usa. Causa é o porquê."
+    },
+    {
+      "persona": "davi",
+      "texto": "Me dá um exemplo."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Sintoma: o site está devolvendo erro cinco zero três pra quem tenta entrar. Causa: o agendador não acha nó pra colocar as aplicações. CPU alta, memória alta, pod reiniciando, tudo isso é causa possível, ou nem isso. A minha leitura do capítulo é que o alerta que acorda alguém deveria olhar pro sintoma, e as causas ficam nos painéis, pra quem for investigar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Mas espera. Se eu só alerto sintoma, eu não descubro o problema mais tarde?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Às vezes, sim, e esse é um trade-off honesto. Tem causa que vale alerta, quando ela avisa de um sintoma que ainda vai acontecer. Um disco que vai encher em quatro horas é causa, mas é uma causa que vai virar queda com certeza, e dá tempo de agir. Agora, CPU em oitenta e cinco não diz que nada vai quebrar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o critério é: esse alerta me diz que o usuário está sofrendo, ou que vai sofrer logo?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Esse é o primeiro filtro. O segundo é: tem alguma coisa que uma pessoa precisa fazer agora? Se a resposta for não, não é alerta que acorda gente. O livro descreve três saídas pro monitoramento: o alerta, que pede ação humana imediata; o ticket, que pede ação humana, mas pode esperar uns dias; e o registro, que ninguém precisa ler na hora, mas que vai estar lá quando alguém for investigar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso muda tudo pra mim. Na minha cabeça, só existiam duas coisas: alerta e silêncio."
+    },
+    {
+      "persona": "jorge",
+      "texto": "E é por isso que todo mundo acaba com alerta demais. Se a única opção além do alerta é não saber, todo mundo escolhe o alerta. Quando você tem o ticket e o painel como opções legítimas, fica fácil rebaixar um alerta sem sentir que está escondendo o problema."
+    },
+    {
+      "persona": "davi",
+      "texto": "Agora, voltando pro caso. Se eu fosse o time do Sirena, o que eu deveria estar olhando? Porque não dá pra olhar só se o site responde."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Aí entra a parte mais famosa do capítulo, os quatro sinais de ouro. O livro diz que, se você só puder medir quatro coisas do seu sistema voltado pro usuário, meça essas quatro: latência, tráfego, erros e saturação."
+    },
+    {
+      "persona": "davi",
+      "texto": "Vamos um por um, que eu quero entender direito. Latência é o tempo de resposta, isso eu sei."
+    },
+    {
+      "persona": "jorge",
+      "texto": "É o tempo pra atender uma requisição. E tem uma armadilha que o livro aponta: separe a latência das requisições que deram certo da latência das que deram erro. Se o servidor devolve erro em dois milissegundos, essas respostas rápidas puxam a média pra baixo e o painel fica bonito enquanto o usuário só vê erro."
+    },
+    {
+      "persona": "davi",
+      "texto": "Nossa, isso é traiçoeiro. O sistema parece mais rápido justamente quando está pior.",
+      "estilo": "surpreso"
+    },
+    {
+      "persona": "jorge",
+      "texto": "E tem outro ponto. Não confie na média. Se noventa e nove pessoas recebem a página rápido e uma espera dez segundos, a média esconde essa uma. O capítulo recomenda olhar a cauda da distribuição, com histogramas ou percentis, em vez de uma média só."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tráfego é quanto de requisição está chegando."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Isso. Requisições por segundo num site, transações num banco, o que fizer sentido pro seu sistema. E tráfego também é sintoma. Se o tráfego despenca às duas da tarde de uma terça, alguma coisa está impedindo o usuário de chegar, mesmo que nenhum servidor reclame."
+    },
+    {
+      "persona": "davi",
+      "texto": "Erros é a taxa de requisições que falham."
+    },
+    {
+      "persona": "jorge",
+      "texto": "E o livro lembra que nem todo erro é explícito. Tem o erro cinco zero zero, claro. Mas tem a resposta que volta com sucesso e com o conteúdo errado, e tem a resposta que demora mais do que você prometeu, que pro usuário é tão ruim quanto um erro. No caso do Sirena, a página de erro cinco zero três era o sintoma mais claro de todos. E o serviço externo viu esse sintoma assim que o site caiu. A detecção estava certa. O que falhou foi o caminho do alerta até uma pessoa."
+    },
+    {
+      "persona": "davi",
+      "texto": "E saturação. Essa é a que eu tenho mais dúvida."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Saturação é o quanto o seu serviço está cheio, olhando pro recurso mais apertado. E o capítulo faz uma observação que eu acho valiosa: muitos sistemas começam a degradar bem antes de chegar a cem por cento. Por isso não adianta só medir uso, você precisa saber em que ponto aquele recurso começa a doer."
+    },
+    {
+      "persona": "davi",
+      "texto": "E aqui entra a história das reservas de CPU do Sirena."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Exatamente. Se o time medisse saturação como uso de CPU, ia ver dez por cento e achar que sobrava espaço. Mas o recurso que estava apertado não era a CPU física, era a capacidade de agendar, a soma das reservas. Isso não está no livro, é a minha opinião: escolher o recurso certo pra medir saturação é a parte difícil, e quase nunca é o primeiro gráfico que a ferramenta te mostra."
+    },
+    {
+      "persona": "davi",
+      "texto": "Então o erro deles foi medir a coisa errada?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Eu não diria erro deles, porque eu não estava lá. O que o postmortem mostra é que o sinal útil estava disponível, os eventos do agendador falhando desde as doze e nove, logo no começo da queda, e que o alerta que chegou falava de outra coisa. E tem um detalhe que dói: o documento registra que uma ação parecida, sobre alertas de pods, já tinha saído de um postmortem anterior, no começo de outubro, e não tinha sido implementada."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso acontece em todo lugar, né? Postmortem vira lista de tarefas que ninguém pega."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Em todo lugar. Por isso eu gosto de tratar ação de postmortem como qualquer outra entrega do time, com dono e com prazo."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tá, agora deixa eu defender um pouco a minha ideia original. Esquece o alerta. Pelo menos coletar tudo não tem problema, né? Dado a mais nunca faz mal. Se um dia eu precisar, está lá."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Quanto isso custa às três da manhã? E quanto isso custa no fim do mês?",
+      "estilo": "irônico"
+    },
+    {
+      "persona": "davi",
+      "texto": "Às três da manhã, nada. Ninguém acorda por causa de um log guardado."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Às três da manhã, custa o tempo de achar a informação certa no meio de tudo. Quando o painel tem duzentos gráficos, o plantonista passa os primeiros minutos procurando qual deles importa. E no fim do mês, custa a fatura. Na minha experiência, a conta de observabilidade cresce sem que ninguém decida que ela vai crescer. Alguém liga o log de depuração pra investigar um problema e esquece ligado. Alguém coloca o identificador do usuário como dimensão de uma métrica e, de repente, aquela métrica vira milhões de séries."
+    },
+    {
+      "persona": "davi",
+      "texto": "Isso de identificador como dimensão eu já fiz. Achei que estava sendo cuidadoso.",
+      "estilo": "sem graça"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Todo mundo já fez. E a intenção é boa. O problema é que cada dado guardado tem custo de coleta, de transporte, de armazenamento e de consulta, e quem paga não é quem decidiu coletar. É a fatura que ninguém lê, que é uma das coisas que mais me assustam em nuvem."
+    },
+    {
+      "persona": "davi",
+      "texto": "Mas e o argumento de que um dia eu vou precisar?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "É um argumento válido pra algumas coisas. Por isso a pergunta não é coletar ou não coletar, é por quanto tempo e com que detalhe. O capítulo defende um monitoramento tão simples quanto possível, e sugere que sinais que são coletados, mas não aparecem em nenhum painel e não são usados por nenhum alerta, são candidatos a remoção. Eu vou um passo além, e essa parte é opinião minha: dado bruto pode ficar pouco tempo, e o resumo dele pode ficar mais tempo. Você raramente precisa de cada requisição de seis meses atrás, mas quer saber como era a latência naquela época."
+    },
+    {
+      "persona": "davi",
+      "texto": "E tem o custo de manter, né? Cada alerta que existe alguém precisa entender."
+    },
+    {
+      "persona": "jorge",
+      "texto": "O capítulo trata a complexidade como um custo: ele pede regras simples e um monitoramento tão simples quanto possível. Regra de alerta é código. Ela tem dono, envelhece, quebra quando o sistema muda. O alerta do cron job do Sirena é um bom exemplo de regra que envelheceu: ela foi escrita pensando num tipo de falha e disparou em outro, com um título que enganava. Alerta com nome errado é pior do que alerta nenhum, porque ele manda a pessoa pro lugar errado com pressa."
+    },
+    {
+      "persona": "davi",
+      "texto": "Deixa eu juntar os trade-offs, então. Se eu alerto pouco, só em sintoma, eu durmo melhor e confio quando o telefone toca, mas posso descobrir algumas causas mais tarde."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Correto. E você compensa isso com painéis bons e com tickets pras causas que podem esperar."
+    },
+    {
+      "persona": "davi",
+      "texto": "Se eu alerto muito, em tudo, eu pego mais coisa cedo no papel, mas na prática o time aprende a ignorar, e o alerta importante se perde."
+    },
+    {
+      "persona": "jorge",
+      "texto": "E você paga em sono e em gente. Plantão barulhento é uma das coisas que mais fazem gente boa sair de um time."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se eu coleto tudo pra sempre, eu tenho resposta pra qualquer pergunta, em teoria, mas pago na fatura, pago na lentidão das consultas e pago no tempo pra achar o que importa."
+    },
+    {
+      "persona": "jorge",
+      "texto": "E se você coleta muito pouco, você fica cego no dia do incidente. Não existe resposta certa fora do contexto. Existe a escolha consciente de quais custos você aceita."
+    },
+    {
+      "persona": "davi",
+      "texto": "Tem uma pergunta que eu acho que quem está ouvindo faria. Como eu sei, hoje, que meus alertas estão ruins?"
+    },
+    {
+      "persona": "jorge",
+      "texto": "Pega o histórico do último mês. Pra cada alerta que tocou, pergunta: alguém fez alguma coisa por causa dele? Se a resposta for não, várias vezes seguidas, esse alerta virou ruído. Ou ele vira ticket, ou vira painel, ou vai embora. E pra cada incidente real do mês, pergunta o contrário: algum alerta avisou antes de um usuário? No caso do Sirena, quem avisou primeiro, pro time, foi o product owner. Isso é um sinal forte."
+    },
+    {
+      "persona": "davi",
+      "texto": "Gostei disso. É tipo fazer faxina no alerta como a gente faz em dependência velha."
+    },
+    {
+      "persona": "jorge",
+      "texto": "É exatamente isso. E faz com frequência, porque o sistema muda e os alertas não mudam sozinhos."
+    },
+    {
+      "persona": "davi",
+      "texto": "Peraí, deixa eu resumir com as minhas palavras, pra ver se eu entendi mesmo. Primeiro: alerta é pra quando uma pessoa precisa fazer alguma coisa agora, porque o usuário está sofrendo ou vai sofrer logo. Se não for isso, é ticket, é painel ou é registro, e tudo bem."
+    },
+    {
+      "persona": "davi",
+      "texto": "Segundo: pra saber se o usuário está sofrendo, eu olho os quatro sinais de ouro. Latência, separando sucesso de erro e olhando a cauda, não a média. Tráfego, porque uma queda de tráfego também é um sintoma. Erros, incluindo os disfarçados de sucesso. E saturação, medida no recurso que realmente aperta, que no caso do Sirena eram as reservas, e não a CPU."
+    },
+    {
+      "persona": "davi",
+      "texto": "Terceiro: coletar tudo não é de graça. Custa na fatura, custa na complexidade e custa no tempo de achar o que importa no meio do incidente. Então eu decido o que guardar, com que detalhe e por quanto tempo. E quarto: um alerta que dispara e ninguém age é um problema tão sério quanto não ter alerta."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Resumo perfeito. Eu só acrescentaria uma coisa: confere de vez em quando se o título do alerta diz a verdade.",
+      "estilo": "sorrindo"
+    },
+    {
+      "persona": "davi",
+      "texto": "Anotado! Agora, o desafio da semana. Revise os alertas de um serviço que você mantém e marque os que exigem que alguém faça algo agora. Proponha o que fazer com os outros: virar ticket, virar painel ou sair."
+    },
+    {
+      "persona": "davi",
+      "texto": "E se você ainda não trabalha na área, abra a pasta ponto github barra workflows no repositório do Pebacast, em github ponto com barra lucas jdev barra pebacast, liste cada situação que abre uma issue, como a do watchdog, que avisa depois de trinta e seis horas sem roteiro novo, e marque quais pedem ação imediata e quais podiam ser só um registro."
+    },
+    {
+      "persona": "davi",
+      "texto": "Jorge, muito obrigado por mais essa conversa. Eu saio daqui querendo apagar metade dos alertas do meu time."
+    },
+    {
+      "persona": "jorge",
+      "texto": "Apaga com critério, Davi. E pra você que ouviu até aqui, que o seu telefone só toque quando valer a pena. Obrigado."
+    },
+    {
+      "persona": "davi",
+      "texto": "Esse foi o Pebacast. Valeu por ouvir, e até o próximo episódio!"
+    }
+  ],
+  "desafio": "Revise os alertas de um serviço que você mantém e marque os que exigem que alguém faça algo agora. Proponha o que fazer com os outros.",
+  "desafio_iniciante": "Abra a pasta .github/workflows no repositório do Pebacast, em github.com/lucas-jdev/pebacast, liste cada situação que abre uma issue, como a do watchdog.yml, que avisa depois de 36 horas sem roteiro novo, e marque quais pedem ação imediata e quais poderiam ser só um registro.",
+  "fontes": [
+    "Site Reliability Engineering: How Google Runs Production Systems, Betsy Beyer, Chris Jones, Jennifer Petoff e Niall Richard Murphy, cap. 6"
+  ]
+}

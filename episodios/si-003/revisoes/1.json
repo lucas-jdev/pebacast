@@ -1,0 +1,229 @@
+{
+  "aprovado": false,
+  "roteiro_sha256": "127a906441eaf21846eec406fb8448c58bfeb4b3f37c054a2f3b2e5f749254ff",
+  "afirmacoes": [
+    {
+      "fala": 3,
+      "afirmacao": "FoundationDB, aquele banco de dados distribuído de chave e valor que a Apple mantém como código aberto",
+      "veredito": "correta",
+      "fonte": "https://github.com/apple/foundationdb"
+    },
+    {
+      "fala": 3,
+      "afirmacao": "Ele foi aberto no dia dois de novembro de dois mil e vinte e seis",
+      "veredito": "correta",
+      "fonte": "https://github.com/apple/foundationdb/pull/14404"
+    },
+    {
+      "fala": 5,
+      "afirmacao": "Cada shard é uma faixa contínua de chaves",
+      "veredito": "correta",
+      "fonte": "Documentação do FoundationDB (data distribution) e https://github.com/apple/foundationdb/pull/14404"
+    },
+    {
+      "fala": 6,
+      "afirmacao": "o rastreador só sorteava entre as primeiras faixas de cada grupo, na ordem das chaves, até um limite. As faixas depois desse limite nunca entravam no sorteio",
+      "veredito": "correta",
+      "fonte": "https://github.com/apple/foundationdb/pull/14404 (descrição: só embaralhava os primeiros DD_SHARD_COMPARE_LIMIT ranges do time)"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "ele tira uma amostra entre todas as faixas do grupo, sem repetir, e mantém o mesmo número de consultas de métrica por pedido",
+      "veredito": "correta",
+      "fonte": "https://github.com/apple/foundationdb/pull/14404"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "Um revisor aprovou no dia vinte e quatro de novembro",
+      "veredito": "imprecisa",
+      "correcao": "Em 24 de novembro um revisor deixou comentários recomendando a aprovação (LGTM), mas a página do PR não mostra uma aprovação formal; diga que o PR recebeu revisão favorável em 24/11 e continua aberto, sem merge.",
+      "fonte": "https://github.com/apple/foundationdb/pull/14404 (consultado em 2026-11-26: aberto, sem merge, review de 24/11 sem aprovação formal registrada)"
+    },
+    {
+      "fala": 7,
+      "afirmacao": "Na última vez que eu olhei, ainda não estava mergeado",
+      "veredito": "correta",
+      "fonte": "https://github.com/apple/foundationdb/pull/14404"
+    },
+    {
+      "fala": 17,
+      "afirmacao": "é a consulta espalhada, que no inglês o pessoal chama de scatter and gather. Você manda a pergunta pra todas as partições e junta as respostas",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, seção Partitioning Secondary Indexes by Document (scatter/gather)"
+    },
+    {
+      "fala": 19,
+      "afirmacao": "O Martin Kleppmann, no Designing Data-Intensive Applications, no capítulo seis, chama esse efeito de amplificação da latência de cauda",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6: 'scatter/gather is prone to tail latency amplification' (o conceito é definido no cap. 1)"
+    },
+    {
+      "fala": 23,
+      "afirmacao": "Você ordena as chaves e corta em intervalos contínuos, como uma enciclopédia em vários volumes",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Partitioning by Key Range (analogia dos volumes da enciclopédia)"
+    },
+    {
+      "fala": 24,
+      "afirmacao": "Você passa a chave numa função de hash, e cada partição fica responsável por uma faixa de valores de hash. Isso espalha bem, mas destrói a ordem",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Partitioning by Hash of Key"
+    },
+    {
+      "fala": 26,
+      "afirmacao": "Perde a eficiência dela. Ainda dá pra fazer, mas vira consulta espalhada",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6 (no MongoDB com sharding por hash, a consulta por intervalo vai para todas as partições)"
+    },
+    {
+      "fala": 28,
+      "afirmacao": "Esse é um exemplo que o Kleppmann usa no capítulo seis, com dados de sensores gravados com a hora como chave. Todas as escritas do momento caem na partição de hoje",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Partitioning by Key Range"
+    },
+    {
+      "fala": 31,
+      "afirmacao": "Do jeito que o livro também sugere pra esse caso: a chave deixou de começar pela hora e passou a começar pelo identificador do sensor, e só depois a hora",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6 (prefixar o timestamp com o nome do sensor; consulta de vários sensores vira uma consulta por sensor)"
+    },
+    {
+      "fala": 37,
+      "afirmacao": "O hash espalha chaves diferentes, mas não divide uma chave sozinha. O Kleppmann dá o exemplo de uma celebridade numa rede social",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Skewed Workloads and Relieving Hot Spots"
+    },
+    {
+      "fala": 39,
+      "afirmacao": "Uma saída que o livro descreve é acrescentar um número aleatório no fim da chave quente. Em vez de uma chave, você tem, digamos, cem variações dela",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6 (número aleatório de dois dígitos no início ou no fim da chave, 100 chaves)"
+    },
+    {
+      "fala": 41,
+      "afirmacao": "Pra saber tudo daquele cliente, você precisa ler as cem variações e juntar. E precisa guardar em algum lugar quais chaves foram divididas",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Skewed Workloads and Relieving Hot Spots"
+    },
+    {
+      "fala": 41,
+      "afirmacao": "o próprio sistema geralmente não descobre sozinho quais são",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6 (a maioria dos sistemas não compensa automaticamente; cabe à aplicação)"
+    },
+    {
+      "fala": 46,
+      "afirmacao": "Vinte e três dividido por dez, resto três",
+      "veredito": "correta",
+      "fonte": "aritmética: 23 mod 10 = 3"
+    },
+    {
+      "fala": 48,
+      "afirmacao": "Vinte e três dividido por onze, resto um",
+      "veredito": "correta",
+      "fonte": "aritmética: 23 mod 11 = 1"
+    },
+    {
+      "fala": 49,
+      "afirmacao": "Quando o número de máquinas muda, quase todas as chaves mudam de lugar",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6 (de 10 para 11 nós, cerca de 10/11 das chaves mudam)"
+    },
+    {
+      "fala": 49,
+      "afirmacao": "O Kleppmann fala exatamente disso: o resto da divisão pelo número de nós é uma péssima forma de distribuir, justamente porque torna o rebalanceamento caríssimo",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, How not to do it: hash mod N"
+    },
+    {
+      "fala": 51,
+      "afirmacao": "criar, desde o começo, muito mais partições do que máquinas. Cada máquina fica com várias. Quando entra uma máquina nova, ela rouba algumas partições inteiras das outras",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Fixed number of partitions"
+    },
+    {
+      "fala": 53,
+      "afirmacao": "Partições demais têm custo de gestão, partições de menos ficam gigantes",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Fixed number of partitions"
+    },
+    {
+      "fala": 53,
+      "afirmacao": "o particionamento dinâmico, que combina bem com faixa de chave: quando uma partição cresce demais, ela se divide em duas; quando encolhe muito, junta com a vizinha",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Dynamic partitioning"
+    },
+    {
+      "fala": 53,
+      "afirmacao": "É parecido com o que o FoundationDB faz com os shards",
+      "veredito": "correta",
+      "fonte": "Documentação do FoundationDB (data distribution divide e junta shards por tamanho e carga)"
+    },
+    {
+      "fala": 55,
+      "afirmacao": "Rebalancear é mover dados pela rede enquanto o sistema está atendendo usuário. Isso gasta banda, gasta disco",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Operations: Automatic or Manual Rebalancing"
+    },
+    {
+      "fala": 59,
+      "afirmacao": "O Kleppmann alerta pra isso: rebalanceamento totalmente automático combinado com detecção automática de falha pode causar falha em cascata",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Operations: Automatic or Manual Rebalancing"
+    },
+    {
+      "fala": 59,
+      "afirmacao": "Por isso muita gente prefere que o sistema sugira o plano de rebalanceamento e um humano aprove",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6 (Couchbase, Riak e Voldemort sugerem a atribuição e exigem commit do administrador)"
+    },
+    {
+      "fala": 61,
+      "afirmacao": "Lá o rebalanceamento automático é parte do produto",
+      "veredito": "correta",
+      "fonte": "Documentação do FoundationDB (data distribution automática)"
+    },
+    {
+      "fala": 63,
+      "afirmacao": "o capítulo seis também trata disso. Alguém precisa guardar o mapa de qual partição está em qual máquina. Pode ser um serviço de coordenação separado, pode ser uma camada de roteamento na frente, ou as próprias máquinas",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Request Routing"
+    },
+    {
+      "fala": 65,
+      "afirmacao": "Ou cada partição guarda um índice local só dos seus dados, e aí a busca por cidade vira consulta espalhada de novo, ou você cria um índice global, particionado pela cidade",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Partitioning Secondary Indexes by Document / by Term"
+    },
+    {
+      "fala": 65,
+      "afirmacao": "cada escrita pode ter que atualizar outra partição",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6, Partitioning Secondary Indexes by Term"
+    },
+    {
+      "fala": 69,
+      "afirmacao": "Por faixa de chave, as chaves vizinhas ficam juntas, então consulta por intervalo é barata, mas uma chave que cresce sempre pro mesmo lado, tipo data, concentra tudo numa partição quente",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6"
+    },
+    {
+      "fala": 70,
+      "afirmacao": "Consulta que toca várias partições espera a mais lenta",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6"
+    },
+    {
+      "fala": 71,
+      "afirmacao": "Resto da divisão pelo número de máquinas move quase tudo, por isso se usa número fixo de partições ou divisão dinâmica",
+      "veredito": "correta",
+      "fonte": "Designing Data-Intensive Applications, Martin Kleppmann, 1ª ed., cap. 6"
+    },
+    {
+      "fala": 74,
+      "afirmacao": "abre o arquivo de migração da tabela de votos no repositório do Pebacast, no GitHub, em lucas-jdev barra pebacast, pasta votos barra migrations, proponha particionar essa tabela pelo episódio ou pelo visitante, e diga qual das consultas do arquivo votos barra src barra votos ponto js ficaria mais cara",
+      "veredito": "correta",
+      "fonte": "Repositório público lucas-jdev/pebacast: votos/migrations/0001_votos.sql e votos/src/votos.js existem; o placar (GROUP BY episodio) e o registro por (episodio, visitante) permitem a análise sem trabalhar na área"
+    }
+  ]
+}

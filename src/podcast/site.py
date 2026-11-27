@@ -33,6 +33,11 @@ from podcast.roteiro import (
 from podcast.validacao import NOTICIA, PASTA_REVISOES, PUBLICACAO, ROTEIRO, max_revisoes
 
 ARQUIVOS_ESTATICOS = "site"
+# O ícone oficial do Spotify, sem nenhuma alteração: Primary_Logo_White_RGB.svg do pacote 2024-spotify-logo-icon.zip
+# do kit de design (developer.spotify.com/documentation/design), porque marca não se redesenha. É a versão branca
+# porque o botão é escuro, e as regras reservam o verde para fundo preto ou branco puro. Sem o arquivo, o botão
+# "Ouvir no Spotify" fica só com o texto.
+ICONE_DO_SPOTIFY = "icones/spotify.svg"
 PAGINA_EPISODIOS = "episodios.html"
 PAGINA_SOBRE = "sobre/"
 PASTA_DOS_EPISODIOS = "episodios"
@@ -86,7 +91,8 @@ def gerar_index(projeto: Projeto, arquivo_feed: str, data: date | None = None) -
         _secao_sagas(sagas, publicados),
         _secao_como(config),
         _secao_assinar(_url_feed(meta, arquivo_feed), meta, beta=_config_do_site(config)["beta"],
-                       spotify=_config_do_site(config)["spotify"]),
+                       spotify=_config_do_site(config)["spotify"],
+                       icone_spotify=(projeto.raiz / ARQUIVOS_ESTATICOS / ICONE_DO_SPOTIFY).is_file()),
     ]
     return _documento(
         config, arquivo_feed,
@@ -196,9 +202,14 @@ def gerar_pagina_do_episodio(projeto: Projeto, arquivo_feed: str, episodio_id: s
     )
 
 
+def _objetivos_em_frases(episodio: Mapping[str, Any]) -> str:
+    """Os objetivos como frases: juntos sem pontuação, a prévia do WhatsApp lia "…do STRIDE Relacionar…" (#118)."""
+    return " ".join(f"{' '.join(o.split()).rstrip('.;')}." for o in episodio.get("objetivos", []) if o.strip())
+
+
 def _resumo(episodio: Mapping[str, Any], nome: str, limite: int = 155) -> str:
-    """Descrição para buscadores: os objetivos do episódio, cortados numa palavra até o limite."""
-    texto = " ".join(" ".join(episodio.get("objetivos", [])).split()) or f"Episódio do {nome}."
+    """Descrição para buscadores e para a prévia de compartilhamento: os objetivos, cortados numa palavra até o limite."""
+    texto = _objetivos_em_frases(episodio) or f"Episódio do {nome}."
     if len(texto) <= limite:
         return texto
     return texto[: limite - 1].rsplit(" ", 1)[0].rstrip(",;:.") + "…"
@@ -228,7 +239,7 @@ def _secao_do_episodio(item: Mapping[str, Any], publicados: Sequence[Mapping[str
                 f'<span class="vizinhos__rotulo">{rotulo}</span>{escape(outro["episodio"]["titulo"])}</a>')
 
     links = vizinho(anterior, "← Anterior", "anterior") + (
-        vizinho(proximo, "Próximo →", "proximo") if proximo else _proximo_que_nao_saiu(item))
+        vizinho(proximo, "Próximo →", "proximo") if proximo else _proximo_que_nao_saiu(item, publicados))
     return f"""<section class="secao" id="episodio">
   <div class="largura">
     <p class="apresenta"><strong>{escape(meta['titulo'])}</strong> · podcast diário de arquitetura em diálogo,
@@ -242,17 +253,24 @@ def _secao_do_episodio(item: Mapping[str, Any], publicados: Sequence[Mapping[str
 
 
 def _antes_ouca(item: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]]) -> str:
-    """Os pré-requisitos do currículo que já saíram: quem chega pelo ep. 2 sabe que o 1 vem antes."""
+    """Os pré-requisitos publicados que ficam fora do caminho da saga.
+
+    Um pré-requisito da mesma saga vem antes no currículo, e quem segue o "← Anterior" passa por ele.
+    Citá-lo ao lado do anterior ("continua SW 001" junto de "Anterior: SW 002") parecia dizer que a
+    pessoa pulou um episódio (#120). Fica o aviso para o pré-requisito de outra saga.
+    """
     no_ar = {i["episodio"]["id"]: i["episodio"]["titulo"] for i in publicados}
-    antes = [eid for eid in item["episodio"].get("pre_requisitos", []) if eid in no_ar]
+    da_saga = {episodio.id for episodio in item["saga"].episodios}
+    antes = [eid for eid in item["episodio"].get("pre_requisitos", []) if eid in no_ar and eid not in da_saga]
     if not antes:
         return ""
     links = " e ".join(f'<a href="../../{caminho_do_episodio(eid)}">{escape(no_ar[eid])}</a>' for eid in antes)
     return f'<p class="antes">Este episódio continua {links}. Se ainda não ouviu, vale começar por lá.</p>'
 
 
-def _proximo_que_nao_saiu(item: Mapping[str, Any]) -> str:
-    """Sem próximo publicado na saga: diz qual é o próximo do currículo, ou que a saga acabou, e convida a assinar."""
+def _proximo_que_nao_saiu(item: Mapping[str, Any], publicados: Sequence[Mapping[str, Any]]) -> str:
+    """Sem próximo publicado na saga: diz qual é o próximo do currículo, ou que a saga acabou, e não deixa a
+    pessoa num beco: oferece o episódio mais recente de outra saga para ouvir enquanto isso."""
     saga, episodio_id = item["saga"], item["episodio"]["id"]
     ordem = [e.id for e in saga.episodios]
     seguinte = saga.episodios[ordem.index(episodio_id) + 1] if ordem.index(episodio_id) + 1 < len(ordem) else None
@@ -260,10 +278,17 @@ def _proximo_que_nao_saiu(item: Mapping[str, Any]) -> str:
         texto = f"Este é o último episódio da saga {escape(saga.nome_curto)} no currículo."
     else:
         texto = (f"O ep. {saga.posicao_do(seguinte.id)} da saga {escape(saga.nome_curto)}, "
-                 f"<em>{escape(seguinte.titulo)}</em>, ainda não saiu. As sagas se revezam: assine para receber.")
+                 f"<em>{escape(seguinte.titulo)}</em>, ainda não saiu. As sagas se revezam, então pode levar alguns dias.")
+    # O ep. 1 da outra saga com episódio mais recente: o meio de outra trilha não serve a quem está começando.
+    no_ar = {i["episodio"]["id"]: i for i in publicados}
+    outra = next((i["saga"] for i in publicados if i["saga"].id != saga.id and i["saga"].episodios[0].id in no_ar), None)
+    inicio = None if outra is None else no_ar[outra.episodios[0].id]
+    enquanto_isso = "" if inicio is None else (
+        f'<span class="vizinhos__enquanto">Enquanto isso, comece a saga {escape(outra.nome_curto)}:'
+        f'<a href="../../{caminho_do_episodio(inicio["episodio"]["id"])}">{escape(inicio["episodio"]["titulo"])}</a></span>')
     return f"""<div class="vizinhos__link vizinhos__link--proximo vizinhos__em-breve">
-      <span class="vizinhos__rotulo">Próximo</span>{texto}
-      <a class="botao botao--pequeno" href="../../#assinar">Assinar</a>
+      <span class="vizinhos__rotulo">Próximo</span>{texto}{enquanto_isso}
+      <a class="vizinhos__assinar" href="../../#assinar">Assinar para receber</a>
     </div>"""
 
 
@@ -379,7 +404,7 @@ def _episodio_estruturado(item: Mapping[str, Any], meta: Mapping[str, Any], seri
         "url": _url(meta, caminho_do_episodio(episodio["id"])),
         "datePublished": publicacao["publicado_em"],
         "timeRequired": f"PT{max(1, round(publicacao['duracao_segundos'] / 60))}M",
-        "description": " ".join(episodio.get("objetivos", [])),
+        "description": _objetivos_em_frases(episodio),
         "associatedMedia": {"@type": "MediaObject", "contentUrl": publicacao["url_audio"]},
         "partOfSeries": {"@id": serie},
     }
@@ -608,7 +633,7 @@ def _episodio_destaque(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     link = "./" if na_propria_pagina else caminho_do_episodio(episodio["id"])
     titulo = (f'<h1 class="episodio__titulo" id="titulo-{eid}">{escape(episodio["titulo"])}</h1>' if na_propria_pagina else
               f'<h3 class="episodio__titulo" id="titulo-{eid}"><a href="{escape(link)}">{escape(episodio["titulo"])}</a></h3>')
-    caso, player = _caso(item["noticia"]), _player(item["publicacao"], episodio["id"])
+    caso, player = _caso(item["noticia"]), _player(item)
     abertura = f"{player}\n    {caso}" if na_propria_pagina else f"{caso}\n    {player}"
     classe = "episodio episodio--destaque" + (" episodio--pagina" if na_propria_pagina else "")
     return f"""<article class="{classe}" id="{eid}" data-saga="{escape(saga.id)}">
@@ -653,13 +678,31 @@ def _secao_arquivo(publicados: Sequence[Mapping[str, Any]], personas: Mapping[st
   <div class="largura">
     <div class="secao__cabeca">
       <p class="sobretitulo">Arquivo</p>
-      <h1 class="secao__titulo">Todos os episódios</h1>
+      <h1 class="secao__titulo" data-arquivo-titulo>Todos os episódios</h1>
       <p class="secao__lead" data-arquivo-lead>{escape(lead)}</p>
     </div>
     {_filtro_por_saga(publicados)}
     <div class="arquivo">{grupos}</div>
+    {_proximos_por_saga(publicados)}
   </div>
 </section>"""
+
+
+def _proximos_por_saga(publicados: Sequence[Mapping[str, Any]]) -> str:
+    """No fim da lista filtrada por uma saga, o próximo dela que ainda não saiu. O JS mostra o da saga escolhida."""
+    no_ar = {item["episodio"]["id"] for item in publicados}
+    sagas = {item["saga"].id: item["saga"] for item in publicados}
+    notas = []
+    for saga in sagas.values():
+        seguinte = next((e for e in saga.episodios if e.id not in no_ar), None)
+        if seguinte is None:
+            texto = f"Por enquanto, a saga {escape(saga.nome_curto)} acaba aqui."
+        else:
+            texto = (f"Próximo da saga: <strong>{escape(seguinte.titulo)}</strong>, o ep. {saga.posicao_do(seguinte.id)}, "
+                     "ainda não saiu. As sagas se revezam, então pode levar alguns dias.")
+        notas.append(f'<p class="arquivo__proximo" data-proximo-da-saga="{escape(saga.id)}" hidden>{texto} '
+                     '<a class="vizinhos__assinar" href="./#assinar">Assinar para receber</a></p>')
+    return "".join(notas)
 
 
 def _filtro_por_saga(publicados: Sequence[Mapping[str, Any]]) -> str:
@@ -673,7 +716,7 @@ def _filtro_por_saga(publicados: Sequence[Mapping[str, Any]]) -> str:
         (sid, nome, contagem[sid]) for sid, nome, _ in SAGAS if sid in contagem
     ]
     botoes = "".join(
-        f'<button class="filtro__opcao" type="button" data-saga="{escape(sid)}" aria-pressed="{"true" if not sid else "false"}">'
+        f'<button class="filtro__opcao" type="button" data-saga="{escape(sid)}" data-nome="{escape(nome)}" aria-pressed="{"true" if not sid else "false"}">'
         f'{escape(nome)} <span class="filtro__total">{quantos}</span></button>'
         for sid, nome, quantos in opcoes
     )
@@ -694,7 +737,7 @@ def _episodio_compacto(item: Mapping[str, Any], personas: Mapping[str, Any], vot
     {_meta(item)}
     <h3 class="item__titulo" id="titulo-{eid}"><a href="{escape(caminho_do_episodio(episodio['id']))}">{escape(episodio['titulo'])}</a></h3>
     {_caso(item["noticia"])}
-    {_player(item["publicacao"], episodio["id"])}{_votos(episodio["id"], votos)}
+    {_player(item)}{_votos(episodio["id"], votos)}
     <details class="dobra">
       <summary>Objetivos e desafio</summary>
       {_objetivos_e_desafio(episodio, roteiro)}
@@ -715,6 +758,7 @@ def _meta(item: Mapping[str, Any]) -> str:
     return f"""<p class="episodio__meta">
       <time datetime="{escape(publicacao['publicado_em'])}">{escape(_data_por_extenso(publicacao['publicado_em']))}</time>
       <span aria-hidden="true">·</span> {escape(_minutos(publicacao['duracao_segundos']))}
+      <span class="progresso" data-progresso="{escape(item['episodio']['id'])}" hidden></span>
     </p>"""
 
 
@@ -750,14 +794,21 @@ def _primeira_frase(texto: str, limite: int = 180) -> str:
     return frase[: limite - 1].rsplit(" ", 1)[0].rstrip(",;:") + "…"
 
 
-def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
-    duracao = publicacao["duracao_segundos"]
-    return f"""<div class="player" role="group" aria-labelledby="titulo-{escape(episodio_id)}" data-duracao="{duracao}" data-episodio="{escape(episodio_id)}">
+def _player(item: Mapping[str, Any]) -> str:
+    """O título e a saga vão em data-* para a tela de bloqueio do celular (Media Session), que não lê a página.
+    A caixa em volta é o container das consultas do CSS: o layout depende da largura do player, e não da tela,
+    porque no tablet o card estreita o player tanto quanto um celular."""
+    publicacao, episodio, saga = item["publicacao"], item["episodio"], item["saga"]
+    episodio_id, duracao = episodio["id"], publicacao["duracao_segundos"]
+    return f"""<div class="player-caixa"><div class="player" role="group" aria-labelledby="titulo-{escape(episodio_id)}" data-duracao="{duracao}" data-episodio="{escape(episodio_id)}"
+      data-titulo="{escape(episodio['titulo'])}" data-rotulo="{escape(saga.rotulo_do(episodio_id))}">
       <audio controls preload="none"><source src="{escape(publicacao['url_audio'])}" type="audio/mpeg"></audio>
       <button class="player__play" type="button" aria-label="Tocar">
         <svg class="player__icone-play" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-play"/></svg>
         <svg class="player__icone-pausa" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-pause"/></svg>
       </button>
+      <button class="player__pular" type="button" data-pular="-15" aria-label="Voltar 15 segundos">−15</button>
+      <button class="player__pular" type="button" data-pular="30" aria-label="Avançar 30 segundos">+30</button>
       <div class="player__trilha">
         <input class="player__barra" type="range" min="0" max="{duracao}" value="0" step="1" aria-label="Posição no episódio">
         <div class="player__tempos"><span class="player__atual">0:00</span><span><span class="so-leitor">de </span>{escape(_duracao(duracao))}</span></div>
@@ -773,8 +824,11 @@ def _player(publicacao: Mapping[str, Any], episodio_id: str) -> str:
           <input class="player__nivel" type="range" min="0" max="100" step="5" value="100" aria-label="Volume" aria-orientation="vertical">
         </div>
       </div>
+      <p class="player__retomar" data-retomar hidden><span><span data-retomar-motivo>Você parou em</span> <span data-retomar-tempo></span>.</span>
+        <button class="player__onde-parei" type="button" hidden></button>
+        <button class="player__do-comeco" type="button" aria-label="Ouvir do começo">Do começo</button></p>
       <p class="player__aviso" role="status" data-player-aviso></p>
-    </div>"""
+    </div></div>"""
 
 
 def _votos(episodio_id: str, api: str) -> str:
@@ -869,15 +923,19 @@ def _fontes(roteiro: Mapping[str, Any]) -> str:
 
 
 def _links(item: Mapping[str, Any], link_permanente: str) -> str:
+    """Sem JS, "Compartilhar" é só o link da página. Com JS, ele abre o compartilhar do aparelho ou copia o
+    endereço, sem recarregar a página nem cortar o áudio (#118)."""
+    eid = escape(item["episodio"]["id"])
     return f"""<p class="episodio__links"><a href="{escape(item['publicacao']['url_audio'])}" download>Baixar o MP3</a>
-      <span aria-hidden="true">·</span> <a href="{escape(link_permanente)}">Link deste episódio</a></p>"""
+      <span aria-hidden="true">·</span> <a href="{escape(link_permanente)}" data-compartilhar="{eid}">Compartilhar</a></p>"""
 
 
 _ESTADO_DO_PROXIMO = {
-    AGUARDANDO_PUBLICACAO: "Roteiro aprovado na revisão. Falta só gravar a voz e publicar.",
+    AGUARDANDO_PUBLICACAO: "Já está escrito e revisado: sai na próxima publicação.",
     AGUARDANDO_COTA: "Tivemos um problema interno ao gravar a voz deste episódio. O roteiro já está pronto, e ele sai em breve.",
 }
-_ESTADO_PADRAO = "Fontes conferidas. O roteiro é o próximo a ser escrito."
+# Para o ouvinte, e não no vocabulário da pipeline (achado B2 da investigação de HX, #5).
+_ESTADO_PADRAO = "É o próximo da fila: as fontes já foram conferidas, e ele deve sair na próxima publicação."
 
 
 _DIAS_POR_EXTENSO = {"segunda": "segunda", "terca": "terça", "quarta": "quarta", "quinta": "quinta",
@@ -1087,13 +1145,17 @@ def _quebravel(url: str) -> str:
     return escape(esquema + separador) + "/<wbr>".join(escape(parte) for parte in resto.split("/"))
 
 
-def _secao_assinar(url_feed: str, meta: Mapping[str, Any], beta: bool = False, spotify: str = "") -> str:
+def _secao_assinar(url_feed: str, meta: Mapping[str, Any], beta: bool = False, spotify: str = "",
+                   icone_spotify: bool = False) -> str:
     """Com o programa no Spotify, ele vem primeiro: é o único caminho que não pede saber o que é RSS."""
     if spotify:
         titulo = "Assine no Spotify ou pelo feed"
         lead = ("No Spotify é um toque. Em qualquer outro app de podcast que aceite RSS, como AntennaPod, Pocket Casts,\n"
                 "        Apple Podcasts ou Overcast, cole o endereço do feed. Episódio novo chega sozinho.")
-        acao = (f'\n      <p class="assinar__acoes"><a class="botao" href="{escape(spotify)}">Ouvir no Spotify</a></p>')
+        # alt vazio: o texto do botão já diz "Spotify", e o leitor de tela não precisa ouvir a marca duas vezes.
+        icone = (f'<img class="botao__marca" src="{ICONE_DO_SPOTIFY}" alt="" width="23" height="22">'
+                 if icone_spotify else "")
+        acao = (f'\n      <p class="assinar__acoes"><a class="botao" href="{escape(spotify)}">{icone}Ouvir no Spotify</a></p>')
     else:
         titulo = "Assine pelo feed"
         em_breve = " No Spotify em breve; por enquanto, pelo feed." if beta else ""
@@ -1320,6 +1382,7 @@ _SIMBOLOS = """<svg width="0" height="0" style="position:absolute" aria-hidden="
   <symbol id="i-curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
   <symbol id="i-nao_curti" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" transform="rotate(180 12 12)" d="M3 10h4v10H3zm4 0 4-7c1.6 0 2.6 1.3 2.2 2.8L12.6 9H19a2 2 0 0 1 2 2.3l-1.2 6.9A2 2 0 0 1 17.8 20H7"/></symbol>
   <symbol id="i-fora" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6m0-6-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-compartilhar" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="18" cy="5.5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="18.5" r="2.6"/><path d="m8.3 10.8 7.4-4.1m-7.4 6.5 7.4 4.1"/></g></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
 </svg>"""
 
