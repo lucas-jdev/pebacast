@@ -1004,3 +1004,4 @@ h1.secao__titulo { font-size: clamp(2.4rem, 5.5vw, 3.8rem); }
 .player__onde-parei { min-height: 44px; padding: 0 0.2rem; text-align: left; border: 0; background: none; color: var(--texto); font: inherit; font-weight: 650;
   text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .player__onde-parei[hidden] { display: none; }
+/* temporário (#136): dispara o Capturar prints num run normal; será revertido */
