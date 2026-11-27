@@ -1,0 +1,122 @@
+# Spike #27: mede no ubuntu-latest o custo do QA de voz (instalação + análise de um episódio).
+# Só existe no branch spike/qa-de-voz, que não é mergeado. Disparo: workflow_dispatch (gh workflow run
+# --ref spike/qa-de-voz); o push neste arquivo também dispara, porque o GitHub só lista para
+# workflow_dispatch os workflows que existem no branch padrão.
+name: Spike QA de voz (tempo)
+
+on:
+  workflow_dispatch:
+    inputs:
+      episodio:
+        description: Episódio publicado a analisar (o sw-002 tem 17,4 min)
+        default: sw-002
+  push:
+    branches: [spike/qa-de-voz]
+    paths: [".github/workflows/spike-qa-voz.yml", "experimentos/qa-voz/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  medir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - modelo: campplus_voxceleb
+            arquivo: 3dspeaker_speech_campplus_sv_en_voxceleb_16k.onnx
+            sha256: 98daf9bcf1c8abf3db374fec4c27a5eda7c58705bb3f180d057b085a72a88bb5
+          - modelo: wespeaker_resnet34_lm
+            arquivo: wespeaker_en_voxceleb_resnet34_LM.onnx
+            sha256: e9848563da86f263117134dfd7ad63c92355b37de492b55e325400c9d9c39012
+    env:
+      EPISODIO: ${{ inputs.episodio || 'sw-002' }}
+      GH_TOKEN: ${{ github.token }}
+      MODELO: ${{ matrix.modelo }}
+      MODELO_URL: https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/${{ matrix.arquivo }}
+      MODELO_SHA256: ${{ matrix.sha256 }}
+    steps:
+      - name: Marcar o início
+        run: echo "INICIO=$(date +%s.%N)" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: ffmpeg
+        run: |
+          comeco=$(date +%s.%N)
+          if ! command -v ffmpeg >/dev/null; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg >/dev/null
+            echo "FFMPEG=instalado" >> "$GITHUB_ENV"
+          else
+            echo "FFMPEG=já no runner" >> "$GITHUB_ENV"
+          fi
+          echo "T_FFMPEG=$(echo "$(date +%s.%N) - $comeco" | bc)" >> "$GITHUB_ENV"
+
+      - name: Instalar as dependências do QA de voz
+        run: |
+          comeco=$(date +%s.%N)
+          pip install -q -e . onnxruntime==1.32.0 kaldi-native-fbank==1.23.3
+          echo "T_PIP=$(echo "$(date +%s.%N) - $comeco" | bc)" >> "$GITHUB_ENV"
+          pip show onnxruntime kaldi-native-fbank numpy | grep -E "^(Name|Version)"
+
+      - uses: actions/cache@v5
+        id: cache-modelo
+        with:
+          path: modelos
+          key: qa-voz-modelo-${{ env.MODELO_SHA256 }}
+
+      - name: Baixar o modelo e conferir o SHA-256
+        run: |
+          comeco=$(date +%s.%N)
+          mkdir -p modelos
+          arquivo="modelos/$(basename "$MODELO_URL")"
+          [ -f "$arquivo" ] || curl -sSfL -o "$arquivo" "$MODELO_URL"
+          echo "$MODELO_SHA256  $arquivo" | sha256sum -c -
+          echo "T_MODELO=$(echo "$(date +%s.%N) - $comeco" | bc)" >> "$GITHUB_ENV"
+          echo "CACHE_MODELO=${{ steps.cache-modelo.outputs.cache-hit == 'true' && 'sim' || 'não' }}" >> "$GITHUB_ENV"
+
+      - name: Baixar o episódio
+        run: |
+          comeco=$(date +%s.%N)
+          mkdir -p audio
+          gh release download "episodio-$EPISODIO" --repo "$GITHUB_REPOSITORY" --pattern "pebacast-$EPISODIO.mp3" --dir audio
+          echo "T_AUDIO=$(echo "$(date +%s.%N) - $comeco" | bc)" >> "$GITHUB_ENV"
+
+      - name: Analisar (segmentação, embedding e F0)
+        run: |
+          comeco=$(date +%s.%N)
+          python experimentos/qa-voz/medir.py . audio modelos saida "$EPISODIO" --modelo "$MODELO"
+          echo "T_ANALISE=$(echo "$(date +%s.%N) - $comeco" | bc)" >> "$GITHUB_ENV"
+
+      - name: Resumo
+        if: ${{ always() }}
+        run: |
+          total=$(echo "$(date +%s.%N) - $INICIO" | bc)
+          {
+            echo "## Spike QA de voz: tempo no ubuntu-latest ($EPISODIO, $MODELO)"
+            echo
+            echo "| Etapa | Segundos |"
+            echo "|---|---|"
+            printf '| ffmpeg (%s) | %.1f |\n' "$FFMPEG" "${T_FFMPEG:-0}"
+            printf '| pip install (onnxruntime, kaldi-native-fbank, pipeline) | %.1f |\n' "${T_PIP:-0}"
+            printf '| modelo (cache: %s) + SHA-256 | %.1f |\n' "$CACHE_MODELO" "${T_MODELO:-0}"
+            printf '| download do MP3 | %.1f |\n' "${T_AUDIO:-0}"
+            printf '| análise | %.1f |\n' "${T_ANALISE:-0}"
+            printf '| **job inteiro até aqui, com checkout e setup-python** | **%.1f** |\n' "$total"
+            echo
+            echo "nproc: $(nproc)"
+            echo
+            echo '```'
+            cat saida/tempos.json 2>/dev/null || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
