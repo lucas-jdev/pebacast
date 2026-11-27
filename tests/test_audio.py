@@ -218,3 +218,44 @@ def test_vinheta_fica_abaixo_da_fala_mesmo_com_a_faixa_alta(tmp_path):
     fala_lufs = _medir(destino, trechos.fala).integrada_lufs
     assert _medir(destino, trechos.abertura).integrada_lufs <= fala_lufs
     assert _medir(destino, trechos.encerramento).integrada_lufs <= fala_lufs
+
+
+def test_musica_fica_abaixo_da_fala_no_mp3_mesmo_quando_o_limitador_baixa_a_fala(tmp_path):
+    # #142: a fala do TTS tem picos que o limitador corta, e a música quase não. Com o ganho do
+    # episódio aplicado depois da mistura, compensar a fala subia a música junto: no si-003, a
+    # abertura saiu 0,9 LU acima da fala. Aqui, sílabas baixas com estalos perto do 0 dBFS fazem
+    # a música sair uns 4 LU acima da fala nessa montagem.
+    musica = tmp_path / "rosa.wav"
+    subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i",
+                    "anoisesrc=d=30:a=0.3:c=pink", str(musica)], check=True)
+    tempo = np.arange(24_000 * 20) / 24_000
+    silabas = 0.05 * np.sin(2 * np.pi * 200 * tempo) * (np.sin(2 * np.pi * 4 * tempo) > 0)
+    estalos = (np.arange(tempo.size) % 2400 == 0) * 0.98
+    vinheta = Vinheta(musica, abertura=Recorte(0, 6, fade_entrada_s=0, fade_saida_s=2),
+                      encerramento=Recorte(10, 6, fade_entrada_s=0, fade_saida_s=0), sobreposicao_s=1,
+                      abaixo_da_fala_lu=2)
+    destino = tmp_path / "episodio.mp3"
+
+    trechos = exportar_mp3(Audio.de_float(silabas + estalos, 24_000), destino, bitrate_kbps=64, vinheta=vinheta)
+
+    # Medido como o qualidade_audio.py mede: cada trecho do MP3 publicado.
+    fala = _medir(destino, trechos.fala).integrada_lufs
+    assert _medir(destino, trechos.abertura).integrada_lufs - fala <= -2
+    assert _medir(destino, trechos.encerramento).integrada_lufs - fala <= -2
+    episodio = _medir(destino)
+    assert episodio.integrada_lufs == pytest.approx(-16, abs=1)
+    assert episodio.pico_real_dbtp <= -1
+
+
+def test_correcao_da_musica_mira_a_faixa_abaixo_do_alvo(tmp_path, monkeypatch):
+    import podcast.audio as modulo
+
+    medidas = {(0.0, 5.0): -15.0, (5.0, 15.0): -16.0, (15.0, 21.0): -18.2}
+    monkeypatch.setattr(modulo, "medir_trecho", lambda mp3, trecho=None: modulo.Loudness(medidas[trecho], -2))
+    vinheta = Vinheta(Path("v.mp3"), abertura=Recorte(0, 6, fade_saida_s=2), sobreposicao_s=1, abaixo_da_fala_lu=2)
+
+    correcoes = modulo.correcao_da_musica(Path("e.mp3"), Trechos((5.0, 15.0), (), (0.0, 5.0), (15.0, 21.0)), vinheta)
+
+    # A abertura está 1 LU acima da fala e desce para o meio da faixa aceita (-2,25 LU). O
+    # encerramento, a -2,2 LU, já está na faixa e fica como está.
+    assert correcoes == pytest.approx((-3.25, 0.0))
