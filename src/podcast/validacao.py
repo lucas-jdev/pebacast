@@ -8,6 +8,7 @@ os arquivos.
 import hashlib
 import json
 import re
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -29,6 +30,24 @@ ESPACOS = re.compile(r"\s+")
 PONTUACAO_NAS_PONTAS = " .,;:!?…\"'“”‘’()"
 # O apresentador apresenta o podcast e a pessoa convidada logo no começo, antes de entrar no tema.
 FALAS_DA_APRESENTACAO = 3
+FALAS_DO_FECHAMENTO = 3
+PROMESSA_DE_DATA = re.compile(r"\bamanh[ãa]\b", re.IGNORECASE)
+NAO_PALAVRA = re.compile(r"[^\w]+")
+
+
+@dataclass(frozen=True)
+class Orientacao:
+    """O que o áudio diz ao ouvinte sobre onde ele está e como responder (#112).
+
+    No app de podcast o áudio é a única interface: sem isso, quem continua uma saga não sabe
+    em que ponto está, e quem quer responder não sabe onde.
+    """
+
+    saga: str
+    posicao_por_extenso: str
+    tem_proximo: bool
+    aviso_ia: str
+    pedido_de_retorno: str
 
 
 @dataclass(frozen=True)
@@ -45,6 +64,9 @@ class Regras:
     vereditos_reprovam: frozenset[str]
     nota_minima_relevancia: float
     urls_ja_usadas: frozenset[str]
+    # None para roteiro já publicado: a regra vale do próximo episódio em diante e não pode
+    # reprovar a regravação de um episódio que saiu antes dela.
+    orientacao: Orientacao | None = None
 
     @property
     def max_revisoes(self) -> int:
@@ -118,6 +140,8 @@ def _validar_roteiro(roteiro: Any, regras: Regras) -> list[str]:
     if not _menciona(primeira.get("texto"), regras.nome_podcast):
         problemas.append(f"{ROTEIRO}: a primeira fala precisa apresentar o {regras.nome_podcast}")
     problemas += _validar_apresentacao_do_expert(falas[:FALAS_DA_APRESENTACAO], regras)
+    if regras.orientacao is not None:
+        problemas += _validar_orientacao(falas, regras.orientacao)
 
     if not _texto_preenchido(roteiro.get("desafio")):
         problemas.append(f"{ROTEIRO}: desafio vazio")
@@ -153,6 +177,44 @@ def _validar_apresentacao_do_expert(inicio: list[Any], regras: Regras) -> list[s
     if not any(fala.get("persona") == regras.expert for fala in falas):
         problemas.append(f"{ROTEIRO}: {regras.nome_expert} precisa falar nas {FALAS_DA_APRESENTACAO} primeiras falas")
     return problemas
+
+
+def _validar_orientacao(falas: list[Any], orientacao: Orientacao) -> list[str]:
+    textos = [str(fala.get("texto", "")) if isinstance(fala, dict) else "" for fala in falas]
+    abertura = _simplificar(" ".join(textos[:FALAS_DA_APRESENTACAO]))
+    fechamento_original = " ".join(textos[-FALAS_DO_FECHAMENTO:])
+    fechamento = _simplificar(fechamento_original)
+    saga = _simplificar(f"saga {orientacao.saga}")
+    posicao = _simplificar(f"{orientacao.posicao_por_extenso} episódio")
+
+    problemas = []
+    if not _contem(_simplificar(textos[0]), _simplificar(orientacao.aviso_ia)):
+        problemas.append(f"{ROTEIRO}: a primeira fala precisa trazer o aviso de IA com o texto padrão: "
+                         f"{orientacao.aviso_ia!r}")
+    if not _contem(abertura, saga) or not _contem(abertura, posicao):
+        problemas.append(f"{ROTEIRO}: as {FALAS_DA_APRESENTACAO} primeiras falas precisam dizer a saga e a posição "
+                         f"({orientacao.posicao_por_extenso} episódio da saga {orientacao.saga})")
+    anuncio_do_proximo = re.compile(rf"\bproximo (?:episodio )?da {re.escape(saga)}\b")
+    if orientacao.tem_proximo and not anuncio_do_proximo.search(fechamento):
+        problemas.append(f"{ROTEIRO}: as {FALAS_DO_FECHAMENTO} últimas falas precisam anunciar o tema do "
+                         f"\"próximo episódio da saga {orientacao.saga}\"")
+    if PROMESSA_DE_DATA.search(fechamento_original):
+        problemas.append(f"{ROTEIRO}: o fechamento não pode prometer data (\"amanhã\"): as sagas se revezam")
+    if not _contem(fechamento, _simplificar(orientacao.pedido_de_retorno)):
+        problemas.append(f"{ROTEIRO}: as {FALAS_DO_FECHAMENTO} últimas falas precisam trazer o pedido de retorno "
+                         f"com o texto padrão: {orientacao.pedido_de_retorno!r}")
+    return problemas
+
+
+def _simplificar(texto: str) -> str:
+    """Sem acento, pontuação e caixa: o texto padrão vale mesmo com outra vírgula ou um acento trocado."""
+    decomposto = unicodedata.normalize("NFKD", texto.casefold())
+    sem_acento = "".join(c for c in decomposto if not unicodedata.combining(c))
+    return NAO_PALAVRA.sub(" ", sem_acento).strip()
+
+
+def _contem(texto: str, trecho: str) -> bool:
+    return f" {trecho} " in f" {texto} "
 
 
 def _menciona(texto: Any, nome: str) -> bool:

@@ -252,6 +252,7 @@ def test_feed_lista_episodios_publicados_com_enclosure_e_guid(projeto, tmp_path)
     assert item.find("pubDate").text == "Sun, 08 Nov 2026 01:00:00 +0000"
     notas = item.find("description").text
     assert "gerado por inteligência artificial" in notas
+    assert "Vote e deixe um recado: https://x.github.io/pebacast/episodios/sw-001/" in notas
     assert "Apagão (Jornal, 2026-11-01) https://n/1" in notas
     assert "Desafio: Liste dois trade-offs." in notas
 
@@ -377,6 +378,19 @@ def test_relatorio_tem_uma_entrada_por_episodio_para_as_issues():
     assert "- revisoes/3.json" in dados["reprovados"]["sl-001"]
     assert "episodios/sl-001/revisoes/" in dados["reprovados"]["sl-001"]
     assert "sem falas" not in dados["reprovados"]["sl-001"]
+
+
+@precisa_ffmpeg
+def test_show_notes_abrem_com_o_mesmo_aviso_de_ia_que_o_audio_fala(projeto, tmp_path):
+    _escrever_episodio(projeto, "sw-001")
+    _publicar(projeto, tmp_path)
+    aviso = "Este episódio foi gerado por IA, com fontes escolhidas à mão."
+    _gravar(projeto.raiz / "config" / "pipeline.yaml",
+            {**CONFIG, "roteiro": {"aviso_ia": aviso, "pedido_de_retorno": "Conta pra gente."}})
+
+    notas = ET.fromstring(gerar_feed(projeto)).find("channel/item/description").text
+
+    assert notas.startswith(f"{aviso}\n")
 
 
 def test_beta_acrescenta_o_aviso_no_fim_da_descricao_do_canal(projeto):
