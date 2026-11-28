@@ -27,6 +27,13 @@ class IssuesDeIncidente:
         else:
             self._gh("issue", "create", "--title", titulo, "--label", ROTULO, "--body", self.com_execucao(corpo_novo))
 
+    def comentar(self, titulo: str, comentario: str) -> bool:
+        """Comenta na issue aberta com o título, se houver. Não abre nenhuma."""
+        abertas = self.abertas(titulo)
+        for numero in abertas:
+            self._gh("issue", "comment", str(numero), "--body", self.com_execucao(comentario))
+        return bool(abertas)
+
     def fechar(self, titulo: str, comentario: str) -> None:
         for numero in self.abertas(titulo):
             self._gh("issue", "close", str(numero), "--reason", "completed", "--comment", self.com_execucao(comentario))

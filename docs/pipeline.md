@@ -223,12 +223,66 @@ As falhas seguem o QA de texto: a mesma retentativa, a resposta cortada no limit
 python -m podcast.qualidade_pronuncia pebacast-co-002-anterior.mp3 episodios/co-002/roteiro.json
 ```
 
+## QA de voz
+
+O TTS às vezes muda o timbre de uma voz no meio do episódio ou deixa o Davi e a convidada parecidos demais. Depois do QA de pronúncia, `src/podcast/qualidade_voz.py` confere isso, em **modo aviso** (#21, [ADR 0012](adr/0012-qa-de-voz.md)). A abordagem foi provada no spike #27 (`docs/spikes/qa-de-voz.md`, no branch `spike/qa-de-voz`).
+
+1. **Separa os turnos pelo roteiro, sem modelo de fala.**
+   - As falas que foram ao TTS e a divisão em blocos de `agrupar_em_blocos` dão a persona, o bloco e o tamanho de cada turno.
+   - Um VAD de energia acha as pausas na fala (`Trechos.fala`, sem a vinheta), e uma programação dinâmica escolhe onde cortar, com a duração de cada turno proporcional aos caracteres e a velocidade reestimada por bloco e por persona.
+   - Uma última passada soma a evidência de voz: quanto cada trecho entre pausas parece cada persona. É o que segura a fronteira quando o Gemini emenda dois turnos sem pausa.
+   - Os parâmetros ficam em `qa_voz.segmentacao`.
+2. **Mede só o miolo de cada turno:** sem 20 % de cada borda, com pelo menos 2 s, e sem o primeiro turno, que fica sob a vinheta.
+   - O timbre é um embedding de locutor (WeSpeaker ResNet34-LM, ONNX, 256 números) calculado pelo `onnxruntime` sobre as features do `kaldi-native-fbank`, sem torch.
+   - O F0 (YIN, em numpy) entra só no laudo, para explicar a diferença em Hz.
+3. **Aplica as regras de `qa_voz.limites`** (cosseno de 0 a 1):
+   - a persona num bloco contra o resto do episódio (≥ 0,75) e contra a impressão de voz de referência (≥ 0,73);
+   - a persona no episódio inteiro contra a referência (≥ 0,92);
+   - cada par de personas do episódio, que não pode soar como a mesma voz (≤ 0,61).
+
+   Um bloco com menos de `miolos_min_no_bloco` trechos (2), nele ou no resto do episódio, não é julgado, e o laudo diz isso.
+
+O laudo vai para o resumo da execução (`qualidade.md`), com as medidas por persona e por bloco e o F0 de cada persona. Se reprovar, o Python abre a issue `incidente` "Voz do <id> fora do padrão", no padrão do QA do áudio: reprovar de novo só comenta, e a issue fecha sozinha quando a voz do episódio passa. Na fase aviso, o Lucas marca em cada issue se o aviso acertou ou foi alarme falso. Isso calibra os limites antes de ligar o modo regravar.
+
+**Não roda no fallback.** No Kokoro, as personas dividem vozes. O laudo diz "não aplicável", e nada é aberto (#28).
+
+**Modelo.** Vem da URL fixa de `qa_voz.modelo.url`, um release do `k2-fsa/sherpa-onnx`.
+
+- O SHA-256 de `qa_voz.modelo.sha256` é conferido **antes** de carregar.
+- O download vai para um arquivo temporário e só vira `~/.cache/pebacast/modelos/<sha>.onnx` se o hash bater. Um arquivo do cache que não bate é baixado de novo.
+- No Actions, o `actions/cache` guarda essa pasta, com o SHA como chave.
+- Download falho, SHA errado ou modelo quebrado viram "QA de voz não rodou" no resumo e num `::warning::`, sem segurar a publicação.
+- O extra `qa-voz` fixa `onnxruntime==1.32.0` e `kaldi-native-fbank==1.23.3`, porque os limites dependem do valor exato do embedding.
+
+**Atribuição.** O modelo é o WeSpeaker ResNet34-LM do projeto WeSpeaker (https://github.com/wenet-e2e/wespeaker), treinado no VoxCeleb.
+
+- Os pesos são licenciados sob CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); o código do WeSpeaker é Apache-2.0.
+- O pebacast usa, sem modificações, a exportação em ONNX publicada pelo `k2-fsa/sherpa-onnx` (`wespeaker_en_voxceleb_resnet34_LM.onnx`).
+
+**Impressão de voz de referência** (`config/vozes-referencia.json`, versionado). Por persona, guarda o vetor, a voz do Gemini, os episódios usados e a data; no topo, o SHA-256 do modelo.
+
+- **Só muda por PR.** O comando `python -m podcast.qualidade_voz referencia --repo <dono/repo> --episodios <ids>` baixa os MP3 dos releases, mede e reescreve o arquivo. O workflow **Referência de voz** (`referencia-de-voz.yml`, manual, com os ids) roda o comando e abre um PR, nunca um push no `main`.
+- **Quando atualizar:** na estreia de uma persona, depois que o Lucas ouvir o episódio, e no fim da fase aviso, só com os episódios marcados como bons. O arquivo inicial usa os 12 episódios validados no spike.
+- **Estreia:** uma persona sem referência só tem as medidas de dentro do episódio, e o laudo diz "sem referência". Um episódio anterior basta para a referência valer.
+- **Invalidação:** se o SHA do arquivo não for o da config, ou se a voz do Gemini da persona mudou, a referência dela é ignorada, e o laudo diz "sem referência válida".
+
+Para conferir um episódio publicado sem abrir issue: `python -m podcast.qualidade_voz avaliar --repo <dono/repo> <id>`.
+
+**Modo regravar** (`qa_voz.modo: regravar`, desligado até o fim da calibração).
+
+- Com a voz reprovada na publicação, o relatório lista o episódio em `regravar_automatico`.
+- Depois do push, o passo "Disparar a regravação pedida pelo QA de voz" do `publicar.yml` roda `python -m podcast.qualidade_voz disparar`, que dispara o `regravar.yml` (`acao=regravar`) e comenta na issue. O job `publicar` tem `actions: write` só para isso.
+- **Só a publicação dispara,** e um episódio é publicado uma vez só, então há no máximo uma candidata automática por episódio. O regravar e o substituir nunca disparam.
+- **Cota (ADR 0011):** o disparo só acontece se a execução publicou um episódio só e nenhum ficou aguardando a cota. Se a regravação ainda assim encontrar a cota esgotada, ela falha e comenta na issue que é preciso rodar à mão depois das 08:15 UTC.
+
+**Custo.** Em 5 runs no `ubuntu-latest` (27/11, si-003, 16 min): instalar o extra e restaurar o cache, de 3 a 6 s; baixar e conferir o modelo sem cache, menos de 1 s; a análise, de 21 a 61 s, conforme o runner. O segmentador domina, porque mede um embedding por trecho entre pausas. Usar 4 threads em vez de 2 no `onnxruntime` não mudou o tempo.
+
 ## Regravação do áudio
 
 Quando um áudio publicado sai ruim, `.github/workflows/regravar.yml` narra o mesmo roteiro de novo, disparado à mão no Actions com o id do episódio:
 
-1. **regravar** (`python -m podcast.regravacao regravar <id>`): valida o roteiro, narra só com o TTS principal, sem fallback, e anexa `pebacast-<id>-candidata.mp3` ao release, com as medidas do QA ao lado (`pebacast-<id>-candidata.qualidade.json`). O link, as quatro medidas e o laudo do [QA de pronúncia](#qa-de-pronúncia) da candidata aparecem no resumo da execução. O QA de pronúncia não abre issue aqui, e se não rodar o passo continua, porque a candidata já foi anexada. O feed não muda, e a issue de incidente também não: a candidata ainda não está no ar.
-2. **substituir** (`python -m podcast.regravacao substituir <id>`): guarda o áudio que está no ar como `pebacast-<id>-anterior.mp3` no release, que serve de caminho de volta e de caso de calibração dos QAs, e só então põe a candidata no lugar do áudio publicado. Depois atualiza tamanho, duração e `regravado_em` no `publicacao.json` e publica o feed. URL, GUID e data de publicação continuam os mesmos. Com as medidas da candidata, mostra o QA no resumo e atualiza a issue de incidente do episódio: fecha se passou, comenta se não.
+1. **regravar** (`python -m podcast.regravacao regravar <id>`): valida o roteiro, narra só com o TTS principal, sem fallback, e anexa `pebacast-<id>-candidata.mp3` ao release, com as medidas do QA ao lado (`pebacast-<id>-candidata.qualidade.json`). O link, as quatro medidas e os laudos do [QA de pronúncia](#qa-de-pronúncia) e do [QA de voz](#qa-de-voz) da candidata aparecem no resumo da execução. O laudo de voz também vai ao release (`pebacast-<id>-candidata.voz.json`) e, se houver uma issue de voz aberta para o episódio, vira um comentário: "aprovada: ouça e substitua" ou "também reprovou; a próxima regravação é manual". Nenhum QA abre issue aqui, e se um deles não rodar o passo continua, porque a candidata já foi anexada. Com a cota diária esgotada, o passo falha sem fallback e comenta na issue de voz que é preciso rodar à mão depois das 08:15 UTC. O feed não muda, e a issue de incidente também não: a candidata ainda não está no ar.
+2. **substituir** (`python -m podcast.regravacao substituir <id>`): guarda o áudio que está no ar como `pebacast-<id>-anterior.mp3` no release, que serve de caminho de volta e de caso de calibração dos QAs, e só então põe a candidata no lugar do áudio publicado. Depois atualiza tamanho, duração e `regravado_em` no `publicacao.json` e publica o feed. URL, GUID e data de publicação continuam os mesmos. Com as medidas da candidata, mostra o QA no resumo e atualiza a issue de incidente do episódio: fecha se passou, comenta se não. O mesmo vale para a issue de voz, com o laudo de voz salvo da candidata, sem medir de novo.
 
 Decisão em [ADR 0008](adr/0008-regravacao-em-dois-passos.md).
 
