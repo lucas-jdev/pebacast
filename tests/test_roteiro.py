@@ -18,6 +18,7 @@ from podcast.roteiro import (
     main,
     montar_contexto,
     ordem_da_fila,
+    ordinal_por_extenso,
     regras_para,
     saga_do_dia,
     selecionar,
@@ -409,6 +410,102 @@ def test_so_a_revisao_final_confere_o_trecho(projeto):
     antiga["afirmacoes"][0]["afirmacao"] = "frase de uma versão anterior do roteiro"
     _escrever_episodio(projeto, "sw-001", revisoes=[antiga, _revisao(roteiro)])
     assert _problemas(projeto, "sw-001") == []
+
+
+# Orientação do ouvinte (#112)
+
+AVISO = "Este episódio foi gerado por inteligência artificial e revisado por uma segunda IA."
+PEDIDO = "Conta pra gente o que achou: o link está na descrição do episódio."
+
+
+def _com_textos_fixos(projeto: Projeto) -> None:
+    episodio = {**CONFIG["episodio"], "palavras_alvo": {"min": 20, "max": 200}}  # os textos fixos ocupam palavras
+    _gravar(projeto.raiz / "config" / "pipeline.yaml",
+            {**CONFIG, "episodio": episodio, "roteiro": {"aviso_ia": AVISO, "pedido_de_retorno": PEDIDO}})
+
+
+def _roteiro_orientado(episodio: str, abertura: str, fechamento: str) -> dict:
+    roteiro = _roteiro(episodio)
+    roteiro["falas"][0]["texto"] = f"Bem-vindos ao Pebacast! {AVISO} {abertura} Hoje a convidada é a Helena."
+    roteiro["falas"][-1]["texto"] = fechamento
+    return roteiro
+
+
+ORIENTADO = _roteiro_orientado(
+    "sw-001",
+    abertura="Este é o primeiro episódio da saga Software.",
+    fechamento=f"O próximo episódio da saga Software é sobre o tema dois. {PEDIDO} Até o próximo!",
+)
+
+
+def _problemas_do_roteiro(projeto: Projeto, roteiro: dict) -> list[str]:
+    _escrever_episodio(projeto, roteiro["episodio"], roteiro=roteiro, revisoes=[_revisao(roteiro)])
+    return _problemas(projeto, roteiro["episodio"])
+
+
+def test_roteiro_que_orienta_o_ouvinte_passa(projeto):
+    _com_textos_fixos(projeto)
+    assert _problemas_do_roteiro(projeto, ORIENTADO) == []
+
+
+def test_texto_padrao_vale_com_pontuacao_e_caixa_diferentes(projeto):
+    _com_textos_fixos(projeto)
+    roteiro = json.loads(json.dumps(ORIENTADO).replace("Conta pra gente o que achou:", "conta pra gente, o que achou?"))
+    assert _problemas_do_roteiro(projeto, roteiro) == []
+
+
+@pytest.mark.parametrize(("antes", "depois", "trecho"), [
+    ("e revisado por uma segunda IA", "e revisado por outra IA", "aviso de IA com o texto padrão"),
+    ("primeiro episódio da saga Software", "primeiro episódio da nossa trilha", "saga e a posição"),
+    ("primeiro episódio da saga Software", "segundo episódio da saga Software", "saga e a posição"),
+    ("O próximo episódio da saga Software é sobre", "Na próxima conversa vem", "próximo episódio da saga Software"),
+    ("Até o próximo!", "Até amanhã!", "não pode prometer data"),
+    ("o link está na descrição", "procura a gente", "pedido de retorno"),
+])
+def test_roteiro_novo_sem_orientacao_e_reprovado(projeto, antes, depois, trecho):
+    _com_textos_fixos(projeto)
+    roteiro = json.loads(json.dumps(ORIENTADO, ensure_ascii=False).replace(antes, depois))
+    problemas = _problemas_do_roteiro(projeto, roteiro)
+    assert any(trecho in problema for problema in problemas), problemas
+
+
+def test_ultimo_episodio_da_saga_nao_anuncia_proximo(projeto):
+    _com_textos_fixos(projeto)
+    roteiro = _roteiro_orientado("sw-003", abertura="É o terceiro episódio da saga Software.",
+                                 fechamento=f"Esse foi o último da saga Software por enquanto. {PEDIDO}")
+    assert _problemas_do_roteiro(projeto, roteiro) == []
+
+
+def test_roteiro_publicado_antes_da_regra_continua_valido_para_regravar(projeto):
+    _com_textos_fixos(projeto)
+    _publicar(projeto, "sw-001")
+    assert _problemas(projeto, "sw-001") == []
+
+
+def test_contexto_traz_saga_falada_posicao_proximo_textos_e_aberturas(projeto):
+    _com_textos_fixos(projeto)
+    _publicar(projeto, "sw-001")
+
+    contexto = montar_contexto(projeto, date(2026, 11, 8))
+
+    assert contexto["saga"]["nome_falado"] == "Software"
+    assert (contexto["saga"]["posicao"], contexto["saga"]["posicao_por_extenso"]) == (2, "segundo")
+    assert contexto["proximo_da_saga"] == {"id": "sw-003", "titulo": "Três"}
+    assert contexto["textos_fixos"] == {"aviso_ia": AVISO, "pedido_de_retorno": PEDIDO}
+    assert contexto["aberturas_recentes"] == ["Bem-vindos ao Pebacast!"]
+
+
+@pytest.mark.parametrize(("numero", "extenso"), [
+    (1, "primeiro"), (3, "terceiro"), (10, "décimo"), (13, "décimo terceiro"), (21, "vigésimo primeiro"),
+])
+def test_posicao_por_extenso(numero, extenso):
+    assert ordinal_por_extenso(numero) == extenso
+
+
+def test_curriculo_real_tem_os_textos_fixos():
+    config = yaml.safe_load((RAIZ / "config" / "pipeline.yaml").read_text(encoding="utf-8"))
+    assert config["roteiro"]["aviso_ia"].startswith("Este episódio foi gerado por inteligência artificial")
+    assert "descrição do episódio" in config["roteiro"]["pedido_de_retorno"]
 
 
 # Linha de comando

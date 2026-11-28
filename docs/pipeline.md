@@ -69,6 +69,15 @@ O roteirista recebe o spec, as personas, o contexto de notícias e os feedbacks 
 
 Estrutura fixa do episódio: abertura com boas-vindas ao Pebacast e aviso de conteúdo gerado por IA, apresentação do expert convidado, problema ou notícia, solução ingênua do apresentador, desconstrução pelo expert, trade-offs, resumo, desafio e despedida. O `validar` confere a abertura: a primeira fala cita o Pebacast e traz o aviso de IA, e nas três primeiras falas o apresentador diz o nome do expert e o expert fala.
 
+No aplicativo de podcast o áudio é a única interface, então o episódio diz ao ouvinte onde ele está e como responder (#112). Em roteiro novo, o `validar` também confere:
+
+- **Aviso de IA:** a primeira fala traz, ao pé da letra, o `roteiro.aviso_ia` de `config/pipeline.yaml`, a mesma frase que abre as show notes.
+- **Saga e posição:** as três primeiras falas dizem "terceiro episódio da saga Soluções", com o nome curto do site e a posição no currículo.
+- **Próximo da saga:** as três últimas falas anunciam o tema do "próximo episódio da saga ...", sem prometer data, porque as sagas se revezam ("amanhã" reprova). No último episódio do currículo, não há o que anunciar.
+- **Pedido de retorno:** as três últimas falas trazem o `roteiro.pedido_de_retorno`, que aponta para o link de votar nas show notes.
+
+Roteiro já publicado fica fora dessas regras, para a regravação de um episódio anterior a elas continuar passando. A saudação variada e o tema do próximo são pedidos da rotina, e não do `validar`: a rotina recebe no contexto as aberturas dos últimos episódios e o título do próximo da saga.
+
 ## 4. Revisão
 
 O revisor é um subagente novo a cada revisão, sem o contexto do roteirista, e segue `rotina/revisor.md`. Ele não reescreve o roteiro:
@@ -119,8 +128,8 @@ O ffmpeg mistura a fala com a vinheta e exporta em MP3 mono a 64 kbps, com cerca
 O MP3 vai para o `AudioStorage` (um release `episodio-<id>` por episódio) e o Actions commita `publicacao.json`. O `feed.xml` é regenerado inteiro a partir de `episodios/` e publicado no GitHub Pages, em https://lucas-jdev.github.io/pebacast/feed.xml. O deploy passa pela action local `.github/actions/deploy-pages-com-retentativa`, usada pelos três workflows que publicam no Pages: às vezes o GitHub ainda não lista o pacote do site recém-enviado ("No artifacts named github-pages", 2 vezes em 14 deploys em nov/2026, uma delas deixando o se-002 fora do feed), então ela espera 60 s e tenta mais uma vez com o mesmo pacote (#89). Ele traz:
 
 - GUID imutável do episódio;
-- show notes com as fontes, o desafio e o resumo do relatório de revisão;
-- aviso de conteúdo gerado por IA.
+- show notes com o link da página do episódio para votar e deixar recado, as fontes, o desafio e o resumo do relatório de revisão;
+- o aviso de conteúdo gerado por IA, que é o mesmo `roteiro.aviso_ia` que o áudio fala na primeira fala.
 
 Mudanças que só afetam o site ou o feed (`site/`, `src/podcast/site.py`, `src/podcast/publicacao.py`, `curriculum/`, `config/`) são publicadas por `.github/workflows/site.yml`, sem esperar episódio novo. Ele também pode ser disparado à mão. Ele faz checkout da ponta do `main`, e não do commit que o disparou: se ficou na fila esperando uma publicação de episódio, ele publica o `main` já com o episódio novo. Pelo mesmo motivo, `publicar.yml` e `regravar.yml` geram o site de novo depois do `git pull --rebase`, antes do deploy.
 
